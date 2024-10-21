@@ -57,6 +57,7 @@ import com.archos.mediacenter.utils.trakt.TraktService;
 import com.archos.mediacenter.video.browser.BootupRecommandationService;
 import com.archos.mediacenter.video.picasso.SmbRequestHandler;
 import com.archos.mediacenter.video.picasso.ThumbnailRequestHandler;
+import com.archos.mediacenter.video.player.PlayerActivity;
 import com.archos.mediacenter.video.utils.LocaleConfigParser;
 import com.archos.mediacenter.video.utils.OpenSubtitlesApiHelper;
 import com.archos.mediacenter.video.utils.TrustingOkHttp3Downloader;
@@ -374,6 +375,8 @@ public class CustomApplication extends Application {
         updateVersionState(this);
         if (openSubtitlesApiHelper == null) openSubtitlesApiHelper = OpenSubtitlesApiHelper.getInstance();
         //makeUseOpenSubtitlesRestApi(PreferenceManager.getDefaultSharedPreferences(this).getBoolean(VideoPreferencesCommon.KEY_OPENSUBTITILES_REST_API, true));
+
+        upgradeActions(mContext);
     }
 
     private void launchSambaDiscovery() {
@@ -735,5 +738,16 @@ public class CustomApplication extends Application {
         Configuration config = new Configuration();
         config.setLocale(locale);  // Use setLocale() instead of deprecated locale field
         resources.updateConfiguration(config, resources.getDisplayMetrics());
+    }
+
+    private void upgradeActions(Context context) {
+        log.info("upgradeActions: check for upgrade actions from version: " + novaPreviousVersionArray[0] + "." + novaPreviousVersionArray[1] + "." + novaPreviousVersionArray[2] + " to " + novaVersionArray[0] + "." + novaVersionArray[1] + "." + novaVersionArray[2]);
+        // if nova is upgraded from 6.3.3 to above set String toto to "ok"
+        if (novaPreviousVersionArray[0] == 6 && novaPreviousVersionArray[1] == 3 && novaPreviousVersionArray[2] == 3) {
+            PreferenceManager.getDefaultSharedPreferences(context)
+                    .edit()
+                    .putBoolean(PlayerActivity.KEY_ENABLE_ANDROID_FRAME_TIMING, false)
+                    .commit();
+        }
     }
 }
