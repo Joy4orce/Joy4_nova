@@ -186,7 +186,7 @@ public class SubtitleManager {
         // remove space/new lines at end and beginning
         String displayText = input.trim();
         // convert \n or literal "\n" to <br>
-        displayText = displayText.replaceAll("\\n|\\\\n", "<br />");
+        displayText = displayText.replaceAll("(?i)\\n|\\\\n", "<br />");
         // condense whitespace to 1 space
         displayText = displayText.replaceAll("\\s+", " ");
 
