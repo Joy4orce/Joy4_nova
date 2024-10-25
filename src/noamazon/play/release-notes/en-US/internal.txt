@@ -1,6 +1,6 @@
 - add pgs subtitles support
-- disable by default smoother playback: use Android timely frame posting
-- upgrade to ffmpeg 7.0.2
+- upgrade to ffmpeg 7.1
 - add locale setting in nova for devices with restricted language support
 - target SDK 34 to comply with Google API rules
 - fix network shortcuts host check to accept FQDN with TLD larger than 6 characters
+- disable by default use Android timely frame posting for smoother playback
