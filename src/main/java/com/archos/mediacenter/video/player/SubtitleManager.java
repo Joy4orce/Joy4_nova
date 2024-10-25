@@ -103,6 +103,7 @@ public class SubtitleManager {
     final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
+            log.debug("handleMessage: " + msg.what);
             switch (msg.what) {
                 case MSG_STOP_SUBTITLE:
                     mSubtitleTxtView.setVisibility(View.GONE);
@@ -138,9 +139,10 @@ public class SubtitleManager {
         }
 
         private void displayView(Subtitle subtitle) {
-            log.debug("displayView");
+            log.debug("displayView sub duration=" + subtitle.getDuration());
 
             if (subtitle.isText()) {
+                log.debug("displayView: Text");
                 mSubtitleTxtView.setVisibility(View.VISIBLE);
 
                 if (mSpannableStringBuilder == null) {
@@ -158,9 +160,11 @@ public class SubtitleManager {
                     mSpannableStringBuilder.setSpan(mTextShadowSpan, 0, mSpannableStringBuilder.length(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                 }
                 mSubtitleTxtView.setText(mSpannableStringBuilder);
+                log.debug("displayView: text=" + mSpannableStringBuilder.toString());
                 // need to Invalidate View to force an update!
                 mSubtitleTxtView.postInvalidate();
             } else if (subtitle.isBitmap()) {
+                log.debug("displayView: Bitmap bounds=" + subtitle.getBounds());
                 Rect bounds = subtitle.getBounds();
                 mSubtitleGfxView.setSubtitle(subtitle.getBitmap(), bounds.right, bounds.bottom);
             }
@@ -326,7 +330,7 @@ public class SubtitleManager {
         }
 
         synchronized void addSubtitle(Subtitle subtitle) {
-            log.debug("DispSubtitleThread addSubtitle");
+            log.debug("DispSubtitleThread addSubtitle isBitmap=" + subtitle.isBitmap() + " isText=" + subtitle.isText() + " isTimed=" + subtitle.isTimed() + " duration=" + subtitle.getDuration());
             mSuspended = false;
 
             if (subtitle.isTimed()) {

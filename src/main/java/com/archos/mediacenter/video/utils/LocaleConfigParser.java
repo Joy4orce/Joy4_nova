@@ -54,7 +54,7 @@ public class LocaleConfigParser {
         } finally {
             parser.close();
         }
-
+        Log.i("LocaleConfigParser", "getLocales: MARC locales=" + locales);
         return locales;
     }
 }
