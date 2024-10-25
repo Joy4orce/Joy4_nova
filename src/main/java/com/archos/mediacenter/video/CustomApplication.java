@@ -199,6 +199,7 @@ public class CustomApplication extends Application {
     private HttpImageManager mHttpImageManager;
 
     private static Locale defaultLocale;
+    private static Locale systemLocale;
 
     public CustomApplication() {
         super();
@@ -232,13 +233,14 @@ public class CustomApplication extends Application {
     private static void getDefaultLocale(Context context) {
         // Get the locales from the locales_config.xml
         List<Locale> locales = LocaleConfigParser.getLocales(context);
+        log.debug("getDefaultLocale: locales=" + locales);
         // Assuming the first locale in the list is the one configured for the application
         if (!locales.isEmpty()) {
             defaultLocale = locales.get(0);
         } else {
             defaultLocale = Locale.getDefault();
         }
-        log.debug("onCreate: defaultLocale=" + defaultLocale);
+        log.debug("getDefaultLocale: systemLocale=" + systemLocale + ", defaultLocale=" + defaultLocale);
     }
 
     @Override
@@ -280,8 +282,10 @@ public class CustomApplication extends Application {
         log = LoggerFactory.getLogger(CustomApplication.class);
         setupBouncyCastle();
 
+        systemLocale = Locale.getDefault();
         getDefaultLocale();
         loadLocale();
+        log.debug("onCreate: systemLocale=" + systemLocale + ", defaultLocale=" + defaultLocale);
 
         // must be done before sambaDiscovery otherwise no context for jcifs
         new Thread(() -> {
@@ -726,8 +730,7 @@ public class CustomApplication extends Application {
         // Warning no log.debug at this stage
         Locale locale;
         if (localeCode == null || localeCode.isEmpty() || localeCode.equalsIgnoreCase(VideoPreferencesCommon.KEY_UI_LANG_SYSTEM)) {
-            //log.debug("setLocale: use system default language");
-            locale = defaultLocale; // Use system default language
+            locale = systemLocale; // Use system default language
             if (DBG) Log.d("CustomApplication", "setLocale: use system default language = " + locale);
         } else {
             //log.debug("setLocale: use language " + lang);

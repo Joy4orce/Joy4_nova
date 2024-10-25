@@ -44,8 +44,6 @@ public class LocaleConfigParser {
                         } else {
                             locales.add(new Locale(language));
                         }
-                    } else {
-                        Log.d("LocaleConfigParser", "Language attribute is missing in locales config");
                     }
                 }
                 eventType = parser.next();
