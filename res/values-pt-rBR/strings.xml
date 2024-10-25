@@ -336,6 +336,9 @@
     <string name="s_chinese_simplified">Chinês Simplificado</string>
     <string name="s_traditional_chinese">Chinês Tradicional</string>
     <string name="s_chinese_bilingual">Chinês bilingual</string>
+    <string name="s_chinese_mainland">Chinês (China Continental)</string>
+    <string name="s_chinese_hk">Chinês (Hong Kong)</string>
+    <string name="s_chinese_tw">Chinês (Taiwan)</string>
     <string name="s_spanish_la">Espanhol (latin american)</string>
     <string name="s_extremaduran">Estremenha</string>
     <string name="s_montenegrin">Montenegrino</string>
@@ -546,6 +549,9 @@
     <string name="summary_list_preference_primary">Selecione seus idiomas para baixar legendas</string>
     <string name="favSubLang_title">Idiomas de leitura de legendas</string>
     <string name="favSubLang_summary">Escolha seu idioma favorito para ler legendas</string>
+    <string name="ui_language_title">Escolha um idioma da interface do usuário</string>
+    <string name="UiLang_title">Idioma da interface de usuário</string>
+    <string name="UiLang_summary">Defina o idioma da interface do usuário e escolha o sistema para usar o padrão do sistema</string>
     <string name="ui_mode_title">Modo de interface do usuário</string>
     <string name="ui_mode_summary">Escolha entre TV e Tablet/Telefone</string>
     <string name="preferences_video_about">Sobre</string>

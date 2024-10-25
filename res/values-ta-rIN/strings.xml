@@ -21,7 +21,10 @@
     <string name="goto_start">கானொளி தொகுப்பு</string>
     <!-- Menu item that takes the user to the "now playing" screen of the music player -->
     <!-- Menu item to refresh servers list -->
+    <string name="refresh_servers_list">சர்வர் பட்டியலைப் புதுப்பிக்கவும்</string>
     <!-- Menu item to enable network shares -->
+    <string name="enable_network_shares">நெட்வொர்க் பகிர்வுகளை இயக்கு</string>
+    <string name="initial_scan">ஆரம்ப ஸ்கேன்</string>
     <!-- Library screen, menu item -->
     <string name="search_title">தேடு</string>
     <!-- Default name of track that doesn't have a name in the metadata -->
@@ -32,24 +35,51 @@
     <!-- Context menu item -->
     <string name="info">தகவல்</string>
     <!-- Context menu item -->
+    <string name="play_selection">விளையாடு</string>
     <!-- Context menu item -->
     <string name="multiple_selection">பலவகை தேர்ந்தெடுப்பு</string>
     <!-- Context menu item -->
+    <string name="play_from_beginning">ஆரம்பத்திலிருந்து விளையாடு</string>
     <!-- Dialog box button -->
     <!--The fast scroll thumb will show one character from this string depending on the position in the list -->
+    <string name="fast_scroll_alphabet">\u0020ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     <!-- The string used in file/folder infos dialog. -->
+    <string name="info_duration">கால அளவு</string>
+    <string name="video_sources">ஆதாரங்கள்</string>
     <!-- Infos dialog tabs -->
+    <string name="info_tab_movie">திரைப்படம்</string>
+    <string name="info_tab_show">காட்டு</string>
     <string name="info_tab_episode">அத்தியாயம்</string>
     <string name="info_tab_video">காணொளி</string>
     <string name="info_tab_file">கோப்பு விவரம்</string>
+    <string name="info_tab_poster_chooser">சுவரொட்டி தேர்வு செய்பவர்</string>
     <string name="info_tab_share">பகிர்</string>
+    <string name="info_menu_backdrop_select">பின்னணி</string>
+    <string name="info_menu_series_backdrop_select">தொடர் பின்னணி</string>
+    <string name="info_menu_poster_select">மற்றொரு சுவரொட்டியைத் தேர்ந்தெடுக்கவும்</string>
+    <string name="info_menu_series_poster_select">மற்றொரு சுவரொட்டியைத் தேர்ந்தெடுக்கவும்</string>
     <!-- COVER ROLL -->
+    <string name="watching_up_next">அடுத்து/பார்க்கிறேன்</string>
+    <string name="recently_added">சமீபத்தில் சேர்க்கப்பட்டது</string>
+    <string name="recently_added_videos">சமீபத்தில் சேர்க்கப்பட்டது</string>
+    <string name="recently_played">சமீபத்தில் விளையாடியது</string>
+    <string name="recently_played_videos">சமீபத்தில் விளையாடியது</string>
     <string name="video_lists">இசைப்பட்டியல்கள்</string>
     <!-- The string used in main storage list -->
+    <string name="external_storage">வெளி</string>
+    <string name="internal_storage">உள்</string>
     <string name="network_storage">பிணையம்</string>
     <string name="sd_card_storage">SD கார்டு</string>
+    <string name="usb_host_storage">வெளிப்புற இயக்கி</string>
+    <string name="other_storage">ஓட்டு</string>
+    <string name="network_media_servers">மீடியா சர்வர்கள் (UPnP)</string>
+    <string name="network_shared_folders">பகிரப்பட்ட கோப்புறைகள் (SMB)</string>
     <string name="network_connected_as">%s உடன் இணையவும்</string>
     <string name="network_guest">விருந்தாளி</string>
+    <string name="sftp_folders">FTP</string>
+    <string name="network_jcifs">சம்பா (பரிசோதனை)</string>
+    <string name="network_cling">UPNP (பரிசோதனை)</string>
+    <string name="recordings_storage">பதிவுகள்</string>
     <string name="root_storage">அகச் சேமிப்பகம்</string>
     <string name="cannot_list">பட்டியலிட இயலாத தகவு</string>
     <!-- VIDEO -->

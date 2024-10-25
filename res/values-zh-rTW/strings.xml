@@ -333,6 +333,9 @@
     <string name="s_chinese_simplified">簡體中文</string>
     <string name="s_traditional_chinese">繁體中文</string>
     <string name="s_chinese_bilingual">中文雙語</string>
+    <string name="s_chinese_mainland">簡體中文 (中國大陸)</string>
+    <string name="s_chinese_hk">繁體中文 (香港)</string>
+    <string name="s_chinese_tw">繁體中文 (台灣)</string>
     <string name="s_spanish_la">西班牙文 (LA)</string>
     <string name="s_extremaduran">埃斯特雷馬杜拉文</string>
     <string name="s_montenegrin">蒙特內哥羅文</string>
@@ -549,6 +552,9 @@
     <string name="favSubLang_summary">選擇您觀賞影片字幕的偏好語言</string>
     <string name="favAudioLang_title">音訊首選語言</string>
     <string name="favAudioLang_summary">選擇您喜愛的音軌語言</string>
+    <string name="ui_language_title">選擇使用者介面語言</string>
+    <string name="UiLang_title">使用者介面語言</string>
+    <string name="UiLang_summary">設定 Nova 的使用者介面語言，選擇「系統」以使用系統預設值</string>
     <string name="ui_mode_title">使用者介面模式</string>
     <string name="ui_mode_summary">選擇使用者介面是電視或平板/手機</string>
     <string name="preferences_video_about">關於</string>

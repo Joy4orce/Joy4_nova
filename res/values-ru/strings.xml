@@ -264,7 +264,7 @@
     <string name="you_have_no_animes">Нет мультфильмов</string>
     <string name="you_have_no_movie_collections">Нет коллекций</string>
     <string name="you_have_no_anime_collections">Нет коллекций аниме</string>
-    <string name="you_have_no_tv_shows">Нет ТВ-программ</string>
+    <string name="you_have_no_tv_shows">Нет сериалов</string>
     <string name="you_have_no_anime_shows">Нет мультсериалов</string>
     <string name="you_have_no_non_scraped_videos">Нет нераспознанных видео</string>
     <plurals name="Nmovies">
@@ -349,6 +349,9 @@
     <string name="s_chinese_simplified">Упрощенный китайский</string>
     <string name="s_traditional_chinese">Китайский традиционный</string>
     <string name="s_chinese_bilingual">Китайский двуязычный</string>
+    <string name="s_chinese_mainland">Китайский (Китай)</string>
+    <string name="s_chinese_hk">Китайский (Гонконг)</string>
+    <string name="s_chinese_tw">Китайский (Тайвань)</string>
     <string name="s_spanish_la">Испанский (LA)</string>
     <string name="s_extremaduran">Эстремадурский</string>
     <string name="s_montenegrin">Черногорский</string>
@@ -395,7 +398,7 @@
     <string name="player_plugin_purchase_archos_msg">Вы можете приобрести дополнительные плагины на www.archos.com.</string>
     <string name="player_plugin_purchase_google_play_msg">Вы можете приобрести дополнительные плагины в Google Play.</string>
     <string name="player_plugin_purchase_google_play_button">Перейти в Google Play</string>
-    <string name="plugin_update_required_title">Требуется обновленеи кодека</string>
+    <string name="plugin_update_required_title">Требуется обновление кодека</string>
     <string name="plugin_update_required_message">Похоже, что у вас установлены дополнительные кодеки для Nova Video Player.\n\nНовая версия Nova Video Player требует обновления этих кодеков.\n\nПожалуйста, перейдите в Google Play для обновления и повторной установки кодеков.</string>
     <!-- Subtitles wizard -->
     <string name="get_subtitles_on_drive">Выберите субтитры на накопителе</string>
@@ -413,7 +416,7 @@
     <string name="get_subtitles_online">Получить субтитры онлайн</string>
     <string name="toast_subloader_sub_found">Найдены субтитры для этого языка</string>
     <string name="toast_subloader_sub_not_found">Субтитры не найдены</string>
-    <string name="toast_subloader_service_unreachable">сервер с субтитрами недоступен</string>
+    <string name="toast_subloader_service_unreachable">Сервер с субтитрами недоступен</string>
     <string name="menu_subloader_allfolder">Получить недостающие субтитры</string>
     <string name="dialog_subloader_copying">Копирование субтитров…</string>
     <string name="dialog_subloader_downloading">Загрузка субтитров…</string>
@@ -528,7 +531,7 @@
     <string name="preferences_parser_sync_mode">Режим синхронизации анализатора</string>
     <string name="preferences_parser_sync_mode_cdata">PTS (рекомендуется)</string>
     <string name="preferences_parser_sync_mode_sample">Образец</string>
-    <string name="preferences_parser_sync_mode_summary">Режим синхронизации анализатора lavc. Экспериментальная настройка, может приводить к задержке вывода</string>
+    <string name="preferences_parser_sync_mode_summary">Режим синхронизации анализатора lavc. ⚠ Экспериментальная настройка, может приводить к задержке вывода</string>
     <string name="preferences_stream_buffer_size_title">Размер буфера потока</string>
     <string name="preferences_stream_buffer_size_summary">Размер кэша в Мб, используемого парсером</string>
     <string name="preferences_stream_max_iframe_size_title">Макс. размер i-кадра</string>
@@ -565,6 +568,9 @@
     <string name="favSubLang_summary">Выберите предпочтительный язык субтитров</string>
     <string name="favAudioLang_title">Предпочитаемый язык</string>
     <string name="favAudioLang_summary">Выберите предпочитаемый язык звуковой дорожки</string>
+    <string name="ui_language_title">Выберите язык интерфейса</string>
+    <string name="UiLang_title">Язык интерфейса</string>
+    <string name="UiLang_summary">Установите язык интерфейса, или выберите использование по умолчанию для системы</string>
     <string name="ui_mode_title">Режим пользовательского интерфейса</string>
     <string name="ui_mode_summary">Интерфейс ТВ или Планшета/Телефона</string>
     <string name="preferences_video_about">О программе</string>
@@ -700,7 +706,7 @@
     <string name="audio_interface_choice_summary">Расширенные настройки, могут нарушить декодирование аудио.</string>
     <string name="audio_interface_opensles">Принудительный OpenSL ES</string>
     <string name="audio_interface_audiotrack">Принудительная аудиодорожка</string>
-    <string name="audio_interface_any">По-умолчанию</string>
+    <string name="audio_interface_any">По умолчанию</string>
     <string name="preferences_user_interface">Пользовательский интерфейс</string>
     <string name="preferences_display_resume_box_summary">Показать/скрыть кнопку возобновления просмотра последнего видео на главном экране</string>
     <string name="preferences_display_resume_box">Отображать окно \"Возобновить\"</string>

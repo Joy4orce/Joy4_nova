@@ -339,6 +339,9 @@
     <string name="s_chinese_simplified">Chino simplificado</string>
     <string name="s_traditional_chinese">Chino tradicional</string>
     <string name="s_chinese_bilingual">Chino bilingual</string>
+    <string name="s_chinese_mainland">Chino (Continental)</string>
+    <string name="s_chinese_hk">Chino (Hong Kong)</string>
+    <string name="s_chinese_tw">Chino (Taiwan)</string>
     <string name="s_spanish_la">Español (LA)</string>
     <string name="s_extremaduran">Extremeño</string>
     <string name="s_montenegrin">Montenegrino</string>
@@ -510,11 +513,11 @@
     <string name="preferences_category_video">Vídeo</string>
     <string name="preferences_force_software_decoding">Forzar decodificación por software</string>
     <string name="preferences_force_software_decoding_summary">Puedes probar esta opción si algunos vídeos no se reproducen correctamente</string>
-    <string name="preferences_force_audio_passthrough">Audio passthrough</string>
+    <string name="preferences_force_audio_passthrough">Pasarela de audio (passthrough)</string>
     <string name="preferences_force_audio_passthrough_disabled">Desactivado (recomendado)</string>
     <string name="preferences_force_audio_passthrough_enable">Modo 1 (obsoleto)</string>
     <string name="preferences_force_audio_passthrough_enable2">Modo 2</string>
-    <string name="preferences_force_audio_passthrough_summary">Transmite audio comprimido a través de HDMI o S/PDIF. ⚠ Experimental. Puede provocar que el A/V no esté sincronizado</string>
+    <string name="preferences_force_audio_passthrough_summary">Transmite audio comprimido sobre HDMI o S/PDIF. ⚠ Experimental puede resultar en A/V desincronizados</string>
     <string name="preferences_parser_sync_mode">Modo de sincronización del analizador</string>
     <string name="preferences_parser_sync_mode_cdata">Basado en PTS (recomendado)</string>
     <string name="preferences_parser_sync_mode_sample">basado en muestra</string>
@@ -523,8 +526,8 @@
     <string name="preferences_stream_buffer_size_summary">Cantidad de caché usada antes del analizador para abordar problemas de búfer en MB</string>
     <string name="preferences_stream_max_iframe_size_title">Tamaño máximo de i-frame</string>
     <string name="preferences_stream_max_iframe_size_summary">Tamaño máximo comprimido de i-frame en MB</string>
-    <string name="preferences_force_passthrough">Forzar passthrough de audio</string>
-    <string name="preferences_force_passthrough_summary">Si la transferencia de audio (passthrough) está activa, fuerza su uso incluso si el receptor AV no asegura soportar el códec</string>
+    <string name="preferences_force_passthrough">Forzar pasarela de audio (passthrough)</string>
+    <string name="preferences_force_passthrough_summary">Si la pasarela de audio (passthrough) está activa, fuerza su uso incluso si el receptor AV no asegura soportar el códec</string>
     <string name="preferences_playback_speed">Activar velocidad de reproducción</string>
     <string name="preferences_playback_speed_summary">Habilita la posibilidad de cambiar la velocidad de reproducción. ⚠ Experimental, puede estropear el vídeo</string>
     <string name="preferences_disable_downmix_title">Desactivar reducción a estéreo</string>
@@ -555,6 +558,9 @@
     <string name="favSubLang_summary">Seleccione el idioma para la lectura de subtítulos</string>
     <string name="favAudioLang_title">Idioma preferido de audio</string>
     <string name="favAudioLang_summary">Elige tu idioma de pista de audio favorito</string>
+    <string name="ui_language_title">Eligir un idioma para la interfaz de usuario</string>
+    <string name="UiLang_title">Idioma de la interfaz de usuario</string>
+    <string name="UiLang_summary">Establecer el idioma de la interfaz de usuario de Nova, seleccione \'sistema\' para usar el definido por defecto para el sistema</string>
     <string name="ui_mode_title">Modo de interfaz de usuario</string>
     <string name="ui_mode_summary">Elija entre interfaz de usuario TV y Teléfono/Tablet</string>
     <string name="preferences_video_about">Acerca de</string>

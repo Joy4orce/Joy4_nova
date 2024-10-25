@@ -322,6 +322,9 @@
     <string name="s_chinese">Čínština</string>
     <string name="s_chinese_simplified">Zjednodušená čínština</string>
     <string name="s_traditional_chinese">Tradiční čínština</string>
+    <string name="s_chinese_mainland">Čínština (Pevninská Čína)</string>
+    <string name="s_chinese_hk">Čínština (Hong Kong)</string>
+    <string name="s_chinese_tw">Čínština (Tchaj-wan)</string>
     <string name="s_spanish_la">Španělština (LA)</string>
     <string name="s_montenegrin">Černohorština</string>
     <string name="s_manipuri">Manipurština</string>
@@ -532,6 +535,9 @@
     <string name="favSubLang_summary">Vyberte preferovaný jazyk pro zobrazované titulky</string>
     <string name="favAudioLang_title">Preferovaný jazyk zvuku</string>
     <string name="favAudioLang_summary">Zvote oblíbenou jazykovou audio stopu</string>
+    <string name="ui_language_title">Vyberte jazyk uživatelského rozhraní</string>
+    <string name="UiLang_title">Jazyk uživatelského rozhraní</string>
+    <string name="UiLang_summary">Nastavte jazyk uživatelského rozhraní pro NOVA, vyberte systém pro použití systémového jazyka</string>
     <string name="ui_mode_title">Režim uživatelského rozhraní</string>
     <string name="ui_mode_summary">Vyberte rozhraní pro TV nebo pro tablet/telefon</string>
     <string name="preferences_video_about">O aplikaci</string>

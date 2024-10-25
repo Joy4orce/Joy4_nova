@@ -281,6 +281,7 @@
     <string name="switch_to_list">列表</string>
     <string name="switch_to_grid">网格</string>
     <!-- VideoPlayer -->
+    <string name="player_track">音轨</string>
     <string name="player_loading_video">正在加载视频\u2026</string>
     <string name="player_audio_track_toast">音频轨：</string>
     <string name="player_subtitle_track_toast">字幕轨：</string>
@@ -333,6 +334,9 @@
     <string name="s_chinese_simplified">简体中文</string>
     <string name="s_traditional_chinese">繁体中文</string>
     <string name="s_chinese_bilingual">中英双语</string>
+    <string name="s_chinese_mainland">中文 (中国大陆)</string>
+    <string name="s_chinese_hk">中文 (香港)</string>
+    <string name="s_chinese_tw">中文 (台湾)</string>
     <string name="s_spanish_la">西班牙语 (LA)</string>
     <string name="s_extremaduran">埃斯特雷马杜拉语</string>
     <string name="s_montenegrin">黑山语</string>
@@ -511,7 +515,7 @@
     <string name="preferences_force_audio_passthrough_summary">通过 HDMI 或 S/PDIF 传输压缩音频。⚠实验性功能，可能导致 A/V不同步</string>
     <string name="preferences_parser_sync_mode">解析器同步模式</string>
     <string name="preferences_parser_sync_mode_cdata">基于 PTS (推荐)</string>
-    <string name="preferences_parser_sync_mode_sample">基于采样 </string>
+    <string name="preferences_parser_sync_mode_sample">基于采样</string>
     <string name="preferences_parser_sync_mode_summary">Lavc 解析器中的同步模式。⚠ 实验性功能，可能会导致 A/V 累积延迟</string>
     <string name="preferences_stream_buffer_size_title">在线播放缓冲区大小</string>
     <string name="preferences_stream_buffer_size_summary">解析器处理缓存问题前使用的缓存大小，单位MB</string>
@@ -549,6 +553,8 @@
     <string name="favSubLang_summary">选择您最喜欢的字幕阅读语言</string>
     <string name="favAudioLang_title">音频首选语言</string>
     <string name="favAudioLang_summary">选择您喜欢的音轨语言</string>
+    <string name="ui_language_title">选择用户界面语言</string>
+    <string name="UiLang_title">显示语言</string>
     <string name="ui_mode_title">用户界面模式</string>
     <string name="ui_mode_summary">在电视、平板电脑/手机用户界面之间选择</string>
     <string name="preferences_video_about">关于</string>

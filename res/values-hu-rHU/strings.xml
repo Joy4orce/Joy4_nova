@@ -339,6 +339,9 @@
     <string name="s_chinese_simplified">Egyszerűsített kínai</string>
     <string name="s_traditional_chinese">Hagyományos kínai</string>
     <string name="s_chinese_bilingual">Kínai, kétnyelvű</string>
+    <string name="s_chinese_mainland">Kínai (kontinentális)</string>
+    <string name="s_chinese_hk">Kínai (Hong Kong)</string>
+    <string name="s_chinese_tw">Kínai (Tajvan)</string>
     <string name="s_spanish_la">Spanyol (LA)</string>
     <string name="s_extremaduran">Extremadurai</string>
     <string name="s_montenegrin">Montenegrói</string>
@@ -537,6 +540,7 @@
     <string name="preference_tv_3d_automatic_switch_summary">Csak akkor használja ezt a funkciót, ha a 3D TV-je támogatja</string>
     <string name="preference_tv_refreshrate_switch">Frissítési ráta automatikus kapcsolásának engedélyezése</string>
     <string name="preference_tv_refreshrate_switch_summary">Képvibrálás megszüntetése azáltal, hogy a kijelző legjobb frissítési rátája a videó képkocka sebességéhez lesz igazítva (változó eszköztámogatás)</string>
+    <string name="preferences_tv_refreshrate_switch_disabled">Kikapcsolva</string>
     <string name="preference_remove_dolby_vision">Dolby vision kikapcsolása</string>
     <string name="preference_remove_dolby_vision_summary">Szabványos videókodekek használata a dolby vision helyett</string>
     <string name="preference_cutout_short_edges">Teljes képernyős videó képkivágásokkal</string>
@@ -552,6 +556,9 @@
     <string name="favSubLang_summary">Válassza ki a megjelenítendő feliratok nyelvét</string>
     <string name="favAudioLang_title">Alapértelmezett hangsáv</string>
     <string name="favAudioLang_summary">Válassza ki az előnyben részesített hangsávot</string>
+    <string name="ui_language_title">Felhasználói felület nyelvének kiválasztása</string>
+    <string name="UiLang_title">Felhasználói felület nyelve</string>
+    <string name="UiLang_summary">A NOVA felhasználói felület nyelvének beállítása. Válassza a Rendszer opciót a rendszer nyelvének használatához</string>
     <string name="ui_mode_title">Felhasználói felület módja</string>
     <string name="ui_mode_summary">Válasszon TV vagy Tablet/Telefon felület között</string>
     <string name="preferences_video_about">Névjegy</string>
@@ -574,6 +581,7 @@
     <string name="enable_adult_scrap_title">Felnőtt filmek feldolgozása</string>
     <string name="enable_adult_scrap_summary">Felnőtt filmek leírásának lekérése (alapértelmezetten kikapcsolva)</string>
     <string name="locale">Rendszernyelv</string>
+    <string name="scraper_language_title">Videóleírás nyelve</string>
     <string name="yes">Igen</string>
     <string name="no">Nem</string>
     <string name="abort">Megszakítás</string>
