@@ -87,7 +87,7 @@ public class SubtitleManager {
 
     // some ssa syntax https://sweetkaraoke.pagesperso-orange.fr/Tutoriels/Tutoriel4_1b.html#Chapitre_1_:_les_styles_ASS_et_SSA_:
     // matches a single "{\ ... }"
-    private static final Pattern SSA_ANY_TAG = Pattern.compile("\\{\\\\.*?\\}");
+    private static final Pattern SSA_ANY_TAG = Pattern.compile("(?:\\\\)?\\{(?:\\{\\})?\\\\.*?\\}"); // capture any ssa tag {\tag} but also this format \{{}\an8}
     // matches "{\c&Hcolor&}text" until end of input or next color tag, matches also "\<1/2/3/4>c&H<hex code>&" and "*c&H<hex code>&"
     private static final Pattern SSA_COLOR_TAG = Pattern.compile("\\{\\\\?[1-4\\*]?\\\\c&[h,H]([0-9A-Fa-f]+)&\\}(.*?)(?=\\{\\\\c|$)");
     // replacement for SSA_COLOR_TAG $1=color and $2=text
