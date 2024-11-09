@@ -33,7 +33,7 @@
 }
 -keep class com.archos.medialib.Subtitle {
   public java.lang.Object createTimedTextSubtitle(int, int, java.lang.String);
-  public java.lang.Object createTimedBitmapSubtitle(int, int, int, int, android.graphics.Bitmap);
+  public java.lang.Object createTimedBitmapSubtitle(int, int, int, int, int, int, android.graphics.Bitmap);
 }
 -keep class com.archos.medialib.AvosMediaMetadataRetriever {
   private long mMediaMetadataRetrieverHandle;
