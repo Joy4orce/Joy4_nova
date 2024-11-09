@@ -344,26 +344,29 @@ public class SubtitleManager {
                     } catch (InterruptedException e) { // wake up from sleep thus mCurrentSubtitle exists
                         interrupted = true;
                         long elapsedTime = System.currentTimeMillis() - sleepStart;
-                        int currentPosition = mCurrentSubtitle.getPosition() + (int) elapsedTime;
-                        log.debug("DispSubtitleThread sleep - interrupted, already slept for {}ms", elapsedTime);
-                        if (mNextSubtitle != null && mNextSubtitle.getDuration() == 0) { // this is an empty subtitle that is used to provide the correct duration
-                            int realCurrentSubtitleDuration = mNextSubtitle.getPosition() - mCurrentSubtitle.getPosition();
-                            log.debug("DispSubtitleThread sleep interrupt, received empty Subtitle: currentPosition={}, currentSubtitle={}+{}ms, nextSubtitle={}+{}ms, realCurrentSubtitleDuration={}, old mSubtitleDisplayLeft={}",
-                                    currentPosition, mCurrentSubtitle.getPosition(), mCurrentSubtitle.getDuration(), mNextSubtitle.getPosition(), mNextSubtitle.getDuration(), realCurrentSubtitleDuration, mSubtitleDisplayLeft);
-                            mCurrentSubtitle.setDuration(realCurrentSubtitleDuration);
-                            mSubtitleDisplayLeft = mNextSubtitle.getPosition() - currentPosition;
-                            log.debug("DispSubtitleThread updated remaining time to display previous sub mSubtitleDisplayLeft={} -> continue", mSubtitleDisplayLeft);
-                            //mNextSubtitle = null; // remove the empty subtitle
-                        } else { // mNextSubtitle == null or mNextSubtitle.getDuration() > 0
-                            // interrupted by non null mNextSubtitle, should be picked by next loop iteration, can be an exit condition
+                        log.debug("DispSubtitleThread sleep interrupt, waking up after {}ms, mCurrentSubtitle={}+{}ms, mNextSubtitle={}+{}ms, old mSubtitleDisplayLeft={}",
+                                elapsedTime,
+                                mCurrentSubtitle != null ? mCurrentSubtitle.getPosition() : "null",
+                                mCurrentSubtitle != null ? mCurrentSubtitle.getDuration() : "null",
+                                mNextSubtitle != null ? mNextSubtitle.getPosition() : "null",
+                                mNextSubtitle != null ? mNextSubtitle.getDuration() : "null",
+                                mSubtitleDisplayLeft);
+                        if (mCurrentSubtitle != null) {
+                            int currentPosition = mCurrentSubtitle.getPosition() + (int) elapsedTime;
+                            if (mNextSubtitle != null && mNextSubtitle.getDuration() == 0) { // this is an empty subtitle that is used to provide the correct duration
+                                int realCurrentSubtitleDuration = mNextSubtitle.getPosition() - mCurrentSubtitle.getPosition();
+                                mCurrentSubtitle.setDuration(realCurrentSubtitleDuration);
+                                mSubtitleDisplayLeft = mNextSubtitle.getPosition() - currentPosition;
+                                log.debug("DispSubtitleThread sleep interrupt bcoz received new empty Subtitle, currentPosition={}, realCurrentSubtitleDuration={}, updated mSubtitleDisplayLeft={}", currentPosition, realCurrentSubtitleDuration, mSubtitleDisplayLeft);
+                                mNextSubtitle = null; // remove the empty subtitle
+                            } else { // mNextSubtitle == null or mNextSubtitle.getDuration() > 0
+                                // interrupted by non null mNextSubtitle, should be picked by next loop iteration, can be an exit condition
+                                mSubtitleDisplayLeft -= (int) (System.currentTimeMillis() - sleepStart);
+                                log.debug("DispSubtitleThread sleep interrupt by exit condition, waking up after {}ms, bcoz received new non empty Subtitle, updated mSubtitleDisplayLeft={}", elapsedTime, mSubtitleDisplayLeft);
+                            }
+                        } else {
                             mSubtitleDisplayLeft -= (int) (System.currentTimeMillis() - sleepStart);
-                            log.debug("DispSubtitleThread sleep interrupt by exit condition, waking up after {}ms, bcoz received new non empty Subtitle mCurrentSubtitle={}+{}ms, mNextSubtitle={}+{}ms, update mSubtitleDisplayLeft={}",
-                                    elapsedTime,
-                                    mCurrentSubtitle != null ? mCurrentSubtitle.getPosition() : "null",
-                                    mCurrentSubtitle != null ? mCurrentSubtitle.getDuration() : "null",
-                                    mNextSubtitle != null ? mNextSubtitle.getPosition() : "null",
-                                    mNextSubtitle != null ? mNextSubtitle.getDuration() : "null",
-                                    mSubtitleDisplayLeft);
+                            log.debug("DispSubtitleThread sleep interrupt by seek condition, updated mSubtitleDisplayLeft={}", mSubtitleDisplayLeft);
                         }
                     }
                     // if not interrupted update mSubtitleDisplayLeft (otherwise it is already done)
