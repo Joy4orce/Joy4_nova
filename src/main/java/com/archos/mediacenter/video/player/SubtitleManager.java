@@ -16,6 +16,7 @@ package com.archos.mediacenter.video.player;
 
 import com.archos.mediacenter.video.R;
 import com.archos.medialib.Subtitle;
+import com.archos.medialib.Subtitle.SubtitleAlignment;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -102,6 +103,10 @@ public class SubtitleManager {
     private static final Pattern SSA_STRIKETHROUGH_TAG = Pattern.compile("\\{\\\\s1\\}(.*?)(?=\\{\\\\s0|$)");
     private static final String HTML_STRIKETHROUGH_TAG = "<s>$1</s>";
 
+    // alignment tag can contain a Word Joiner (WJ) \u2060 unicode character and be of the form \{{}\\u2060an8} or simply {\an8}
+    // 1 is BOTTOM_LEFT, 2 is BOTTOM_MID, 3 is BOTTOM_RIGHT, 4 is MID_LEFT, 5 is MID_MID, 6 is MID_RIGHT, 7 is TOP_LEFT, 8 is TOP_MID, 9 is TOP_RIGHT
+    private static final Pattern SUBRIP_ALIGNMENT_TAG = Pattern.compile("\\{(?:\\{\\})?\\\\(?:\\u2060)?an([1-9])\\}");
+
     private static class SubtitleHandler extends Handler {
         private final WeakReference<SubtitleManager> mSubtitleManager;
 
@@ -167,6 +172,9 @@ public class SubtitleManager {
 
         if (subtitle.isText()) {
             log.debug("displayView: Text");
+
+            subtitle.setAlignment(getAlignment(subtitle.getText()));
+
             mSubtitleTxtView.setVisibility(View.VISIBLE);
 
             if (mSpannableStringBuilder == null) {
@@ -211,7 +219,31 @@ public class SubtitleManager {
         mHandler.sendMessage(mHandler.obtainMessage(MSG_DISPLAY_SUBTITLE, subtitle));
     }
 
-    private static String cleanText (final String input) {
+    private static SubtitleAlignment getAlignment(final String input) {
+        SubtitleAlignment alignment = SubtitleAlignment.BOTTOM_MID;
+        Matcher subripAlignmentMatch = SUBRIP_ALIGNMENT_TAG.matcher(input);
+        if (subripAlignmentMatch.find()) {
+            int alignmentInt = Integer.parseInt(subripAlignmentMatch.group(1));
+            log.debug("getAlignment: input={} -> alignmentInt={}", input, alignmentInt);
+            alignment = switch (alignmentInt) {
+                case 1 -> SubtitleAlignment.BOTTOM_LEFT;
+                case 2 -> SubtitleAlignment.BOTTOM_MID;
+                case 3 -> SubtitleAlignment.BOTTOM_RIGHT;
+                case 4 -> SubtitleAlignment.MID_LEFT;
+                case 5 -> SubtitleAlignment.MID_MID;
+                case 6 -> SubtitleAlignment.MID_RIGHT;
+                case 7 -> SubtitleAlignment.TOP_LEFT;
+                case 8 -> SubtitleAlignment.TOP_MID;
+                case 9 -> SubtitleAlignment.TOP_RIGHT;
+                default -> alignment;
+            };
+        } else {
+            log.debug("getAlignment: not found input={} -> alignmentInt={}", input, alignment);
+        }
+        return alignment;
+    }
+
+    private static String cleanText(final String input) {
         // remove space/new lines at end and beginning
         String displayText = input.trim();
         // convert \n or literal "\n" to <br>
@@ -231,7 +263,7 @@ public class SubtitleManager {
             displayText = replaceAll(displayText, SSA_STRIKETHROUGH_TAG, HTML_STRIKETHROUGH_TAG, sb);
             displayText = replaceAll(displayText, SSA_ANY_TAG, "", sb);
         }
-        log.debug("cleaned Text [{}]", displayText);
+        log.debug("cleanText: [{}] -> [{}]", input, displayText);
         return displayText;
     }
 
