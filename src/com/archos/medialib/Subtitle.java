@@ -29,6 +29,10 @@ public abstract class Subtitle {
     private static final int TYPE_TIMED_TEXT_SUBTITLE = 2;
     private static final int TYPE_TIMED_BITMAP_SUBTITLE = 3;
 
+    public enum SubtitleAlignment {
+        BOTTOM_LEFT, BOTTOM_MID, BOTTOM_RIGHT, MID_LEFT, MID_MID, MID_RIGHT, TOP_LEFT, TOP_MID, TOP_RIGHT
+    }
+
     public Subtitle(int type) {
         this.type = type;
     }
@@ -53,6 +57,17 @@ public abstract class Subtitle {
     public abstract void setDuration(int duration);
     public abstract int getFrameWidth();
     public abstract int getFrameHeight();
+
+    private SubtitleAlignment alignment = SubtitleAlignment.BOTTOM_MID; // Default alignment
+
+    public SubtitleAlignment getAlignment() {
+        return alignment;
+    }
+
+    public void setAlignment(SubtitleAlignment alignment) {
+        log.debug("setAlignment: {}", alignment);
+        this.alignment = alignment;
+    }
 
     public static class TextSubtitle extends Subtitle {
         private final String text;
