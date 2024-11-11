@@ -152,22 +152,31 @@ public class VideoMetadata implements Serializable {
         SubtitleTrack(MediaMetadata data, int idx) {
             int gapKey = IMediaPlayer.METADATA_KEY_SUBTITLE_TRACK + IMediaPlayer.METADATA_KEY_SUBTITLE_TRACK_MAX * idx;
 
-            name = getMetadataString(data, gapKey + IMediaPlayer.METADATA_KEY_SUBTITLE_TRACK_NAME);
+            String tName = getMetadataString(data, gapKey + IMediaPlayer.METADATA_KEY_SUBTITLE_TRACK_NAME);
             path = getMetadataString(data, gapKey + IMediaPlayer.METADATA_KEY_SUBTITLE_TRACK_PATH);
-            isExternal = (path != null) && (path.length() > 0); // it is "" for internal subs
+            isExternal = (path != null) && (!path.isEmpty()); // it is "" for internal subs
+            isGfx = ! isExternal && tName != null && (tName.endsWith(" [VOBSUB]") || tName.endsWith(" [PGS]"));
+            if (isGfx) name = tName.substring(0, tName.length() - (tName.endsWith(" [VOBSUB]") ? 8 : 5));
+            else name = tName;
+            log.warn("SubtitleTrack name=" + name + ", path=" + path + ", isExternal=" + isExternal + ", isGfx=" + isGfx);
         }
         
         SubtitleTrack(IMediaMetadataRetriever retriever, int idx) {
             int gapKey = IMediaMetadataRetriever.METADATA_KEY_SUBTITLE_TRACK + IMediaMetadataRetriever.METADATA_KEY_SUBTITLE_TRACK_MAX * idx;
-            
-            name = getMetadataRetrieverString(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_SUBTITLE_TRACK_NAME);
+
+            String tName = getMetadataRetrieverString(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_SUBTITLE_TRACK_NAME);
             path = getMetadataRetrieverString(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_SUBTITLE_TRACK_PATH);
-            isExternal = (path != null) && (path.length() > 0);
+            isExternal = (path != null) && (!path.isEmpty());
+            isGfx = ! isExternal && tName != null && (tName.endsWith(" [VOBSUB]") || tName.endsWith(" [PGS]"));
+            if (isGfx) name = tName.substring(0, tName.length() - (tName.endsWith(" [VOBSUB]") ? 8 : 5));
+            else name = tName;
+            log.warn("SubtitleTrack name=" + name + ", path=" + path + ", isExternal=" + isExternal + ", isGfx=" + isGfx);
         }
 
         public final String name;
         public final String path;
         public final boolean isExternal;
+        public final boolean isGfx;
     }
 
     public VideoMetadata() {
