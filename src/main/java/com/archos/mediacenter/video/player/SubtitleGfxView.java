@@ -38,7 +38,7 @@ public class SubtitleGfxView extends View {
     // advantage of false is to allow repositioning and scaling but you loose possible shifted position to evade from text appearing on the screen
     // note that true conflicts with setting shift subs position up
 
-    private final boolean RECT_COORDINATES = true;
+    public final static boolean RECT_COORDINATES = true;
     private int mSize = -1;
     private int mDrawWidth;
     private int mDrawHeight;
@@ -206,17 +206,15 @@ public class SubtitleGfxView extends View {
             ratio = shortestDisplaySize / (float) mOriginalWidth;
         }
 
-        ratio *= sizeToRatioModifier(mSize);
-
-        // Apply a multiplication factor to compensate the screen density
-        if (mScreenDpi != SCREEN_REFERENCE_DPI) {
-            ratio *= (double)mScreenDpi / (double)SCREEN_REFERENCE_DPI;
-        }
-
         if (RECT_COORDINATES) {
             mDrawWidth = (int) (mBitmap.getWidth() * mScaleFactor);
             mDrawHeight = (int) (mBitmap.getHeight() * mScaleFactor);
         } else {
+            ratio *= sizeToRatioModifier(mSize);
+            // Apply a multiplication factor to compensate the screen density
+            if (mScreenDpi != SCREEN_REFERENCE_DPI) {
+                ratio *= (double)mScreenDpi / (double)SCREEN_REFERENCE_DPI;
+            }
             mDrawWidth = (int) (mOriginalWidth * mScaleFactor * ratio);
             mDrawHeight = (int) (mOriginalHeight * mScaleFactor * ratio);
         }
