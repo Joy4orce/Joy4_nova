@@ -155,8 +155,9 @@ public class VideoMetadata implements Serializable {
             String tName = getMetadataString(data, gapKey + IMediaPlayer.METADATA_KEY_SUBTITLE_TRACK_NAME);
             path = getMetadataString(data, gapKey + IMediaPlayer.METADATA_KEY_SUBTITLE_TRACK_PATH);
             isExternal = (path != null) && (!path.isEmpty()); // it is "" for internal subs
+            // TODO MARC do the lang parsing here
             isGfx = ! isExternal && tName != null && (tName.endsWith(" [VOBSUB]") || tName.endsWith(" [PGS]"));
-            if (isGfx) name = tName.substring(0, tName.length() - (tName.endsWith(" [VOBSUB]") ? 8 : 5));
+            if (isGfx) name = tName.substring(0, tName.length() - (tName.endsWith(" [VOBSUB]") ? 9 : 6));
             else name = tName;
             log.warn("SubtitleTrack name=" + name + ", path=" + path + ", isExternal=" + isExternal + ", isGfx=" + isGfx);
         }
@@ -167,8 +168,9 @@ public class VideoMetadata implements Serializable {
             String tName = getMetadataRetrieverString(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_SUBTITLE_TRACK_NAME);
             path = getMetadataRetrieverString(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_SUBTITLE_TRACK_PATH);
             isExternal = (path != null) && (!path.isEmpty());
+            // TODO MARC do the lang parsing here
             isGfx = ! isExternal && tName != null && (tName.endsWith(" [VOBSUB]") || tName.endsWith(" [PGS]"));
-            if (isGfx) name = tName.substring(0, tName.length() - (tName.endsWith(" [VOBSUB]") ? 8 : 5));
+            if (isGfx) name = tName.substring(0, tName.length() - (tName.endsWith(" [VOBSUB]") ? 9 : 6));
             else name = tName;
             log.warn("SubtitleTrack name=" + name + ", path=" + path + ", isExternal=" + isExternal + ", isGfx=" + isGfx);
         }
