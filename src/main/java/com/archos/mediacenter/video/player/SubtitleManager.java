@@ -67,6 +67,7 @@ public class SubtitleManager {
     private int                 mSubtitleEvadedVPos;
     SpannableStringBuilder      mSpannableStringBuilder = null;
     TextShadowSpan              mTextShadowSpan = null;
+    private boolean mIsSubtitleGfx = false;
 
     Surface                     mUiSurface;
     private boolean mForbidWindow ;
@@ -171,7 +172,8 @@ public class SubtitleManager {
         log.debug("displayView sub duration={}", subtitle.getDuration());
 
         if (subtitle.isText()) {
-            log.debug("displayView: Text");
+            log.debug("displayView: Text, mIsSubtitleGfx=false");
+            mIsSubtitleGfx = false;
 
             subtitle.setAlignment(getAlignment(subtitle.getText()));
 
@@ -196,7 +198,8 @@ public class SubtitleManager {
             // need to Invalidate View to force an update!
             mSubtitleTxtView.postInvalidate();
         } else if (subtitle.isBitmap()) {
-            log.debug("displayView: Bitmap bounds={}", subtitle.getBounds());
+            mIsSubtitleGfx = true;
+            log.debug("displayView: Bitmap bounds={}, mIsSubtitleGfx=true", subtitle.getBounds());
             Rect bounds = subtitle.getBounds();
             mSubtitleGfxView.setSubtitle(subtitle.getBitmap(), bounds, subtitle.getFrameWidth(), subtitle.getFrameHeight());
         }
@@ -237,8 +240,6 @@ public class SubtitleManager {
                 case 9 -> SubtitleAlignment.TOP_RIGHT;
                 default -> alignment;
             };
-        } else {
-            log.debug("getAlignment: not found input={} -> alignmentInt={}", input, alignment);
         }
         return alignment;
     }
@@ -700,7 +701,10 @@ public class SubtitleManager {
      * @param pos 0..255.
      */
     public void setVerticalPosition(int pos) {
-        mSubtitleVPos = pos;
+        if (mIsSubtitleGfx && SubtitleGfxView.RECT_COORDINATES)
+            mSubtitleVPos = 0;
+        else
+            mSubtitleVPos = pos;
         // note: Increased the Range from 0.100 to 0.255 to make it smoother
         // translate VPos 0..255 to 0..(1/3)DisplayHeight
         // mScreenHeight / 3 * pos / 255
@@ -709,11 +713,12 @@ public class SubtitleManager {
     }
 
     private void setVerticalPositionInternal (int pos) {
-        mSubtitleEvadedVPos = pos;
+        if (mIsSubtitleGfx && SubtitleGfxView.RECT_COORDINATES) mSubtitleEvadedVPos = 0;
+        else mSubtitleEvadedVPos = pos;
         if (mSubtitleSpacer == null)
             return;
-        mSubtitleSpacerParams.height = pos;
-        log.debug("New Height: " + mSubtitleSpacerParams.height);
+        mSubtitleSpacerParams.height = mSubtitleEvadedVPos;
+        log.debug("setVerticalPositionInternal: new Height " + mSubtitleSpacerParams.height);
         mSubtitleSpacer.setLayoutParams(mSubtitleSpacerParams);
         mSubtitleSpacer.requestLayout();
         mSubtitleSpacer.postInvalidate();
@@ -739,5 +744,9 @@ public class SubtitleManager {
             mDispSubtitleThread.clear();
             mDispSubtitleThread.interrupt();
         }
+    }
+
+    public boolean isSubtitleGfx() {
+        return mIsSubtitleGfx;
     }
 }
