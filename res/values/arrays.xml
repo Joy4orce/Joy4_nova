@@ -194,4 +194,19 @@
         <item>WebDAV</item>
         <item>WebDAVS</item>
     </string-array>
+
+    <!-- sync with avos av.h -->
+    <string-array name="subtitles_types">
+        <item>None</item>
+        <item>VOBSUB</item>
+        <item>DVD</item>
+        <item>DVBT</item>
+        <item>TEXT</item>
+        <item>XSUB</item>
+        <item>SSA</item>
+        <item>ASS</item>
+        <item>EXT</item>
+        <item>MOV TEXT</item>
+        <item>PGS</item>
+    </string-array>
 </resources>
