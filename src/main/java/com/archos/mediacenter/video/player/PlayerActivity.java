@@ -3335,7 +3335,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         if (mPlayer.getVideoMetadata().getSubtitleTrack(mVideoInfo.subtitleTrack).isGfx) {
             log.debug(caller + ": set vpos to 0, mVideoInfo=" + ((mVideoInfo == null) ? "null" : "noNull" + ", subtitleTrack=" + ((mVideoInfo == null) ? "null" : mVideoInfo.subtitleTrack)));
             mSubtitleManager.setVerticalPosition(0);
-            //mSubtitleInfoController.enableSettings(SUBTITLE_MENU_SETTINGS, false, true);
+            mSubtitleInfoController.enableSettings(SUBTITLE_MENU_SETTINGS, false, true);
             if (mSettingsMenuItem != null) {
                 mSettingsMenuItem.setEnabled(false); // Make the item non-selectable
                 mSettingsMenuItem.setFocusable(false);
@@ -3345,7 +3345,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         } else {
             log.debug(caller + ": set vpos to " + vpos + ", subtitleTrack=" + mVideoInfo.subtitleTrack);
             mSubtitleManager.setVerticalPosition(vpos);
-            //mSubtitleInfoController.enableSettings(SUBTITLE_MENU_SETTINGS, true, false);
+            mSubtitleInfoController.enableSettings(SUBTITLE_MENU_SETTINGS, true, false);
             if (mSettingsMenuItem != null) {
                 mSettingsMenuItem.setEnabled(true);
                 mSettingsMenuItem.setFocusable(true);
