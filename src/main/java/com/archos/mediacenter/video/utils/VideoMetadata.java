@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.Arrays;
 
 public class VideoMetadata implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -121,7 +122,8 @@ public class VideoMetadata implements Serializable {
             channels = getMetadataString(data, gapKey + IMediaPlayer.METADATA_KEY_AUDIO_TRACK_CHANNELS);
             vbr = getMetadataBool(data, gapKey + IMediaPlayer.METADATA_KEY_AUDIO_TRACK_VBR);
             supported = getMetadataBool(data, gapKey + IMediaPlayer.METADATA_KEY_AUDIO_TRACK_SUPPORTED);
-            log.debug("AudioTrack name=" + name + ", format=" + format);
+            language = getMetadataString(data, gapKey + IMediaPlayer.METADATA_KEY_AUDIO_TRACK_LANGUAGE);
+            log.debug("AudioTrack name=" + name + ", format=" + format + ", language" + language);
         }
         
         AudioTrack(IMediaMetadataRetriever retriever, int idx) {
@@ -134,6 +136,7 @@ public class VideoMetadata implements Serializable {
             channels = getMetadataRetrieverString(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_AUDIO_TRACK_CHANNELS);
             vbr = getMetadataRetrieverBool(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_AUDIO_TRACK_VBR);
             supported = getMetadataRetrieverBool(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_AUDIO_TRACK_SUPPORTED);
+            language = getMetadataRetrieverString(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_AUDIO_TRACK_LANGUAGE);
             log.debug("AudioTrack name=" + name + ", format=" + format);
         }
 
@@ -144,6 +147,7 @@ public class VideoMetadata implements Serializable {
         public final String  channels;
         public final boolean vbr;
         public final boolean supported;
+        public final String  language;
     }
 
     public static class SubtitleTrack implements Serializable {
@@ -151,34 +155,33 @@ public class VideoMetadata implements Serializable {
 
         SubtitleTrack(MediaMetadata data, int idx) {
             int gapKey = IMediaPlayer.METADATA_KEY_SUBTITLE_TRACK + IMediaPlayer.METADATA_KEY_SUBTITLE_TRACK_MAX * idx;
-
-            String tName = getMetadataString(data, gapKey + IMediaPlayer.METADATA_KEY_SUBTITLE_TRACK_NAME);
+            name = getMetadataString(data, gapKey + IMediaPlayer.METADATA_KEY_SUBTITLE_TRACK_NAME);
             path = getMetadataString(data, gapKey + IMediaPlayer.METADATA_KEY_SUBTITLE_TRACK_PATH);
             isExternal = (path != null) && (!path.isEmpty()); // it is "" for internal subs
-            // TODO MARC do the lang parsing here
-            isGfx = ! isExternal && tName != null && (tName.endsWith(" [VOBSUB]") || tName.endsWith(" [PGS]"));
-            if (isGfx) name = tName.substring(0, tName.length() - (tName.endsWith(" [VOBSUB]") ? 9 : 6));
-            else name = tName;
-            log.warn("SubtitleTrack name=" + name + ", path=" + path + ", isExternal=" + isExternal + ", isGfx=" + isGfx);
+            if (isExternal) isGfx = false;
+            else isGfx = getMetadataBool(data, gapKey + IMediaPlayer.METADATA_KEY_SUBTITLE_TRACK_IS_GFX);
+            format = getMetadataInt(data, gapKey + IMediaPlayer.METADATA_KEY_SUBTITLE_TRACK_FORMAT);
+            language = getMetadataString(data, gapKey + IMediaPlayer.METADATA_KEY_SUBTITLE_TRACK_LANGUAGE);
         }
         
         SubtitleTrack(IMediaMetadataRetriever retriever, int idx) {
+            // note no bool method here
             int gapKey = IMediaMetadataRetriever.METADATA_KEY_SUBTITLE_TRACK + IMediaMetadataRetriever.METADATA_KEY_SUBTITLE_TRACK_MAX * idx;
-
-            String tName = getMetadataRetrieverString(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_SUBTITLE_TRACK_NAME);
+            name = getMetadataRetrieverString(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_SUBTITLE_TRACK_NAME);
             path = getMetadataRetrieverString(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_SUBTITLE_TRACK_PATH);
             isExternal = (path != null) && (!path.isEmpty());
-            // TODO MARC do the lang parsing here
-            isGfx = ! isExternal && tName != null && (tName.endsWith(" [VOBSUB]") || tName.endsWith(" [PGS]"));
-            if (isGfx) name = tName.substring(0, tName.length() - (tName.endsWith(" [VOBSUB]") ? 9 : 6));
-            else name = tName;
-            log.warn("SubtitleTrack name=" + name + ", path=" + path + ", isExternal=" + isExternal + ", isGfx=" + isGfx);
+            if (isExternal) isGfx = false;
+            else isGfx = getMetadataRetrieverInt(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_SUBTITLE_TRACK_IS_GFX) == 1;
+            format = getMetadataRetrieverInt(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_SUBTITLE_TRACK_FORMAT);
+            language = getMetadataRetrieverString(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_SUBTITLE_TRACK_LANGUAGE);
         }
 
         public final String name;
         public final String path;
         public final boolean isExternal;
         public final boolean isGfx;
+        public final int format;
+        public final String language;
     }
 
     public VideoMetadata() {
