@@ -35,7 +35,6 @@ public class TVMenuItem extends LinearLayout implements Checkable, TVSlaveView{
     private String text;
     private boolean isDisabled; // Add this field
     private OnClickListener ocl;
-    private OnClickListener savedOcl;
     private TVMenuItem slaveView;
 
     private Context mContext;
@@ -83,13 +82,11 @@ public class TVMenuItem extends LinearLayout implements Checkable, TVSlaveView{
 
     @Override
     public void setOnClickListener(OnClickListener ocl) {
-        if (ocl != null) savedOcl = ocl;
         this.ocl = ocl;
         if (!isDisabled) {
             findViewById(R.id.info_text).setOnClickListener(ocl);
         }
     }
-
 
     @Override
     public void setChecked(boolean checked) {
@@ -123,6 +120,20 @@ public class TVMenuItem extends LinearLayout implements Checkable, TVSlaveView{
     }
     public String getText() { return text;}
 
+    // send key events to TVMenu in order to skip disabled items and separators in menu navigation
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            ViewParent parent = getParent();
+            while (parent != null && !(parent instanceof TVMenu)) {
+                parent = parent.getParent();
+            }
+            if (parent instanceof TVMenu) {
+                return ((TVMenu) parent).onKeyDown(event.getKeyCode(), event);
+            }
+        }
+        return super.dispatchKeyEvent(event);
+    }
 
 
     @Override
@@ -220,16 +231,18 @@ public class TVMenuItem extends LinearLayout implements Checkable, TVSlaveView{
         setEnabled(!disabled);
         setFocusableInTouchMode(!disabled);
         if (disabled) {
-            setOnClickListener(null);
             setAlpha(0.5f); // Visually indicate the item is disabled
         } else {
-            setOnClickListener(savedOcl); // restore the original OnClickListener
             setAlpha(1.0f); // Restore the original appearance
         }
     }
 
     public boolean isDisabled() {
         return isDisabled;
+    }
+
+    public boolean isEnabled() {
+        return !isDisabled;
     }
 
 }
