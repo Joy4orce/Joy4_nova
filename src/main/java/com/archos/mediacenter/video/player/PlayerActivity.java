@@ -434,7 +434,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     private boolean mCling = false;
 
     private TVMenu mSubtitleTVMenu;
-    private TVMenuItem mSettingsMenuItem;
+    private TVMenuItem mSubtitleSettingsMenuItem;
+    private TVMenuItem mSubtitleDelayMenuItem;
     private TVCardView mSubtitleTVCardView;
     private TVCardView mAudioTracksTVCardView;
     private TVMenu mAudioTracksTVMenu;
@@ -1699,6 +1700,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         if (mSubtitleTVMenu != null) {
             mSubtitleTVMenu.clean();
 
+            log.debug("refreshSubtitleTVMenu: mSubtitleInfoController.getTrackCount()=" + mSubtitleInfoController.getTrackCount());
+
             mPlayerController.getTVMenuAdapter().setCardViewVisibility(View.VISIBLE, mSubtitleTVCardView);
 
             if(mSubtitleInfoController.getTrackCount()>0) {
@@ -1706,7 +1709,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                     mSubtitleTVMenu.createAndAddTVMenuItem(mSubtitleInfoController.getTrackNameAt(i).toString(), true, mSubtitleInfoController.getTrack() == i);
                 }
                 mSubtitleTVMenu.createAndAddSeparator();
-                mSubtitleTVMenu.createAndAddTVMenuItem(getText(R.string.player_pref_subtitle_delay_title).toString(), false, false).setOnClickListener(new View.OnClickListener() {
+                mSubtitleDelayMenuItem = mSubtitleTVMenu.createAndAddTVMenuItem(getText(R.string.player_pref_subtitle_delay_title).toString(), false, false);
+                mSubtitleDelayMenuItem.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         // TODO Auto-generated method stub
@@ -1714,13 +1718,19 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                     }
                 });
 
-                mSettingsMenuItem = mSubtitleTVMenu.createAndAddTVMenuItem(getText(R.string.menu_player_settings).toString(), false, false);
-                mSettingsMenuItem.setOnClickListener(new View.OnClickListener() {
+                log.debug("refreshSubtitleTVMenu: isCurrentSubtrackNone=" + isCurrentSubtrackNone());
+                disableSubtitleDelayTVMenuItem(isCurrentSubtrackNone());
+
+                mSubtitleSettingsMenuItem = mSubtitleTVMenu.createAndAddTVMenuItem(getText(R.string.menu_player_settings).toString(), false, false);
+                mSubtitleSettingsMenuItem.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         createTVSubtitleSettingsDialog();
                     }
                 });
+
+                log.debug("refreshSubtitleTVMenu: isCurrentSubtrackGfx=" + isCurrentSubtrackGfx());
+                disableSubtitleSettingsMenuItem(isCurrentSubtrackGfx() || isCurrentSubtrackNone());
             }
             mSubtitleTVMenu.createAndAddTVMenuItem(getText(R.string.get_subtitles_online).toString(), false, false).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -3326,6 +3336,14 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         return mPlayer.getVideoMetadata().getSubtitleTrack(mVideoInfo.subtitleTrack).isGfx;
     }
 
+    public boolean isCurrentSubtrackNone() {
+        if (mPlayer == null || mPlayer.getVideoMetadata() == null || mVideoInfo == null ||
+                mVideoInfo.subtitleTrack == -1) {
+            return false;
+        }
+        return mVideoInfo.subtitleTrack >= mVideoInfo.nbSubtitles;
+    }
+
     private void setSubtitleVpos(String caller) {
         setSubtitleVpos(PreferenceManager.getDefaultSharedPreferences(PlayerActivity.this).getInt(KEY_SUBTITLE_VPOS, mSubtitleVPosDefault), caller);
     }
@@ -3335,28 +3353,27 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         if (mPlayer.getVideoMetadata().getSubtitleTrack(mVideoInfo.subtitleTrack).isGfx) {
             log.debug(caller + ": set vpos to 0, mVideoInfo=" + ((mVideoInfo == null) ? "null" : "noNull" + ", subtitleTrack=" + ((mVideoInfo == null) ? "null" : mVideoInfo.subtitleTrack)));
             mSubtitleManager.setVerticalPosition(0);
-            mSubtitleInfoController.enableSettings(SUBTITLE_MENU_SETTINGS, false, true);
-            if (mSettingsMenuItem != null) {
-                mSettingsMenuItem.setEnabled(false); // Make the item non-selectable
-                mSettingsMenuItem.setFocusable(false);
-                mSettingsMenuItem.setFocusableInTouchMode(false);
-                mSettingsMenuItem.setOnClickListener(null); // Remove the click listener
-            }
+            disableSubtitleSettingsMenuItem(true);
         } else {
             log.debug(caller + ": set vpos to " + vpos + ", subtitleTrack=" + mVideoInfo.subtitleTrack);
             mSubtitleManager.setVerticalPosition(vpos);
-            mSubtitleInfoController.enableSettings(SUBTITLE_MENU_SETTINGS, true, false);
-            if (mSettingsMenuItem != null) {
-                mSettingsMenuItem.setEnabled(true);
-                mSettingsMenuItem.setFocusable(true);
-                mSettingsMenuItem.setFocusableInTouchMode(true);
-                mSettingsMenuItem.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        createTVSubtitleSettingsDialog();
-                    }
-                });
-            }
+            disableSubtitleSettingsMenuItem(false);
+        }
+    }
+
+    private void disableSubtitleDelayTVMenuItem(boolean disable) {
+        log.debug("disableSubtitleDelayTVMenuItem: " + disable);
+        mSubtitleInfoController.enableSettings(SUBTITLE_MENU_DELAY, !disable, disable);
+        if (mSubtitleDelayMenuItem != null) {
+            mSubtitleDelayMenuItem.setDisabled(disable);
+        }
+    }
+
+    private void disableSubtitleSettingsMenuItem(boolean disable) {
+        log.debug("disableSubtitleSettingsMenuItem: " + disable);
+        mSubtitleInfoController.enableSettings(SUBTITLE_MENU_SETTINGS, !disable, disable);
+        if (mSubtitleSettingsMenuItem != null) {
+            mSubtitleSettingsMenuItem.setDisabled(disable);
         }
     }
 
@@ -3393,7 +3410,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 }
                 if (mVideoInfo.subtitleTrack >= 0) {
                     String trackName = mSubtitleInfoController.getTrackNameAt(subtitleTrackToPosition(mVideoInfo.subtitleTrack, mVideoInfo.nbSubtitles)).toString();
-                    mSubtitleInfoController.enableSettings(SUBTITLE_MENU_DELAY, !trackName.equals(getText(R.string.s_none)), true);
+                    disableSubtitleDelayTVMenuItem(position == 0);
+                    disableSubtitleSettingsMenuItem(position == 0 || isCurrentSubtrackGfx());
                     log.debug("onTrackSelected: position={}, mSubtitleInfoController.getTrackNameAt({}) mVideoInfo.subtitleTrack={}", position, trackName, mVideoInfo.subtitleTrack);
                 } else {
                     log.debug("onTrackSelected: position={}, None mVideoInfo.subtitleTrack={}", position, mVideoInfo.subtitleTrack);
@@ -3693,7 +3711,11 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 // at this point mVideoInfo.subtitleTrack is the track number to be used
                 log.debug("onSubtitleMetadataUpdated: set mSubtitleInfoController.setTrack: " + subtitleTrackToPosition(mVideoInfo.subtitleTrack, mVideoInfo.nbSubtitles));
                 mSubtitleInfoController.setTrack(subtitleTrackToPosition(mVideoInfo.subtitleTrack, mVideoInfo.nbSubtitles)); // +1 since none track is at position 0, for UI only
-                if (mSubtitleInfoController.getTrack() == nonePosition) mSubtitleInfoController.enableSettings(SUBTITLE_MENU_DELAY, false, false);
+                if (mSubtitleInfoController.getTrack() == nonePosition) {
+                    log.debug("onSubtitleMetadataUpdated: disableSubtitleDelayTVMenuItem(true) because nonePosition");
+                    disableSubtitleDelayTVMenuItem(true);
+                    disableSubtitleSettingsMenuItem(true);
+                }
             }
 
             refreshSubtitleTVMenu();

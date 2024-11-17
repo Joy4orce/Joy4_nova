@@ -32,12 +32,10 @@ import com.archos.mediacenter.video.R;
  */
 public class TVMenuItem extends LinearLayout implements Checkable, TVSlaveView{
     private boolean isChecked;
-
     private String text;
-
-
-
+    private boolean isDisabled; // Add this field
     private OnClickListener ocl;
+    private OnClickListener savedOcl;
     private TVMenuItem slaveView;
 
     private Context mContext;
@@ -82,15 +80,20 @@ public class TVMenuItem extends LinearLayout implements Checkable, TVSlaveView{
         else
             this.setBackground(null);
     }
-    
 
     @Override
-    public void setOnClickListener(OnClickListener ocl){
+    public void setOnClickListener(OnClickListener ocl) {
+        if (ocl != null) savedOcl = ocl;
         this.ocl = ocl;
-        (findViewById(R.id.info_text)).setOnClickListener(ocl);
+        if (!isDisabled) {
+            findViewById(R.id.info_text).setOnClickListener(ocl);
+        }
     }
+
+
     @Override
     public void setChecked(boolean checked) {
+        if (isDisabled) return;
         if(slaveView!=null)
             slaveView.setChecked(checked);
         if(findViewById(R.id.info_text)!=null && findViewById(R.id.info_text) instanceof Checkable)
@@ -210,4 +213,23 @@ public class TVMenuItem extends LinearLayout implements Checkable, TVSlaveView{
         // TODO Auto-generated method stub
         slaveView=null;
     }
+
+    public void setDisabled(boolean disabled) {
+        isDisabled = disabled;
+        setFocusable(!disabled);
+        setEnabled(!disabled);
+        setFocusableInTouchMode(!disabled);
+        if (disabled) {
+            setOnClickListener(null);
+            setAlpha(0.5f); // Visually indicate the item is disabled
+        } else {
+            setOnClickListener(savedOcl); // restore the original OnClickListener
+            setAlpha(1.0f); // Restore the original appearance
+        }
+    }
+
+    public boolean isDisabled() {
+        return isDisabled;
+    }
+
 }
