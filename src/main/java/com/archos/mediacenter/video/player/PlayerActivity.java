@@ -434,6 +434,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     private boolean mCling = false;
 
     private TVMenu mSubtitleTVMenu;
+    private TVMenuItem mSettingsMenuItem;
     private TVCardView mSubtitleTVCardView;
     private TVCardView mAudioTracksTVCardView;
     private TVMenu mAudioTracksTVMenu;
@@ -1124,7 +1125,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             vpos = (int) ((layoutHeight / (float)(displayHeight<displayWidth?displayHeight:displayWidth)) * vpos);
         }
         mSubtitleManager.setSize(size);
-        mSubtitleManager.setVerticalPosition(vpos);
+        setSubtitleVpos(vpos, "updateSizes");
     }
 
     @Override
@@ -1542,8 +1543,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 if (r != null)
                     tvPicker2.removeCallbacks(r);
                 mSubtitleManager.fadeSubtitlePositionHint(true);
-
-                mSubtitleManager.setVerticalPosition(delay/100);
+                setSubtitleVpos(delay/100, "onDelayChanged");
                 r = new Runnable() {
                     @Override
                     public void run() {
@@ -1713,7 +1713,9 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                         createTVSubtitleDialog();
                     }
                 });
-                mSubtitleTVMenu.createAndAddTVMenuItem(getText(R.string.menu_player_settings).toString(), false, false).setOnClickListener(new View.OnClickListener() {
+
+                mSettingsMenuItem = mSubtitleTVMenu.createAndAddTVMenuItem(getText(R.string.menu_player_settings).toString(), false, false);
+                mSettingsMenuItem.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         createTVSubtitleSettingsDialog();
@@ -3287,7 +3289,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 mVideoInfo.subtitleTrack = newSubtitleTrack;
                 mSubtitleManager.clear();
                 mSubtitleInfoController.setTrack(mVideoInfo.subtitleTrack);
-
+                setSubtitleVpos("switchSubtitleTrack");
                 mPlayerController.updateToast(getResources().getText(R.string.player_subtitle_track_toast) + " " +
                         mSubtitleInfoController.getTrackNameAt(mVideoInfo.subtitleTrack));
             }
@@ -3313,6 +3315,48 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             mVideoInfo.subtitleDelay += delay;
             mPlayer.setSubtitleDelay(mVideoInfo.subtitleDelay);
             mPlayerController.updateToast("Subtitle delay: " + mVideoInfo.subtitleDelay + "ms");
+        }
+    }
+
+    public boolean isCurrentSubtrackGfx() {
+        if (mPlayer == null || mPlayer.getVideoMetadata() == null || mVideoInfo == null ||
+                mVideoInfo.subtitleTrack == -1 || mVideoInfo.subtitleTrack >= mVideoInfo.nbSubtitles) {
+            return false;
+        }
+        return mPlayer.getVideoMetadata().getSubtitleTrack(mVideoInfo.subtitleTrack).isGfx;
+    }
+
+    private void setSubtitleVpos(String caller) {
+        setSubtitleVpos(PreferenceManager.getDefaultSharedPreferences(PlayerActivity.this).getInt(KEY_SUBTITLE_VPOS, mSubtitleVPosDefault), caller);
+    }
+
+    private void setSubtitleVpos(int vpos, String caller) {
+        if (mVideoInfo == null || mVideoInfo.subtitleTrack == -1 || mVideoInfo.subtitleTrack >= mVideoInfo.nbSubtitles) return;
+        if (mPlayer.getVideoMetadata().getSubtitleTrack(mVideoInfo.subtitleTrack).isGfx) {
+            log.debug(caller + ": set vpos to 0, mVideoInfo=" + ((mVideoInfo == null) ? "null" : "noNull" + ", subtitleTrack=" + ((mVideoInfo == null) ? "null" : mVideoInfo.subtitleTrack)));
+            mSubtitleManager.setVerticalPosition(0);
+            //mSubtitleInfoController.enableSettings(SUBTITLE_MENU_SETTINGS, false, true);
+            if (mSettingsMenuItem != null) {
+                mSettingsMenuItem.setEnabled(false); // Make the item non-selectable
+                mSettingsMenuItem.setFocusable(false);
+                mSettingsMenuItem.setFocusableInTouchMode(false);
+                mSettingsMenuItem.setOnClickListener(null); // Remove the click listener
+            }
+        } else {
+            log.debug(caller + ": set vpos to " + vpos + ", subtitleTrack=" + mVideoInfo.subtitleTrack);
+            mSubtitleManager.setVerticalPosition(vpos);
+            //mSubtitleInfoController.enableSettings(SUBTITLE_MENU_SETTINGS, true, false);
+            if (mSettingsMenuItem != null) {
+                mSettingsMenuItem.setEnabled(true);
+                mSettingsMenuItem.setFocusable(true);
+                mSettingsMenuItem.setFocusableInTouchMode(true);
+                mSettingsMenuItem.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        createTVSubtitleSettingsDialog();
+                    }
+                });
+            }
         }
     }
 
@@ -3343,6 +3387,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                     mSubtitleManager.clear();
                     mVideoInfo.subtitleTrack = positionToSubtitleTrack(position, mVideoInfo.nbSubtitles);
                     log.debug("onTrackSelected: -> mVideoInfo.subtitleTrack={}", mVideoInfo.subtitleTrack);
+                    setSubtitleVpos("onTrackSelected");
                 } else {
                     log.debug("onTrackSelected: player failed to get to subtitletrack {}", positionToSubtitleTrack(position, mVideoInfo.nbSubtitles));
                 }
@@ -3610,7 +3655,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                         log.debug("onSubtitleMetadataUpdated: extsub name={}, path={}, videoPath={}, isExternal={}, langFromPath={}", vMetadata.getSubtitleTrack(i).name, vMetadata.getSubtitleTrack(i).path, vMetadata.getFile().getPath(), vMetadata.getSubtitleTrack(i).isExternal, lang);
                         if (lang != null) {
                             log.debug("onSubtitleMetadataUpdated: extsub name might not be null add track name with lang=" + lang);
-                            mSubtitleInfoController.addTrack(lang);
+                            mSubtitleInfoController.addTrack(lang + " (ext)");
                         } else { // this should never happen
                             log.warn("onSubtitleMetadataUpdated: extsub name and lang are null, add track name to unknown");
                             mSubtitleInfoController.addTrack(getText(R.string.unknown_track_name));
@@ -3621,9 +3666,9 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                             log.debug("onSubtitleMetadataUpdated: intsub name are null/empty, add track name with unknown");
                             mSubtitleInfoController.addTrack(getText(R.string.unknown_track_name));
                         } else { // name is not null use it
+                            // TODO MARC now we have the lang clean the code
                             log.debug("onSubtitleMetadataUpdated: intsub add track name with name=" + vMetadata.getSubtitleTrack(i).name + " replacing language code");
-                            mSubtitleInfoController.addTrack(replaceLanguageCodeInString(mContext, vMetadata.getSubtitleTrack(i).name));
-                        }
+                            mSubtitleInfoController.addTrack(replaceLanguageCodeInString(mContext, vMetadata.getSubtitleTrack(i).name) + " (int)");                        }
                     }
                 }
                 mSubtitleInfoController.addSeparator();
@@ -3641,12 +3686,10 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 boolean outline = preferences.getBoolean(KEY_SUBTITLE_OUTLINE, mSubtitleOutlineDefault);
                 mSubtitleManager.setSize(size);
                 mSubtitleManager.setColor(color);
-                mSubtitleManager.setVerticalPosition(vpos);
+                setSubtitleVpos(vpos, "onSubtitleMetadataUpdated");
                 mSubtitleManager.setOutlineState(outline);
-
                 // mVideoInfo.subtitleTrack is the track number with the none track 0<=mVideoInfo.subtitleTrack<=nbTrack, nbTrack for none track
                 // but mSubtitleInfoController is the track number with the none track (i.e. nbTrack + 1) at position 0
-
                 // at this point mVideoInfo.subtitleTrack is the track number to be used
                 log.debug("onSubtitleMetadataUpdated: set mSubtitleInfoController.setTrack: " + subtitleTrackToPosition(mVideoInfo.subtitleTrack, mVideoInfo.nbSubtitles));
                 mSubtitleInfoController.setTrack(subtitleTrackToPosition(mVideoInfo.subtitleTrack, mVideoInfo.nbSubtitles)); // +1 since none track is at position 0, for UI only

@@ -747,6 +747,7 @@ public class SubtitleManager {
     }
 
     public boolean isSubtitleGfx() {
+        // this method is unreliable since it needs to have a sub displayed to know if it is gfx or not
         return mIsSubtitleGfx;
     }
 }
