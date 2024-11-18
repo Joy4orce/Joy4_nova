@@ -3280,28 +3280,43 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         else return (subtitleTrack + 1) % nbTracks;
     }
 
-    int nextPosition(int subtitleTrack, int nbTracks) { // nbTracks does not count none track
-        // position is between 0<=position<=nbTrack with 0 is none track
-        return (subtitleTrack + 1) % (nbTracks + 1);
+    int nextVideoInfoSubtitleTrack(int subtitleTrack, int nbTracks) { // nbTracks does not count none track
+        // subtitleTracks are between 0<=track<=nbTrack and none track is nbTrack
+        // none track is covered in nextSubtitleTrack
+        return (subtitleTrack == nbTracks - 1) ? nbTracks : (subtitleTrack + 1) % (nbTracks + 1);
     }
 
-    // 0<=subtitleTrack<=nbTracks and noneTrack=nbTracks
-    // 0<=subtitlepostion<=nbTracks and noneTrack=0
+    int nextPosition(int subtitleTrack, int nbTracks) { // nbTracks does not count none track
+        // position is between 0<=position<=nbTrack with 0 is none track
+        return ((subtitleTrack + 1) % (nbTracks + 1));
+    }
+
+    // 0<=subtitleTrack<=nbTracks and noneTrack=nbTracks for mVideoInfo with nvTracks out of reach
+    // 0<=subtitlepostion<=nbTracks and noneTrack=0 for mSubtitleInfoController
     // warning: when addressing mPlayer.setSubtitleTrack none track is -1
 
     /* PlayerController.Settings */
     public void switchSubtitleTrack() { // switch to next subtitle track avoiding none
         if (mSubtitleInfoController.getTrackCount() > 1) {
-            log.debug("switchSubtitleTrack: " + mVideoInfo.subtitleTrack + " mVideoInfo.nbSubtitles: " + mVideoInfo.nbSubtitles);
-            int newSubtitlePosition = nextPosition(mVideoInfo.subtitleTrack, mVideoInfo.nbSubtitles);
-            int newSubtitleTrack = positionToSubtitleTrack(newSubtitlePosition, mVideoInfo.nbSubtitles);
-            if (mPlayer.setSubtitleTrack(positionToPlayerSubtitleTrack(newSubtitlePosition, mVideoInfo.nbSubtitles))) {
+            int newSubtitleTrack = nextVideoInfoSubtitleTrack(mVideoInfo.subtitleTrack, mVideoInfo.nbSubtitles);
+            int newSubtitlePosition = subtitleTrackToPosition(newSubtitleTrack, mVideoInfo.nbSubtitles);
+            int playerPosition = positionToPlayerSubtitleTrack(newSubtitlePosition, mVideoInfo.nbSubtitles);
+            log.debug("switchSubtitleTrack: {}/{} -> (track,position)=({},{}), playerPosition={}", mVideoInfo.subtitleTrack, mVideoInfo.nbSubtitles,
+                    newSubtitleTrack, newSubtitlePosition, playerPosition);
+            if (mPlayer.setSubtitleTrack(playerPosition)) {
                 mVideoInfo.subtitleTrack = newSubtitleTrack;
                 mSubtitleManager.clear();
-                mSubtitleInfoController.setTrack(mVideoInfo.subtitleTrack);
+                mSubtitleInfoController.setTrack(subtitleTrackToPosition(mVideoInfo.subtitleTrack, mVideoInfo.nbSubtitles)); // +1 since none track is at position 0, for UI only
+                if (mSubtitleInfoController.getTrack() == 0) { // 0 is nonePosition
+                    log.debug("switchSubtitleTrack: disableSubtitleDelayTVMenuItem(true) because nonePosition");
+                    disableSubtitleDelayTVMenuItem(true);
+                    disableSubtitleSettingsMenuItem(true);
+                }
+                refreshSubtitleTVMenu();
+                CharSequence subTrackName = mSubtitleInfoController.getTrackNameAt(subtitleTrackToPosition(mVideoInfo.subtitleTrack, mVideoInfo.nbSubtitles));
+                log.debug("switchSubtitleTrack: changed track={} -> {}", mVideoInfo.subtitleTrack, subTrackName);
                 setSubtitleVpos("switchSubtitleTrack");
-                mPlayerController.updateToast(getResources().getText(R.string.player_subtitle_track_toast) + " " +
-                        mSubtitleInfoController.getTrackNameAt(mVideoInfo.subtitleTrack));
+                mPlayerController.updateToast(getResources().getText(R.string.player_subtitle_track_toast) + " " + subTrackName);
             }
         }
         log.info("switchSubtitleTrack: " + mVideoInfo.subtitleTrack);
