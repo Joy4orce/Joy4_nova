@@ -14,6 +14,7 @@
 
 package com.archos.mediacenter.utils;
 
+import static androidx.core.content.res.TypedArrayUtils.getText;
 import static com.archos.mediascraper.StringUtils.capitalizeFirstLetter;
 
 import android.content.Context;
@@ -385,6 +386,10 @@ public class ISO639codes {
         return result;
     }
 
+    public static String removeStartingSpaces(String string) {
+        return string.replaceAll("^\\s+", ""); // Remove starting spaces
+    }
+
     public static String replaceLanguageCodeInString(String string) {
         // treat strings being "l_XYZ" or "l_XY" or "XYZ" or "XY" or "title (l_XYZ)" or "title (l_XY)"
         // and replace it with locale language corresponding to XY or XYZ letter code
@@ -425,6 +430,35 @@ public class ISO639codes {
             }
         }
         log.debug("replaceLanguageCodeInString: input={} -> result={}", string, result);
+        return result;
+    }
+
+    public static String generateTrackName(String string, String lang) {
+        // generate track name as "title (language)" from lang XYZ or XY letter code
+        // avoid name=" " with starting space seen in Modern Family show
+        String cleanString;
+        if (string == null) cleanString = "";
+        else cleanString = removeStartingSpacesAndSurroundingParenthesis(string);
+        String language =  "";
+        String result = "";
+        if (lang != null && ! lang.isEmpty()) {
+            if (lang.equals("und") || lang.equals("Unknown")) language = ""; // und = undefined
+            else language = ISO639codes.getLanguageNameForLetterCode(lang);
+        }
+        if (! cleanString.isEmpty()) {
+            if (language != null && ! language.isEmpty()) {
+                result = cleanString + " (" + language + ")";
+            } else {
+                result = cleanString;
+            }
+        } else {
+            if (language != null && ! language.isEmpty()) {
+                result = capitalizeFirstLetter(language);
+            } else {
+                result = ""; // will be interpreted by Video as R.string.unknown_track_name
+            }
+        }
+        log.warn("generateTrackName: MARC input={}, lang={} -> cleanString={}, language={} -> result={}", string, lang, cleanString, language,result);
         return result;
     }
 
