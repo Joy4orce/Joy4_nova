@@ -16,6 +16,7 @@ package com.archos.mediacenter.video.browser.subtitlesmanager;
 
 import android.content.Context;
 
+import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.utils.VideoUtils;
 
 import org.slf4j.Logger;
@@ -27,6 +28,18 @@ import org.slf4j.LoggerFactory;
 public class ISO639codes {
 
     private static final Logger log = LoggerFactory.getLogger(ISO639codes.class);
+
+    static public String generateTrackName(Context context, String string, String lang) {
+        // generate track name as "title (language)" from lang XYZ or XY letter code
+        String result = com.archos.mediacenter.utils.ISO639codes.generateTrackName(string, lang);
+        if (result.startsWith("s_"))
+            result =  VideoUtils.getLanguageString(context, result).toString();
+        log.debug("generateTrackName: exception string={} result={}", string, result);
+        if (result == null || result.isEmpty()) {
+            result = context.getText(R.string.unknown_track_name).toString();
+        }
+        return result;
+    }
 
     static public String replaceLanguageCodeInString(Context context, String string) {
         String result = com.archos.mediacenter.utils.ISO639codes.replaceLanguageCodeInString(string);

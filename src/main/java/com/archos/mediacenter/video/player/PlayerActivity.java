@@ -3643,7 +3643,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             for (int i = 0; i < nbTrack; ++i) {
                 VideoMetadata.AudioTrack audio = vMetadata.getAudioTrack(i);
                 log.debug("onAudioMetadataUpdated: name={}, format={}", audio.name, audio.format);
-                trackName = replaceLanguageCodeInString(mContext, audio.name);
+                trackName = generateTrackName(mContext, audio.name, audio.language);
                 CharSequence name = trackName;
                 // when no name use track number instead of R.string.unknown_track_name th
                 if (trackName.isEmpty())
@@ -3701,7 +3701,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                         } else { // name is not null use it
                             // TODO MARC now we have the lang clean the code
                             log.debug("onSubtitleMetadataUpdated: intsub add track name with name=" + vMetadata.getSubtitleTrack(i).name + " replacing language code");
-                            mSubtitleInfoController.addTrack(replaceLanguageCodeInString(mContext, vMetadata.getSubtitleTrack(i).name) + " (int)");                        }
+                            mSubtitleInfoController.addTrack(generateTrackName(mContext, vMetadata.getSubtitleTrack(i).name, vMetadata.getSubtitleTrack(i).language) + " (int)");                        }
                     }
                 }
                 mSubtitleInfoController.addSeparator();

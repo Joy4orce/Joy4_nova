@@ -14,7 +14,7 @@
 
 package com.archos.mediacenter.video.leanback.details;
 
-import static com.archos.mediacenter.video.browser.subtitlesmanager.ISO639codes.replaceLanguageCodeInString;
+import static com.archos.mediacenter.video.browser.subtitlesmanager.ISO639codes.generateTrackName;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -199,7 +199,7 @@ public class FileDetailsRowPresenter extends FullWidthRowPresenter implements Ba
             }
             int index = i + offset;
             sb.append(Integer.toString(index + 1)).append(".").append(separator)
-                    .append(replaceLanguageCodeInString(context, videoMetadata.getSubtitleTrack(index).name) + separator);
+                    .append(generateTrackName(context, videoMetadata.getSubtitleTrack(index).name, videoMetadata.getSubtitleTrack(index).language) + separator);
         }
         return sb.toString();
     }

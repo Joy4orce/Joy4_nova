@@ -70,7 +70,6 @@ import com.archos.filecorelibrary.FileUtils;
 import com.archos.filecorelibrary.FileUtilsQ;
 import com.archos.mediacenter.filecoreextension.UriUtils;
 import com.archos.mediacenter.utils.MediaUtils;
-import static com.archos.mediacenter.video.browser.subtitlesmanager.ISO639codes.replaceLanguageCodeInString;
 import com.archos.mediacenter.utils.imageview.ImageProcessor;
 import com.archos.mediacenter.utils.imageview.ImageViewSetter;
 import com.archos.mediacenter.utils.imageview.ImageViewSetterConfiguration;
@@ -126,6 +125,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.archos.mediacenter.video.browser.subtitlesmanager.ISO639codes.generateTrackName;
+import static com.archos.mediacenter.video.browser.subtitlesmanager.ISO639codes.replaceLanguageCodeInString;
 import static com.archos.mediacenter.video.utils.VideoUtils.getFileUriStringFromContentUri;
 
 import org.slf4j.Logger;
@@ -1037,7 +1038,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
             if(videoMetadata!=null) {
                 for (int i = 0; i < subtitleTrackNb; ++i) {
                     if (!videoMetadata.getSubtitleTrack(i).isExternal) { //manage external subs with sub manager
-                        lines.add((totSubs + 1) + ": " + replaceLanguageCodeInString(mContext, videoMetadata.getSubtitleTrack(i).name));
+                        lines.add((totSubs + 1) + ": " + generateTrackName(mContext, videoMetadata.getSubtitleTrack(i).name, videoMetadata.getSubtitleTrack(i).language));
                         totSubs++;
                     }
                 }

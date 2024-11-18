@@ -46,7 +46,6 @@ import androidx.preference.PreferenceManager;
 import androidx.core.app.NotificationCompat;
 
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.util.Log;
 
 import com.archos.environment.ArchosFeatures;
 import com.archos.filecorelibrary.FileUtils;
@@ -79,7 +78,7 @@ import java.util.concurrent.ExecutionException;
 import static com.archos.filecorelibrary.FileUtils.removeFileSlashSlash;
 import static com.archos.mediacenter.utils.ISO639codes.findLanguageInString;
 import static com.archos.mediacenter.utils.ISO639codes.isLanguageInString;
-import static com.archos.mediacenter.video.browser.subtitlesmanager.ISO639codes.replaceLanguageCodeInString;
+import static com.archos.mediacenter.video.browser.subtitlesmanager.ISO639codes.generateTrackName;
 import static com.archos.mediacenter.video.browser.subtitlesmanager.SubtitleManager.getSubLanguageFromSubPathAndVideoPath;
 import static com.archos.mediacenter.video.utils.VideoPreferencesCommon.KEY_PLAYBACK_SPEED;
 import static com.archos.mediascraper.StringUtils.stringContainsForced;
@@ -1292,7 +1291,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         // VideoDbInfo sets audioTrack to -1 when file has not been played or restores playerParams
         for (int i = 0; i < nbTrack; ++i) {
             if (vMetadata.getAudioTrack(i).supported) {
-                trackName = replaceLanguageCodeInString(getApplicationContext(), vMetadata.getAudioTrack(i).name);
+                trackName = generateTrackName(getApplicationContext(), vMetadata.getAudioTrack(i).name, vMetadata.getAudioTrack(i).language);
                 if (firstSupportedTrack == null) {
                     log.debug("onAudioMetadataUpdated: identify firstSupportedTrack={}({})", i, trackName);
                     firstSupportedTrack = i;
