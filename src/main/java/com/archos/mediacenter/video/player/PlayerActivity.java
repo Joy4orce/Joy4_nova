@@ -3688,20 +3688,15 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                         log.debug("onSubtitleMetadataUpdated: extsub name={}, path={}, videoPath={}, isExternal={}, langFromPath={}", vMetadata.getSubtitleTrack(i).name, vMetadata.getSubtitleTrack(i).path, vMetadata.getFile().getPath(), vMetadata.getSubtitleTrack(i).isExternal, lang);
                         if (lang != null) {
                             log.debug("onSubtitleMetadataUpdated: extsub name might not be null add track name with lang=" + lang);
-                            mSubtitleInfoController.addTrack(lang + " (ext)");
+                            mSubtitleInfoController.addTrack(lang);
                         } else { // this should never happen
                             log.warn("onSubtitleMetadataUpdated: extsub name and lang are null, add track name to unknown");
                             mSubtitleInfoController.addTrack(getText(R.string.unknown_track_name));
                         }
                     } else {
                         // internal subtitle get name from name
-                        if (vMetadata.getSubtitleTrack(i).name == null || vMetadata.getSubtitleTrack(i).name.isEmpty()) {
-                            log.debug("onSubtitleMetadataUpdated: intsub name are null/empty, add track name with unknown");
-                            mSubtitleInfoController.addTrack(getText(R.string.unknown_track_name));
-                        } else { // name is not null use it
-                            // TODO MARC now we have the lang clean the code
-                            log.debug("onSubtitleMetadataUpdated: intsub add track name with name=" + vMetadata.getSubtitleTrack(i).name + " replacing language code");
-                            mSubtitleInfoController.addTrack(generateTrackName(mContext, vMetadata.getSubtitleTrack(i).name, vMetadata.getSubtitleTrack(i).language) + " (int)");                        }
+                        log.debug("onSubtitleMetadataUpdated: intsub add track name with name=" + vMetadata.getSubtitleTrack(i).name + " replacing language code in " + vMetadata.getSubtitleTrack(i).language);
+                        mSubtitleInfoController.addTrack(generateTrackName(mContext, vMetadata.getSubtitleTrack(i).name, vMetadata.getSubtitleTrack(i).language));
                     }
                 }
                 mSubtitleInfoController.addSeparator();
