@@ -68,11 +68,11 @@
 
     <logger name="com.archos.mediacenter.utils.videodb.XmlDb" level="INFO"/>
 
-    <logger name="com.archos.mediaprovider.video.VideoStoreImportReceiver" level="DEBUG"/>
-    <logger name="com.archos.mediaprovider.video.VideoStoreImportService" level="DEBUG"/>
-    <logger name="com.archos.mediaprovider.video.VideoStoreImportImpl" level="DEBUG"/>
-    <logger name="com.archos.mediaprovider.video.NetworkScannerServiceVideo" level="DEBUG"/>
-    <logger name="com.archos.mediascraper.AutoScrapeService" level="DEBUG"/>
+    <logger name="com.archos.mediaprovider.video.VideoStoreImportReceiver" level="INFO"/>
+    <logger name="com.archos.mediaprovider.video.VideoStoreImportService" level="INFO"/>
+    <logger name="com.archos.mediaprovider.video.VideoStoreImportImpl" level="INFO"/>
+    <logger name="com.archos.mediaprovider.video.NetworkScannerServiceVideo" level="INFO"/>
+    <logger name="com.archos.mediascraper.AutoScrapeService" level="INFO"/>
 
     <!-- Debug: Did not manage to access the file -->
     <logger name="com.archos.mediacenter.video.info.VideoInfoActivityFragment" level="INFO"/>
@@ -108,15 +108,15 @@
     <logger name="com.archos.mediacenter.video.utils.SubtitlesDownloaderActivity2" level="INFO"/>
     <logger name="com.archos.mediacenter.video.utils.OpenSubtitlesApiHelper" level="INFO"/>
     <logger name="com.archos.mediacenter.video.utils.ISO639codes" level="INFO"/>
-    <logger name="com.archos.mediacenter.video.utils.VideoPreferencesCommon" level="DEBUG"/>
-    <logger name="com.archos.mediacenter.video.player.SubtitleManager" level="DEBUG"/>
+    <logger name="com.archos.mediacenter.video.utils.VideoPreferencesCommon" level="INFO"/>
+    <logger name="com.archos.mediacenter.video.player.SubtitleManager" level="INFO"/>
 
     <!-- Debug auto-scan refresh -->
-    <logger name="com.archos.mediaprovider.video.NetworkAutoRefresh" level="DEBUG"/>
-    <logger name="com.archos.mediaprovider.video.NetworkScannerUtil" level="DEBUG"/>
-    <logger name="com.archos.mediaprovider.video.NetworkScannerServiceVideo" level="DEBUG"/>
-    <logger name="com.archos.mediaprovider.video.NetworkRefreshJob" level="DEBUG"/>
-    <logger name="com.archos.mediaprovider.video.RemoteStateService" level="DEBUG"/>
+    <logger name="com.archos.mediaprovider.video.NetworkAutoRefresh" level="INFO"/>
+    <logger name="com.archos.mediaprovider.video.NetworkScannerUtil" level="INFO"/>
+    <logger name="com.archos.mediaprovider.video.NetworkScannerServiceVideo" level="INFO"/>
+    <logger name="com.archos.mediaprovider.video.NetworkRefreshJob" level="INFO"/>
+    <logger name="com.archos.mediaprovider.video.RemoteStateService" level="INFO"/>
 
     <includes>
         <include file="${LOG_DIR}/logback.xml" optional="true" />
