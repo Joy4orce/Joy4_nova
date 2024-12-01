@@ -31,8 +31,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import retrofit2.Response;
 
@@ -63,7 +63,7 @@ public class SearchShowParser {
         log.debug("getSearchShowParserResult: examining response of " + response.body().total_results + " entries in " + language + ", for " + searchInfo.getShowName() + " and specific year " + year);
 
         // sort first tvshows by popularity so that distinction between levenstein distance is operated on popularity
-        List<BaseTvShow> resultsTvShow = response.body().results;
+        CopyOnWriteArrayList<BaseTvShow> resultsTvShow = new CopyOnWriteArrayList<>(response.body().results);
         // OBSERVATION: number_of_seasons only available on id search not name search --> cannot discriminate
         // popularity sort is disabled for now to enable sort by year to pick lower year if not specified with lowest levenshtein metric
         // pick most popular show with same same levenshtein distance when no year is specified
