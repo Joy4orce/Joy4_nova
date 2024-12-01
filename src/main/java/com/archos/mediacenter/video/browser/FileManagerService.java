@@ -23,15 +23,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 
-import androidx.core.app.ServiceCompat;
-import androidx.core.content.ContextCompat;
+import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.preference.PreferenceManager;
 import androidx.core.app.NotificationCompat;
 import android.text.format.Formatter;
@@ -48,7 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class FileManagerService extends Service implements OperationEngineListener{
+public class FileManagerService extends Service implements OperationEngineListener, DefaultLifecycleObserver {
 
     private static final String TAG = "FileManagerService";
     private static final boolean DBG = false;
@@ -124,9 +124,6 @@ public class FileManagerService extends Service implements OperationEngineListen
                 .setSmallIcon(R.drawable.nova_notification)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setTicker(null).setOnlyAlertOnce(true).setOngoing(true).setAutoCancel(true);
-        ServiceCompat.startForeground(this, PASTE_NOTIFICATION_ID, nb.build(),
-            (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0
-        );
         mLastStatus = ActionStatusEnum.NONE;
         localBinder = new FileManagerServiceBinder();
         mOpenAtTheEnd = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(OPEN_AT_THE_END_KEY, true);
@@ -151,14 +148,13 @@ public class FileManagerService extends Service implements OperationEngineListen
         filter.addAction("OPEN");
         if (Build.VERSION.SDK_INT >= 33) registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
         else registerReceiver(receiver, filter);
+        // Register as a lifecycle observer
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         if (DBG) Log.d(TAG, "onStartCommand");
-        ServiceCompat.startForeground(this, PASTE_NOTIFICATION_ID, nb.build(),
-                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0
-        );
         return START_NOT_STICKY;
     }
 
@@ -243,10 +239,8 @@ public class FileManagerService extends Service implements OperationEngineListen
     @Override
     public void onDestroy() {
         if (DBG) Log.d(TAG, "onDestroy: removing Foreground notif and stopping self");
-        setCanceledStatus();
-    	super.onDestroy();
-    	unregisterReceiver(receiver);
-        stopService();
+        cleanup();
+        super.onDestroy();
     }
 
 
@@ -346,13 +340,8 @@ public class FileManagerService extends Service implements OperationEngineListen
         }
     }
 
-    public void stopService() {
-        if (DBG) Log.d(TAG, "stopService");
-        stopForeground(true);
-    }
-
     public static void startService(Context context) {
-        ContextCompat.startForegroundService(context, new Intent(context, FileManagerService.class));
+        context.startService(new Intent(context, FileManagerService.class));
     }
 
     public void deleteObserver(ServiceListener listener) {
@@ -401,21 +390,20 @@ public class FileManagerService extends Service implements OperationEngineListen
                 displayOpenFileNotification();
             }
         }
-            // Copy => don't reset the paste mode when done so that the current
-            // selection can be pasted again somewhere else if needed
-            String message;
-            // Copy successful
-            if (mProcessedFiles.size() == 1 && mProcessedFiles.get(0).isDirectory())
-                message = getResources().getString(R.string.copy_directory_success_one);
-            else
-                message = getResources().getString(R.string.copy_file_success_one);
+        // Copy => don't reset the paste mode when done so that the current
+        // selection can be pasted again somewhere else if needed
+        String message;
+        // Copy successful
+        if (mProcessedFiles.size() == 1 && mProcessedFiles.get(0).isDirectory())
+            message = getResources().getString(R.string.copy_directory_success_one);
+        else
+            message = getResources().getString(R.string.copy_file_success_one);
 
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
 
         for(ServiceListener fl :mListeners){
             fl.onActionStop();
         }
-        stopService();
     }
 
     @Override
@@ -429,7 +417,6 @@ public class FileManagerService extends Service implements OperationEngineListen
         for (ServiceListener lis : mListeners){
             lis.onActionError();
         }
-        stopService();
     }
 
 
@@ -545,11 +532,49 @@ public class FileManagerService extends Service implements OperationEngineListen
         releaseWakeLock();
         Toast.makeText(this, com.archos.filecorelibrary.R.string.copy_file_failed_one, Toast.LENGTH_LONG).show();
         setCanceledStatus();
-        stopService();
     }
 
     @Override
     public void onSuccess(Uri target) {}
 
+    @Override
+    public void onStop(LifecycleOwner owner) {
+        // App in background
+        if (DBG) Log.d(TAG, "onStop: LifecycleOwner app in background, stopSelf");
+        stopSelf();
+    }
 
+    @Override
+    public void onStart(LifecycleOwner owner) {
+        if (DBG) Log.d(TAG, "onStart: app in foreground");
+    }
+
+    public void cleanup() {
+        if (DBG) Log.d(TAG, "cleanup");
+        setCanceledStatus();
+        // Stop the CopyCutEngine
+        if (mCopyCutEngine != null) {
+            mCopyCutEngine.stop();
+            mCopyCutEngine.setListener(null);
+            mCopyCutEngine = null;
+        }
+        // Clear the list of processed files
+        if (mProcessedFiles != null) {
+            mProcessedFiles.clear();
+            mProcessedFiles = null;
+        }
+        // Clear the progress map
+        if (mProgress != null) {
+            mProgress.clear();
+            mProgress = null;
+        }
+        // Clear the list of listeners
+        if (mListeners != null) {
+            mListeners.clear();
+            mListeners = null;
+        }
+        // Release the WakeLock
+        releaseWakeLock();
+        unregisterReceiver(receiver);
+    }
 }

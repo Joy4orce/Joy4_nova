@@ -34,12 +34,16 @@ import android.os.IBinder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.StatFs;
+
+import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.preference.PreferenceManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TorrentObserverService extends Service{
+public class TorrentObserverService extends Service implements DefaultLifecycleObserver {
 
     private static final Logger log = LoggerFactory.getLogger(TorrentObserverService.class);
 
@@ -109,6 +113,13 @@ public class TorrentObserverService extends Service{
 
     public final static String intentPaused = "activity.paused";
     public final static String intentResumed = "activity.resumed";
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        // Register as a lifecycle observer
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
+    }
 
     @Override
     public int onStartCommand(Intent i, int flags, int id) {
@@ -199,27 +210,25 @@ public class TorrentObserverService extends Service{
                                 mObserver.setPort(mPort);
                             }
                         }
-                        final BufferedReader readererror = new BufferedReader (new InputStreamReader(sProcess.getErrorStream()));
+                        final BufferedReader readerError = new BufferedReader (new InputStreamReader(sProcess.getErrorStream()));
                         new Thread(){
                             public void run(){
                                 String line = "";
                                 try {
-                                    while (readererror!=null&&(line = readererror.readLine ()) != null&&!hasToStop) {
+                                    while (readerError!=null&&(line = readerError.readLine ()) != null&&!hasToStop && !Thread.currentThread().isInterrupted()) {
                                         log.debug("Stderr: " + line);
                                     }
                                 } catch (IOException e) {
-                                    e.printStackTrace();
+                                    log.error("Error reading stderr", e);
                                 }
                                 log.debug("end of error lines");
                             }
                         }.start();
-                        
-                        
+
                         observeStdout();
-                        
-                       
+
                         if(sProcess!=null)
-                        sProcess.waitFor();
+                            sProcess.waitFor();
 
                         log.debug("daemon has finished");
                         isDaemonRunning=false;
@@ -247,11 +256,8 @@ public class TorrentObserverService extends Service{
 
         };
         mTorrentThread.start();
-
-
-
-
     }
+
     private void observeStdout() {
         String line;
 
@@ -322,7 +328,6 @@ public class TorrentObserverService extends Service{
         isDaemonRunning = false;
     }
 
-
     public static void staticExitProcess(){
         log.debug("calling exit");
         try {
@@ -363,7 +368,6 @@ public class TorrentObserverService extends Service{
         // TODO Auto-generated method stub
         if(mObserver == observer)
             mObserver=null;
-        
     }
 
     private android.os.Looper newLooper() {
@@ -415,4 +419,38 @@ public class TorrentObserverService extends Service{
             mHandler.removeMessages(MSG_QUIT);
         }
     }
+
+    @Override
+    public void onStop(LifecycleOwner owner) {
+        // App in background
+        log.debug("onStop: LifecycleOwner app in background, stopSelf");
+        stopSelf();
+    }
+
+    @Override
+    public void onStart(LifecycleOwner owner) {
+        // App in foreground
+        log.debug("onStart: LifecycleOwner app in foreground");
+    }
+
+    @Override
+    public void onDestroy() {
+        log.debug("onDestroy()");
+        cleanup(); // Call cleanup here
+        super.onDestroy();
+    }
+
+    private void cleanup() {
+        // Stop the torrent thread if it's running
+        if (mTorrentThread != null) {
+            mTorrentThread.interrupt();
+            mTorrentThread = null;
+        }
+        // Exit and kill the torrent process
+        exitProcess();
+        killProcess();
+        // Remove any pending messages from the handler
+        mHandler.removeCallbacksAndMessages(null);
+    }
+
 }

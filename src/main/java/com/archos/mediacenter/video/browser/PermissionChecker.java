@@ -99,7 +99,7 @@ public class PermissionChecker {
         // for API>=33 instead of using WRITE_EXTERNAL_STORAGE and READ_EXTERNAL_STORAGE, more granularity is required and READ_MEDIA_(VIDEO|AUDIO|IMAGE) need to be requested when MANAGE_EXTERNAL_STORAGE is not used
         // for API>=33, POST_NOTIFICATIONS permission is also required
         // Environment.isExternalStorageManager() used to check MANAGE_EXTERNAL_STORAGE is for API>=30
-        // for API>=34 FOREGROUND_SERVICE_DATA_SYNC and FOREGROUND_SERVICE_MEDIA_PLAYBACK are required
+        // for API>=34 FOREGROUND_SERVICE_DATA_SYNC (not granted for nova by google (yay!) and FOREGROUND_SERVICE_MEDIA_PLAYBACK are required
 
         Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:" + mActivity.getPackageName()));
         activityToRequestManageStorageExists = intent.resolveActivity(mActivity.getPackageManager()) != null;
@@ -116,7 +116,7 @@ public class PermissionChecker {
                                     Manifest.permission.MANAGE_EXTERNAL_STORAGE,
                                     Manifest.permission.POST_NOTIFICATIONS,
                                     Manifest.permission.RECORD_AUDIO,
-                                    Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC,
+                                    //Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC,
                                     Manifest.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK
                             },
                             PERM_REQ_MANAGE
@@ -160,7 +160,7 @@ public class PermissionChecker {
                                     Manifest.permission.READ_MEDIA_IMAGES,
                                     Manifest.permission.POST_NOTIFICATIONS,
                                     Manifest.permission.RECORD_AUDIO,
-                                    Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC,
+                                    //Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC,
                                     Manifest.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK
                             },
                             PERM_REQ_RW
