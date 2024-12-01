@@ -334,9 +334,11 @@ public class FileManagerService extends Service implements OperationEngineListen
 
     public void stopPasting() {
         if (DBG) Log.d(TAG, "stopPasting");
-        if(mIsActionRunning){
-             if(mCopyCutEngine!=null)
-                  mCopyCutEngine.stop();
+        if (mIsActionRunning) {
+            if (mCopyCutEngine != null) {
+                mCopyCutEngine.stop();
+            }
+            mIsActionRunning = false; // Reset the flag
         }
     }
 
@@ -541,6 +543,7 @@ public class FileManagerService extends Service implements OperationEngineListen
     public void onStop(LifecycleOwner owner) {
         // App in background
         if (DBG) Log.d(TAG, "onStop: LifecycleOwner app in background, stopSelf");
+        cleanup();
         stopSelf();
     }
 
@@ -551,6 +554,7 @@ public class FileManagerService extends Service implements OperationEngineListen
 
     public void cleanup() {
         if (DBG) Log.d(TAG, "cleanup");
+        stopPasting();
         setCanceledStatus();
         // Stop the CopyCutEngine
         if (mCopyCutEngine != null) {
