@@ -424,6 +424,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
     public void onStop(LifecycleOwner owner) {
         // App in background
         log.debug("onStop: LifecycleOwner app in background, stopSelf");
+        cleanup();
         stopSelf();
     }
 

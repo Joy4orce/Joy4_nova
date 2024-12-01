@@ -309,6 +309,7 @@ public class  UpdateRecommendationsService extends IntentService implements Defa
 	public void onStop(LifecycleOwner owner) {
 		// App in background
 		if (DBG) Log.d(TAG, "onStop: LifecycleOwner app in background, stopSelf");
+		cleanup();
 		stopSelf();
 	}
 
