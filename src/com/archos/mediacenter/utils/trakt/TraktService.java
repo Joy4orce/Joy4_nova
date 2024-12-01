@@ -1285,12 +1285,17 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
         removeListener();
         if (mBackgroundHandler != null) {
             mBackgroundHandler.removeCallbacksAndMessages(null);
+            mBackgroundHandler = null;
+        }
+        if (mBackgroundHandlerThread != null) {
             if (mBackgroundHandlerThread.quit()) {
                 try {
                     mBackgroundHandlerThread.join();
                 } catch (InterruptedException e) {
+                    log.error("InterruptedException while joining mBackgroundHandlerThread", e);
                 }
             }
+            mBackgroundHandlerThread = null;
         }
         if (mUiHandler != null) {
             mUiHandler.removeCallbacksAndMessages(null); // Clear any pending messages
@@ -1300,7 +1305,6 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
             mToast.cancel();
             mToast = null;
         }
-        mBackgroundHandlerThread = null;
         mNetworkState = null;
         mTrakt = null;
     }
@@ -1535,6 +1539,7 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
     public void onStop(LifecycleOwner owner) {
         // App in background
         log.debug("onStop: LifecycleOwner App in background");
+        cleanup();
         stopSelf();
     }
 
