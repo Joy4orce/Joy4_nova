@@ -35,6 +35,8 @@ import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.preference.PreferenceManager;
+
+import android.os.Looper;
 import android.provider.BaseColumns;
 
 import androidx.lifecycle.ProcessLifecycleOwner;
@@ -75,7 +77,7 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
     // window size used to split queries to db
     private final static int WINDOW_SIZE = 2000;
 
-    static boolean sIsScraping = false;
+    private static volatile boolean sIsScraping = false;
     static int sNumberOfFilesRemainingToProcess = 0;
     static int sTotalNumberOfFilesRemainingToProcess = 0;
     static int sNumberOfFilesScraped = 0;
@@ -96,7 +98,8 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
     private boolean restartOnNextRound = false;
     private AutoScraperBinder mBinder;
     private Thread mExportingThread;
-    private Handler mHandler;
+    private static Handler mHandler = new Handler(Looper.getMainLooper());
+
     private static Context mContext;
 
     private static final int NOTIFICATION_ID = 4;
@@ -107,6 +110,9 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
     private static final String notifChannelDescr = "AutoScrapeService";
 
     private static Boolean scrapeOnlyMovies = false;
+
+    private volatile boolean isServiceRunning = true;
+    private static final String PREF_IS_SCRAPE_DIRTY = "is_scrape_dirty";
 
     /**
      * Ugly implementation based on a static variable, guessing that there is only one instance at a time (seems to be true...)
@@ -132,7 +138,11 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
 
     public void cleanup() {
         log.debug("cleanup");
+        if (mThread != null && mThread.isAlive()) {
+            saveDirtyState(true);
+        }
         sIsScraping = false;
+        isServiceRunning = false;
         // Stop the scraping thread if it's running
         if (mThread != null) {
             mThread.interrupt();
@@ -174,7 +184,6 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
         log.debug("onCreate: register lifecycle observer");
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
         mBinder = new AutoScraperBinder();
-        mHandler = new Handler();
     }
 
     @Override
@@ -229,7 +238,7 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
 
                         sNumberOfFilesRemainingToProcess = window;
 
-                        while (cursor.moveToNext()
+                        while (cursor.moveToNext() && isServiceRunning && !Thread.currentThread().isInterrupted()
                                 && PreferenceManager.getDefaultSharedPreferences(AutoScrapeService.this).getBoolean(AutoScrapeService.KEY_ENABLE_AUTO_SCRAP, true)) {
                             if (sTotalNumberOfFilesRemainingToProcess > 0)
                                 nm.notify(NOTIFICATION_ID, nb.setContentText(getString(R.string.remaining_videos_to_process) + " " + sTotalNumberOfFilesRemainingToProcess).build());
@@ -258,7 +267,7 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                         }
                         index += window;
                         cursor.close();
-                    } while (index < numberOfRows);
+                    } while (index < numberOfRows && isServiceRunning && !Thread.currentThread().isInterrupted());
                     sIsScraping = false;
                     cursor.close();
                     log.debug("startExporting: call stopSelf");
@@ -281,27 +290,31 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
      */
     public static void registerObserver(final Context context) {
         final Context appContext = context.getApplicationContext();
-        appContext.getContentResolver().registerContentObserver(VideoStore.ALL_CONTENT_URI, true, new ContentObserver(null) {
+        appContext.getContentResolver().registerContentObserver(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, false, new ContentObserver(null) {
             @Override
             public void onChange(boolean selfChange) {
+                // Check if auto scraping is enabled and the app is in the foreground
                 if (PreferenceManager.getDefaultSharedPreferences(appContext).getBoolean(KEY_ENABLE_AUTO_SCRAP, true) && AppState.isForeGround()) {
-                    // only look if there is something to scrape if not yet in scrape process
+                    // Check if a scraping operation is already in progress
                     if (isScraping()) {
-                        log.debug("registerObserver: already scraping, not launching service!");
+                        log.debug("registerObserver.onChange: already scraping, not launching service!");
                         return;
                     }
-                    // only launch AutoScrapeService if there is something not scraped to avoid notification popup
+                    
                     // Look for all the videos not yet processed and not located in the Camera folder
                     String[] selectionArgs = new String[]{ Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getPath() + "/Camera" + "/%" };
                     Cursor cursor = context.getContentResolver().query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, SCRAPER_ACTIVITY_COLS, WHERE_NOT_SCRAPED, selectionArgs, null);
-                    final int cursorGetCount = cursor.getCount();
-                    if (cursorGetCount > 0) {
-                        log.debug("registerObserver: onChange getting " + cursorGetCount + " videos not yet scraped, launching service.");
-                        AutoScrapeService.startService(appContext);
-                    } else {
-                        log.debug("registerObserver: onChange getting " + cursorGetCount + " videos not yet scraped -> not launching service!");
+
+                    if (cursor != null) {
+                        final int cursorGetCount = cursor.getCount();
+                        if (cursorGetCount > 0) {
+                            log.debug("registerObserver: onChange getting " + cursorGetCount + " videos not yet scraped, launching service.");
+                            AutoScrapeService.startService(appContext);
+                        } else {
+                            log.debug("registerObserver: onChange getting " + cursorGetCount + " videos not yet scraped -> not launching service!");
+                        }
+                        cursor.close();
                     }
-                    cursor.close();
                 }
             }
         });
@@ -392,7 +405,7 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
 
                             sNumberOfFilesRemainingToProcess = window;
                             restartOnNextRound = true;
-                            while (cursor.moveToNext() && isEnable(AutoScrapeService.this) && !Thread.currentThread().isInterrupted()) {
+                            while (cursor.moveToNext() && isEnable(AutoScrapeService.this) && isServiceRunning && !Thread.currentThread().isInterrupted()) {
                                 // stop if disconnected while scraping
                                 if (!NetworkState.isLocalNetworkConnected(AutoScrapeService.this) && !NetworkState.isNetworkConnected(AutoScrapeService.this)) {
                                     cursor.close();
@@ -571,7 +584,7 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                             cursor.close();
                             numberOfRowsRemaining -= window;
                             totalNumberOfFilesScraped+= totalNumberOfFilesScraped;
-                        } while (numberOfRowsRemaining > 0);
+                        } while (numberOfRowsRemaining > 0 && isServiceRunning && !Thread.currentThread().isInterrupted());
                         if (numberOfRows == mNetworkOrScrapErrors) { //when as many errors, we assume we don't have the internet or that the scraper returns an error, do not loop
                             restartOnNextRound = false;
                             log.debug("startScraping: no internet or scraper errors, stop iterating");
@@ -589,7 +602,7 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                             log.debug("startScraping: new entries to scrape found most likely added during scrape process, restartOnNextRound");
                         }
                         cursor.close();
-                    } while(restartOnNextRound
+                    } while(restartOnNextRound && isServiceRunning && !Thread.currentThread().isInterrupted()
                             &&PreferenceManager.getDefaultSharedPreferences(AutoScrapeService.this).getBoolean(AutoScrapeService.KEY_ENABLE_AUTO_SCRAP, true)); //if we had something to do, we look for new videos
                     sIsScraping = false;
                     mHandler.post(new Runnable() {
@@ -663,12 +676,31 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
     public void onStop(LifecycleOwner owner) {
         // App in background
         log.debug("onStop: LifecycleOwner app in background, stopSelf");
+        cleanup();
         stopSelf();
     }
 
     @Override
     public void onStart(LifecycleOwner owner) {
         log.debug("onStart: LifecycleOwner app in foreground");
+        isServiceRunning = true;
+        if (isDirtyState()) {
+            log.debug("onStart: Rescanning everything due to dirty state");
+            // Reset the dirty flag in SharedPreferences
+            saveDirtyState(false);
+            startScraping(true, false); // Rescan everything
+        }
+    }
+
+    private void saveDirtyState(boolean dirtyState) {
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .edit()
+                .putBoolean(PREF_IS_SCRAPE_DIRTY, dirtyState)
+                .apply();
+    }
+
+    private boolean isDirtyState() {
+        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PREF_IS_SCRAPE_DIRTY, false);
     }
 
 }
