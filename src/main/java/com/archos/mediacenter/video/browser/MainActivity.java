@@ -725,7 +725,7 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
 
         @Override
         public void onChange(boolean selfChange) {
-            // A change occured in the medialib concerning one or several videos
+            // A change occurred in the medialib concerning one or several videos
             // => update the global resume view in case the video to resume has
             // been deleted
             updateGlobalResume();
@@ -763,8 +763,7 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
 
                 if (scraperId > 0) {
                     int scraperType = c
-                            .getInt(c
-                                    .getColumnIndex(VideoStore.Video.VideoColumns.ARCHOS_MEDIA_SCRAPER_TYPE));
+                            .getInt(c.getColumnIndex(VideoStore.Video.VideoColumns.ARCHOS_MEDIA_SCRAPER_TYPE));
                     String[] selectionArgs = new String[] {
                             String.valueOf(scraperType), String.valueOf(scraperId)
                     };
