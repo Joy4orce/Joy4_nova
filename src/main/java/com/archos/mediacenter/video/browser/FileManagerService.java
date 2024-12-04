@@ -35,13 +35,15 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.preference.PreferenceManager;
 import androidx.core.app.NotificationCompat;
 import android.text.format.Formatter;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.archos.filecorelibrary.CopyCutEngine;
 import com.archos.filecorelibrary.MetaFile2;
 import com.archos.filecorelibrary.OperationEngineListener;
 import com.archos.mediacenter.video.R;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,8 +52,7 @@ import java.util.List;
 
 public class FileManagerService extends Service implements OperationEngineListener, DefaultLifecycleObserver {
 
-    private static final String TAG = "FileManagerService";
-    private static final boolean DBG = false;
+    private static final Logger log = LoggerFactory.getLogger(FileManagerService.class);
 
     private ArrayList<MetaFile2> mProcessedFiles = null;
     private IBinder localBinder;
@@ -77,10 +78,11 @@ public class FileManagerService extends Service implements OperationEngineListen
     private HashMap<MetaFile2, Long> mProgress;
     private long mPasteTotalProgress;
     private CopyCutEngine mCopyCutEngine;
-    private ArrayList<ServiceListener> mListeners;
+    private ArrayList<ServiceListener> mListeners = new ArrayList<>();
     private boolean mIsActionRunning;
     private Uri mTarget;
     private PowerManager.WakeLock mWakeLock;
+    private boolean isReceiverRegistered = false;
 
 
     public enum FileActionEnum {
@@ -102,14 +104,14 @@ public class FileManagerService extends Service implements OperationEngineListen
 
     public FileManagerService() {
         super();
-        if (DBG) Log.d(TAG, "FileManagerService: setting fileManagerService not to null");
+        log.debug("FileManagerService: setting fileManagerService not to null");
         fileManagerService = this;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        if (DBG) Log.d(TAG, "onCreate: creating notification channel first");
+        log.debug("onCreate: creating notification channel first");
 
         // need to do that early to avoid ANR on Android 26+
         nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -148,13 +150,14 @@ public class FileManagerService extends Service implements OperationEngineListen
         filter.addAction("OPEN");
         if (Build.VERSION.SDK_INT >= 33) registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
         else registerReceiver(receiver, filter);
+        isReceiverRegistered = true;
         // Register as a lifecycle observer
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        if (DBG) Log.d(TAG, "onStartCommand");
+        log.debug("onStartCommand");
         return START_NOT_STICKY;
     }
 
@@ -238,7 +241,7 @@ public class FileManagerService extends Service implements OperationEngineListen
 
     @Override
     public void onDestroy() {
-        if (DBG) Log.d(TAG, "onDestroy: removing Foreground notif and stopping self");
+        log.debug("onDestroy: removing Foreground notif and stopping self");
         cleanup();
         super.onDestroy();
     }
@@ -269,6 +272,7 @@ public class FileManagerService extends Service implements OperationEngineListen
             mIsActionRunning = true;
             mTarget = target;
             mHasOpenAtTheEndBeenSet = false;
+            if (mProgress == null) mProgress = new HashMap<>();
             mProgress.clear();
             mPasteTotalSize = (long) 0;
             ArrayList<Uri> sources = new ArrayList<Uri>(FilesToPaste.size());
@@ -277,8 +281,6 @@ public class FileManagerService extends Service implements OperationEngineListen
             startStatusbarNotification();
         }
     }
-
-
 
     /*
      * is currently pasting files
@@ -333,7 +335,7 @@ public class FileManagerService extends Service implements OperationEngineListen
     }
 
     public void stopPasting() {
-        if (DBG) Log.d(TAG, "stopPasting");
+        log.debug("stopPasting");
         if (mIsActionRunning) {
             if (mCopyCutEngine != null) {
                 mCopyCutEngine.stop();
@@ -368,19 +370,19 @@ public class FileManagerService extends Service implements OperationEngineListen
 
     private void acquireWakeLock() {
         releaseWakeLock();
-        if (DBG) Log.d(TAG, "acquireWakeLock");
+        log.debug("acquireWakeLock");
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Nova:FileManagerWakeLock");
         mWakeLock.acquire();
     }
     private void releaseWakeLock(){
-        if (DBG) Log.d(TAG, "releaseWakeLock");
+        log.debug("releaseWakeLock");
         if(mWakeLock!=null&&mWakeLock.isHeld())
             mWakeLock.release();
     }
     @Override
     public void onEnd() {
-        if (DBG) Log.d(TAG, "onEnd: releasing wakelock, removing Foreground notif and stopping self");
+        log.debug("onEnd: releasing wakelock, removing Foreground notif and stopping self");
         releaseWakeLock();
         mLastStatus = ActionStatusEnum.STOP;
         mIsActionRunning = false;
@@ -410,7 +412,7 @@ public class FileManagerService extends Service implements OperationEngineListen
 
     @Override
     public void onFatalError(Exception e) {
-        if (DBG) Log.d(TAG, "onFatalError: releasing wakelock, removing Foreground notif and stopping self");
+        log.debug("onFatalError: releasing wakelock, removing Foreground notif and stopping self");
         releaseWakeLock();
         Toast.makeText(this, com.archos.filecorelibrary.R.string.copy_file_failed_one, Toast.LENGTH_LONG).show();
         mLastStatus = ActionStatusEnum.ERROR;
@@ -448,7 +450,7 @@ public class FileManagerService extends Service implements OperationEngineListen
 
     @Override
     public void onFilesListUpdate(List<MetaFile2> copyingMetaFiles,List<MetaFile2> rootFiles) {
-        if (DBG) Log.d(TAG, "onFilesListUpdate");
+        log.debug("onFilesListUpdate");
         mProcessedFiles.clear();
         mProcessedFiles.addAll(copyingMetaFiles);
         mProgress.clear();
@@ -468,7 +470,7 @@ public class FileManagerService extends Service implements OperationEngineListen
     /* Notification */
 
     public void startStatusbarNotification() {
-        if (DBG) Log.d(TAG, "startStatusbarNotification: stopping OPEN_NOTIFICATION_ID notif and doing PASTE_NOTIFICATION_ID");
+        log.debug("startStatusbarNotification: stopping OPEN_NOTIFICATION_ID notif and doing PASTE_NOTIFICATION_ID");
         nm.cancel(OPEN_NOTIFICATION_ID);
 
         // Build the intent to send when the user clicks on the notification in the notification panel
@@ -486,7 +488,7 @@ public class FileManagerService extends Service implements OperationEngineListen
     }
 
     private void displayOpenFileNotification() {
-        if (DBG) Log.d(TAG, "displayOpenFileNotification");
+        log.debug( "displayOpenFileNotification");
         nb.setContentTitle(getText(R.string.open_file))
                 .setContentText(mProcessedFiles.get(0).getName())
                 .setWhen(System.currentTimeMillis())
@@ -496,7 +498,7 @@ public class FileManagerService extends Service implements OperationEngineListen
     }
 
     private void updateStatusbarNotification(long currentSize, long totalSize, int currentFiles, int totalFiles) {
-        if (DBG) Log.d(TAG, "updateStatusbarNotification");
+        log.debug("updateStatusbarNotification");
         if (nb != null) {
             String formattedCurrentSize = Formatter.formatShortFileSize(this, currentSize);
             String formattedTotalSize = Formatter.formatShortFileSize(this, totalSize);
@@ -518,19 +520,21 @@ public class FileManagerService extends Service implements OperationEngineListen
         }
     }
     private void setCanceledStatus(){
-        if (DBG) Log.d(TAG, "setCanceledStatus");
+        log.debug("setCanceledStatus");
         mLastStatus = ActionStatusEnum.CANCELED;
         mIsActionRunning = false;
         removeStatusbarNotification();
-        for (ServiceListener lis : mListeners){
-            lis.onActionCanceled();
+        if (mListeners != null) {
+            for (ServiceListener lis : mListeners) {
+                lis.onActionCanceled();
+            }
         }
         removeStatusbarNotification();
         nm.cancel(OPEN_NOTIFICATION_ID);
     }
     @Override
     public void onCanceled() {
-        if (DBG) Log.d(TAG, "onCanceled");
+        log.debug("onCanceled");
         releaseWakeLock();
         Toast.makeText(this, com.archos.filecorelibrary.R.string.copy_file_failed_one, Toast.LENGTH_LONG).show();
         setCanceledStatus();
@@ -542,18 +546,21 @@ public class FileManagerService extends Service implements OperationEngineListen
     @Override
     public void onStop(LifecycleOwner owner) {
         // App in background
-        if (DBG) Log.d(TAG, "onStop: LifecycleOwner app in background, stopSelf");
+        log.debug("onStop: LifecycleOwner app in background, stopSelf");
         cleanup();
         stopSelf();
     }
 
     @Override
     public void onStart(LifecycleOwner owner) {
-        if (DBG) Log.d(TAG, "onStart: app in foreground");
+        log.debug("onStart: app in foreground");
+        mCopyCutEngine = new CopyCutEngine(this);
+        mListeners = new ArrayList<>();
+        mProgress = new HashMap<>();
     }
 
     public void cleanup() {
-        if (DBG) Log.d(TAG, "cleanup");
+        log.debug("cleanup");
         stopPasting();
         setCanceledStatus();
         // Stop the CopyCutEngine
@@ -579,6 +586,9 @@ public class FileManagerService extends Service implements OperationEngineListen
         }
         // Release the WakeLock
         releaseWakeLock();
-        unregisterReceiver(receiver);
+        if (isReceiverRegistered) {
+            unregisterReceiver(receiver);
+            isReceiverRegistered = false;
+        }
     }
 }
