@@ -52,6 +52,7 @@
     <string name="info_tab_episode">அத்தியாயம்</string>
     <string name="info_tab_video">காணொளி</string>
     <string name="info_tab_file">கோப்பு விவரம்</string>
+    <string name="info_tab_backdrop_chooser">பின் திரையை தேர்ந்தெடு</string>
     <string name="info_tab_poster_chooser">சுவரொட்டி தேர்வு செய்பவர்</string>
     <string name="info_tab_share">பகிர்</string>
     <string name="info_menu_backdrop_select">பின்னணி</string>
@@ -86,6 +87,10 @@
     <string name="videos">காணொளிகள்</string>
     <string name="all_videos">அனைத்து காணொளிகள்</string>
     <string name="not_played_yet_videos">பார்க்காத காணொளிகள்</string>
+    <string name="video_folder">கோப்புரைகள்</string>
+    <string name="movies">திரைப்படம்</string>
+    <string name="animes">அனிமேஷன்</string>
+    <string name="all_movies">அனைத்து திரைப்படங்கள்</string>
     <string name="movie_collections">குழுமங்கள்</string>
     <string name="movies_by_year">வருட வாரியான படங்கள்</string>
     <string name="all_tv_shows">டிவி நிகழ்ச்சிகள்</string>
