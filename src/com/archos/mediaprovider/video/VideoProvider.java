@@ -229,7 +229,7 @@ public class VideoProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projectionIn, String selection, String[] selectionArgs,
             String sort, CancellationSignal cancellationSignal) {
-        log.debug("QUERY " + uri);
+        log.debug("QUERY " + uri + ", selection=" + selection + ", selectionArgs=" + Arrays.toString(selectionArgs) + ", sort=" + sort);
         int table = URI_MATCHER.match(uri);
 
         // let ScraperProvider handle that
@@ -394,7 +394,7 @@ public class VideoProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        log.debug("INSRT " + uri + " PID:" + Process.myPid() + " TID:" + Process.myTid());
+        log.debug("INSRT " + uri + " PID:" + Process.myPid() + " TID:" + Process.myTid() + ", values=" + values);
         int match = URI_MATCHER.match(uri);
 
         // let ScraperProvider handle that
@@ -549,7 +549,7 @@ public class VideoProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        log.debug("DELTE " + uri);
+        log.debug("DELTE " + uri + ", selection=" + selection + ", selectionArgs=" + Arrays.toString(selectionArgs));
         int match = URI_MATCHER.match(uri);
 
         // let ScraperProvider handle that
@@ -601,7 +601,7 @@ public class VideoProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues initialValues, String userWhere,
             String[] whereArgs) {
-        log.debug("UPDTE " + uri);
+        log.debug("UPDTE " + uri + ", userWhere=" + userWhere + ", whereArgs=" + Arrays.toString(whereArgs) + ", initialValues=" + initialValues);
         int count;
         // log.trace("update for uri="+uri+", initValues="+initialValues);
         int match = URI_MATCHER.match(uri);
