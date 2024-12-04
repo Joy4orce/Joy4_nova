@@ -1061,7 +1061,6 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
         cursor.close();
         List<VideoStore.List.ListObj> originalLocalLists = new ArrayList<>(localLists);
 
-
         Trakt.Result result = mTrakt.getLists(0);
         List<TraktList> listLists;
         if(result.status == Status.SUCCESS){
@@ -1475,6 +1474,8 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
             new Client(context, null, false).sync(flag);
     }
 
+    // WARNING: this triggers a full sync thus do not use at each new video addition...
+    // TODO: improvement, add a method to add a single new video
     public static void onNewVideo(Context context) {
         if (Trakt.isTraktV2Enabled(context, PreferenceManager.getDefaultSharedPreferences(context)))
             new Client(context, null, false).sync(FLAG_SYNC_TO_DB_WATCHED|FLAG_SYNC_TO_TRAKT|FLAG_SYNC_MOVIES|FLAG_SYNC_SHOWS);
