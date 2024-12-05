@@ -78,11 +78,10 @@ public class FileManagerService extends Service implements OperationEngineListen
     private HashMap<MetaFile2, Long> mProgress;
     private long mPasteTotalProgress;
     private CopyCutEngine mCopyCutEngine;
-    private ArrayList<ServiceListener> mListeners = new ArrayList<>();
+    private ArrayList<ServiceListener> mListeners;
     private boolean mIsActionRunning;
     private Uri mTarget;
     private PowerManager.WakeLock mWakeLock;
-    private boolean isReceiverRegistered = false;
 
 
     public enum FileActionEnum {
@@ -150,7 +149,6 @@ public class FileManagerService extends Service implements OperationEngineListen
         filter.addAction("OPEN");
         if (Build.VERSION.SDK_INT >= 33) registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
         else registerReceiver(receiver, filter);
-        isReceiverRegistered = true;
         // Register as a lifecycle observer
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
     }
@@ -272,7 +270,6 @@ public class FileManagerService extends Service implements OperationEngineListen
             mIsActionRunning = true;
             mTarget = target;
             mHasOpenAtTheEndBeenSet = false;
-            if (mProgress == null) mProgress = new HashMap<>();
             mProgress.clear();
             mPasteTotalSize = (long) 0;
             ArrayList<Uri> sources = new ArrayList<Uri>(FilesToPaste.size());
@@ -488,7 +485,7 @@ public class FileManagerService extends Service implements OperationEngineListen
     }
 
     private void displayOpenFileNotification() {
-        log.debug( "displayOpenFileNotification");
+        log.debug("displayOpenFileNotification");
         nb.setContentTitle(getText(R.string.open_file))
                 .setContentText(mProcessedFiles.get(0).getName())
                 .setWhen(System.currentTimeMillis())
@@ -524,10 +521,8 @@ public class FileManagerService extends Service implements OperationEngineListen
         mLastStatus = ActionStatusEnum.CANCELED;
         mIsActionRunning = false;
         removeStatusbarNotification();
-        if (mListeners != null) {
-            for (ServiceListener lis : mListeners) {
-                lis.onActionCanceled();
-            }
+        for (ServiceListener lis : mListeners){
+            lis.onActionCanceled();
         }
         removeStatusbarNotification();
         nm.cancel(OPEN_NOTIFICATION_ID);
@@ -554,9 +549,6 @@ public class FileManagerService extends Service implements OperationEngineListen
     @Override
     public void onStart(LifecycleOwner owner) {
         log.debug("onStart: app in foreground");
-        mCopyCutEngine = new CopyCutEngine(this);
-        mListeners = new ArrayList<>();
-        mProgress = new HashMap<>();
     }
 
     public void cleanup() {
@@ -566,29 +558,21 @@ public class FileManagerService extends Service implements OperationEngineListen
         // Stop the CopyCutEngine
         if (mCopyCutEngine != null) {
             mCopyCutEngine.stop();
-            mCopyCutEngine.setListener(null);
-            mCopyCutEngine = null;
         }
         // Clear the list of processed files
         if (mProcessedFiles != null) {
             mProcessedFiles.clear();
-            mProcessedFiles = null;
         }
         // Clear the progress map
         if (mProgress != null) {
             mProgress.clear();
-            mProgress = null;
         }
         // Clear the list of listeners
         if (mListeners != null) {
             mListeners.clear();
-            mListeners = null;
         }
         // Release the WakeLock
         releaseWakeLock();
-        if (isReceiverRegistered) {
-            unregisterReceiver(receiver);
-            isReceiverRegistered = false;
-        }
+        unregisterReceiver(receiver);
     }
 }
