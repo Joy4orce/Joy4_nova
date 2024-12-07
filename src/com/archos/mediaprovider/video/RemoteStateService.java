@@ -50,6 +50,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RemoteStateService extends IntentService implements UpnpServiceManager.Listener, DefaultLifecycleObserver {
     private static final Logger log = LoggerFactory.getLogger(RemoteStateService.class);
 
+    private static volatile boolean isServiceRunning = true;
+
     private static final Uri NOTIFY_URI = VideoStore.ALL_CONTENT_URI;
     private static final Uri SERVER_URI = VideoStore.SmbServer.getContentUri();
 
@@ -150,7 +152,7 @@ public class RemoteStateService extends IntentService implements UpnpServiceMana
             if (c != null) {
                 log.debug("found " + c.getCount() + " servers");
                 mServerDbUpdated = false;
-                while (c.moveToNext()) {
+                while (c.moveToNext() && isServiceRunning) {
                     final long id = c.getLong(COLUMN_ID);
                     final String server = c.getString(COLUMN_DATA);
                     final int active = c.getInt(COLUMN_ACTIVE);
@@ -284,7 +286,7 @@ public class RemoteStateService extends IntentService implements UpnpServiceMana
         Cursor c = context.getContentResolver().query(VideoStore.SmbServer.getContentUri(), new String[]{"_id", "_data", "active"}, SELECTION, null, null);
         boolean active = false;
         if (c != null)
-            while (c.moveToNext() && active == false)
+            while (c.moveToNext() && active == false && isServiceRunning)
                 active = (c.getInt(2) == 1);
         return active;
     }
@@ -293,11 +295,13 @@ public class RemoteStateService extends IntentService implements UpnpServiceMana
     public void onStop(LifecycleOwner owner) {
         // App in background
         log.debug("onStop: LifecycleOwner app in background, stopSelf");
+        isServiceRunning = false;
         stopSelf();
     }
 
     @Override
     public void onStart(LifecycleOwner owner) {
         log.debug("onStart: LifecycleOwner app in foreground");
+        isServiceRunning = true;
     }
 }

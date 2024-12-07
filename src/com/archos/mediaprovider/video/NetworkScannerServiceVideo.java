@@ -127,7 +127,7 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
     private static final String notifChannelName = "NetworkScannerServiceVideo";
     private static final String notifChannelDescr = "NetworkScannerServiceVideo";
 
-    private volatile boolean isServiceRunning = true;
+    private static volatile boolean isServiceRunning = true;
     private Thread mScanThread;
     private Thread mRemoveFilesThread;
 
@@ -466,7 +466,7 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
             // hashmap to contain all knows files + data, keyed by path
             HashMap<String, PrescanItem> prescanItemsMap = new HashMap<String, NetworkScannerServiceVideo.PrescanItem>();
             if (prescan != null) {
-                while (prescan.moveToNext()) {
+                while (prescan.moveToNext() && isServiceRunning) {
                     PrescanItem item = new PrescanItem(prescan);
                     if(upnpUri!=null&&!item._data.startsWith(upnpUri)) { // if this isn't in folder about to be listed, we won't need to delete it
                         item.needsDelete = false;
@@ -834,7 +834,7 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
         Cursor c = cr.query(uri, PROJ_ID_DATA_SIZE, SEL_NEW_VIDS_N_SUBS, null, sortOrder);
         if (c != null) {
             String lastBucket = null;
-            while (c.moveToNext()) {
+            while (c.moveToNext() & isServiceRunning) {
                 long id = c.getLong(0);
                 String file = c.getString(1);
                 long size = c.getLong(2);
@@ -1142,10 +1142,10 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
 
     public void cleanup() {
         log.debug("cleanup");
+        isServiceRunning = false;
         // Stop the handler thread safely
         if (mHandlerThread != null) {
             mHandlerThread.quitSafely(); // Safely quit the handler thread
-            mHandlerThread = null; // Clear the reference
         }
         if (mScanThread != null) {
             mScanThread.interrupt();
