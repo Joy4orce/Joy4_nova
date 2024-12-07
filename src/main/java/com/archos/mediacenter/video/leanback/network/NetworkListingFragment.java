@@ -159,6 +159,10 @@ public class NetworkListingFragment extends ListingFragment {
 
     /** Add current Uri to the shortcut list */
     protected void createShortcut() {
+        if (getActivity() == null) {
+            log.error("createShortcut: null context, cannot create shortcut");
+            return;
+        }
         // only proposed for not a shortcut and not indexed folder (perhaps ancestor indexed but it will not propose to index)
         // thus only add STATIC shortcut and then propose to index in askForIndexing
         log.debug("createShortcut: ARG_TITLE=" + ARG_TITLE + ", argument ARG_TITLE=" + getArguments().getString(ARG_TITLE));
