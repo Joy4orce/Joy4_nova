@@ -79,7 +79,6 @@ public class MediaRetrieverService extends Service implements DefaultLifecycleOb
         if (DBG) Log.d(TAG, "onDestroy");
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
-            mHandler = null;
         }
         super.onDestroy();
     }
