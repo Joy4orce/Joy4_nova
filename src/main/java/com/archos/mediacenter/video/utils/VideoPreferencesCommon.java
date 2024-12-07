@@ -520,7 +520,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         mExportManualPreference = findPreference(getString(R.string.nfo_export_manual_prefkey));
         mExportManualPreference.setOnPreferenceClickListener(preference -> {
             Intent intent = new Intent(AutoScrapeService.EXPORT_EVERYTHING, null, getActivity(), AutoScrapeService.class);
-            ContextCompat.startForegroundService(getActivity(), intent);
+            getContext().startService(intent);
             Toast.makeText(getActivity(), R.string.nfo_export_in_progress, Toast.LENGTH_SHORT).show();
             return true;
         });
@@ -529,7 +529,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             Intent intent = new Intent(AutoScrapeService.RESCAN_EVERYTHING, null, getActivity(), AutoScrapeService.class);
             intent.putExtra(AutoScrapeService.RESCAN_EVERYTHING, true);
             intent.putExtra(AutoScrapeService.RESCAN_ONLY_DESC_NOT_FOUND, false);
-            ContextCompat.startForegroundService(getActivity(), intent);
+            getContext().startService(intent);
             Toast.makeText(getActivity(), R.string.rescrap_in_progress, Toast.LENGTH_SHORT).show();
             return true;
         });
@@ -537,14 +537,14 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         findPreference(getString(R.string.rescrap_all_movies_prefkey)).setOnPreferenceClickListener(preference -> {
             Intent intent = new Intent(AutoScrapeService.RESCAN_MOVIES, null, getActivity(), AutoScrapeService.class);
             intent.putExtra(AutoScrapeService.RESCAN_ONLY_DESC_NOT_FOUND, false);
-            ContextCompat.startForegroundService(getActivity(), intent);
+            getContext().startService(intent);
             Toast.makeText(getActivity(), R.string.rescrap_movies_in_progress, Toast.LENGTH_SHORT).show();
             return true;
         });
 
         findPreference(getString(R.string.rescrap_all_collections_prefkey)).setOnPreferenceClickListener(preference -> {
             Intent intent = new Intent(AllCollectionScrapeService.INTENT_RESCRAPE_ALL_COLLECTIONS, null, getActivity(), AllCollectionScrapeService.class);
-            ContextCompat.startForegroundService(getActivity(), intent);
+            getContext().startService(intent);
             Toast.makeText(getActivity(), R.string.rescrap_collections_in_progress, Toast.LENGTH_SHORT).show();
             return true;
         });
