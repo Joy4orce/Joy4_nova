@@ -25,10 +25,10 @@ import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import retrofit2.Response;
 
@@ -54,7 +54,7 @@ public class SearchMovieParser2 {
         int levenshteinDistanceTitle, levenshteinDistanceOriginalTitle;
         log.debug("getSearchMovieParserResult: examining response of " + response.body().total_results + " entries in " + language + ", for " + movieName + " and specific year " + year);
         // sort first movies by popularity so that distinction between levenstein distance is operated on popularity
-        CopyOnWriteArrayList<BaseMovie> resultsMovie = new CopyOnWriteArrayList<>(response.body().results);
+        List<BaseMovie> resultsMovie = new ArrayList<>(response.body().results);
         if (resultsMovie == null) {
             log.debug("getSearchMovieParserResult: no results");
             return searchMovieParserResult;
