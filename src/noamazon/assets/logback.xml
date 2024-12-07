@@ -38,17 +38,21 @@
     <logger name="com.archos.mediacenter.video.browser.MainActivity" level="INFO"/>
     <logger name="com.archos.mediacenter.video.browser.MainFragment" level="INFO"/>
     <logger name="com.archos.mediacenter.video.leanback.MainFragment" level="INFO"/>
-    <logger name="com.archos.mediacenter.video.CustomApplication" level="DEBUG"/>
+    <logger name="com.archos.mediacenter.video.CustomApplication" level="INFO"/>
+
+    <logger name="com.archos.mediacenter.video.browser.FileManagerService" level="INFO"/>
+    <logger name="com.archos.mediacenter.video.browser.NewVideosActionProvider" level="INFO"/>
+    <logger name="com.archos.mediacenter.video.browser.TorrentObserverService" level="INFO"/>
 
     <!-- Debug player -->
-    <logger name="com.archos.mediacenter.video.player.Player" level="DEBUG"/>
+    <logger name="com.archos.mediacenter.video.player.Player" level="INFO"/>
     <logger name="com.archos.mediacenter.video.player.PlayerActivity" level="INFO"/>
     <logger name="com.archos.mediacenter.video.player.PlayerController" level="INFO"/>
     <logger name="com.archos.mediacenter.video.player.PlayerService" level="INFO"/>
     <logger name="com.archos.mediacenter.video.player.MediaButtonService" level="INFO"/>
 
     <!-- Debug permissions -->
-    <logger name="com.archos.mediacenter.video.browser.PermissionChecker" level="DEBUG"/>
+    <logger name="com.archos.mediacenter.video.browser.PermissionChecker" level="INFO"/>
 
     <logger name="com.archos.filecorelibrary.FileUtils" level="INFO"/>
     <logger name="com.archos.filecorelibrary.FileUtilsQ" level="INFO"/>
@@ -96,6 +100,11 @@
     <logger name="jcifs.smb.SmbTransportImpl" level="INFO"/>
     <logger name="com.archos.filecorelibrary.samba" level="INFO"/>
 
+    <!-- Debug trakt -->
+    <logger name="com.archos.mediacenter.utils.trakt.Trakt" level="INFO"/>
+    <logger name="com.archos.mediacenter.utils.trakt.TraktService" level="INFO"/>
+    <logger name="com.archos.mediacenter.utils.trakt.TraktAPI" level="INFO"/>
+
     <!-- Debug scraper -->
     <logger name="com.archos.mediascraper.themoviedb3" level="INFO"/>
     <logger name="com.archos.mediascraper.themoviedb3.MyTmdb" level="INFO"/>
@@ -117,6 +126,8 @@
     <logger name="com.archos.mediaprovider.video.NetworkScannerServiceVideo" level="INFO"/>
     <logger name="com.archos.mediaprovider.video.NetworkRefreshJob" level="INFO"/>
     <logger name="com.archos.mediaprovider.video.RemoteStateService" level="INFO"/>
+    <logger name="com.archos.mediaprovider.video.VideoProvider" level="INFO"/>
+    <logger name="com.archos.mediaprovider.video.ScraperProvider" level="INFO"/>
 
     <includes>
         <include file="${LOG_DIR}/logback.xml" optional="true" />
