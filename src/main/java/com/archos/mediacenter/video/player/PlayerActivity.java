@@ -3362,7 +3362,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
     private void setSubtitleVpos(int vpos, String caller) {
         if (mVideoInfo == null || mVideoInfo.subtitleTrack == -1 || mVideoInfo.subtitleTrack >= mVideoInfo.nbSubtitles) return;
-        if (mPlayer.getVideoMetadata().getSubtitleTrack(mVideoInfo.subtitleTrack).isGfx) {
+        VideoMetadata.SubtitleTrack subtitleTrack = mPlayer.getVideoMetadata().getSubtitleTrack(mVideoInfo.subtitleTrack);
+        if (subtitleTrack != null && subtitleTrack.isGfx) {
             log.debug(caller + ": set vpos to 0, mVideoInfo=" + ((mVideoInfo == null) ? "null" : "noNull" + ", subtitleTrack=" + ((mVideoInfo == null) ? "null" : mVideoInfo.subtitleTrack)));
             mSubtitleManager.setVerticalPosition(0);
             disableSubtitleSettingsMenuItem(true);
