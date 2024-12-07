@@ -94,7 +94,7 @@ public class TorrentLoaderActivity extends AppCompatActivity implements TorrentT
         public void handleMessage(Message msg) {                    
             if(msg.what == LOADING_FINISHED){
                 if(mFiles!=null&& !mFiles.isEmpty()&&!isDialogDisplayed)   {
-                    if (mProgress != null && mProgress.isShowing()) {
+                    if (!isFinishing() && mProgress != null && mProgress.isShowing()) {
                         mProgress.dismiss();
                     }
                     if(mFiles.size()>1){
@@ -129,13 +129,13 @@ public class TorrentLoaderActivity extends AppCompatActivity implements TorrentT
                         startPlayerActivity(mFiles.keySet().toArray(new String[mFiles.size()])[0]);
                     }
                 }
-                else if(mFiles!=null&&mFiles.isEmpty()){
+                else if(!isFinishing() && mFiles!=null&&mFiles.isEmpty()){
                     mProgress.dismiss();
                     showErrorDialog(getString(R.string.error_no_video_file));
                 }
             }
             else if(msg.what == ERROR_DIALOG){
-                if (mProgress != null && mProgress.isShowing()) {
+                if (!isFinishing() && mProgress != null && mProgress.isShowing()) {
                     mProgress.dismiss();
                 }
                 if(!isClosingService)
@@ -370,6 +370,14 @@ public class TorrentLoaderActivity extends AppCompatActivity implements TorrentT
     }
     @Override
     public void warnOnNotEnoughSpace() {
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mProgress != null && mProgress.isShowing()) {
+            mProgress.dismiss();
+        }
+        super.onDestroy();
     }
 
 }

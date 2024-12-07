@@ -19,6 +19,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.InterruptedIOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
@@ -167,7 +168,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
                     mObserver.notifyDaemonStreaming();
                 //observeStdout();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("selectFile: caught IOException, error writing", e);
             }
         }
     }
@@ -237,12 +238,10 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
                         log.warn("IOException ", io);
                         isDaemonRunning=false;
                         mHasSetFiles  =false;
-
                     } catch(InterruptedException io){
                         log.warn("InterruptedException", io);
                         isDaemonRunning = false;
                         mHasSetFiles = false;
-
                     }
                     if(mObserver!=null)
                         mObserver.onEndOfTorrentProcess();
@@ -297,10 +296,20 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
                     mObserver.notifyObserver(line);
                 log.debug("Stdout: " + line+String.valueOf(mHasSetFiles));
             }
-
+        } catch (InterruptedIOException e) {
+            log.warn("observeStdout: read interrupted by close() on another thread", e);
+            Thread.currentThread().interrupt(); // Restore the interrupted status
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Error reading stdout", e);
+        } finally {
+            if (mReader != null) {
+                try {
+                    mReader.close();
+                } catch (IOException e) {
+                    log.error("Error closing reader", e);
+                }
+            }
         }
     }
 
@@ -355,7 +364,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
             Runtime.getRuntime().exec("killall -9 libtorrentd.so").waitFor();
         } catch (Exception e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("killProcess: caught Exception", e);
         }
        
     }
@@ -442,6 +451,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
     }
 
     private void cleanup() {
+        log.debug("cleanup");
         // Stop the torrent thread if it's running
         if (mTorrentThread != null) {
             mTorrentThread.interrupt();
