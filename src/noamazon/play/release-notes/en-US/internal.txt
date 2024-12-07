@@ -1,8 +1,5 @@
 - add pgs subtitles support
-- downgrade to ffmpeg 4.4.5 to fix audio passthrough
-- upgrade to dav1d 1.5.0
+- upgrade to dav1d 1.5.0, keep ffmpeg 4.4.5 since upgrade breaks passthrough
 - fix performmance hit when using trakt after video information retrieval
 - add locale setting in nova for devices with restricted language support
 - target SDK 34 to comply with Google API rules and remove foreground dataSync processes not granted to nova by Google
-- fix network shortcuts host check to accept FQDN with TLD larger than 6 characters
-- disable by default use Android timely frame posting for smoother playback
