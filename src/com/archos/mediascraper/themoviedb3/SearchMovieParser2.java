@@ -14,7 +14,6 @@
 
 package com.archos.mediascraper.themoviedb3;
 
-import android.util.Pair;
 
 import com.archos.mediascraper.ScraperImage;
 import com.archos.mediascraper.SearchResult;
@@ -27,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import retrofit2.Response;
@@ -59,41 +57,6 @@ public class SearchMovieParser2 {
             log.debug("getSearchMovieParserResult: no results");
             return searchMovieParserResult;
         }
-        // popularity sort is disabled to enable sort by year to pick lower year if not specified with lowest levenshtein metric
-        // if year is specified pick movies with highest popularity (solves The Killer 1989 best pick)
-        if (SORT_POPULARITY && year != null && ! year.isEmpty())
-            Collections.sort(resultsMovie, new Comparator<BaseMovie>() {
-                @Override
-                public int compare(final BaseMovie bm1, final BaseMovie bm2) {
-                    if (bm1.popularity == null && bm2.popularity == null) return 0;
-                    if (bm1.popularity == null) return -1;
-                    if (bm2.popularity == null) return 1;
-                    if (bm1.popularity > bm2.popularity) {
-                        return -1;
-                    } else if (bm1.popularity.equals(bm2.popularity)) {
-                        return 0;
-                    } else {
-                        return 1;
-                    }
-                }
-            });
-        // prefer older movie first if no specific year has been requested
-        if (SORT_YEAR && (year == null || year.isEmpty()))
-            Collections.sort(resultsMovie, new Comparator<BaseMovie>() {
-                @Override
-                public int compare(final BaseMovie bm1, final BaseMovie bm2) {
-                    if (bm1.release_date == null && bm2.release_date == null) return 0;
-                    if (bm1.release_date == null) return -1;
-                    if (bm2.release_date == null) return 1;
-                    if (bm1.release_date.before(bm2.release_date)) {
-                        return -1;
-                    } else if (bm1.release_date.equals(bm2.release_date)) {
-                        return 0;
-                    } else {
-                        return 1;
-                    }
-                }
-            });
 
         boolean isReleaseDateKnown = false;
         for (BaseMovie movie : resultsMovie) {
@@ -122,6 +85,7 @@ public class SearchMovieParser2 {
             levenshteinDistanceTitle = title != null ? levenshteinDistance.apply(movieNameLC, title.toLowerCase()) : Integer.MAX_VALUE;
             levenshteinDistanceOriginalTitle = originalTitle != null ? levenshteinDistance.apply(movieNameLC, originalTitle.toLowerCase()) : Integer.MAX_VALUE;
             result.setLevenshteinDistance(Math.min(levenshteinDistanceTitle, levenshteinDistanceOriginalTitle));
+            result.setReleaseOrFirstAiredDate(movie.release_date);
             log.debug("getSearchMovieParserResult: between " + movieNameLC + " and " + result.getOriginalTitle().toLowerCase() + "/" + result.getTitle().toLowerCase() + " levenshteinDistanceTitle=" + levenshteinDistanceTitle + ", levenshteinDistanceOriginalTitle=" + levenshteinDistanceOriginalTitle);
 
             if (movie.poster_path == null || movie.poster_path.endsWith("missing/series.jpg") || movie.poster_path.endsWith("missing/movie.jpg") || movie.poster_path == "") {

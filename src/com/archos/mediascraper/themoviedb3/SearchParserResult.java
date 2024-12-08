@@ -14,16 +14,16 @@
 
 package com.archos.mediascraper.themoviedb3;
 
-import android.util.Pair;
-
 import com.archos.mediascraper.SearchResult;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Comparator;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class SearchParserResult {
 
@@ -50,15 +50,24 @@ public class SearchParserResult {
         if (sr1.getLevenshteinDistance() != sr2.getLevenshteinDistance()) {
             return Integer.compare(sr1.getLevenshteinDistance(), sr2.getLevenshteinDistance());
         }
+        Float pop1 = sr1.getPopularity();
+        Float pop2 = sr2.getPopularity();
         // or highest popularity if it failed
-        if (sr1.getPopularity() != sr2.getPopularity()) {
-            return Float.compare(sr2.getPopularity(), sr1.getPopularity());
+        if (!Objects.equals(pop1, pop2)) {
+            if (pop1 == null) return -1; // sr1 is considered less than sr2
+            if (pop2 == null) return 1;  // sr2 is considered less than sr1
+            return Float.compare(pop1, pop2);
         }
-        // Or newest if it failed
-        //NB: String not int
-        if (sr1.getYear() != null && sr2.getYear() != null)
-            return sr2.getYear().compareTo(sr1.getYear());
-        return 0;
+        // Or newest if it failed: do not use year but releaseDate (movie) or firstAiredDate (show)
+        //NB: year is a String not int
+        //if (sr1.getYear() != null && ! sr1.getYear().isEmpty() && sr2.getYear() != null && ! sr2.getYear().isEmpty())
+        //    return sr2.getYear().compareTo(sr1.getYear());
+        Date date1 = sr1.getReleaseOrFirstAiredDate();
+        Date date2 = sr2.getReleaseOrFirstAiredDate();
+        if (date1 == null && date2 == null) return 0;
+        if (date1 == null) return -1; // date1 is considered less than date2
+        if (date2 == null) return 1;  // date2 is considered less than date1
+        return Long.compare(date1.getTime(), date2.getTime());
     };
 
     public List<SearchResult> getResults(int maxItems) {

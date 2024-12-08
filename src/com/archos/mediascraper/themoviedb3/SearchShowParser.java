@@ -15,7 +15,6 @@
 package com.archos.mediascraper.themoviedb3;
 
 import android.os.Bundle;
-import android.util.Pair;
 
 import com.archos.mediascraper.ScraperImage;
 import com.archos.mediascraper.SearchResult;
@@ -31,7 +30,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import retrofit2.Response;
@@ -39,8 +37,6 @@ import retrofit2.Response;
 public class SearchShowParser {
     private static final Logger log = LoggerFactory.getLogger(SearchShowParser.class);
     private final static int SERIES_NOT_PERMITTED_ID = 313081;
-    private final static boolean SORT_POPULARITY = true; // used only if year specified
-    private final static boolean SORT_YEAR = true; // used only if no year specified
 
     private final static LevenshteinDistance levenshteinDistance = new LevenshteinDistance();
 
@@ -64,39 +60,6 @@ public class SearchShowParser {
 
         // sort first tvshows by popularity so that distinction between levenstein distance is operated on popularity
         List<BaseTvShow> resultsTvShow = new ArrayList<>(response.body().results);
-        // OBSERVATION: number_of_seasons only available on id search not name search --> cannot discriminate
-        // popularity sort is disabled for now to enable sort by year to pick lower year if not specified with lowest levenshtein metric
-        // pick most popular show with same same levenshtein distance when no year is specified
-        if (SORT_POPULARITY && year != null)
-            Collections.sort(resultsTvShow, new Comparator<BaseTvShow>() {
-                @Override
-                public int compare(final BaseTvShow btvs1, final BaseTvShow btvs2) {
-                    if (btvs1.popularity > btvs2.popularity) {
-                        return -1;
-                    } else if (btvs1.popularity.equals(btvs2.popularity)) {
-                        return 0;
-                    } else {
-                        return 1;
-                    }
-                }
-            });
-        // prefer older show first if no year is specified (if this is a reboot year should never be null)
-        if (SORT_YEAR && year == null)
-            Collections.sort(resultsTvShow, new Comparator<BaseTvShow>() {
-                @Override
-                public int compare(final BaseTvShow btvs1, final BaseTvShow btvs2) {
-                    if (btvs1.first_air_date == null && btvs2.first_air_date == null) return 0;
-                    if (btvs1.first_air_date == null) return -1;
-                    if (btvs2.first_air_date == null) return 1;
-                    if (btvs1.first_air_date.before(btvs2.first_air_date)) {
-                        return -1;
-                    } else if (btvs1.first_air_date.equals(btvs2.first_air_date)) {
-                        return 0;
-                    } else {
-                        return 1;
-                    }
-                }
-            });
 
         boolean isAirDateKnown = false;
         for (BaseTvShow series : resultsTvShow) {
@@ -134,8 +97,8 @@ public class SearchShowParser {
                 levenshteinDistanceTitle = levenshteinDistance.apply(showNameLC, result.getTitle().toLowerCase());
                 levenshteinDistanceOriginalTitle = levenshteinDistance.apply(showNameLC, result.getOriginalTitle().toLowerCase());
                 result.setLevenshteinDistance(Math.min(levenshteinDistanceTitle, levenshteinDistanceOriginalTitle));
+                result.setReleaseOrFirstAiredDate(series.first_air_date);
                 log.debug("getSearchShowParserResult: between " + showNameLC + " and " + result.getOriginalTitle().toLowerCase() + "/" + result.getTitle().toLowerCase() + " levenshteinDistanceTitle=" + levenshteinDistanceTitle + ", levenshteinDistanceOriginalTitle=" + levenshteinDistanceOriginalTitle);
-
 
                 if (series.poster_path == null || series.poster_path.endsWith("missing/series.jpg") || series.poster_path.endsWith("missing/movie.jpg") || series.poster_path == "") {
                     log.debug("getSearchShowParserResult: set aside " + series.name + " because poster missing i.e. image=" + series.poster_path);
