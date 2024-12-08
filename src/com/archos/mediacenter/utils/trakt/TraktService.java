@@ -1284,7 +1284,6 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
         removeListener();
         if (mBackgroundHandler != null) {
             mBackgroundHandler.removeCallbacksAndMessages(null);
-            mBackgroundHandler = null;
         }
         if (mBackgroundHandlerThread != null) {
             if (mBackgroundHandlerThread.quit()) {
@@ -1294,15 +1293,12 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
                     log.error("InterruptedException while joining mBackgroundHandlerThread", e);
                 }
             }
-            mBackgroundHandlerThread = null;
         }
         if (mUiHandler != null) {
             mUiHandler.removeCallbacksAndMessages(null); // Clear any pending messages
-            mUiHandler = null;
         }
         if (mToast != null) {
             mToast.cancel();
-            mToast = null;
         }
         mNetworkState = null;
         mTrakt = null;
