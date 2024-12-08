@@ -54,9 +54,9 @@ public class SearchParserResult {
         Float pop2 = sr2.getPopularity();
         // or highest popularity if it failed
         if (!Objects.equals(pop1, pop2)) {
-            if (pop1 == null) return -1; // sr1 is considered less than sr2
-            if (pop2 == null) return 1;  // sr2 is considered less than sr1
-            return Float.compare(pop1, pop2);
+            if (pop2 == null) return -1; // sr1 is considered less than sr2 i.e. to be considered first
+            if (pop1 == null) return 1;  // sr2 is considered less than sr1 i.e. to be considered first
+            return Float.compare(pop2, pop1);
         }
         // Or newest if it failed: first use releaseDate (movie) or firstAiredDate (show) and after year if it fails
         Date date1 = sr1.getReleaseOrFirstAiredDate();
