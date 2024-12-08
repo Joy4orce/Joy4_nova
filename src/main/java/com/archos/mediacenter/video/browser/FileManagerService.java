@@ -83,6 +83,7 @@ public class FileManagerService extends Service implements OperationEngineListen
     private Uri mTarget;
     private PowerManager.WakeLock mWakeLock;
 
+    private boolean isReceiverRegistered = false;
 
     public enum FileActionEnum {
         NONE, COPY, CUT, DELETE, COMPRESSION, EXTRACTION
@@ -149,6 +150,7 @@ public class FileManagerService extends Service implements OperationEngineListen
         filter.addAction("OPEN");
         if (Build.VERSION.SDK_INT >= 33) registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
         else registerReceiver(receiver, filter);
+        isReceiverRegistered = true;
         // Register as a lifecycle observer
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
     }
@@ -573,6 +575,9 @@ public class FileManagerService extends Service implements OperationEngineListen
         }
         // Release the WakeLock
         releaseWakeLock();
-        unregisterReceiver(receiver);
+        if (isReceiverRegistered) {
+            unregisterReceiver(receiver);
+            isReceiverRegistered = false; // Reset the flag after unregistering the receiver
+        }
     }
 }
