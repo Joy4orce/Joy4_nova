@@ -419,7 +419,7 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
         try {
             f = MetaFileFactoryWithUpnp.getMetaFileForUrl(what);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("doScan: caught Exception failed to get MetaFile for {}", what, e);
         }
         if (f != null) {
             log.debug("doScan path resolved to:" + f.getUri().toString());
@@ -428,15 +428,16 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
             wifiLock = wifiManager.createWifiLock(WIFI_MODE_FULL_HIGH_PERF, "ArchosNetworkIndexer");
             wifiLock.acquire();
 
-            // send out a sticky broadcast telling the world that we started scanning
-            Intent scannerIntent = new Intent(ArchosMediaIntent.ACTION_VIDEO_SCANNER_SCAN_STARTED, what);
-            scannerIntent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
-            sendBroadcast(scannerIntent);
-            // also show a notification.
-            nm.notify(NOTIFICATION_ID, nb.setContentTitle(getString(R.string.network_scan_msg)).setContentText(f.getUri().toString()).build());
+            try {
+                // send out a sticky broadcast telling the world that we started scanning
+                Intent scannerIntent = new Intent(ArchosMediaIntent.ACTION_VIDEO_SCANNER_SCAN_STARTED, what);
+                scannerIntent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
+                sendBroadcast(scannerIntent);
+                // also show a notification.
+                nm.notify(NOTIFICATION_ID, nb.setContentTitle(getString(R.string.network_scan_msg)).setContentText(f.getUri().toString()).build());
 
-            String path;
-            String upnpUri = null;
+                String path;
+                String upnpUri = null;
              /*
              special case with upnp : we need to get all indexed files of specified host,
              because a specific file can have already been indexed in another folder
@@ -448,73 +449,74 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
              some can not be listed later because they are in another indexed folder.
              So we have to set  item.needsDelete = false for each
              item that are not in currently listed folder */
-            if("upnp".equals(f.getUri().getScheme())){
-                path = "upnp://" + f.getUri().getHost()+"/";
-                upnpUri = f.getUri().toString();
-                if (f.isDirectory()&&!upnpUri.endsWith("/"))
-                    upnpUri = upnpUri + "/";
-            }
-            else {
-                path = f.getUri().toString();
-                if (f.isDirectory()&&!path.endsWith("/"))
-                    path = path + "/";
-            }
-            log.debug("doScan: path identified is " + path);
-            // query database for all files we have already in that directory
-            String[] selectionArgs = new String[] { path };
-            Cursor prescan = cr.query(VideoStoreInternal.FILES_SCANNED, PrescanItem.PROJECTION, IN_FOLDER_SELECT, selectionArgs, null);
-            // hashmap to contain all knows files + data, keyed by path
-            HashMap<String, PrescanItem> prescanItemsMap = new HashMap<String, NetworkScannerServiceVideo.PrescanItem>();
-            if (prescan != null) {
-                while (prescan.moveToNext() && isServiceRunning) {
-                    PrescanItem item = new PrescanItem(prescan);
-                    if(upnpUri!=null&&!item._data.startsWith(upnpUri)) { // if this isn't in folder about to be listed, we won't need to delete it
-                        item.needsDelete = false;
-                    }
-                    log.trace("doScan: prescan item._data " + item._data);
-                    if(item.unique_id!=null && !item.unique_id.isEmpty())
-                        prescanItemsMap.put(item.unique_id, item);
-                    else
-                        prescanItemsMap.put(item._data, item);
+                if ("upnp".equals(f.getUri().getScheme())) {
+                    path = "upnp://" + f.getUri().getHost() + "/";
+                    upnpUri = f.getUri().toString();
+                    if (f.isDirectory() && !upnpUri.endsWith("/"))
+                        upnpUri = upnpUri + "/";
+                } else {
+                    path = f.getUri().toString();
+                    if (f.isDirectory() && !path.endsWith("/"))
+                        path = path + "/";
                 }
-                prescan.close();
+                log.debug("doScan: path identified is " + path);
+                // query database for all files we have already in that directory
+                String[] selectionArgs = new String[]{path};
+                Cursor prescan = cr.query(VideoStoreInternal.FILES_SCANNED, PrescanItem.PROJECTION, IN_FOLDER_SELECT, selectionArgs, null);
+                // hashmap to contain all knows files + data, keyed by path
+                HashMap<String, PrescanItem> prescanItemsMap = new HashMap<String, NetworkScannerServiceVideo.PrescanItem>();
+                if (prescan != null) {
+                    while (prescan.moveToNext() && isServiceRunning) {
+                        PrescanItem item = new PrescanItem(prescan);
+                        if (upnpUri != null && !item._data.startsWith(upnpUri)) { // if this isn't in folder about to be listed, we won't need to delete it
+                            item.needsDelete = false;
+                        }
+                        log.trace("doScan: prescan item._data " + item._data);
+                        if (item.unique_id != null && !item.unique_id.isEmpty())
+                            prescanItemsMap.put(item.unique_id, item);
+                        else
+                            prescanItemsMap.put(item._data, item);
+                    }
+                    prescan.close();
+                }
+
+                boolean nfoScanEnabled = NfoParser.isNetworkNfoParseEnabled(this);
+                BulkOperationHandler bulkHandler = new BulkOperationHandler(nfoScanEnabled, this);
+
+                // prescan list is modified by FileVisitListener to indicate whether
+                // a file needs to be deleted or not
+                // ! this is the actual scanning process !
+                // extract server id string / number
+                // Note that extractSmbServer is not smb specific...
+                String server = extractSmbServer(f.getUri());
+                long serverId = getLightIndexServerId(server);
+                FileVisitListener fileVisitListener = new FileVisitListener(
+                        mBlacklist, prescanItemsMap, nfoScanEnabled, bulkHandler, serverId);
+
+                FileVisitor.visit(f, RECURSION_LIMIT, fileVisitListener);
+                // once all files where visited we have inserted, updated or deleted files in the db.
+                // Nfo has also been processed
+                List<MetaFile2> lastPlayedDbs = fileVisitListener.getLastPlayedDbs();
+
+                int insertCount = bulkHandler.getInsertHandled();
+                int updateCount = bulkHandler.getUpdatesHandled();
+                int deleteCount = bulkHandler.getDeletesHandled();
+                log.debug("added:" + insertCount + " modified:" + updateCount + " deleted:" + deleteCount);
+
+                int newSubs = handleSubtitles(cr);
+                log.debug("added subtitles:" + newSubs);
+                // send a "done" notification
+                WrapperChannelManager.refreshChannels(this);
+                Intent intent = new Intent(ArchosMediaIntent.ACTION_VIDEO_SCANNER_SCAN_FINISHED, what);
+                intent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
+                sendBroadcast(intent);
+                // and cancel the Notification
+                nm.cancel(NOTIFICATION_ID);
+                log.trace("doScan: added:" + insertCount + " modified:" + updateCount + " deleted:" + deleteCount + " listed files " + mFoundFiles);
+            } finally {
+                if (wifiLock != null && wifiLock.isHeld())
+                    wifiLock.release();
             }
-
-            boolean nfoScanEnabled = NfoParser.isNetworkNfoParseEnabled(this);
-            BulkOperationHandler bulkHandler = new BulkOperationHandler(nfoScanEnabled, this);
-
-            // prescan list is modified by FileVisitListener to indicate whether
-            // a file needs to be deleted or not
-            // ! this is the actual scanning process !
-            // extract server id string / number
-            // Note that extractSmbServer is not smb specific...
-            String server = extractSmbServer(f.getUri());
-            long serverId = getLightIndexServerId(server);
-            FileVisitListener fileVisitListener = new FileVisitListener(
-                    mBlacklist, prescanItemsMap, nfoScanEnabled, bulkHandler, serverId);
-
-            FileVisitor.visit(f, RECURSION_LIMIT, fileVisitListener);
-            // once all files where visited we have inserted, updated or deleted files in the db.
-            // Nfo has also been processed
-            List<MetaFile2> lastPlayedDbs = fileVisitListener.getLastPlayedDbs();
-
-            int insertCount = bulkHandler.getInsertHandled();
-            int updateCount = bulkHandler.getUpdatesHandled();
-            int deleteCount = bulkHandler.getDeletesHandled();
-            log.debug("added:" + insertCount + " modified:" + updateCount + " deleted:" + deleteCount);
-
-            int newSubs = handleSubtitles(cr);
-            log.debug("added subtitles:" + newSubs);
-            // send a "done" notification
-            WrapperChannelManager.refreshChannels(this);
-            Intent intent = new Intent(ArchosMediaIntent.ACTION_VIDEO_SCANNER_SCAN_FINISHED, what);
-            intent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
-            sendBroadcast(intent);
-            // and cancel the Notification
-            nm.cancel(NOTIFICATION_ID);
-            log.trace("doScan: added:" + insertCount + " modified:" + updateCount + " deleted:" + deleteCount + " listed files " + mFoundFiles);
-            if (wifiLock != null && wifiLock.isHeld())
-                wifiLock.release();
         } else if(mRecordOnFailPreference!=null){
             PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(mRecordOnFailPreference, -1).commit();//unable to reach server
         }
