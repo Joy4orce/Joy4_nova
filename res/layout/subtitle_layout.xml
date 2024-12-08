@@ -29,6 +29,7 @@
         android:textSize="14sp"
         android:maxLines="4"
         android:textColor="#ffffffff"
+        android:gravity="center"
         android:visibility="gone" />
 
     <com.archos.mediacenter.video.player.SubtitleSpacerView android:id="@+id/subtitle_spacer"
