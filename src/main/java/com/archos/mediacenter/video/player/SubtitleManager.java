@@ -27,12 +27,14 @@ import android.os.Looper;
 import android.os.Message;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.RelativeLayout;
 
 import androidx.core.content.ContextCompat;
 import androidx.core.text.HtmlCompat;
@@ -172,12 +174,16 @@ public class SubtitleManager {
         log.debug("displayView sub duration={}", subtitle.getDuration());
 
         if (subtitle.isText()) {
-            log.debug("displayView: Text, mIsSubtitleGfx=false");
             mIsSubtitleGfx = false;
 
             subtitle.setAlignment(getAlignment(subtitle.getText()));
 
+            log.debug("displayView: Text, mIsSubtitleGfx=false, alignment={}", subtitle.getAlignment());
+
             mSubtitleTxtView.setVisibility(View.VISIBLE);
+
+            // Adjust the position based on the alignment
+            adjustSubtitlePosition(subtitle.getAlignment());
 
             if (mSpannableStringBuilder == null) {
                 mSpannableStringBuilder = new SpannableStringBuilder();
@@ -204,6 +210,25 @@ public class SubtitleManager {
             mSubtitleGfxView.setSubtitle(subtitle.getBitmap(), bounds, subtitle.getFrameWidth(), subtitle.getFrameHeight());
         }
     }
+
+    private void adjustSubtitlePosition(SubtitleAlignment alignment) {
+        // Set the gravity based on the alignment
+        int gravity = switch (alignment) {
+            case BOTTOM_LEFT -> Gravity.BOTTOM | Gravity.START;
+            case BOTTOM_MID -> Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+            case BOTTOM_RIGHT -> Gravity.BOTTOM | Gravity.END;
+            case MID_LEFT -> Gravity.CENTER_VERTICAL | Gravity.START;
+            case MID_MID -> Gravity.CENTER;
+            case MID_RIGHT -> Gravity.CENTER_VERTICAL | Gravity.END;
+            case TOP_LEFT -> Gravity.TOP | Gravity.START;
+            case TOP_MID -> Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+            case TOP_RIGHT -> Gravity.TOP | Gravity.END;
+        }; // Default to bottom center
+
+        // Set the gravity to the Subtitle3DTextView
+        mSubtitleTxtView.setGravity3D(gravity);
+    }
+
     private int mColor;
     private boolean mOutline;
     private int mUiMode;
@@ -713,8 +738,7 @@ public class SubtitleManager {
     private void setVerticalPositionInternal (int pos) {
         if (mIsSubtitleGfx && SubtitleGfxView.RECT_COORDINATES) mSubtitleEvadedVPos = 0;
         else mSubtitleEvadedVPos = pos;
-        if (mSubtitleSpacer == null)
-            return;
+        if (mSubtitleSpacer == null) return;
         mSubtitleSpacerParams.height = mSubtitleEvadedVPos;
         log.debug("setVerticalPositionInternal: new Height " + mSubtitleSpacerParams.height);
         mSubtitleSpacer.setLayoutParams(mSubtitleSpacerParams);
