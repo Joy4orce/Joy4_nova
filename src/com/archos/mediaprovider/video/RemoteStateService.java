@@ -32,6 +32,7 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 
 import com.archos.filecorelibrary.FileEditor;
 import com.archos.filecorelibrary.jcifs.JcifsFileEditor;
+import com.archos.filecorelibrary.samba.SambaDiscovery;
 import com.archos.mediacenter.filecoreextension.upnp2.FileEditorFactoryWithUpnp;
 import com.archos.mediacenter.filecoreextension.upnp2.UpnpServiceManager;
 import com.archos.mediacenter.utils.AppState;
@@ -182,9 +183,16 @@ public class RemoteStateService extends IntentService implements UpnpServiceMana
                                         if (updateServerDb(id, cr, active, 1, now))
                                             mServerDbUpdated = true;
                                     } else {
-                                        log.debug("server does not exist: " + server);
-                                        if (updateServerDb(id, cr, active, 0, now))
-                                            mServerDbUpdated = true;
+                                        String smbDiscoveryInfo = SambaDiscovery.getIpFromShareName(serverUri.getHost());
+                                        if (smbDiscoveryInfo == null) {
+                                            log.debug("server does not exist: " + server);
+                                            if (updateServerDb(id, cr, active, 0, now))
+                                                mServerDbUpdated = true;
+                                        } else {
+                                            log.debug("server exists in SambaDiscovery, not jcifs-ng: " + server);
+                                            if (updateServerDb(id, cr, active, 1, now))
+                                                mServerDbUpdated = true;
+                                        }
                                     }
                                 }
                             }.start();
