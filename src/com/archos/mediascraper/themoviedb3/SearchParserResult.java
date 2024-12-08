@@ -58,13 +58,15 @@ public class SearchParserResult {
             if (pop2 == null) return 1;  // sr2 is considered less than sr1
             return Float.compare(pop1, pop2);
         }
-        // Or newest if it failed: do not use year but releaseDate (movie) or firstAiredDate (show)
-        //NB: year is a String not int
-        //if (sr1.getYear() != null && ! sr1.getYear().isEmpty() && sr2.getYear() != null && ! sr2.getYear().isEmpty())
-        //    return sr2.getYear().compareTo(sr1.getYear());
+        // Or newest if it failed: first use releaseDate (movie) or firstAiredDate (show) and after year if it fails
         Date date1 = sr1.getReleaseOrFirstAiredDate();
         Date date2 = sr2.getReleaseOrFirstAiredDate();
-        if (date1 == null && date2 == null) return 0;
+        if (date1 == null && date2 == null) {
+            //NB: year is a String not int
+            if (sr1.getYear() != null && ! sr1.getYear().isEmpty() && sr2.getYear() != null && ! sr2.getYear().isEmpty())
+                return sr2.getYear().compareTo(sr1.getYear());
+            return 0;
+        }
         if (date1 == null) return -1; // date1 is considered less than date2
         if (date2 == null) return 1;  // date2 is considered less than date1
         return Long.compare(date1.getTime(), date2.getTime());
