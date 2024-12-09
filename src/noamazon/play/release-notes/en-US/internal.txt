@@ -1,7 +1,7 @@
 - add pgs subtitles support
 - support subtitles position SSA tags
 - upgrade to dav1d 1.5.0
-- fix performmance during video scanning using trakt
+- fix performance during video scanning using trakt
 - add locale setting in nova for devices with restricted language support
 - target SDK 34 and remove foreground dataSync processes to comply with Google requirements
 - better video identification logic
