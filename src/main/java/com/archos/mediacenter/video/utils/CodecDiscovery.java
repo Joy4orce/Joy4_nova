@@ -78,6 +78,34 @@ public class CodecDiscovery {
 		return false;
 	}
 
+	private static String getCodecForProfile(String mimeType, int profile) {
+		log.debug("getCodecForProfile: mimeType={} profile={}", mimeType, profile);
+		if (Build.VERSION.SDK_INT < 27) return null;
+		MediaCodecList codecList = new MediaCodecList(MediaCodecList.ALL_CODECS);
+		MediaCodecInfo[] codecInfos = codecList.getCodecInfos();
+		for (MediaCodecInfo codecInfo : codecInfos) {
+			// Ignore encoders
+			if (codecInfo.isEncoder()) {
+				continue;
+			}
+
+			if (isCodecInfoSupported(codecInfo, mimeType, false)) {
+				MediaCodecInfo.CodecCapabilities capabilities = codecInfo.getCapabilitiesForType(mimeType);
+				if (capabilities != null) {
+					if (capabilities.profileLevels != null) {
+						for (MediaCodecInfo.CodecProfileLevel level : capabilities.profileLevels) {
+							log.debug("getCodecForProfile: profile={}, level={}", level.profile, level.level);
+							if (level.profile == profile) {
+								return codecInfo.getName();
+							}
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 	public static boolean isSwCodec(MediaCodecInfo codecInfo) {
 		if (Build.VERSION.SDK_INT >= 29) {
 			return codecInfo.isSoftwareOnly();
