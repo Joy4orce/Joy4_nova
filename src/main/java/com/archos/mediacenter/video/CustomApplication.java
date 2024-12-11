@@ -381,6 +381,19 @@ public class CustomApplication extends Application {
         //makeUseOpenSubtitlesRestApi(PreferenceManager.getDefaultSharedPreferences(this).getBoolean(VideoPreferencesCommon.KEY_OPENSUBTITILES_REST_API, true));
 
         upgradeActions(mContext);
+
+        // Amazon has an "optional" check that when opening IEC61937, the content is stereo
+        // It is pushed into some weird vendor callbacks, I have no idea what they are supposed to mean
+        // But anyway we can allow IEC61937 @ 8 channels by removing this thing
+        try {
+            Class<?> fireOSInit = Class.forName("com.amazon.fireos.FireOSInit");
+            Field f = fireOSInit.getDeclaredField("sVendorCallbacks");
+            f.setAccessible(true);
+            Object o = f.get(null);
+            Map<Class<?>, Object> m = (Map<Class<?>, Object>) o;
+            m.remove(Class.forName("android.media.VendorAudioTrackCallback"));
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
+        }
     }
 
     private void launchSambaDiscovery() {
