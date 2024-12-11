@@ -89,6 +89,9 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.lang.reflect.Field;
+import java.util.Map;
+
 public class CustomApplication extends Application {
 
     private static Logger log = null;
@@ -392,7 +395,7 @@ public class CustomApplication extends Application {
             Object o = f.get(null);
             Map<Class<?>, Object> m = (Map<Class<?>, Object>) o;
             m.remove(Class.forName("android.media.VendorAudioTrackCallback"));
-        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e) {
+        } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException | NullPointerException e) {
         }
     }
 
