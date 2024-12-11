@@ -567,8 +567,8 @@
     <string name="preferences_force_software_decoding_summary">You may try this option if some videos are not playing correctly</string>
     <string name="preferences_force_audio_passthrough">Audio passthrough</string>
     <string name="preferences_force_audio_passthrough_disabled">Disabled (recommended)</string>
-    <string name="preferences_force_audio_passthrough_enable">Mode 1 (deprecated)</string>
-    <string name="preferences_force_audio_passthrough_enable2">Mode 2</string>
+    <string name="preferences_force_audio_passthrough_enable">Mode 1 (NOVA\'s IEC61937)</string>
+    <string name="preferences_force_audio_passthrough_enable2">Mode 2 (system\'s IEC61937, recommended)</string>
     <string name="preferences_force_audio_passthrough_summary">Transmit compressed audio over HDMI or S/PDIF. ⚠ Experimental may result in A/V out of sync</string>
     <string name="preferences_parser_sync_mode">Parser synchronisation mode</string>
     <string name="preferences_parser_sync_mode_cdata">PTS based (recommended)</string>
