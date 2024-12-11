@@ -483,8 +483,6 @@
     <string name="preferences_force_software_decoding_summary">Μπορείτε να δοκιμάσετε αυτή την επιλογή αν κάποια βίντεο δεν αναπαράγονται σωστά</string>
     <string name="preferences_force_audio_passthrough">Διέλευση ήχου</string>
     <string name="preferences_force_audio_passthrough_disabled">Απενεργοποιημένο (συνιστάται)</string>
-    <string name="preferences_force_audio_passthrough_enable">Λειτουργία 1 (παρωχημένη)</string>
-    <string name="preferences_force_audio_passthrough_enable2">Λειτουργία 2</string>
     <string name="preferences_force_audio_passthrough_summary">Μετάδοση συμπιεσμένου ήχου μέσω HDMI ή S/PDIF. ⚠ Δοκιμαστική μπορεί να οδηγήσει σε αποσυγχρονισμό εικόνας ήχου</string>
     <string name="preferences_parser_sync_mode">Λειτουργία συγχρονισμού ανάλυσης</string>
     <string name="preferences_parser_sync_mode_cdata">Βάσει PTS (συνιστάται)</string>

@@ -509,8 +509,6 @@
     <string name="preferences_force_software_decoding_summary">假如部分影片播放不正常，您可以嘗試開啟此選項</string>
     <string name="preferences_force_audio_passthrough">原始音訊傳遞</string>
     <string name="preferences_force_audio_passthrough_disabled">已停用 (推薦)</string>
-    <string name="preferences_force_audio_passthrough_enable">Mode 1 (不推薦)</string>
-    <string name="preferences_force_audio_passthrough_enable2">Mode 2</string>
     <string name="preferences_force_audio_passthrough_summary">藉由 HDMI 或 S/PDIF 傳送壓縮音訊 (⚠ 實驗性功能，可能會導致影音的不同步)</string>
     <string name="preferences_parser_sync_mode">剖析器同步模式</string>
     <string name="preferences_parser_sync_mode_cdata">PTS 式 (推薦)</string>

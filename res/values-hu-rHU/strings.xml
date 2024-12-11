@@ -515,8 +515,6 @@
     <string name="preferences_force_software_decoding_summary">Kipróbálhatja ezt a beállítást, ha néhány videó hibásan jelenik meg</string>
     <string name="preferences_force_audio_passthrough">Hangtovábbítás</string>
     <string name="preferences_force_audio_passthrough_disabled">Letiltva (ajánlott)</string>
-    <string name="preferences_force_audio_passthrough_enable">Mód 1 (elavult)</string>
-    <string name="preferences_force_audio_passthrough_enable2">Mód 2</string>
     <string name="preferences_force_audio_passthrough_summary">Tömörített hang továbbítása HDMI vagy S/PDIF csatlakozókra. ⚠ Kísérleti, A/V szinkronizációs hiba lehetséges</string>
     <string name="preferences_parser_sync_mode">Szinkronizálási mód</string>
     <string name="preferences_parser_sync_mode_cdata">PTS alapú (ajánlott)</string>

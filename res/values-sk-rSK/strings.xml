@@ -525,8 +525,6 @@
     <string name="preferences_force_software_decoding_summary">Túto možnosť môžete vyskúšať, ak sa niektoré videá neprehrávajú správne</string>
     <string name="preferences_force_audio_passthrough">Prechod zvuku</string>
     <string name="preferences_force_audio_passthrough_disabled">Vypnuté (odporúčané)</string>
-    <string name="preferences_force_audio_passthrough_enable">Režim 1 (zastaraný)</string>
-    <string name="preferences_force_audio_passthrough_enable2">Režim 2</string>
     <string name="preferences_force_audio_passthrough_summary">Prenos komprimovaného zvuku cez HDMI alebo S/PDIF. ⚠ Experimentálne môže dôjsť k nesynchronizácii A/V</string>
     <string name="preferences_parser_sync_mode">Synchronizačný režim analyzátora</string>
     <string name="preferences_parser_sync_mode_cdata">PTS (odporúčané)</string>

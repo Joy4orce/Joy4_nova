@@ -525,8 +525,6 @@
     <string name="preferences_force_software_decoding_summary">Jeśli niektóre filmy nie są odtwarzane poprawnie, może spróbować tej opcji</string>
     <string name="preferences_force_audio_passthrough">Przekazywanie audio</string>
     <string name="preferences_force_audio_passthrough_disabled">Wyłączone (zalecane)</string>
-    <string name="preferences_force_audio_passthrough_enable">Tryb 1 (przestarzały)</string>
-    <string name="preferences_force_audio_passthrough_enable2">Tryb 2</string>
     <string name="preferences_force_audio_passthrough_summary">Wysyłaj skompresowany dźwięk przez HDMI lub S/PDIF. ⚠ Opcja eksperymentalna, może powodować utratę synchronizacji dźwięku z obrazem</string>
     <string name="preferences_parser_sync_mode">Tryb synchronizacji parsera</string>
     <string name="preferences_parser_sync_mode_cdata">Oparte na PTS (zalecane)</string>

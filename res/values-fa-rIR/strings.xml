@@ -321,7 +321,9 @@
     <string name="menu_audio">فایل‌های صوتی</string>
     <string name="menu_lock_player">قفل کردن پخش‌کننده</string>
     <string name="menu_bookmark">تنظیم نشانک</string>
+    <string name="menu_brightness_settings">روشنایی</string>
     <string name="menu_player_settings">ساماندهی</string>
+    <string name="menu_change_folder">تغییر پوشه </string>
     <!-- Subtitles/Audio languages -->
     <!-- Subtitles in filename HI = Hearing Impaired -->
     <!-- Subtitles in filename SDH = Subtitles for the Deaf and Hard of Hearing -->

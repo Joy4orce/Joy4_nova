@@ -496,8 +496,6 @@
     <string name="preferences_force_software_decoding_summary">Můžete vyzkoušet tuto možnost pokud nejsou některá videa správně přehrávána</string>
     <string name="preferences_force_audio_passthrough">Audio pass-through</string>
     <string name="preferences_force_audio_passthrough_disabled">Vypnuto (doporučeno)</string>
-    <string name="preferences_force_audio_passthrough_enable">Režim 1 (zastaralý)</string>
-    <string name="preferences_force_audio_passthrough_enable2">Režim 2</string>
     <string name="preferences_force_audio_passthrough_summary">Posílat komprimovaný zvuk přes HDMI nebo S/PDIF. ⚠ Experimentální funkce může mít za následek chybnou A/V synchronizaci</string>
     <string name="preferences_parser_sync_mode_sample">na základě vzorku </string>
     <string name="preferences_stream_buffer_size_title">Velikost vyrovnávací paměti streamu</string>

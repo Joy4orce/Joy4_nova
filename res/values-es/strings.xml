@@ -515,8 +515,6 @@
     <string name="preferences_force_software_decoding_summary">Puedes probar esta opción si algunos vídeos no se reproducen correctamente</string>
     <string name="preferences_force_audio_passthrough">Pasarela de audio (passthrough)</string>
     <string name="preferences_force_audio_passthrough_disabled">Desactivado (recomendado)</string>
-    <string name="preferences_force_audio_passthrough_enable">Modo 1 (obsoleto)</string>
-    <string name="preferences_force_audio_passthrough_enable2">Modo 2</string>
     <string name="preferences_force_audio_passthrough_summary">Transmite audio comprimido sobre HDMI o S/PDIF. ⚠ Experimental puede resultar en A/V desincronizados</string>
     <string name="preferences_parser_sync_mode">Modo de sincronización del analizador</string>
     <string name="preferences_parser_sync_mode_cdata">Basado en PTS (recomendado)</string>

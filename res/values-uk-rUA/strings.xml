@@ -525,8 +525,6 @@
     <string name="preferences_force_software_decoding_summary">Можете спробувати цей параметр, якщо деякі відеозаписи не відтворюються коректно</string>
     <string name="preferences_force_audio_passthrough">Пряме виведення звуку</string>
     <string name="preferences_force_audio_passthrough_disabled">Вимкнено (рекомендовано)</string>
-    <string name="preferences_force_audio_passthrough_enable">Режим 1 (застаріло)</string>
-    <string name="preferences_force_audio_passthrough_enable2">Режим 2</string>
     <string name="preferences_force_audio_passthrough_summary">Передача стисненого аудіо через HDMI або S/PDIF. ⚠ Може призвести до розсинхронізації звуку та відео</string>
     <string name="preferences_parser_sync_mode">Режим синхронізації аналізатора</string>
     <string name="preferences_parser_sync_mode_cdata">PTS (рекомендовано)</string>

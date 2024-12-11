@@ -524,8 +524,6 @@
     <string name="preferences_force_software_decoding_summary">ניתן לנסות אפשרות זו אם חלק מקבצי הווידאו לא מנוגנים באופן תקין</string>
     <string name="preferences_force_audio_passthrough">העברת אודיו ישירה</string>
     <string name="preferences_force_audio_passthrough_disabled">מושבת (מומלץ)</string>
-    <string name="preferences_force_audio_passthrough_enable">מוד 1 (מיושן)</string>
-    <string name="preferences_force_audio_passthrough_enable2">מוד 2</string>
     <string name="preferences_force_audio_passthrough_summary">העברת אודיו דחוס דרך HDMI או S/PDIF. ⚠ ניסיוני, יתכן חוסר סינכרון אודיו/וידאו</string>
     <string name="preferences_parser_sync_mode">מצב סנכרון מנתח</string>
     <string name="preferences_parser_sync_mode_cdata">מבוסס PTS (מומלץ)</string>
