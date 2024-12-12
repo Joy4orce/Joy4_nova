@@ -1408,7 +1408,11 @@ public class VideoProvider extends ContentProvider {
             log.trace("App now in BackGround");
             UpnpServiceManager.stopServiceIfLaunched();
             removeNetworkListener();
-            RemoteStateService.stop(context);
+            try {
+                RemoteStateService.stop(context);
+            } catch (Exception e) {
+                log.error("DeadSystemException caught while stopping RemoteStateService", e);
+            }
         }
     }
 

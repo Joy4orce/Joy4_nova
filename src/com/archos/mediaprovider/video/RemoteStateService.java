@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.DeadSystemException;
 import android.provider.BaseColumns;
 import android.util.Pair;
 
@@ -137,7 +138,11 @@ public class RemoteStateService extends IntentService implements UpnpServiceMana
     public static void stop(Context context) {
         log.debug("stop");
         Intent intent = new Intent(context, RemoteStateService.class);
-        context.stopService(intent);
+        try {
+            context.stopService(intent);
+        } catch (Exception e) {
+            log.error("DeadSystemException caught while stopping RemoteStateService", e);
+        }
     }
 
     protected void handleDb(Context context, boolean hasConnection, boolean hasLocalConnection) {
