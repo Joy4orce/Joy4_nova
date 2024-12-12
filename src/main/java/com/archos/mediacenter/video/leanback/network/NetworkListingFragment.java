@@ -99,6 +99,11 @@ public class NetworkListingFragment extends ListingFragment {
     }
 
     protected void updateOrbIcon() {
+        if (!isAdded()) {
+            log.warn("updateOrbIcon: Fragment not attached to a context");
+            return;
+        }
+
         removeFromLibrary = false;
         // if shortcut
         // -> if ancestor or himself indexed
