@@ -140,7 +140,12 @@ public class VideoProvider extends ContentProvider {
         PreferenceManager.getDefaultSharedPreferences(context).registerOnSharedPreferenceChangeListener(mPreferencechChangeListener);
 
         // handles NetworkState changes
-        networkState = NetworkState.instance(context);
+        try {
+            networkState = NetworkState.instance(context);
+        } catch (Exception e) {
+            log.error("Exception caught during NetworkState initialization", e);
+            return false;
+        }
         if (propertyChangeListener == null)
             propertyChangeListener = new PropertyChangeListener() {
                 @Override
