@@ -120,11 +120,8 @@ public class NetworkListingFragment extends ListingFragment {
             titleView.setOrb3IconResId(R.drawable.orb_minus);
             if (isCurrentDirectoryIndexed) {
                 if (isHimselfIndexedFolder) {
-                    if (isCurrentDirectoryIndexed) {
-                        titleView.setOnOrb3Description(getString(R.string.remove_from_indexed_folders));
-                        removeFromLibrary = true;
-                    }
-                    else titleView.setOnOrb3Description(getString(R.string.remove_from_shortcuts));
+                    titleView.setOnOrb3Description(getString(R.string.remove_from_indexed_folders));
+                    removeFromLibrary = true;
                 } else titleView.setOnOrb3Description(getString(R.string.remove_from_shortcuts));
             } else
                 titleView.setOnOrb3Description(getString(R.string.remove_from_shortcuts));
