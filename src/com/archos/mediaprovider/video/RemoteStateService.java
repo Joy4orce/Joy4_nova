@@ -209,7 +209,7 @@ public class RemoteStateService extends IntentService implements UpnpServiceMana
                         mUpnpId.put(server,new Pair<>(id, active));
                     }
                 }
-                if(mUpnpId.size()>0&&hasLocalConnection){
+                if(mUpnpId != null && !mUpnpId.isEmpty() &&hasLocalConnection){
                     if(!mUpnpDiscoveryStarted) {
                         //we start upnp discovery but we don't want to add the listener twice
                         UpnpServiceManager.startServiceIfNeeded(context).addListener(this);
