@@ -42,8 +42,8 @@ public class AppState {
 
     public static boolean isForeGround() {
         synchronized (sStartedActivities) {
-            log.debug("isForeGround=" + (sStartedActivities.size() > 0));
-            return sStartedActivities.size() > 0;
+            log.debug("isForeGround=" + (!sStartedActivities.isEmpty()));
+            return !sStartedActivities.isEmpty();
         }
     }
 
