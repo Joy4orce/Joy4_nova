@@ -15,13 +15,15 @@
 package com.archos.mediacenter.video.player;
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.archos.mediacenter.utils.AppState;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ProcessLifecycleOwner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,17 +32,19 @@ import org.slf4j.LoggerFactory;
  * Created by alexandre on 03/03/17.
  */
 
-public class PlayerBrightnessManager implements AppState.OnForeGroundListener {
+public class PlayerBrightnessManager implements DefaultLifecycleObserver {
 
     private static final Logger log = LoggerFactory.getLogger(PlayerBrightnessManager.class);
 
     private static PlayerBrightnessManager sPlayerBrightnessManager;
     private int mBrightness = -1;
 
+    private static volatile boolean isForeground = false;
+
     public static PlayerBrightnessManager getInstance(){
         if(sPlayerBrightnessManager==null) {
             sPlayerBrightnessManager = new PlayerBrightnessManager();
-            AppState.addOnForeGroundListener(sPlayerBrightnessManager);
+            ProcessLifecycleOwner.get().getLifecycle().addObserver(sPlayerBrightnessManager);
         }
         return sPlayerBrightnessManager;
     }
@@ -54,12 +58,6 @@ public class PlayerBrightnessManager implements AppState.OnForeGroundListener {
 
     public void restoreBrightness(Activity activity){
         setBrightness(activity, mBrightness);
-    }
-
-    @Override
-    public void onForeGroundState(Context applicationContext, boolean foreground) {
-        if(!foreground)
-            mBrightness = -1;
     }
 
     public static float getBrightness(Window window) { // get screen brightness float value between 0 and 1
@@ -120,5 +118,16 @@ public class PlayerBrightnessManager implements AppState.OnForeGroundListener {
         final float gamma = 2.2f; // Gamma value for brightness correction
         final int brightnessLevel = Math.round(30f * (float) Math.pow(brightness, 1 / gamma));
         return Math.max(0, Math.min(brightnessLevel, 30));
+    }
+
+    @Override
+    public void onStop(@NonNull LifecycleOwner owner) {
+        isForeground = false;
+        mBrightness = -1;
+    }
+
+    @Override
+    public void onStart(@NonNull LifecycleOwner owner) {
+        isForeground = true;
     }
 }

@@ -38,7 +38,11 @@ import android.os.Environment;
 import android.os.StrictMode;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.preference.PreferenceManager;
 
 import com.archos.environment.ArchosFeatures;
@@ -51,9 +55,7 @@ import com.archos.filecorelibrary.samba.SambaDiscovery;
 import com.archos.filecorelibrary.smbj.SmbjUtils;
 import com.archos.filecorelibrary.sshj.SshjUtils;
 import com.archos.filecorelibrary.webdav.WebdavUtils;
-import com.archos.mediacenter.utils.AppState;
 import com.archos.mediacenter.utils.trakt.Trakt;
-import com.archos.mediacenter.utils.trakt.TraktService;
 import com.archos.mediacenter.video.browser.BootupRecommandationService;
 import com.archos.mediacenter.video.picasso.SmbRequestHandler;
 import com.archos.mediacenter.video.picasso.ThumbnailRequestHandler;
@@ -71,7 +73,6 @@ import com.squareup.picasso.Picasso;
 
 import httpimage.FileSystemPersistence;
 import httpimage.HttpImageManager;
-import io.sentry.Sentry;
 import io.sentry.SentryLevel;
 import io.sentry.android.core.SentryAndroid;
 
@@ -92,13 +93,14 @@ import java.util.regex.Pattern;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-public class CustomApplication extends Application {
+public class CustomApplication extends Application implements DefaultLifecycleObserver {
 
     private static Logger log = null;
 
+    private static CustomApplication sInstance;
+
     private NetworkState networkState = null;
     private static boolean isNetworkStateRegistered = false;
-    private static boolean isAppStateListenerAdded = false;
     private static boolean isVideStoreImportReceiverRegistered = false;
     private static boolean isNetworkStateListenerAdded = false;
     private static boolean isHDMIPlugReceiverRegistered = false;
@@ -160,6 +162,8 @@ public class CustomApplication extends Application {
     private final int AVOS_ENCODING_MPEGH_LC_L4 = 26;
     private final int AVOS_ENCODING_DTS_UHD = 27;
     private final int AVOS_ENCODING_DRA = 28;
+
+    private static volatile boolean isForeground = false;
 
     public static long getHdmiAudioCodecsFlag() {
         return hdmiAudioEncodingFlag;
@@ -279,6 +283,11 @@ public class CustomApplication extends Application {
                     .build());
         }
 
+        // register lifecycle observer
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
+
+        sInstance = this;
+
         // init application context to make it available to all static methods
         mContext = getApplicationContext();
         // must be done after context is available
@@ -335,18 +344,6 @@ public class CustomApplication extends Application {
 
         BASEDIR = Environment.getExternalStorageDirectory().getPath()+"Android/data/"+getPackageName();
 
-        // Class that keeps track of activities so we can tell is we are foreground
-        log.debug("onCreate: registerActivityLifecycleCallbacks AppState");
-        registerActivityLifecycleCallbacks(AppState.sCallbackHandler);
-
-        // NetworkState.(un)registerNetworkCallback following AppState
-        if (!isAppStateListenerAdded) {
-            log.debug("addListener: AppState.addOnForeGroundListener");
-            AppState.addOnForeGroundListener(sForeGroundListener);
-            isAppStateListenerAdded = true;
-        }
-        handleForeGround(AppState.isForeGround());
-
         // handles NetworkState changes
         networkState = NetworkState.instance(mContext);
         if (propertyChangeListener == null)
@@ -364,16 +361,14 @@ public class CustomApplication extends Application {
                 new FileSystemPersistence(BASEDIR));
 
         // Note: we do not init UPnP here, we wait for the user to enter the network view
-        log.debug("onCreate: TraktService.init");
-        TraktService.init();
 
-        NetworkAutoRefresh.init();
+        NetworkAutoRefresh.init(this);
         //init credentials db
         NetworkCredentialsDatabase.getInstance().loadCredentials(this);
         ArchosUtils.setGlobalContext(this.getApplicationContext());
         // only launch BootupRecommandation if on AndroidTV and before Android O otherwise target TV channels
         if(ArchosFeatures.isAndroidTV(this) && Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
-            BootupRecommandationService.init();
+            BootupRecommandationService.init(this);
 
         log.trace("onCreate: manifest permissions " + Arrays.toString(getPermissions(mContext)));
         hasManageExternalStoragePermissionInManifest = hasPermission("android.permission.MANAGE_EXTERNAL_STORAGE", mContext);
@@ -417,11 +412,6 @@ public class CustomApplication extends Application {
     public static SambaDiscovery getSambaDiscovery() {
         return mSambaDiscovery;
     }
-
-    // link networkState register/unregister networkCallback linked to app foreground/background lifecycle
-    private final AppState.OnForeGroundListener sForeGroundListener = (applicationContext, foreground) -> {
-        handleForeGround(foreground);
-    };
 
     protected void handleForeGround(boolean foreground) {
         log.debug("handleForeGround: is app foreground " + foreground);
@@ -768,5 +758,29 @@ public class CustomApplication extends Application {
                     .putBoolean(PlayerActivity.KEY_ENABLE_ANDROID_FRAME_TIMING, false)
                     .commit();
         }
+    }
+
+    public static CustomApplication getApplication() {
+        return sInstance;
+    }
+
+    public static boolean isForeground() {
+        return isForeground;
+    }
+
+    @Override
+    public void onStart(@NonNull LifecycleOwner owner) {
+        isForeground = true;
+        // Handle foreground state
+        log.debug("onStart: lifecycle app now in ForeGround");
+        handleForeGround(true);
+    }
+
+    @Override
+    public void onStop(@NonNull LifecycleOwner owner) {
+        // Handle background state
+        isForeground = false;
+        log.debug("onStop: lifecycle app now in BackGround");
+        handleForeGround(false);
     }
 }

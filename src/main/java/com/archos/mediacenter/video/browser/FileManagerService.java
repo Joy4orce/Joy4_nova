@@ -490,9 +490,7 @@ public class FileManagerService extends Service implements OperationEngineListen
         log.debug("displayOpenFileNotification");
         nb.setContentTitle(getText(R.string.open_file))
                 .setContentText(mProcessedFiles.get(0).getName())
-                .setWhen(System.currentTimeMillis())
-                .setContentIntent(PendingIntent.getBroadcast(this, 0, getOpenIntent(),
-                        ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) ? PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT: PendingIntent.FLAG_UPDATE_CURRENT)));
+                .setWhen(System.currentTimeMillis());
         nm.notify(OPEN_NOTIFICATION_ID, nb.build());
     }
 
