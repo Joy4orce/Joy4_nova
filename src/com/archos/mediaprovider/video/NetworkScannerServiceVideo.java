@@ -426,9 +426,11 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
             ContentResolver cr = getContentResolver();
             WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
             wifiLock = wifiManager.createWifiLock(WIFI_MODE_FULL_HIGH_PERF, "ArchosNetworkIndexer");
-            wifiLock.acquire();
 
             try {
+                if (!wifiLock.isHeld()) {  // Check if the lock is already held
+                    wifiLock.acquire();
+                }
                 // send out a sticky broadcast telling the world that we started scanning
                 Intent scannerIntent = new Intent(ArchosMediaIntent.ACTION_VIDEO_SCANNER_SCAN_STARTED, what);
                 scannerIntent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
