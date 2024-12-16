@@ -281,7 +281,10 @@ android {
                          'okhttp3/**',
                          'org/**',
                          '**/*.txt',
-                         '**/*.xml']
+                         '**/*.xml',
+                         'META-INF/versions/9/OSGI-INF/MANIFEST.MF',
+                         'META-INF/versions/15/OSGI-INF/MANIFEST.MF',
+                         'META-INF/versions/11/OSGI-INF/MANIFEST.MF']
         }
     }
     lint {
