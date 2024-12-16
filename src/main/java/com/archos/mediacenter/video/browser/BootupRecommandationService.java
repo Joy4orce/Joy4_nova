@@ -32,7 +32,7 @@ public class BootupRecommandationService extends BroadcastReceiver implements De
 	private static final String TAG = "BootupActivity";
 	private static final boolean DBG = false;
 
-	private static volatile boolean isForeground = false;
+	private static volatile boolean isForeground = true;
 	private static Application mApplication;
 
 	public static final String UPDATE_ACTION = "com.archos.mediacenter.video.browser.BootupRecommandationService.UPDATE_ACTION";

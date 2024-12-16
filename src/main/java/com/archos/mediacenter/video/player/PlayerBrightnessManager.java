@@ -39,7 +39,7 @@ public class PlayerBrightnessManager implements DefaultLifecycleObserver {
     private static PlayerBrightnessManager sPlayerBrightnessManager;
     private int mBrightness = -1;
 
-    private static volatile boolean isForeground = false;
+    private static volatile boolean isForeground = true;
 
     public static PlayerBrightnessManager getInstance(){
         if(sPlayerBrightnessManager==null) {
