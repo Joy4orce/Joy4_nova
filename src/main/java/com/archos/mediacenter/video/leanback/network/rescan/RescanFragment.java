@@ -172,7 +172,7 @@ public class RescanFragment extends GuidedStepSupportFragment implements Network
 
     @Override
     public void onScannerStateChanged() {
-        if (getActivity() == null) {
+        if (getActivity() != null) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
