@@ -42,6 +42,7 @@ import android.os.Process;
 import android.os.RemoteException;
 
 import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.preference.PreferenceManager;
@@ -1389,9 +1390,10 @@ public class VideoProvider extends ContentProvider implements DefaultLifecycleOb
     }
 
     protected void handleForeGround(boolean foreground) {
+        log.debug("handleForeGround: foreground=" + foreground);
         final Context context = getContext();
-        if (context == null) {
-            log.error("handleForeGround: context is null");
+        if (context == null || ! ProcessLifecycleOwner.get().getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
+            log.error("handleForeGround: context is null or not foreground, return");
             return;
         }
         if (foreground) {
