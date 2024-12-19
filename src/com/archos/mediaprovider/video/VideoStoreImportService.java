@@ -42,6 +42,7 @@ import android.provider.MediaStore;
 
 import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ProcessLifecycleOwner;
 
@@ -114,7 +115,7 @@ public class VideoStoreImportService extends Service implements Handler.Callback
 
     public static boolean startIfHandles(Context context, Intent broadcast) {
         log.debug("startIfHandles");
-        if (! isForeground) {
+        if (! ProcessLifecycleOwner.get().getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
             log.debug("startIfHandles: not in foreground, do nothing");
             return false;
         }
