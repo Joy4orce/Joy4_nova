@@ -985,10 +985,17 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
         public boolean needsDelete = true;
 
         public PrescanItem(Cursor c) {
-            _id = c.getLong(0);
-            _data = c.getString(1);
-            date_modified = c.getLong(2);
-            unique_id = c.getString(3);
+            if (c != null && !c.isClosed() && c.getCount() > 0) {
+                _id = c.getLong(0);
+                _data = c.getString(1);
+                date_modified = c.getLong(2);
+                unique_id = c.getString(3);
+            } else {
+                _id = -1;
+                _data = null;
+                date_modified = -1;
+                unique_id = null;
+            }
         }
     }
 
