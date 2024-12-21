@@ -84,7 +84,7 @@
     <string name="root_storage">Bộ nhớ trong</string>
     <string name="cannot_list">Không thể liệt kê nội dung</string>
     <!-- VIDEO -->
-    <string name="videos">Băng hình</string>
+    <string name="videos">Các video</string>
     <string name="all_videos">Tất cả băng hình</string>
     <string name="not_played_yet_videos">Chưa phát</string>
     <string name="video_folder">Thư mục</string>
@@ -133,9 +133,9 @@
     <string name="date_view_month">Tháng</string>
     <string name="date_view_year">Năm</string>
     <string name="all_movies_and_tv_shows">Phim và Chương trình TV</string>
-    <string name="non_scraped_videos">Các băng hình chưa được thu thập</string>
+    <string name="non_scraped_videos">Các video chưa được thu thập</string>
     <string name="no_server">Không tìm thấy máy chủ phương tiện</string>
-    <string name="cannot_open_video">Không thể mở băng hình này</string>
+    <string name="cannot_open_video">Không thể mở video này</string>
     <string name="confirm_delete">Bạn có thực sự muốn xóa nó?</string>
     <string name="deleting">Đang xóa…</string>
     <string name="cannot_delete_directory">Không thể xóa thư mục</string>
@@ -152,7 +152,7 @@
     <string name="mark_as_watched">Đánh dấu đã xem</string>
     <string name="mark_as_not_watched">Đánh dấu chưa xem</string>
     <string name="upnp_not_allowed">Bạn không được phép truy cập vào máy chủ UPnP này. Vui lòng thay đổi cấu hình truy cập của bạn trước.</string>
-    <string name="scrap_no_info">Bạn không có mô tả phim hoặc chương trình TV cho băng hình này.</string>
+    <string name="scrap_no_info">Bạn không có mô tả phim hoặc chương trình TV cho video này.</string>
     <string name="scrap_remove">Loại bỏ thông tin</string>
     <string name="scrap_remove_short">Xóa</string>
     <!-- for small screens -->
@@ -509,6 +509,8 @@
     <string name="preferences_force_software_decoding_summary">Bạn có thể thử tùy chọn này nếu một số băng hình phát không chính xác</string>
     <string name="preferences_force_audio_passthrough">Truyền tải âm thanh</string>
     <string name="preferences_force_audio_passthrough_disabled">Tắt (khuyến nghị)</string>
+    <string name="preferences_force_audio_passthrough_enable">Đóng gói Nova (thử nghiệm)</string>
+    <string name="preferences_force_audio_passthrough_enable2">Đóng gói hệ thống</string>
     <string name="preferences_force_audio_passthrough_summary">Truyền âm thanh nén qua HDMI hoặc S/PDIF. ⚠ Thử nghiệm có thể dẫn đến A/V không đồng bộ</string>
     <string name="preferences_parser_sync_mode">Chế độ đồng bộ hóa trình phân tích cú pháp</string>
     <string name="preferences_parser_sync_mode_cdata">Dựa trên PTS (khuyến nghị)</string>
@@ -530,6 +532,7 @@
     <string name="preferences_allow_3rd_party_player_summary">Các ứng dụng phát băng hình tương thích khác sẽ được Android đề xuất khi khởi chạy tính năng phát băng hình. Xin lưu ý rằng một số tính năng sẽ không hoạt động (tiếp tục, đánh dấu, v.v.)</string>
     <string name="preference_tv_3d_automatic_switch">Bật chuyển TV 3D tự động</string>
     <string name="preference_tv_3d_automatic_switch_summary">Chỉ sử dụng tính năng này nếu TV 3D của bạn hỗ trợ nó</string>
+    <string name="enable_android_frame_timing">Bật thời gian khung hình Android</string>
     <string name="preference_tv_refreshrate_switch">Kích hoạt chuyển đổi tốc độ làm mới tự động</string>
     <string name="preference_tv_refreshrate_switch_summary">Loại bỏ hiệu ứng judder bằng cách điều chỉnh tốc độ làm mới màn hình tốt nhất sang tốc độ khung hình băng hình (hỗ trợ thiết bị có thể khác nhau)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Đã tắt</string>

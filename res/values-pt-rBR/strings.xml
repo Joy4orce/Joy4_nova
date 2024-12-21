@@ -511,6 +511,8 @@
     <string name="preferences_force_software_decoding_summary">Você pode tentar esta opção se alguns vídeos não estiverem reproduzindo corretamente</string>
     <string name="preferences_force_audio_passthrough">Audio passthrough</string>
     <string name="preferences_force_audio_passthrough_disabled">Desativado (recomendado)</string>
+    <string name="preferences_force_audio_passthrough_enable">Nova encapsulação</string>
+    <string name="preferences_force_audio_passthrough_enable2">Encapsulação do sistema</string>
     <string name="preferences_force_audio_passthrough_summary">Transmitir audio comprimido via HDMI or S/PDIF. ⚠ Experimental e talvez resulte em falta de sincronia de A/V</string>
     <string name="preferences_parser_sync_mode">Modo de sincronização do parser</string>
     <string name="preferences_parser_sync_mode_cdata">Baseado em PTS (recomendado)</string>
@@ -532,6 +534,8 @@
     <string name="preferences_allow_3rd_party_player_summary">Outros aplicativos compatíveis para o reprodutor de vídeo serão propostos pelo Android ao iniciar uma reprodução de vídeo. Esteja ciente de que alguns recursos não funcionarão (continuar, favoritos, etc.)</string>
     <string name="preference_tv_3d_automatic_switch">Ativar TV 3D automático</string>
     <string name="preference_tv_3d_automatic_switch_summary">Use este recurso apenas se sua TV 3D o suporta</string>
+    <string name="enable_android_frame_timing">Ativar tempo de frame android</string>
+    <string name="enable_android_frame_timing_summary">Indicar ao Android o frame de tempo iluminado para uma reprodução mais suave (experimental)</string>
     <string name="preference_tv_refreshrate_switch">Habilitar mudança automática da taxa de atualização</string>
     <string name="preference_tv_refreshrate_switch_summary">Remova o efeito \"judder\" (trepidação) adaptando a melhor taxa de atualização da tela à taxa de quadros de vídeo (o suporte ao dispositivo pode variar)</string>
     <string name="preference_remove_dolby_vision">Desabilitar dolby vision</string>

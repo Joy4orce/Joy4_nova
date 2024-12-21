@@ -539,7 +539,7 @@
     <string name="preference_tv_3d_automatic_switch">Activer automatiquement la commutation 3D\"</string>
     <string name="preference_tv_3d_automatic_switch_summary">Utiliser cette option si votre télé 3D supporte cette fonctionnalité\"</string>
     <string name="enable_android_frame_timing">Activer la synchronisation Android des trames</string>
-    <string name="enable_android_frame_timing_summary">Utiliser la synchronisation d\'affichage d\'Android pour un rendu plus fluide</string>
+    <string name="enable_android_frame_timing_summary">Utiliser la synchronisation d\'affichage d\'Android pour un rendu plus fluide (expérimental)</string>
     <string name="preference_tv_refreshrate_switch">Ajuster automatiquement le taux de rafraîchissement</string>
     <string name="preference_tv_refreshrate_switch_summary">Supprime les saccades d\'affichage en adaptant la fréquence de rafraîchissement écran au fps vidéo (la prise en charge dépend de l\'appareil)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Désactivé</string>

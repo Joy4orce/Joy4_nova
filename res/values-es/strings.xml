@@ -515,6 +515,8 @@
     <string name="preferences_force_software_decoding_summary">Puedes probar esta opción si algunos vídeos no se reproducen correctamente</string>
     <string name="preferences_force_audio_passthrough">Pasarela de audio (passthrough)</string>
     <string name="preferences_force_audio_passthrough_disabled">Desactivado (recomendado)</string>
+    <string name="preferences_force_audio_passthrough_enable">Encapsulación de Nova (experimental)</string>
+    <string name="preferences_force_audio_passthrough_enable2">Encapsulación del sistema</string>
     <string name="preferences_force_audio_passthrough_summary">Transmite audio comprimido sobre HDMI o S/PDIF. ⚠ Experimental puede resultar en A/V desincronizados</string>
     <string name="preferences_parser_sync_mode">Modo de sincronización del analizador</string>
     <string name="preferences_parser_sync_mode_cdata">Basado en PTS (recomendado)</string>
@@ -536,6 +538,8 @@
     <string name="preferences_allow_3rd_party_player_summary">Otras aplicaciones de reproducción de vídeo compatibles serán propuestas por Android cuando se lance una reproducción de vídeo. Tenga en cuenta que algunas características no funcionarán (reanudar, marcadores, etc.)</string>
     <string name="preference_tv_3d_automatic_switch">Activar el conmutador automático de TV 3D</string>
     <string name="preference_tv_3d_automatic_switch_summary">Utilice esta función sólo si su TV es compatible con la función 3D</string>
+    <string name="enable_android_frame_timing">Activar temporización de fotogramas de Android</string>
+    <string name="enable_android_frame_timing_summary">Delegar a Android la temporización de fotogramas para una reproducción más suave (experimental)</string>
     <string name="preference_tv_refreshrate_switch">Activar el cambio de tasa de refresco automático</string>
     <string name="preference_tv_refreshrate_switch_summary">Elimina el efecto judder adaptando la mejor frecuencia de actualización de pantalla a la velocidad de fotogramas de vídeo (la compatibilidad puede variar según el dispositivo)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Desactivado</string>

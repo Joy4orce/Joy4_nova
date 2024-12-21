@@ -525,6 +525,8 @@
     <string name="preferences_force_software_decoding_summary">Túto možnosť môžete vyskúšať, ak sa niektoré videá neprehrávajú správne</string>
     <string name="preferences_force_audio_passthrough">Prechod zvuku</string>
     <string name="preferences_force_audio_passthrough_disabled">Vypnuté (odporúčané)</string>
+    <string name="preferences_force_audio_passthrough_enable">Nova zapuzdrenie (experimentálne)</string>
+    <string name="preferences_force_audio_passthrough_enable2">Zapuzdrenie systému</string>
     <string name="preferences_force_audio_passthrough_summary">Prenos komprimovaného zvuku cez HDMI alebo S/PDIF. ⚠ Experimentálne môže dôjsť k nesynchronizácii A/V</string>
     <string name="preferences_parser_sync_mode">Synchronizačný režim analyzátora</string>
     <string name="preferences_parser_sync_mode_cdata">PTS (odporúčané)</string>
@@ -546,6 +548,8 @@
     <string name="preferences_allow_3rd_party_player_summary">Pri spustení prehrávania videa systém Android navrhne ďalšie kompatibilné aplikácie prehrávača videa. Upozorňujeme, že niektoré funkcie nebudú fungovať (obnovenie, záložky atď.)</string>
     <string name="preference_tv_3d_automatic_switch">Povolenie automatického prepnutia 3D TV</string>
     <string name="preference_tv_3d_automatic_switch_summary">Túto funkciu používajte len vtedy, ak ju váš 3D televízor podporuje</string>
+    <string name="enable_android_frame_timing">Zapnutie Android časovania snímok</string>
+    <string name="enable_android_frame_timing_summary">Delegovať na Android časovanie prelínania snímok pre plynulejšie prehrávanie (experimentálne)</string>
     <string name="preference_tv_refreshrate_switch">Povolenie automatického prepínania obnovovacej frekvencie</string>
     <string name="preference_tv_refreshrate_switch_summary">Odstránenie efektu trhania prispôsobením najlepšej obnovovacej frekvencie obrazovky snímkovej frekvencii videa (podpora zariadenia sa môže líšiť)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Vypnutý</string>

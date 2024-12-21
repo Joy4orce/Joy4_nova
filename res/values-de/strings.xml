@@ -530,6 +530,7 @@
     <string name="preferences_allow_3rd_party_player_summary">Kompatible Apps werden zum Abspielen vorgeschlagen. Einige Features wie Fortsetzungspunkte und Lesezeichen werden allerdings nicht funktionieren.</string>
     <string name="preference_tv_3d_automatic_switch">Automatische 3D-Umschaltung\"</string>
     <string name="preference_tv_3d_automatic_switch_summary">Nur für TV-Geräte mit 3D-Wiedergabe\"</string>
+    <string name="enable_android_frame_timing_summary">\"Frame blit timing\" für eine ruckelfreiere Wiedergabe auf Android delegieren (experimentell)</string>
     <string name="preference_tv_refreshrate_switch">Automatische Aktualisierungsrate aktivieren</string>
     <string name="preference_tv_refreshrate_switch_summary">Entferne den Richtereffekt, indem du die beste Bildschirmwiederholungsrate an die Bildwiederholrate anpassst (Geräteunterstützung kann variieren)</string>
     <string name="preference_remove_dolby_vision">Deaktiviere Dolby-Vision</string>
