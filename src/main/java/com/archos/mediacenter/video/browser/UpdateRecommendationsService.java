@@ -93,8 +93,7 @@ public class  UpdateRecommendationsService extends IntentService implements Defa
 			VideoStore.Video.VideoColumns.SCRAPER_E_NAME,
 			VideoStore.Video.VideoColumns.SCRAPER_E_SEASON,
 			VideoStore.Video.VideoColumns.SCRAPER_E_EPISODE,
-			COVER,  NAME,
-			null, null
+			COVER,  NAME
 	};
 	private int mNameColumn;
 	private NotificationManager mNotificationManager;
