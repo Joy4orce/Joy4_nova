@@ -216,6 +216,14 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
+                <data android:scheme="smb" />
+                <data android:scheme="smbj" />
+                <data android:scheme="ftps" />
+                <data android:scheme="ftp" />
+                <data android:scheme="sftp" />
+                <data android:scheme="sshj" />
+                <data android:scheme="webdav" />
+                <data android:scheme="webdavs" />
                 <data android:scheme="httplive" />
                 <data android:scheme="mms" />
                 <data android:scheme="mmsh" />
@@ -245,6 +253,14 @@
                 <data android:scheme="content"/>
                 <data android:scheme="http"/>
                 <data android:scheme="https"/>
+                <data android:scheme="smb" />
+                <data android:scheme="smbj" />
+                <data android:scheme="ftps" />
+                <data android:scheme="ftp" />
+                <data android:scheme="sftp" />
+                <data android:scheme="sshj" />
+                <data android:scheme="webdav" />
+                <data android:scheme="webdavs" />
                 <data android:mimeType="video/*"/>
                 <data android:mimeType="application/sdp"/>
                 <data android:mimeType="application/mp4"/>
@@ -269,6 +285,14 @@
                 <data android:scheme="content"/>
                 <data android:scheme="http"/>
                 <data android:scheme="https"/>
+                <data android:scheme="smb" />
+                <data android:scheme="smbj" />
+                <data android:scheme="ftps" />
+                <data android:scheme="ftp" />
+                <data android:scheme="sftp" />
+                <data android:scheme="sshj" />
+                <data android:scheme="webdav" />
+                <data android:scheme="webdavs" />
                 <data android:host="*"/>
                 <data android:mimeType="video/*"/>
                 <data android:mimeType="application/sdp"/>
@@ -301,7 +325,14 @@
                 <data android:scheme="file" />
                 <data android:scheme="http" />
                 <data android:scheme="https" />
+                <data android:scheme="smb" />
+                <data android:scheme="smbj" />
+                <data android:scheme="ftps" />
                 <data android:scheme="ftp" />
+                <data android:scheme="sftp" />
+                <data android:scheme="sshj" />
+                <data android:scheme="webdav" />
+                <data android:scheme="webdavs" />
                 <data android:scheme="magnet"/>
                 <data android:host="*" />
                 <data android:mimeType="video/*" />
@@ -655,9 +686,16 @@
 
                 <data android:scheme="content" />
                 <data android:scheme="file" />
-                <data android:scheme="ftp" />
                 <data android:scheme="http" />
                 <data android:scheme="https" />
+                <data android:scheme="smb" />
+                <data android:scheme="smbj" />
+                <data android:scheme="ftps" />
+                <data android:scheme="ftp" />
+                <data android:scheme="sftp" />
+                <data android:scheme="sshj" />
+                <data android:scheme="webdav" />
+                <data android:scheme="webdavs" />
                 <data android:host="*" />
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.3G2" />
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.3GP" />
