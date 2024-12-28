@@ -259,7 +259,7 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                                 try {
                                     NfoWriter.export(fileUri, baseTags, exportContext);
                                 } catch (IOException e) {
-                                    log.error("caugth IOException: ", e);
+                                    log.error("caught IOException: ", e);
                                 }
                         }
                         index += window;
