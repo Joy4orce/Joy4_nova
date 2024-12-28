@@ -140,7 +140,7 @@ public class RemoteStateService extends IntentService implements UpnpServiceMana
 
     protected void handleDb(Context context, boolean hasConnection, boolean hasLocalConnection) {
         if(mUpnpId==null) mUpnpId =new ConcurrentHashMap<>();
-        mUpnpId.clear();
+        else mUpnpId.clear();
         final ContentResolver cr = context.getContentResolver();
         log.debug("handleDb: hasConnection=" + hasConnection + ", hasLocalConnection=" + hasLocalConnection);
         if (hasConnection) {
