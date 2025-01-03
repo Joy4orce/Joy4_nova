@@ -460,7 +460,7 @@ public class Delete {
 
         for (String extension : extensionsToClean) {
             // relocate uri for local files to writeable location to comply with API30
-            Uri uri = FileUtils.relocateNfoJpgAppPublicDir(Uri.parse(parentUri.toString() + filenameWithoutExtension + extension));
+            Uri uri = FileUtils.relocateNfoAppPublicDirForNfoJpgFiles(Uri.parse(parentUri.toString() + filenameWithoutExtension + extension));
             if (uri!=null) { // is it possible?
                 result.add(uri);
             }
