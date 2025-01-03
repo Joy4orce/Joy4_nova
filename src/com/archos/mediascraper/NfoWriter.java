@@ -15,7 +15,8 @@
 
 package com.archos.mediascraper;
 
-import static com.archos.filecorelibrary.FileUtils.relocateNfoJpgAppPublicDir;
+import static com.archos.filecorelibrary.FileUtils.relocateNfoAppPublicDir;
+import static com.archos.filecorelibrary.FileUtils.relocateNfoAppPublicDirForNfoJpgFiles;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -286,7 +287,7 @@ public class NfoWriter {
 
         String videoName = FileUtils.getFileNameWithoutExtension(video);
         Uri parent = FileUtils.getParentUrl(video);
-        Uri exportTarget =  relocateNfoJpgAppPublicDir(Uri.withAppendedPath(parent, videoName + NfoParser.CUSTOM_NFO_EXTENSION));
+        Uri exportTarget =  relocateNfoAppPublicDirForNfoJpgFiles(Uri.withAppendedPath(parent, videoName + NfoParser.CUSTOM_NFO_EXTENSION));
         try {
             FileEditor editor = FileEditorFactoryWithUpnp.getFileEditorForUrl(exportTarget, null);
             // Delete existing file to avoid overwrite issue (end of previous content still there is the new content is shorter)
@@ -322,7 +323,7 @@ public class NfoWriter {
         String videoName = FileUtils.getFileNameWithoutExtension(video);
         Uri parent = FileUtils.getParentUrl(video);
         // relocate uri for local files to writeable location to comply with API30
-        Uri exportTarget =  relocateNfoJpgAppPublicDir(Uri.withAppendedPath(parent, videoName + NfoParser.CUSTOM_NFO_EXTENSION));
+        Uri exportTarget =  relocateNfoAppPublicDirForNfoJpgFiles(Uri.withAppendedPath(parent, videoName + NfoParser.CUSTOM_NFO_EXTENSION));
         try {
             FileEditor editor = FileEditorFactoryWithUpnp.getFileEditorForUrl(exportTarget,null);
             // Delete existing file to avoid overwrite issue (end of previous content still there is the new content is shorter)
@@ -361,7 +362,8 @@ public class NfoWriter {
         Uri parent = FileUtils.getParentUrl(video);
         String showTitle = StringUtils.fileSystemEncode(tag.getTitle());
         // relocate uri for local files to writeable location to comply with API30
-        Uri exportTarget =  relocateNfoJpgAppPublicDir(Uri.withAppendedPath(parent, showTitle + NfoParser.CUSTOM_SHOW_NFO_EXTENSION));
+        Uri exportTarget =  relocateNfoAppPublicDirForNfoJpgFiles(Uri.withAppendedPath(parent, showTitle + NfoParser.CUSTOM_SHOW_NFO_EXTENSION));
+        log.debug("exportInternal: {} -> {}", video, exportTarget);
         try {
             FileEditor editor = FileEditorFactoryWithUpnp.getFileEditorForUrl(exportTarget, null);
             // Delete existing file to avoid overwrite issue (end of previous content still there is the new content is shorter)
@@ -389,7 +391,7 @@ public class NfoWriter {
                 }
             }
         } catch (Exception e) {
-            log.error("exportInternal: caught exception for uri {}", video, e);
+            log.error("exportInternal: caught exception for uri {}", exportTarget, e);
         }
 
     }
@@ -409,7 +411,7 @@ public class NfoWriter {
             String imageName) {
 
         // relocate uri for local files to writeable location to comply with API30
-        Uri target = Uri.withAppendedPath(relocateNfoJpgAppPublicDir(folder), imageName);
+        Uri target = Uri.withAppendedPath(relocateNfoAppPublicDir(folder), imageName);
         if (image != null) {
             File file = image.getLargeFileF();
             Uri from = Uri.parse(file.getAbsolutePath());

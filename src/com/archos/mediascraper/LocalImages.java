@@ -130,7 +130,7 @@ public class LocalImages {
 
         // video = e.g. smb://server/share/Movies/The Movie/The Movie.avi
         // relocate uri for local files to writeable location to comply with API30
-        Uri parent = FileUtils.getParentUrl(FileUtils.relocateNfoJpgAppPublicDir(video));
+        Uri parent = FileUtils.getParentUrl(FileUtils.relocateNfoAppPublicDirForNfoJpgFiles(video));
         String nameNoExt = FileUtils.getFileNameWithoutExtension(video);
         if (parent != null && nameNoExt != null&&!nameNoExt.isEmpty()) {
             // check for smb://server/share/Movies/The Movie/The Movie.tbn
@@ -175,7 +175,7 @@ public class LocalImages {
             return null;
 
         // relocate uri for local files to writeable location to comply with API30
-        Uri parent = com.archos.filecorelibrary.FileUtils.getParentUrl(FileUtils.relocateNfoJpgAppPublicDir(video));
+        Uri parent = com.archos.filecorelibrary.FileUtils.getParentUrl(FileUtils.relocateNfoAppPublicDir(video));
         boolean testShowTitle = !TextUtils.isEmpty(showTitle);
         // we create "show name-poster.jpg" files
         String showTitleFile = testShowTitle ? NfoParser.getCustomShowPosterName(showTitle) : "";
@@ -215,7 +215,7 @@ public class LocalImages {
             return null;
 
         // relocate uri for local files to writeable location to comply with API30
-        Uri parent = FileUtils.getParentUrl(FileUtils.relocateNfoJpgAppPublicDir(video));
+        Uri parent = FileUtils.getParentUrl(FileUtils.relocateNfoAppPublicDir(video));
         boolean testShowTitle = !TextUtils.isEmpty(showTitle);
         // we create "show name-season03.jpg" files
         String showTitleFile = testShowTitle ? NfoParser.getCustomSeasonPosterName(showTitle, season) : "";
@@ -245,9 +245,8 @@ public class LocalImages {
             // so check for images like
             // smb://server/share/TvShows/The Simpsons/season01.tbn
 
-            //TODO test
             // relocate uri for local files to writeable location to comply with API30
-            Uri grandParent = FileUtils.getParentUrl(FileUtils.relocateNfoJpgAppPublicDir(parent));
+            Uri grandParent = FileUtils.getParentUrl(FileUtils.relocateNfoAppPublicDir(parent));
             if (grandParent != null) {
                 Uri result = getIfAvailable(grandParent, parent.getLastPathSegment() + ".tbn");
                 if (result != null)
@@ -284,7 +283,7 @@ public class LocalImages {
 
         // parent = smb://server/share/Movies/Transformers/
         // relocate uri for local files to writeable location to comply with API30
-        Uri parent = FileUtils.getParentUrl(FileUtils.relocateNfoJpgAppPublicDir(video));
+        Uri parent = FileUtils.getParentUrl(FileUtils.relocateNfoAppPublicDir(video));
 
         // nameNoExt = Tansformers.3.1080p
         String nameNoExt =  FileUtils.getFileNameWithoutExtension(video);

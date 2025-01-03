@@ -183,7 +183,7 @@ public class NfoParser {
         result.videoFile = video;
 
         // relocate uri for local files to writeable location to comply with API30
-        Uri videoParent = result.videoFolder = FileUtils.relocateNfoJpgAppPublicDir(FileUtils.getParentUrl(video));
+        Uri videoParent = result.videoFolder = FileUtils.relocateNfoAppPublicDir(FileUtils.getParentUrl(video));
         String videoNameNoExt = result.videoFileNameNoExt = FileUtils.getFileNameWithoutExtension(video);
         if (videoParent == null)
             return result;
@@ -252,7 +252,7 @@ public class NfoParser {
             InputStream nfoInputStream = null;
             try {
                 // relocate uri for local files to writeable location to comply with API30
-                nfoInputStream = FileEditorFactoryWithUpnp.getFileEditorForUrl(FileUtils.relocateNfoJpgAppPublicDir(nfo.videoNfo), null).getInputStream();
+                nfoInputStream = FileEditorFactoryWithUpnp.getFileEditorForUrl(FileUtils.relocateNfoAppPublicDirForNfoJpgFiles(nfo.videoNfo), null).getInputStream();
                 NfoRootHandler rootHandler = importContext.getRootHandler();
                 importContext.getParser().parse(nfoInputStream, rootHandler);
                 BaseTags tag = rootHandler.getResult(context, nfo.videoFile);
