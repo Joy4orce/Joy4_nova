@@ -106,7 +106,7 @@ public class Blacklist {
                 if (filePath.startsWith(blacklisted)) return true;
         }
         // this one needs to be done on networkscannerservicevideo: the shortcut is done
-        return isFilenameBlacklisted(file.getLastPathSegment());
+        return isFilenameBlacklisted(FileUtils.getName(file));
     }
 
     public boolean isBlacklistedManual(Uri file) {
@@ -118,7 +118,7 @@ public class Blacklist {
                 if (filePath.startsWith(blacklisted)) return true;
         }
         // this one needs to be done on networkscannerservicevideo: the shortcut is done
-        return isFilenameBlacklisted(file.getLastPathSegment());
+        return isFilenameBlacklisted(FileUtils.getName(file));
     }
 
     public boolean isFilenameBlacklisted(String fileName) { // check if fileName contains sample|trailer

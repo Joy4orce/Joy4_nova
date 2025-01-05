@@ -253,7 +253,7 @@ public class IndexHelper implements LoaderManager.LoaderCallbacks<Cursor>, Loade
             // Data contains VideoStore.Video.Media.EXTERNAL_CONTENT_URI + videoId
             if (uriPath.startsWith(VideoStore.Video.Media.EXTERNAL_CONTENT_URI.getPath())
                     || uriPath.startsWith(MediaStore.Video.Media.EXTERNAL_CONTENT_URI.getPath())) {
-                String idString = uri.getLastPathSegment();
+                String idString = FileUtils.getName(uri);
                 try {
                     mVideoId = Long.parseLong(idString);
                 } catch (NumberFormatException e) {

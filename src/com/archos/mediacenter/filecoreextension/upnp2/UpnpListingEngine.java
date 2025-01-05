@@ -18,6 +18,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.filecorelibrary.ListingEngine;
 import com.archos.filecorelibrary.MimeUtils;
 
@@ -77,7 +78,7 @@ public class UpnpListingEngine extends ListingEngine {
             mListener.onListingFatalError(null, ErrorEnum.ERROR_UPNP_DEVICE_NOT_FOUND);
             return;
         }
-        String containerId = mUri.getLastPathSegment();
+        String containerId = FileUtils.getName(mUri);
         listFiles(device, containerId);
     }
 

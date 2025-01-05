@@ -34,6 +34,7 @@ import android.os.ParcelFileDescriptor;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.medialib.R;
 import com.archos.mediaprovider.DbHolder;
 import com.archos.mediascraper.BaseTags;
@@ -379,7 +380,7 @@ public class ScraperProvider extends ContentProvider {
     }
 
     public int internalDelete(Uri uri, String selection, String[] selectionArgs) {
-        String data = uri.getLastPathSegment();
+        String data = FileUtils.getName(uri);
         String whereClause;
         String[] whereArgs;
         SQLiteDatabase db = mDbHolder.get();
@@ -747,7 +748,7 @@ public class ScraperProvider extends ContentProvider {
         Bundle extras = new Bundle();
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
         Cursor c;
-        String data = uri.getLastPathSegment();
+        String data = FileUtils.getName(uri);
         qb.setCursorFactory(new ScraperCursorFactory());
 
         boolean useId = false;
@@ -1124,7 +1125,7 @@ public class ScraperProvider extends ContentProvider {
                 throw new FileNotFoundException("No files supported by provider at " + uri);
         }
         SQLiteDatabase db = mDbHolder.get();
-        Cursor c = db.query(table, cols, "_id=?", new String[] { uri.getLastPathSegment() }, null, null, "_id");
+        Cursor c = db.query(table, cols, "_id=?", new String[] { FileUtils.getName(uri) }, null, null, "_id");
 
         String url = null;
         String file = null;
@@ -1216,7 +1217,7 @@ public class ScraperProvider extends ContentProvider {
         switch (sUriMatcher.match(uri)) {
             case EPISODE_ID:
                 selection = "_id=?";
-                selectionArgs = new String[] { uri.getLastPathSegment() };
+                selectionArgs = new String[] { FileUtils.getName(uri) };
                 //$FALL-THROUGH$
             case EPISODE:
                 table = ScraperTables.EPISODE_TABLE_NAME;
@@ -1224,7 +1225,7 @@ public class ScraperProvider extends ContentProvider {
 
             case SHOW_ID:
                 selection = "_id=?";
-                selectionArgs = new String[] { uri.getLastPathSegment() };
+                selectionArgs = new String[] { FileUtils.getName(uri) };
                 //$FALL-THROUGH$
             case SHOW:
             case SHOW_NAME:
@@ -1233,7 +1234,7 @@ public class ScraperProvider extends ContentProvider {
 
             case MOVIE_ID:
                 selection = "_id=?";
-                selectionArgs = new String[] { uri.getLastPathSegment() };
+                selectionArgs = new String[] { FileUtils.getName(uri) };
                 //$FALL-THROUGH$
             case MOVIE:
                 table = ScraperTables.MOVIE_TABLE_NAME;
@@ -1253,7 +1254,7 @@ public class ScraperProvider extends ContentProvider {
                 break;
             case MOVIE_COLLECTION_ID:
                 selection = "_id=?";
-                selectionArgs = new String[] { uri.getLastPathSegment() };
+                selectionArgs = new String[] { FileUtils.getName(uri) };
                 //$FALL-THROUGH$
             case MOVIE_COLLECTION:
                 table = ScraperTables.MOVIE_COLLECTION_TABLE_NAME;

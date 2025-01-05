@@ -16,6 +16,7 @@ package com.archos.mediacenter.filecoreextension.upnp2;
 
 import android.net.Uri;
 
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.filecorelibrary.MetaFile2;
 import com.archos.filecorelibrary.RawLister;
 import com.archos.filecorelibrary.AuthenticationException;
@@ -83,14 +84,15 @@ public class UpnpRawLister extends RawLister  {
         mUpnpServiceManager = UpnpServiceManager.getSingleton(null); //won't create, so we need to be sure it has already been created before
         mUri = uri;
         mLock = new Object();
-        log.debug("UpnpRawLister() uri=" + mUri + " lastPath=" + mUri.getLastPathSegment());
+        log.debug("UpnpRawLister() uri=" + mUri + " lastPath=" + FileUtils.getName(mUri));
         // Get Device from its hash key that is in the Uri
         mDevice = mUpnpServiceManager.getDeviceByKey_blocking(Integer.parseInt(mUri.getHost()), 500); // NPE on subs listing
 
         // Container ID is encoded at the end of the Uri, need to decode it here
         try {
-            if(mUri.getLastPathSegment()!=null)
-                mContainerId = URLDecoder.decode(mUri.getLastPathSegment(), "UTF-8");
+            String lastPathSegment = FileUtils.getName(mUri);
+            if(lastPathSegment!=null)
+                mContainerId = URLDecoder.decode(lastPathSegment, "UTF-8");
         } catch (UnsupportedEncodingException e) { /* does not happen, UTF-8 always available... */ }
     }
 

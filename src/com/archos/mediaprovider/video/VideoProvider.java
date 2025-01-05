@@ -266,7 +266,7 @@ public class VideoProvider extends ContentProvider implements DefaultLifecycleOb
 
         // query our custom files tables directly
         if (table == RAW) {
-            String tableName = uri.getLastPathSegment();
+            String tableName = FileUtils.getName(uri);
             return db.query(distinct, tableName, projectionIn, selection, selectionArgs, groupby, having, sort, limit, cancellationSignal);
         }
 
@@ -279,14 +279,14 @@ public class VideoProvider extends ContentProvider implements DefaultLifecycleOb
         switch (table) {
             case FILES_ID:
                 qb.appendWhere("_id=?");
-                prependArgs.add(uri.getLastPathSegment());
+                prependArgs.add(FileUtils.getName(uri));
                 //$FALL-THROUGH$
             case FILES:
                 qb.setTables(VideoOpenHelper.FILES_TABLE_NAME);
                 break;
             case VIDEO_MEDIA_ID:
                 qb.appendWhere("_id=?");
-                prependArgs.add(uri.getLastPathSegment());
+                prependArgs.add(FileUtils.getName(uri));
                 //$FALL-THROUGH$
             case VIDEO_MEDIA:
                 qb.setTables(VideoOpenHelper.VIDEO_VIEW_NAME);
@@ -294,7 +294,7 @@ public class VideoProvider extends ContentProvider implements DefaultLifecycleOb
             case VIDEO_LIST: {
                 qb.setTables(ListTables.VIDEO_LIST_TABLE);
                 qb.appendWhere(VideoStore.List.Columns.ID+"=?");
-                prependArgs.add(uri.getLastPathSegment());
+                prependArgs.add(FileUtils.getName(uri));
                 break;
             }
             case LIST:{
@@ -318,14 +318,14 @@ public class VideoProvider extends ContentProvider implements DefaultLifecycleOb
                 break;
             case SUBS_MEDIA_ID:
                 qb.appendWhere("_id=?");
-                prependArgs.add(uri.getLastPathSegment());
+                prependArgs.add(FileUtils.getName(uri));
                 //$FALL-THROUGH$
             case SUBS_MEDIA:
                 qb.setTables(VideoOpenHelper.SUBTITLES_TABLE_NAME);
                 break;
             case SUBS_MEDIA_VIDEO_ID:
                 qb.appendWhere("video_id=?");
-                prependArgs.add(uri.getLastPathSegment());
+                prependArgs.add(FileUtils.getName(uri));
                 qb.setTables(VideoOpenHelper.SUBTITLES_TABLE_NAME);
                 break;
             default:
@@ -416,7 +416,7 @@ public class VideoProvider extends ContentProvider implements DefaultLifecycleOb
 
         // insert into our custom files tables.
         if (match == RAW) {
-            String table = uri.getLastPathSegment();
+            String table = FileUtils.getName(uri);
             long rowId = db.insert(table, null, values);
             if (rowId > 0) {
                 Uri result = ContentUris.withAppendedId(uri, rowId);
@@ -454,7 +454,7 @@ public class VideoProvider extends ContentProvider implements DefaultLifecycleOb
                 break;
             }
             case VIDEO_LIST: {
-                int listId = Integer.valueOf(uri.getLastPathSegment());
+                int listId = Integer.valueOf(FileUtils.getName(uri));
                 values.put(VideoStore.VideoList.Columns.LIST_ID,listId);
                 db.insertWithOnConflict(ListTables.VIDEO_LIST_TABLE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
                 newUri = uri;
@@ -578,7 +578,7 @@ public class VideoProvider extends ContentProvider implements DefaultLifecycleOb
                 // those must be deleted in Android's db and the result imported
                 throw new IllegalStateException("delete not supported, has to be done via Android's MediaStore");
             case RAW:
-                String tableName = uri.getLastPathSegment();
+                String tableName = FileUtils.getName(uri);
                 int result = db.delete(tableName, selection, selectionArgs);
                 if (result > 0 && !db.inTransaction()) {
                     mCr.notifyChange(VideoStore.ALL_CONTENT_URI, null);
@@ -587,7 +587,7 @@ public class VideoProvider extends ContentProvider implements DefaultLifecycleOb
             case VIDEO_LIST:
                 selection+= " AND "+ VideoStore.VideoList.Columns.LIST_ID+" = ?";
                 List<String> whereArgs = new ArrayList<String>(Arrays.asList(selectionArgs));
-                whereArgs.add(uri.getLastPathSegment());
+                whereArgs.add(FileUtils.getName(uri));
                 result = db.delete(ListTables.VIDEO_LIST_TABLE, selection, whereArgs.toArray(new String[0]));
                 mCr.notifyChange(VideoStore.ALL_CONTENT_URI, null);
                 return result;
@@ -625,7 +625,7 @@ public class VideoProvider extends ContentProvider implements DefaultLifecycleOb
 
         switch (match) {
             case RAW: {
-                String tableName = uri.getLastPathSegment();
+                String tableName = FileUtils.getName(uri);
                 if (VideoOpenHelper.FILES_TABLE_NAME.equals(tableName)) {
                     // if KEY_SCANNER is present that update was generated by our scanner
                     if (initialValues.containsKey(VideoStoreInternal.KEY_SCANNER)) {
@@ -643,7 +643,7 @@ public class VideoProvider extends ContentProvider implements DefaultLifecycleOb
             case VIDEO_LIST: {
                 userWhere+= " AND "+ VideoStore.VideoList.Columns.LIST_ID+" = ?";
                 List<String> whereArgs2 = new ArrayList<String>(Arrays.asList(whereArgs));
-                whereArgs2.add(uri.getLastPathSegment());
+                whereArgs2.add(FileUtils.getName(uri));
                 int result = db.update(ListTables.VIDEO_LIST_TABLE, initialValues, userWhere, whereArgs2.toArray(new String[0]));
                 mCr.notifyChange(VideoStore.ALL_CONTENT_URI, null);
                 return result;
@@ -782,18 +782,18 @@ public class VideoProvider extends ContentProvider implements DefaultLifecycleOb
 
             case VIDEO_MEDIA_ID:
                 out.table = VideoOpenHelper.FILES_TABLE_NAME;
-                where = "_id=" + uri.getLastPathSegment();
+                where = "_id=" + FileUtils.getName(uri);
                 break;
 
             case VIDEO_THUMBNAILS_ID:
-                where = "_id=" + uri.getLastPathSegment();
+                where = "_id=" + FileUtils.getName(uri);
                 //$FALL-THROUGH$
             case VIDEO_THUMBNAILS:
                 out.table = VideoOpenHelper.VIDEOTHUMBNAIL_TABLE_NAME;
                 break;
 
             case ARCHOS_SMB_SERVER_ID:
-                where = "_id=" + uri.getLastPathSegment();
+                where = "_id=" + FileUtils.getName(uri);
                 //$FALL-THROUGH$
             case ARCHOS_SMB_SERVER:
                 out.table = VideoOpenHelper.SMB_SERVER_TABLE_NAME;
@@ -908,7 +908,7 @@ public class VideoProvider extends ContentProvider implements DefaultLifecycleOb
     private boolean waitForThumbnailReady(Uri origUri) {
         log.debug("waitForThumbnailReady");
 
-        String origId = origUri.getLastPathSegment();
+        String origId = FileUtils.getName(origUri);
         String[] whereArgs = new String[] { origId };
         Cursor c = query(origUri, new String[] { BaseColumns._ID, MediaColumns.DATA,
                 VideoColumns.MINI_THUMB_MAGIC, VideoColumns.ARCHOS_THUMB_TRY}, LIGHT_INDEX_STORAGE_QUERY, whereArgs , null);

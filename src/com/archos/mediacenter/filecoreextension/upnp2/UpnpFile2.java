@@ -97,7 +97,7 @@ public class UpnpFile2 extends MetaFile2 {
     private UpnpFile2(Uri indexableUri) {
         mIsDirectory = true;
         mUri = indexableUri.toString();
-        mName = indexableUri.getLastPathSegment();
+        mName = FileUtils.getName(indexableUri);
         mContentPath = null;
         mMimeType = null;
         mLength = -1;

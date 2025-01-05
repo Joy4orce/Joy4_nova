@@ -583,7 +583,7 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
             if (!isValidType(fileType)) return;
             if (ArchosMediaFile.isHiddenFile(file)) return;
             // shortcut for blacklist check for trailer/sample, full should be isBlacklisted
-            if (mBlacklist.isFilenameBlacklisted(file.getUri().getLastPathSegment())) return;
+            if (mBlacklist.isFilenameBlacklisted(FileUtils.getName(file.getUri()))) return;
             log.trace("FileVisitListener.onFile: File " + file.getUri().toString());
             String p = file.getUri().toString();
             PrescanItem existingItem = null;
@@ -955,7 +955,7 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
         long id = 0;
         Uri result = cr.insert(uri, cv);
         if (result != null) {
-            String idString = result.getLastPathSegment();
+            String idString = FileUtils.getName(result);
             try {
                 id = Long.parseLong(idString);
             } catch (NumberFormatException e) {

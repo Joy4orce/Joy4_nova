@@ -25,6 +25,7 @@ import android.os.Environment;
 import android.provider.BaseColumns;
 import android.util.DisplayMetrics;
 
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediaprovider.video.ScraperStore;
 
 import org.slf4j.Logger;
@@ -229,7 +230,7 @@ public class ScraperImage {
         Uri insert = context.getContentResolver().insert(mType.baseUri, cv);
         long result = -1;
         if (insert != null)
-            result = Long.parseLong(insert.getLastPathSegment());
+            result = Long.parseLong(FileUtils.getName(insert));
         mId = result;
         return result;
     }
