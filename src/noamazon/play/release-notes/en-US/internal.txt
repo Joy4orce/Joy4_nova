@@ -1,11 +1,11 @@
 - fix NFO relocation regression
 - fix nova use as external player with kodi
+- fix 7.1 stereo downmix
 - 2025 banners
 - add pgs subtitles support
-- true passthrough support of TrueHD and DTS:X on Fire stick 4k max 2023 -- requires nova encapsulation mode 1
+- true passthrough support of TrueHD & DTS:X on FireStick4kMax 2023 (requires nova encapsulation mode 1)
 - support subtitles position SSA tags
 - select proper dolby vision codec depending on profile
-- upgrade to dav1d 1.5.0
 - fix performance during video scanning using trakt
 - add locale setting in nova for devices with restricted language support
 - target SDK 34
