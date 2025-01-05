@@ -18,6 +18,7 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.archos.filecorelibrary.FileEditor;
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.filecorelibrary.MetaFile2;
 import com.archos.filecorelibrary.MimeUtils;
 import com.archos.filecorelibrary.RawLister;
@@ -49,7 +50,7 @@ public class HttpFile2 extends MetaFile2 {
     private HttpFile2(Uri indexableUri) {
         mIsDirectory = false;
         mUri = indexableUri.toString();
-        mName = indexableUri.getLastPathSegment();
+        mName = FileUtils.getName(indexableUri);
         mContentPath = indexableUri.toString();
         mMimeType = null;
         mLength = -1;
