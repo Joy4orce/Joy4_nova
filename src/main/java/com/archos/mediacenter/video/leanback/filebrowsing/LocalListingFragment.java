@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.archos.customizedleanback.widget.MyTitleView;
 import com.archos.environment.ArchosUtils;
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediacenter.utils.BlacklistedDbAdapter;
 import com.archos.mediacenter.video.R;
 import com.archos.mediaprovider.ArchosMediaIntent;
@@ -129,7 +130,7 @@ public class LocalListingFragment extends ListingFragment {
     protected void createBlacklisted() {
 
         String blacklistedPath = mUri.toString();
-        String blacklistedName = getArguments().getString(ARG_TITLE)!=null?getArguments().getString(ARG_TITLE):mUri.getLastPathSegment();
+        String blacklistedName = getArguments().getString(ARG_TITLE)!=null?getArguments().getString(ARG_TITLE): FileUtils.getName(mUri);
         boolean result = BlacklistedDbAdapter.VIDEO.addBlacklisted(getActivity(), new BlacklistedDbAdapter.Blacklisted(blacklistedPath));
 
         if (result) {
@@ -152,7 +153,7 @@ public class LocalListingFragment extends ListingFragment {
     /** Remove current Uri from the blacklisted list */
     private void deleteBlacklisted() {
         String blacklistedPath = mUri.toString();
-        String blacklistedName = getArguments().getString(ARG_TITLE)!=null?getArguments().getString(ARG_TITLE):mUri.getLastPathSegment();
+        String blacklistedName = getArguments().getString(ARG_TITLE)!=null?getArguments().getString(ARG_TITLE):FileUtils.getName(mUri);
 
         boolean result = BlacklistedDbAdapter.VIDEO.deleteBlacklisted(getActivity(), mUri.toString());
         if (result) {

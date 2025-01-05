@@ -32,6 +32,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediacenter.utils.ActionItem;
 import com.archos.mediacenter.utils.QuickAction;
 import com.archos.mediacenter.utils.ShortcutDbAdapter;
@@ -68,11 +69,12 @@ public abstract class NewRootFragment extends Fragment implements WorkgroupShort
         }
         rootUriString += "/";// important to end with "/"
         Uri rootUri = Uri.parse(rootUriString);
+        String lastPathSegment = FileUtils.getName(uri);
         Bundle args = new Bundle();
         args.putParcelable(BrowserByNetwork.CURRENT_DIRECTORY, uri);
         args.putString(BrowserByNetwork.TITLE
-                , uri.getLastPathSegment());
-        args.putString(BrowserByNetwork.SHARE_NAME, uri.getLastPathSegment());
+                , lastPathSegment);
+        args.putString(BrowserByNetwork.SHARE_NAME, lastPathSegment);
 
         Fragment f;
         if ("smb".equals(uri.getScheme())) {
@@ -116,7 +118,7 @@ public abstract class NewRootFragment extends Fragment implements WorkgroupShort
                     //if not a shortcut = indexed folder, add as indexed folder and remove static shortcut
                     if(ShortcutDb.STATIC.isShortcut(getContext(), uri.toString()) != -1)
                         ShortcutDb.STATIC.removeShortcut(getActivity(), uri);
-                    ShortcutDbAdapter.VIDEO.addShortcut(getActivity(), new ShortcutDbAdapter.Shortcut(uri.getLastPathSegment(), uri.toString()));
+                    ShortcutDbAdapter.VIDEO.addShortcut(getActivity(), new ShortcutDbAdapter.Shortcut(FileUtils.getName(uri), uri.toString()));
                     loadIndexedShortcuts();
                 }
                 // Close the popup

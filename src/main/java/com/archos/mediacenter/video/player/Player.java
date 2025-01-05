@@ -35,6 +35,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.utils.CodecDiscovery;
 import com.archos.mediacenter.video.utils.VideoMetadata;
@@ -411,7 +412,7 @@ public class Player implements IPlayerControl,
         } else {
             if (scheme.equals("content")) {
                 try {
-                    if (Integer.parseInt(mUri.getLastPathSegment()) <= ArchosMediaCommon.SCANNED_ID_OFFSET)
+                    if (Integer.parseInt(FileUtils.getName(mUri)) <= ArchosMediaCommon.SCANNED_ID_OFFSET)
                         mIsLocalVideo = true;
                 } catch (NumberFormatException e) {}
             }

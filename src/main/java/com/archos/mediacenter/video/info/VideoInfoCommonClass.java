@@ -22,6 +22,7 @@ import android.graphics.Color;
 import android.net.Uri;
 
 import com.archos.filecorelibrary.FileEditor;
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediacenter.filecoreextension.upnp2.FileEditorFactoryWithUpnp;
 import com.archos.mediacenter.filecoreextension.upnp2.StreamUriFinder;
 import com.archos.mediacenter.filecoreextension.upnp2.UpnpServiceManager;
@@ -79,7 +80,7 @@ public class VideoInfoCommonClass {
             if(device!=null) {
                 String friendlyName = UpnpServiceManager.getDeviceFriendlyName(device);
                 if(friendlyName!=null){
-                    video.setFriendlyPath("upnp://" + friendlyName + "/" + video.getFileUri().getLastPathSegment());
+                    video.setFriendlyPath("upnp://" + friendlyName + "/" + FileUtils.getName(video.getFileUri()));
                 }
             }
             if(uri != null){

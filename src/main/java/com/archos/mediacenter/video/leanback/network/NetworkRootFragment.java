@@ -38,6 +38,7 @@ import androidx.leanback.widget.RowPresenter;
 import androidx.core.app.ActivityOptionsCompat;
 import android.view.View;
 
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.filecorelibrary.samba.SambaDiscovery;
 import com.archos.filecorelibrary.samba.Share;
 import com.archos.filecorelibrary.samba.Workgroup;
@@ -309,7 +310,7 @@ public class NetworkRootFragment extends BrowseSupportFragment {
                             Intent intent = new Intent(getActivity(), ListingActivity.getActivityForUri(uri));
                             log.debug("onItemClicked: NetworkBrowse ListingActivity root uri=" + uri + ", root name=" + uri.getHost());
                             intent.putExtra(ListingActivity.EXTRA_ROOT_URI, uri);
-                            String shareName = uri.getLastPathSegment();
+                            String shareName = FileUtils.getName(uri);
                             intent.putExtra(ListingActivity.EXTRA_ROOT_NAME, (shareName==null || shareName.isEmpty())?uri.getHost():shareName);
                             startActivityForResult(intent, REQUEST_CODE_BROWSING);
                         }

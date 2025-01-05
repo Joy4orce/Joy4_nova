@@ -1299,9 +1299,10 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     public void startAsyncTasks() {
         log.debug("startAsyncTasks with " + mCurrentVideo.getFilePath());
         //do not execute file info task when torrent file
+        String getLastPathSegment = FileUtils.getName(mCurrentVideo.getFileUri());
         if((mCurrentVideo.getFileUri() != null &&
-                mCurrentVideo.getFileUri().getLastPathSegment() != null &&
-                !mCurrentVideo.getFileUri().getLastPathSegment().endsWith("torrent")) ||
+                getLastPathSegment != null &&
+                !getLastPathSegment.endsWith("torrent")) ||
                 mIsLaunchFromPlayer) {
             log.debug("startAsyncTasks not a torrent or mIsLaunchFromPlayer starting VideoInfoTask for " + mCurrentVideo.getFilePath());
             if (mVideoInfoTask != null)

@@ -389,8 +389,8 @@ public class SubtitlesDownloaderActivity2 extends AppCompatActivity {
                 Uri newUri = mf2.getStreamingUri();
                 if (newUri != null) {
                     newFileUrl = newUri.toString();
-                    log.debug("getFileInfo: shorten fileUrl to get fileName = " + Uri.parse(fileUrl).getLastPathSegment());
-                    openSubtitlesQueryParams.setFileName(Uri.parse(fileUrl).getLastPathSegment());
+                    log.debug("getFileInfo: shorten fileUrl to get fileName = " + FileUtils.getName(Uri.parse(fileUrl)));
+                    openSubtitlesQueryParams.setFileName(FileUtils.getName(Uri.parse(fileUrl)));
                     Long fileLength = mf2.length();
                     // fileLength can be null (seen on google play console)
                     openSubtitlesQueryParams.setFileLength(fileLength != null ? fileLength : 0); // Add null check here

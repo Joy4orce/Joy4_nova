@@ -26,6 +26,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 
 import com.archos.environment.ArchosFeatures;
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.loader.AllTvshowsLoader;
 import com.archos.mediacenter.video.browser.loader.AnimesLoader;
@@ -709,7 +710,7 @@ public class ChannelManager {
                         if (program.getChannelId() == channel.getId()) {
                             Uri posterUri = program.getPosterArtUri();
 
-                            posterIds.add(Long.parseLong(posterUri.getLastPathSegment()));
+                            posterIds.add(Long.parseLong(FileUtils.getName(posterUri)));
 
                             count++;
                         }

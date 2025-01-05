@@ -72,6 +72,7 @@ import androidx.fragment.app.Fragment;
 import androidx.loader.app.LoaderManager;
 import androidx.preference.PreferenceManager;
 
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediacenter.utils.GlobalResumeView;
 import com.archos.mediacenter.utils.trakt.Trakt;
 import com.archos.mediacenter.video.CustomApplication;
@@ -349,7 +350,7 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
             try {
                 // Open a show
                 if (data.getScheme().equals("show")) {
-                    int showId = Integer.parseInt(data.getLastPathSegment());
+                    int showId = Integer.parseInt(FileUtils.getName(data));
                     Bundle args = new Bundle(2);
                     args.putLong(VideoColumns.SCRAPER_SHOW_ID, showId);
                     args.putString(CursorBrowserByVideo.SUBCATEGORY_NAME, ""); // should better have the show title, but...
@@ -361,7 +362,7 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
                 }
                 // Open a file
                 else {
-                    int videoId = Integer.parseInt(data.getLastPathSegment());
+                    int videoId = Integer.parseInt(FileUtils.getName(data));
                     Uri uri = ContentUris.withAppendedId(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, videoId);
                     Intent intent2 = new Intent(Intent.ACTION_VIEW, uri);
                     if (!mPreferences.getBoolean(VideoPreferencesActivity.ALLOW_3RD_PARTY_PLAYER, VideoPreferencesActivity.ALLOW_3RD_PARTY_PLAYER_DEFAULT)) {

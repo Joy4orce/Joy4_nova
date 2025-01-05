@@ -204,7 +204,7 @@ public class TorrentLoaderActivity extends AppCompatActivity implements TorrentT
             File targetFile = TorrentPathDialogPreference.getDefaultDirectory(PreferenceManager.getDefaultSharedPreferences(this));
             Uri target = Uri.parse("file://" + targetFile.getAbsolutePath());
             //mtorrenttolaunch shouldn't have "file://"
-            mTorrentToLaunch = Uri.withAppendedPath( Uri.parse(targetFile.getAbsolutePath()), mTorrentUri.getLastPathSegment());
+            mTorrentToLaunch = Uri.withAppendedPath( Uri.parse(targetFile.getAbsolutePath()), FileUtils.getName(mTorrentUri));
             CopyCutEngine engine = new CopyCutEngine(getBaseContext());
             engine.setListener(new OperationEngineListener() {
                 @Override

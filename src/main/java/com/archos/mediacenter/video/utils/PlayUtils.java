@@ -123,13 +123,13 @@ public class PlayUtils implements IndexHelper.Listener {
         // try to find extension when none has been set
         String mimeType = video.getMimeType();
         if(mimeType==null&&video.getFileUri()!=null) {
-            String extension = FileUtils.getExtension(video.getFileUri().getLastPathSegment());
+            String extension = FileUtils.getExtension(FileUtils.getName(video.getFileUri()));
             if (extension!=null) {
                 mimeType = MimeUtils.guessMimeTypeFromExtension(extension);
             }
         }
         if(mimeType==null&&video.getStreamingUri()!=null) {
-            String extension = FileUtils.getExtension(video.getStreamingUri().getLastPathSegment());
+            String extension = FileUtils.getExtension(FileUtils.getName(video.getStreamingUri()));
             if (extension!=null) {
                 mimeType = MimeUtils.guessMimeTypeFromExtension(extension);
             }
@@ -303,7 +303,7 @@ public class PlayUtils implements IndexHelper.Listener {
                     try {
                         log.debug("onResumeReady: 3rd party player, non local file, file uri:" + video.getFileUri());
                         StreamOverHttp stream = new StreamOverHttp(video.getFileUri(), mimeType);
-                        dataUri = stream.getUri(video.getFileUri().getLastPathSegment());
+                        dataUri = stream.getUri(FileUtils.getName(video.getFileUri()));
                     } catch (IOException e) {
                         log.error("onResumeReady: failed to start " + video.getFileUri() + e);
                     }
@@ -348,7 +348,7 @@ public class PlayUtils implements IndexHelper.Listener {
                         subUri = Uri.parse(subPath); // these files are in local nova cache not accessible from 3rd party players
                         try {
                             StreamOverHttp stream = new StreamOverHttp(subUri, mimeType);
-                            dataUri = stream.getUri(subUri.getLastPathSegment());
+                            dataUri = stream.getUri(FileUtils.getName(subUri));
                             // vlc
                             if (!subFound) intent.putExtra("subtitles_location", dataUri);
                             subFound = true;

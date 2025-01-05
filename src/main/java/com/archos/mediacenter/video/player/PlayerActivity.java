@@ -75,6 +75,7 @@ import com.archos.environment.ArchosFeatures;
 import com.archos.environment.ArchosIntents;
 import com.archos.environment.ArchosUtils;
 import com.archos.environment.NetworkState;
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediacenter.utils.MediaUtils;
 import com.archos.mediacenter.utils.videodb.IndexHelper;
 import com.archos.mediacenter.utils.videodb.VideoDbInfo;
@@ -3842,7 +3843,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             if (getIntent().getStringExtra("title") != null)
                 mTitle = getIntent().getStringExtra("title");
             else if (scheme == null || !scheme.equals("content"))
-                mTitle = mUri.getLastPathSegment();
+                mTitle = FileUtils.getName(mUri);
             invalidateOptionsMenu();
         }
 

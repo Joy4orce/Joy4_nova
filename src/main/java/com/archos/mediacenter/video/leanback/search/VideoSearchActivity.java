@@ -23,6 +23,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.view.KeyEvent;
 
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.adapters.mappers.VideoCursorMapper;
 import com.archos.mediacenter.video.browser.adapters.object.Video;
@@ -54,7 +55,7 @@ public class VideoSearchActivity extends FragmentActivity {
             // this is something we got from the global search bar
             Cursor cursor = null;
             try {
-                int videoId = Integer.parseInt(intent.getData().getLastPathSegment());
+                int videoId = Integer.parseInt(FileUtils.getName(intent.getData()));
                 SingleVideoLoader loader = new SingleVideoLoader(this, videoId);
                 cursor = getContentResolver().query(loader.getUri(), loader.getProjection(), loader.getSelection(), loader.getSelectionArgs(), loader.getSortOrder());
                 if (cursor.getCount() > 0) {

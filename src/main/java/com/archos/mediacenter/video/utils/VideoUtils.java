@@ -187,7 +187,7 @@ public class VideoUtils {
         if (mPath.getScheme() != null && mPath.getScheme().equals("content")) {
             int id = 0;
             try {
-                id = Integer.parseInt(mPath.getLastPathSegment());
+                id = Integer.parseInt(FileUtils.getName(mPath));
                 ContentResolver cr = context.getContentResolver();
                 VideoDbInfo videoDbInfo = VideoDbInfo.fromId(cr, id);
                 if (DBG) Log.d(TAG, "getFileUriFromContentUri content translated from " + mPath + " to " + ((videoDbInfo != null) ? videoDbInfo.uri : null));

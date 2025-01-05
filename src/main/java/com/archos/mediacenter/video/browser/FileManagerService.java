@@ -38,6 +38,7 @@ import android.text.format.Formatter;
 import android.widget.Toast;
 
 import com.archos.filecorelibrary.CopyCutEngine;
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.filecorelibrary.MetaFile2;
 import com.archos.filecorelibrary.OperationEngineListener;
 import com.archos.mediacenter.video.R;
@@ -167,8 +168,9 @@ public class FileManagerService extends Service implements OperationEngineListen
             nm.cancel(OPEN_NOTIFICATION_ID);
             Uri uri = Uri.withAppendedPath(mTarget, mProcessedFiles.get(0).getName());
             String extension = "*";
-            if(uri.getLastPathSegment().contains(".")&&!uri.getLastPathSegment().endsWith(".")){
-                extension = uri.getLastPathSegment().substring(uri.getLastPathSegment().lastIndexOf(".")+1);
+            String getLastPathSegment = FileUtils.getName(uri);
+            if(getLastPathSegment.contains(".")&&!getLastPathSegment.endsWith(".")){
+                extension = getLastPathSegment.substring(getLastPathSegment.lastIndexOf(".")+1);
             }
 
             String mimeType = mProcessedFiles.get(0).getMimeType() !=null && !mProcessedFiles.get(0).getMimeType().isEmpty() ? mProcessedFiles.get(0).getMimeType() : "*/" + extension;

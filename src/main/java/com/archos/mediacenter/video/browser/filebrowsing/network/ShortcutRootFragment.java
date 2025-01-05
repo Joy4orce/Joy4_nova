@@ -25,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupWindow;
 
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediacenter.utils.ActionItem;
 import com.archos.mediacenter.video.browser.BrowserCategory;
 import com.archos.mediacenter.utils.QuickAction;
@@ -167,10 +168,11 @@ public class ShortcutRootFragment extends NewRootFragment implements View.OnClic
                     Fragment f;
                     if (uri.getScheme().equals("smb")) {
                         f = new BrowserBySmb();
+                        String lastPathSegment = FileUtils.getName(uri);
                         args.putParcelable(BrowserByNetwork.CURRENT_DIRECTORY, uri);
                         args.putString(BrowserByNetwork.TITLE
-                                , uri.getLastPathSegment());
-                        args.putString(BrowserByNetwork.SHARE_NAME, uri.getLastPathSegment());
+                                , lastPathSegment);
+                        args.putString(BrowserByNetwork.SHARE_NAME, lastPathSegment);
                     } else if (uri.getScheme().equals("upnp")) {
                         f = new BrowserByUpnp();
                     } else {

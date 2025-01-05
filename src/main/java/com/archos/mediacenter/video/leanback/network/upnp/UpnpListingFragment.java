@@ -14,6 +14,7 @@
 
 package com.archos.mediacenter.video.leanback.network.upnp;
 
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediacenter.filecoreextension.upnp2.UpnpServiceManager;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.leanback.filebrowsing.ListingFragment;
@@ -54,11 +55,11 @@ public class UpnpListingFragment extends NetworkListingFragment {
     }
 
     protected String getShortcutName() {  //to avoid name like "33" in upnp indexed folders
-        return getArguments().getString(ARG_TITLE)!=null?getArguments().getString(ARG_TITLE):mUri.getLastPathSegment();
+        return getArguments().getString(ARG_TITLE)!=null?getArguments().getString(ARG_TITLE): FileUtils.getName(mUri);
     }
 
     protected String getFriendlyUri() {
-        String shortcutName = getArguments().getString(ARG_TITLE)!=null?getArguments().getString(ARG_TITLE):mUri.getLastPathSegment(); //to avoid name like "33" in upnp
+        String shortcutName = getArguments().getString(ARG_TITLE)!=null?getArguments().getString(ARG_TITLE):FileUtils.getName(mUri); //to avoid name like "33" in upnp
         String friendlyUri = "upnp://";
         String friendlyName = UpnpServiceManager.getSingleton(getActivity()).getDeviceFriendlyName(mUri.getHost());
         if(friendlyName!=null) friendlyUri += friendlyName;

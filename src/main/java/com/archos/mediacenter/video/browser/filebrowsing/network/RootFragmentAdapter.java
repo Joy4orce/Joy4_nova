@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediacenter.utils.ShortcutDbAdapter;
 import com.archos.mediacenter.video.R;
 import com.archos.mediaprovider.video.NetworkScannerServiceVideo;
@@ -112,7 +113,7 @@ public abstract class RootFragmentAdapter extends RecyclerView.Adapter<RecyclerV
                 Uri uri = Uri.parse(mShortcutsCursor.getString(uriColumnIndex));
                 String friendlyUri = mShortcutsCursor.getString(friendlyUriColumnIndex);
                 if(name==null||name.isEmpty()) {
-                    name = uri.getLastPathSegment();
+                    name = FileUtils.getName(uri);
                 }
                 mIndexedShortcuts.add(new ShortcutDbAdapter.Shortcut(name, uri.toString(),friendlyUri));
             }while(mShortcutsCursor.moveToNext());
