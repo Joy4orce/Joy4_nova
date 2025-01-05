@@ -1,5 +1,8 @@
-- true passthrough support of TrueHD and DTS:X on Fire stick 4k max 2023 -- requires nova encapsulation mode 1
+- fix NFO relocation regression
+- fix nova use as external player with kodi
+- 2025 banners
 - add pgs subtitles support
+- true passthrough support of TrueHD and DTS:X on Fire stick 4k max 2023 -- requires nova encapsulation mode 1
 - support subtitles position SSA tags
 - select proper dolby vision codec depending on profile
 - upgrade to dav1d 1.5.0
