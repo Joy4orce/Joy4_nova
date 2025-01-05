@@ -417,7 +417,8 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
             log.debug("doScan path resolved to:" + f.getUri().toString());
             ContentResolver cr = getContentResolver();
             WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
-            wifiLock = wifiManager.createWifiLock(WIFI_MODE_FULL_HIGH_PERF, "ArchosNetworkIndexer");
+            if (wifiLock == null)
+                wifiLock = wifiManager.createWifiLock(WIFI_MODE_FULL_HIGH_PERF, "ArchosNetworkIndexer");
 
             try {
                 if (!wifiLock.isHeld()) {  // Check if the lock is already held
