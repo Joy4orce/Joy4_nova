@@ -267,8 +267,6 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                     } while (index < numberOfRows && isForeground && !Thread.currentThread().isInterrupted());
                     sIsScraping = false;
                     cursor.close();
-                    //log.debug("startExporting: call stopSelf");
-                    //stopSelf();
                 }
             };
             mExportingThread.start();
