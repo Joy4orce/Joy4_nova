@@ -123,6 +123,7 @@ public class RemoteStateService extends IntentService implements UpnpServiceMana
     /** use to issue a check of the smb:// state */
     public static void start(Context context) {
         log.debug("start");
+        if (!isForeground) return;
         Intent intent = new Intent(context, RemoteStateService.class);
         intent.setAction(ACTION_CHECK_SMB);
         context.startService(intent);
