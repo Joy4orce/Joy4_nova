@@ -217,12 +217,16 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
         this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
         super.onCreate(savedInstanceState);
 
-        mSearchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        if (mSearchManager == null) {
+        try {
+            mSearchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+            if (mSearchManager == null) {
+                log.error("onCreate: searchManager is null");
+            } else {
+                mSearchView = new SearchView(this);
+                mSearchView.setSearchableInfo(mSearchManager.getSearchableInfo(getComponentName()));
+            }
+        } catch (IllegalStateException e) {
             log.error("onCreate: searchManager is null");
-        } else {
-            mSearchView = new SearchView(this);
-            mSearchView.setSearchableInfo(mSearchManager.getSearchableInfo(getComponentName()));
         }
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
