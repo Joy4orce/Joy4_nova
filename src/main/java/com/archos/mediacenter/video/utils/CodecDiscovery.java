@@ -24,7 +24,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 
+import com.archos.mediacenter.video.CustomApplication;
 import com.archos.mediacenter.video.R;
+import com.archos.mediacenter.video.player.Player;
 
 public class CodecDiscovery {
 
@@ -165,6 +167,19 @@ public class CodecDiscovery {
 			}
 		}
 		return false;
+	}
+
+	public static String getTechnicalInfo(Context context) {
+		String technicalInfo = "";
+		technicalInfo += context.getResources().getString(R.string.supported_refresh_rates) + " " + CustomApplication.getSupportedRefreshRates() + " → " + Player.getRefreshRate();
+		technicalInfo += "\n" + context.getResources().getString(R.string.hdr_capability) + " " + getHdrScreenCapabilities(context);
+		String supportedAudioCodecs = CustomApplication.getSupportedAudioCodecs();
+		if (!supportedAudioCodecs.isEmpty())
+			technicalInfo += "\n" + context.getResources().getString(R.string.audio_capability) + " " + supportedAudioCodecs;
+		int maxAudioChannelCount = CustomApplication.getMaxAudioChannelCount();
+		if (maxAudioChannelCount > 0)
+			technicalInfo += "\n" + context.getResources().getString(R.string.max_audio_channels) + " " + maxAudioChannelCount;
+		return technicalInfo;
 	}
 
 }

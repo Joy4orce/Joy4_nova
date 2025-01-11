@@ -1025,7 +1025,7 @@
     <string name="audio_capability">Audio capabilities:</string>
     <string name="max_audio_channels">Maximum audio channels:</string>
     <string name="supported_refresh_rates">Supported refresh rates:</string>
-    
+
     <string name="upgrade_info">Upgrade information</string>
     <string name="v5_v6_upgrade_info">WARNING: this Nova major update requires to rescan all video collection for multimedia information re-aquisition.
         It is strongly advised to restart from a clean install to avoid problems. Please check FAQ for details.</string>

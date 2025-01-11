@@ -100,6 +100,7 @@ import com.archos.mediacenter.video.player.tvmenu.TVMenuAdapter;
 import com.archos.mediacenter.video.player.tvmenu.TVMenuItem;
 import com.archos.mediacenter.video.player.tvmenu.TVUtils;
 import com.archos.mediacenter.video.player.tvmenu.TimerDelayTVPicker;
+import com.archos.mediacenter.video.utils.CodecDiscovery;
 import com.archos.mediacenter.video.utils.SubtitlesDownloaderActivity2;
 import com.archos.mediacenter.video.utils.VideoMetadata;
 import com.archos.mediacenter.video.utils.VideoMetadata.AudioTrack;
@@ -1885,19 +1886,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                     getResources().getString(R.string.menu_info));
             String decoder = VideoInfoCommonClass.getShortDecoder(mPlayer.getVideoMetadata(), getResources(), mPlayer.getType());
 
-            String technicalInfo = "";
-
-            technicalInfo += "\n" + getResources().getString(R.string.supported_refresh_rates) + " " + CustomApplication.getSupportedRefreshRates() + " → " + Player.getRefreshRate();
-            technicalInfo += "\n" + getResources().getString(R.string.hdr_capability) + " " + getHdrScreenCapabilities(mContext);
-            String supportedAudioCodecs = CustomApplication.getSupportedAudioCodecs();
-            if (!supportedAudioCodecs.isEmpty())
-                technicalInfo += "\n" + getResources().getString(R.string.audio_capability) + " " + supportedAudioCodecs;
-            int maxAudioChannelCount = CustomApplication.getMaxAudioChannelCount();
-            if (maxAudioChannelCount > 0)
-                technicalInfo += "\n" + getResources().getString(R.string.max_audio_channels) + " " + maxAudioChannelCount;
-
             tcv.setText(decoder);
-            tcv.setText2(technicalInfo);
+            tcv.setText2(CodecDiscovery.getTechnicalInfo(mContext));
 
             tcv.setOnSwitchClickListener(new View.OnClickListener() {
                 @Override

@@ -19,6 +19,7 @@ import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsD
 import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsHdr10;
 import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsHdr10Plus;
 import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsHdrHLG;
+import static com.archos.mediacenter.video.utils.CodecDiscovery.getHdrScreenCapabilities;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -1206,6 +1207,8 @@ public class Player implements IPlayerControl,
             }
         }
         mHandler.post(mRefreshRateCheckerAsync);
+
+        log.debug("CONFIG technicalInfo: " + CodecDiscovery.getTechnicalInfo(mContext));
     }
 
     public void onCompletion(IMediaPlayer mp) {
