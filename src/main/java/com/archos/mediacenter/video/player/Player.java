@@ -19,7 +19,6 @@ import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsD
 import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsHdr10;
 import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsHdr10Plus;
 import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsHdrHLG;
-import static com.archos.mediacenter.video.utils.CodecDiscovery.getHdrScreenCapabilities;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -147,7 +146,7 @@ public class Player implements IPlayerControl,
     private Window      mWindow;
     private AudioManager mAudioManager;
     private AudioFocusRequest mAudioFocusRequest = null;
-    private static double mCurrentRefreshRate = 0.0;
+    private static float mCurrentRefreshRate = 0.0f;
  
     private VideoEffectRenderer mEffectRenderer;
 
@@ -1350,7 +1349,7 @@ public class Player implements IPlayerControl,
         if (Build.VERSION.SDK_INT >= 23) { // For API 23 and above
             Display.Mode[] supportedModes = display.getSupportedModes();
             Display.Mode currentMode = display.getMode();
-            mCurrentRefreshRate = currentMode.getRefreshRate();
+            if (mCurrentRefreshRate < 1) mCurrentRefreshRate = currentMode.getRefreshRate();
             int currentWidth = currentMode.getPhysicalWidth();
             int currentHeight = currentMode.getPhysicalHeight();
             // Use TreeSet to maintain sorted order
