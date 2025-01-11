@@ -54,7 +54,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
     private  String mTorrent;
     ArrayList<String> files ;
     TorrentThreadObserver mObserver;
-    private boolean isDaemonRunning;
+    private static boolean isDaemonRunning;
     private static Process sProcess;
     private IBinder binder ;
     private Thread mTorrentThread;
@@ -314,7 +314,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
     }
 
     public void exitProcess(){
-        log.debug("calling exit");
+        log.debug("exitProcess");
         hasToStop=true;
         try {
             Runtime.getRuntime().exec("killall -2 libtorrentd.so").waitFor();
@@ -338,9 +338,9 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
     }
 
     public static void staticExitProcess(){
-        log.debug("calling exit");
+        log.debug("staticExitProcess");
         try {
-            Runtime.getRuntime().exec("killall -2 libtorrentd.so").waitFor();
+            if (isDaemonRunning) Runtime.getRuntime().exec("killall -2 libtorrentd.so").waitFor();
         } catch (Exception e) {
             // TODO Auto-generated catch block
             if(sProcess != null)
@@ -358,10 +358,10 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
     }
 
     public static void killProcess(){
-        log.debug("calling kill");
+        log.debug("killProcess");
 
         try {
-            Runtime.getRuntime().exec("killall -9 libtorrentd.so").waitFor();
+            if (isDaemonRunning) Runtime.getRuntime().exec("killall -9 libtorrentd.so").waitFor();
         } catch (Exception e) {
             // TODO Auto-generated catch block
             log.error("killProcess: caught Exception", e);
