@@ -125,7 +125,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -133,6 +132,7 @@ import static com.archos.environment.ArchosFeatures.isChromeOS;
 import static com.archos.filecorelibrary.FileUtils.hasManageExternalStoragePermission;
 import static com.archos.mediacenter.video.browser.subtitlesmanager.ISO639codes.generateTrackName;
 import static com.archos.mediacenter.video.browser.subtitlesmanager.SubtitleManager.getSubLanguageFromSubPathAndVideoPath;
+import static com.archos.mediacenter.video.utils.CodecDiscovery.getHdrScreenCapabilities;
 import static com.archos.mediacenter.video.utils.MiscUtils.isEmulator;
 import static com.archos.mediacenter.video.utils.VideoPreferencesCommon.DEFAULT_MAX_IFRAME_SIZE;
 import static com.archos.mediacenter.video.utils.VideoPreferencesCommon.DEFAULT_STREAM_BUFFER_SIZE;
@@ -1884,10 +1884,21 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             TVCardView tcv = tma.createAndAddView(null, ResourcesCompat.getDrawable(getResources(),R.drawable.tv_info, null),
                     getResources().getString(R.string.menu_info));
             String decoder = VideoInfoCommonClass.getShortDecoder(mPlayer.getVideoMetadata(), getResources(), mPlayer.getType());
-            
-            if (decoder != null)
-                tcv.setText2(decoder);
-            
+
+            String technicalInfo = "";
+
+            technicalInfo += "\n" + getResources().getString(R.string.supported_refresh_rates) + " " + CustomApplication.getSupportedRefreshRates() + " → " + Player.getRefreshRate();
+            technicalInfo += "\n" + getResources().getString(R.string.hdr_capability) + " " + getHdrScreenCapabilities(mContext);
+            String supportedAudioCodecs = CustomApplication.getSupportedAudioCodecs();
+            if (!supportedAudioCodecs.isEmpty())
+                technicalInfo += "\n" + getResources().getString(R.string.audio_capability) + " " + supportedAudioCodecs;
+            int maxAudioChannelCount = CustomApplication.getMaxAudioChannelCount();
+            if (maxAudioChannelCount > 0)
+                technicalInfo += "\n" + getResources().getString(R.string.max_audio_channels) + " " + maxAudioChannelCount;
+
+            tcv.setText(decoder);
+            tcv.setText2(technicalInfo);
+
             tcv.setOnSwitchClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

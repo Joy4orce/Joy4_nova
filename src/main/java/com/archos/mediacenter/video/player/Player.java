@@ -15,6 +15,11 @@
 
 package com.archos.mediacenter.video.player;
 
+import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsDoVi;
+import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsHdr10;
+import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsHdr10Plus;
+import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsHdrHLG;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
@@ -25,9 +30,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import androidx.preference.PreferenceManager;
+
 import android.view.Display;
 import android.view.Surface;
-import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.TextureView;
 import android.view.View;
@@ -36,6 +41,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
 import com.archos.filecorelibrary.FileUtils;
+import com.archos.mediacenter.video.CustomApplication;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.utils.CodecDiscovery;
 import com.archos.mediacenter.video.utils.VideoMetadata;
@@ -48,7 +54,10 @@ import com.archos.mediaprovider.ArchosMediaCommon;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import android.view.Display.Mode;
 import android.widget.Toast;
@@ -110,11 +119,6 @@ public class Player implements IPlayerControl,
          //| WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
     );
 
-    private static boolean dolbyVisionDisplay = false;
-    private static boolean hdr10Display = false;
-    private static boolean hdrHlgDisplay = false;
-    private static boolean hdr10PlusDisplay = false;
-
     // All the stuff we need for playing and showing a video
     private Context     mContext = null;
     private SurfaceController mSurfaceController;
@@ -142,6 +146,7 @@ public class Player implements IPlayerControl,
     private Window      mWindow;
     private AudioManager mAudioManager;
     private AudioFocusRequest mAudioFocusRequest = null;
+    private static double mCurrentRefreshRate = 0.0;
  
     private VideoEffectRenderer mEffectRenderer;
 
@@ -187,6 +192,7 @@ public class Player implements IPlayerControl,
                                 return;
                             }
                             log.debug("CONFIG modeId before video start is " + currentModeId);
+                            mCurrentRefreshRate = d.getRefreshRate();
                         } else {
                             log.warn("CONFIG failed to set modeId to " + wantedModeId + " it is still " + currentModeId);
                             Toast.makeText(mContext, R.string.refreshrate_failed, Toast.LENGTH_SHORT).show();
@@ -200,6 +206,7 @@ public class Player implements IPlayerControl,
                                 mHandler.postDelayed(mRefreshRateCheckerAsync, 200);
                                 return;
                             }
+                            mRefreshRate = currentRefreshRate;
                             log.debug("CONFIG refresh rate before video start is " + currentRefreshRate);
                         } else {
                             log.warn("CONFIG failed to set refreshRate to " + mRefreshRate + " it is still " + currentRefreshRate);
@@ -1010,41 +1017,33 @@ public class Player implements IPlayerControl,
                 Display.HdrCapabilities hdrCapabilities = d.getHdrCapabilities();
                 if (hdrCapabilities != null) {
                     int[] hdrSupportedTypes = hdrCapabilities.getSupportedHdrTypes();
-                    for (int i = 0; i < hdrSupportedTypes.length; i++) {
-                        switch (hdrSupportedTypes[i]) {
+                    for (int hdrSupportedType : hdrSupportedTypes) {
+                        switch (hdrSupportedType) {
                             case Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION:
                                 log.debug("CONFIG HDR dolby vision supported");
-                                dolbyVisionDisplay = true;
+                                displaySupportsDoVi(true);
                                 break;
                             case Display.HdrCapabilities.HDR_TYPE_HDR10:
                                 log.debug("CONFIG HDR10 supported");
-                                hdr10Display = true;
+                                displaySupportsHdr10(true);
                                 break;
                             case Display.HdrCapabilities.HDR_TYPE_HLG:
                                 log.debug("CONFIG HDR HLG supported");
-                                hdrHlgDisplay = true;
+                                displaySupportsHdrHLG(true);
                                 break;
                             case Display.HdrCapabilities.HDR_TYPE_HDR10_PLUS:
                                 log.debug("CONFIG HDR10+ supported");
-                                hdr10PlusDisplay = true;
+                                displaySupportsHdr10Plus(true);
                                 break;
                         }
                     }
                 }
-            } else {
-                // no display capability check: blindly assume we get a duper display
-                dolbyVisionDisplay = true;
-                hdr10Display = true;
-                hdrHlgDisplay = true;
-                hdr10PlusDisplay = true;
             }
-            CodecDiscovery.displaySupportsDoVi(dolbyVisionDisplay);
-            CodecDiscovery.displaySupportsHdr10(hdr10Display);
-            CodecDiscovery.displaySupportsHdrHLG(hdrHlgDisplay);
-            CodecDiscovery.displaySupportsHdr10Plus(hdr10PlusDisplay);
 
             int refreshRateSwitchMode = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(mContext).getString("enable_tv_refreshrate_switch_mode","0"));
             boolean refreshRateSwitchEnabled = (refreshRateSwitchMode!= 0);
+
+            CustomApplication.setSupportedRefreshRates(getSupportedRefreshRates());
 
             if (refreshRateSwitchEnabled) {
                 VideoMetadata.VideoTrack video = mVideoMetadata.getVideoTrack();
@@ -1338,5 +1337,56 @@ public class Player implements IPlayerControl,
 
     public void finishActivity() {
         if(mContext instanceof PlayerActivity) ((PlayerActivity)mContext).finish();
+    }
+
+    public String getSupportedRefreshRates() {
+        StringBuilder refreshRates = new StringBuilder();
+        View view = mWindow.getDecorView();
+        Display display = view.getDisplay();
+
+        if (Build.VERSION.SDK_INT >= 23) { // For API 23 and above
+            Display.Mode[] supportedModes = display.getSupportedModes();
+            Display.Mode currentMode = display.getMode();
+            mCurrentRefreshRate = currentMode.getRefreshRate();
+            int currentWidth = currentMode.getPhysicalWidth();
+            int currentHeight = currentMode.getPhysicalHeight();
+            // Use TreeSet to maintain sorted order
+            Set<Float> uniqueRefreshRates = new TreeSet<>();
+            for (Display.Mode mode : supportedModes) {
+                if (mode.getPhysicalWidth() == currentWidth && mode.getPhysicalHeight() == currentHeight) {
+                    // round refreshRate to 2 decimal places
+                    float refreshRate = Math.round(mode.getRefreshRate() * 100.0f) / 100.0f;
+                    uniqueRefreshRates.add(refreshRate);
+                }
+            }
+            // Build the refresh rates string
+            for (Float rate : uniqueRefreshRates) {
+                refreshRates.append(rate).append("Hz, ");
+            }
+        } else { // For API levels below 23
+            float[] supportedRates = display.getSupportedRefreshRates();
+            mCurrentRefreshRate = display.getRefreshRate();
+            // Use TreeSet to maintain sorted order
+            Set<Float> uniqueRefreshRates = new TreeSet<>();
+            for (float rate : supportedRates) {
+                float refreshRate = Math.round(rate * 100.0f) / 100.0f;
+                uniqueRefreshRates.add(refreshRate);
+            }
+            for (Float rate : uniqueRefreshRates) {
+                refreshRates.append(rate).append("Hz, ");
+            }
+        }
+        // Remove trailing ", " in refreshRates and put the result into parenthesis i.e. ( at start and ) at end
+        if (refreshRates.length() > 0) {
+            refreshRates.setLength(refreshRates.length() - 2);
+            refreshRates.insert(0, "(");
+            refreshRates.append(")");
+        }
+        return refreshRates.toString();
+    }
+
+
+    public static String getRefreshRate() {
+        return Math.round(mCurrentRefreshRate * 100.0f) / 100.0f + "Hz";
     }
 }

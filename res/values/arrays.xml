@@ -209,4 +209,12 @@
         <item>MOV TEXT</item>
         <item>PGS</item>
     </string-array>
+
+    <string-array name="display_hdr">
+        <item>None</item>
+        <item>HDR10</item>
+        <item>HDR HLG</item>
+        <item>HDR10+</item>
+        <item>Dolby Vision</item>
+    </string-array>
 </resources>

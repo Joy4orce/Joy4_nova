@@ -105,8 +105,10 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private static boolean isNetworkStateListenerAdded = false;
     private static boolean isHDMIPlugReceiverRegistered = false;
     private static long hdmiAudioEncodingFlag = 0;
+    private static int[] hdmiAudioEncodingsFlags;
     private static long maxAudioChannelCount = 0;
     private static boolean hasHdmi = false;
+    private static String supportedRefreshRates = "";
     private static boolean isAudioPlugged = false;
     public static final long allHdmiAudioCodecs = 0b11111111111111111111111111111;
     private static boolean hasManageExternalStoragePermissionInManifest = false;
@@ -465,6 +467,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
 
     private void registerHdmiAudioPlugReceiver() {
         final IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_HDMI_AUDIO_PLUG);
+        log.debug("registerHdmiAudioPlugReceiver: registerReceiver for ACTION_HDMI_AUDIO_PLUG");
         registerReceiver(mHdmiAudioPlugReceiver, intentFilter);
         isHDMIPlugReceiverRegistered = true;
     }
@@ -477,6 +480,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private final BroadcastReceiver mHdmiAudioPlugReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            log.debug("mHdmiAudioPlugReceiver:onReceive: " + intent);
             final String action = intent.getAction();
             if (action == null)
                 return;
@@ -504,7 +508,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             "MPEGH_LC_L3", "MPEGH_LC_L4", "DTS_UHD", "DRA"
     };
 
-    // provides correspondence between avos codec index and android one and yields to android independent reference and code sync inssues with native part
+    // provides correspondence between avos codec index and android one and yields to android independent reference and code sync i ssues with native part
     public static List<Integer> convertAudioEncodings = new ArrayList<Integer>(Arrays.asList(
             AudioFormat.ENCODING_INVALID, AudioFormat.ENCODING_DEFAULT, AudioFormat.ENCODING_PCM_16BIT,
             AudioFormat.ENCODING_PCM_8BIT, AudioFormat.ENCODING_PCM_FLOAT, AudioFormat.ENCODING_AC3,
@@ -567,6 +571,32 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         }
         log.debug("getEncodingFlags: encodings=" + Arrays.toString(encodings) + ", convertAudioEncodings=" + Arrays.toString(convertAudioEncodings.toArray()) + ", encodingFlags=" + encodingFlags + ", allHdmiAudioCodecs=" + allHdmiAudioCodecs);
         return encodingFlags;
+    }
+
+    public static String getSupportedAudioCodecs() {
+        StringBuilder supportedCodecs = new StringBuilder();
+        log.debug("getSupportedAudioCodecs: hdmiAudioEncodingFlag=" + hdmiAudioEncodingFlag);
+        for (int i = 2; i < audioEncodings.length; i++) {
+            if ((hdmiAudioEncodingFlag & (1L << i)) != 0) {
+                supportedCodecs.append(audioEncodings[i]).append(", ");
+            }
+        }
+        if (supportedCodecs.length() > 0) {
+            supportedCodecs.setLength(supportedCodecs.length() - 2);
+        }
+        return supportedCodecs.toString();
+    }
+
+    public static int getMaxAudioChannelCount() {
+        return (int) maxAudioChannelCount;
+    }
+
+    public static String getSupportedRefreshRates() {
+        return supportedRefreshRates;
+    }
+
+    public static void setSupportedRefreshRates(String refreshRates) {
+        supportedRefreshRates = refreshRates;
     }
 
     private void addNetworkListener() {

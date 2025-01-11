@@ -14,6 +14,7 @@
 
 package com.archos.mediacenter.video.utils;
 
+import android.content.Context;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.os.Build;
@@ -23,43 +24,70 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 
+import com.archos.mediacenter.video.R;
+
 public class CodecDiscovery {
 
 	private static final Logger log = LoggerFactory.getLogger(CodecDiscovery.class);
 
 	// log4j/logback not possible since used from native it seems
 	private static boolean isDoViDisabled = false;
-	private static boolean displaySupportsDovi = false; // could be used to auto disable DoVi codecs
-	private static boolean displaySupportsHdr10 = false; // could be used to auto disable DoVi codecs
-	private static boolean displaySupportsHdrHlg = false; // could be used to auto disable DoVi codecs
-	private static boolean displaySupportsHdr10Plus = false; // could be used to auto disable DoVi codecs
+	private static int hdrCapabilities = 0; // bitmask 0: none, 1: HDR10, 2: HLG, 4: HDR10+, 8: Dolby Vision
 
 	public static boolean isCodecTypeSupported(String codecType, boolean allowSwCodec) {
 		return isCodecTypeSupported(codecType, allowSwCodec, MediaCodecList.REGULAR_CODECS);
 	}
 
 	public static void displaySupportsDoVi(boolean isSupported) {
-        log.debug("displaySupportsDoVi={}", isSupported);
-		displaySupportsDovi = isSupported;
+		log.debug("displaySupportsDoVi={}", isSupported);
+		// set bit 3 of hdrCapabilities to 1 if display supports Dolby Vision
+		hdrCapabilities |= 8;
 	}
 
 	public static void displaySupportsHdr10(boolean isSupported) {
         log.debug("displaySupportsHdr10={}", isSupported);
-		displaySupportsHdr10 = isSupported;
+		// set bit 1 of hdrCapabilities to 1 if display supports HDR10
+		hdrCapabilities |= 1;
 	}
 
 	public static void displaySupportsHdrHLG(boolean isSupported) {
         log.debug("displaySupportsHdrHLG={}", isSupported);
-		displaySupportsHdrHlg = isSupported;
+		// set bit 2 of hdrCapabilities to 1 if display supports HLG
+		hdrCapabilities |= 2;
 	}
 
 	public static void displaySupportsHdr10Plus(boolean isSupported) {
         log.debug("displaySupportsHdr10Plus={}", isSupported);
-		displaySupportsHdr10Plus = isSupported;
+		// set bit 4 of hdrCapabilities to 1 if display supports HDR10+
+		hdrCapabilities |= 4;
+	}
+
+	// [None, HDR10, HDR HLG, HDR10+, Dolby Vision] based on display capabilities
+
+	public static String getHdrScreenCapabilities(Context context) {
+		// concatenate all supported HDR formats supported by the screen
+		// perform a loop on getResources().getStringArray(R.array.display_hdr) [None, HDR10, HDR HLG, HDR10+, Dolby Vision] and concatenate the strings
+		// [None, HDR10, HDR HLG, HDR10+, Dolby Vision] based on display capabilities
+		String[] hdrFormats = context.getResources().getStringArray(R.array.display_hdr);
+		StringBuilder sb = new StringBuilder();
+		if (hdrCapabilities == 0) {
+			sb.append(hdrFormats[0]); // None
+		} else {
+			for (int i = 1; i < hdrFormats.length; i++) { // Start from 1 to skip "None"
+				int mask = 1 << (i - 1); // Calculate the bitmask for the current HDR format
+				if ((hdrCapabilities & mask) != 0) {
+					sb.append(hdrFormats[i]).append(", ");
+				}
+			}
+			if (sb.length() > 0) {
+				sb.setLength(sb.length() - 2); // remove trailing ", "
+			}
+		}
+		return sb.toString();
 	}
 
 	public static void disableDoVi(boolean isDisabled) {
-        log.debug("disableDovi={}", isDisabled);
+		log.debug("disableDovi={}", isDisabled);
 		isDoViDisabled = isDisabled;
 	}
 
