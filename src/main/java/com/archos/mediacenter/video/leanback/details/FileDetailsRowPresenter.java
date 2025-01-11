@@ -124,7 +124,9 @@ public class FileDetailsRowPresenter extends FullWidthRowPresenter implements Ba
         vh.mFileNameTv.setText(videoObject.getFilenameNonCryptic());
         String path = videoObject.getFriendlyPath();
         String parentPath = "";
-        if (path != null) parentPath = path.substring(0, path.lastIndexOf("/"));
+        if (path != null && path.contains("/")) {
+            parentPath = path.substring(0, path.lastIndexOf("/"));
+        }
 
         vh.mFilePathTv.setText(parentPath);
         vh.mProgress.setVisibility(View.GONE);
