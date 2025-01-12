@@ -1378,12 +1378,8 @@ public class Player implements IPlayerControl,
 
             if (Build.VERSION.SDK_INT >= 24) { // HDR capability check
 
-                Display.Mode currentMode = d.getMode();
-                currentMode.getSupportedHdrTypes();
+                if (Build.VERSION.SDK_INT >= 26 && d.isHdr()) log.debug("CONFIG HDR display detected");
 
-
-                if (Build.VERSION.SDK_INT >= 26)
-                    if (d.isHdr()) log.debug("CONFIG HDR display detected");
                 Display.HdrCapabilities hdrCapabilities = d.getHdrCapabilities();
                 if (hdrCapabilities != null) {
                     int[] hdrSupportedTypes = hdrCapabilities.getSupportedHdrTypes();
@@ -1422,34 +1418,29 @@ public class Player implements IPlayerControl,
         }
     }
 
-    public static String getHdr(Context context) {
-        if (mWindow == null) {
-            return context.getResources().getStringArray(R.array.display_hdr)[0]; // Return "None" if window is not available
+    public static String getHdr(Context context) { // only works with API34...
+        if (mWindow == null || Build.VERSION.SDK_INT < 34) {
+            return "";
         }
         View v = mWindow.getDecorView();
         Display d = v.getDisplay();
         int hdrBitMask = 0;
-        if (Build.VERSION.SDK_INT >= 24) { // Check for HDR capability
-            Display.Mode currentMode = d.getMode();
-            Display.HdrCapabilities hdrCapabilities = d.getHdrCapabilities();
-            if (hdrCapabilities != null) {
-                int[] hdrSupportedTypes = hdrCapabilities.getSupportedHdrTypes();
-                for (int hdrSupportedType : hdrSupportedTypes) {
-                    switch (hdrSupportedType) {
-                        case Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION:
-                            hdrBitMask |= 8;
-                            break;
-                        case Display.HdrCapabilities.HDR_TYPE_HDR10:
-                            hdrBitMask |= 1;
-                            break;
-                        case Display.HdrCapabilities.HDR_TYPE_HLG:
-                            hdrBitMask |= 2;
-                            break;
-                        case Display.HdrCapabilities.HDR_TYPE_HDR10_PLUS:
-                            hdrBitMask |= 4;
-                            break;
-                    }
-                }
+        Display.Mode currentMode = d.getMode();
+        int[] hdrSupportedTypes = currentMode.getSupportedHdrTypes();
+        for (int hdrSupportedType : hdrSupportedTypes) {
+            switch (hdrSupportedType) {
+                case Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION:
+                    hdrBitMask |= 8;
+                    break;
+                case Display.HdrCapabilities.HDR_TYPE_HDR10:
+                    hdrBitMask |= 1;
+                    break;
+                case Display.HdrCapabilities.HDR_TYPE_HLG:
+                    hdrBitMask |= 2;
+                    break;
+                case Display.HdrCapabilities.HDR_TYPE_HDR10_PLUS:
+                    hdrBitMask |= 4;
+                    break;
             }
         }
         return getHdrScreenCapabilities(context, hdrBitMask);

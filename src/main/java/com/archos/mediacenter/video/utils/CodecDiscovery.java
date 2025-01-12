@@ -176,8 +176,9 @@ public class CodecDiscovery {
 
 	public static String getTechnicalInfo(Context context) {
 		String technicalInfo = "";
+		String hdrMode = Player.getHdr(context);
 		technicalInfo += context.getResources().getString(R.string.supported_refresh_rates) + " " + CustomApplication.getSupportedRefreshRates() + " → " + Player.getRefreshRate() + " / " + Player.getFps();
-		technicalInfo += "\n" + context.getResources().getString(R.string.hdr_capability) + " " + getHdrScreenCapabilities(context) + " → " + Player.getHdr(context);
+		technicalInfo += "\n" + context.getResources().getString(R.string.hdr_capability) + " " + getHdrScreenCapabilities(context) + ( hdrMode.isEmpty() ? "" : " → " + hdrMode);
 		String supportedAudioCodecs = CustomApplication.getSupportedAudioCodecs();
 		if (!supportedAudioCodecs.isEmpty())
 			technicalInfo += "\n" + context.getResources().getString(R.string.hdmi_audio_capabilities) + " " + supportedAudioCodecs;
