@@ -19,6 +19,7 @@ import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsD
 import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsHdr10;
 import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsHdr10Plus;
 import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsHdrHLG;
+import static com.archos.mediacenter.video.utils.CodecDiscovery.getHdrScreenCapabilities;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -143,11 +144,12 @@ public class Player implements IPlayerControl,
     private static final float EPSILON = 0.00001f;
     private float       mRefreshRate;
     private int         wantedModeId;
-    private Window      mWindow;
+    private static Window      mWindow;
     private AudioManager mAudioManager;
     private AudioFocusRequest mAudioFocusRequest = null;
     private static float mCurrentRefreshRate = 0.0f;
- 
+    private static float mCurrentFps = 0.0f;
+
     private VideoEffectRenderer mEffectRenderer;
 
     /*
@@ -1011,50 +1013,22 @@ public class Player implements IPlayerControl,
             View v = mWindow.getDecorView();
             Display d = v.getDisplay();
 
-            if (Build.VERSION.SDK_INT >= 24) { // HDR capability check
-                if (Build.VERSION.SDK_INT >= 26)
-                    if (d.isHdr()) log.debug("CONFIG HDR display detected");
-                Display.HdrCapabilities hdrCapabilities = d.getHdrCapabilities();
-                if (hdrCapabilities != null) {
-                    int[] hdrSupportedTypes = hdrCapabilities.getSupportedHdrTypes();
-                    for (int hdrSupportedType : hdrSupportedTypes) {
-                        switch (hdrSupportedType) {
-                            case Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION:
-                                log.debug("CONFIG HDR dolby vision supported");
-                                displaySupportsDoVi(true);
-                                break;
-                            case Display.HdrCapabilities.HDR_TYPE_HDR10:
-                                log.debug("CONFIG HDR10 supported");
-                                displaySupportsHdr10(true);
-                                break;
-                            case Display.HdrCapabilities.HDR_TYPE_HLG:
-                                log.debug("CONFIG HDR HLG supported");
-                                displaySupportsHdrHLG(true);
-                                break;
-                            case Display.HdrCapabilities.HDR_TYPE_HDR10_PLUS:
-                                log.debug("CONFIG HDR10+ supported");
-                                displaySupportsHdr10Plus(true);
-                                break;
-                        }
-                    }
-                }
-            }
+            setHdrCapabilities();
 
             int refreshRateSwitchMode = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(mContext).getString("enable_tv_refreshrate_switch_mode","0"));
             boolean refreshRateSwitchEnabled = (refreshRateSwitchMode!= 0);
 
             CustomApplication.setSupportedRefreshRates(getSupportedRefreshRates());
 
-            if (refreshRateSwitchEnabled) {
-                VideoMetadata.VideoTrack video = mVideoMetadata.getVideoTrack();
+            VideoMetadata.VideoTrack video = mVideoMetadata.getVideoTrack();
+            float wantedFps = (float) ((double) video.fpsRate / (double) video.fpsScale);
+            mCurrentFps = wantedFps;
 
+            if (refreshRateSwitchEnabled) {
                 LayoutParams lp = mWindow.getAttributes();
                 mWaitForNewRate = false;
                 if (lp != null && video != null && video.fpsRate > 0 && video.fpsScale > 0) {
-                    log.debug("CONFIG video.fpsRate=" + video.fpsRate + ", video.fpsScale=" + video.fpsScale);
-                    float wantedFps = (float) ((double) video.fpsRate / (double) video.fpsScale);
-                    log.debug("CONFIG wantedFps=" + wantedFps);
-
+                    log.debug("CONFIG video.fpsRate=" + video.fpsRate + ", video.fpsScale=" + video.fpsScale + " -> wantedFps=" + wantedFps);
                     if (refreshRateSwitchMode == 2 && Build.VERSION.SDK_INT >= 31 && mSurfaceHolder != null) {
                         log.debug("CONFIG setting frame rate to " + wantedFps + " fps through setFrameRate Android 12+ API");
                         Surface videoSurface = mSurfaceHolder.getSurface();
@@ -1391,4 +1365,94 @@ public class Player implements IPlayerControl,
     public static String getRefreshRate() {
         return Math.round(mCurrentRefreshRate * 100.0f) / 100.0f + "Hz";
     }
+
+    public static String getFps() {
+        return Math.round(mCurrentFps * 100.0f) / 100.0f + "fps";
+    }
+
+    private void setHdrCapabilities() {
+        if (mWindow != null) {
+
+            View v = mWindow.getDecorView();
+            Display d = v.getDisplay();
+
+            if (Build.VERSION.SDK_INT >= 24) { // HDR capability check
+
+                Display.Mode currentMode = d.getMode();
+                currentMode.getSupportedHdrTypes();
+
+
+                if (Build.VERSION.SDK_INT >= 26)
+                    if (d.isHdr()) log.debug("CONFIG HDR display detected");
+                Display.HdrCapabilities hdrCapabilities = d.getHdrCapabilities();
+                if (hdrCapabilities != null) {
+                    int[] hdrSupportedTypes = hdrCapabilities.getSupportedHdrTypes();
+                    for (int hdrSupportedType : hdrSupportedTypes) {
+                        switch (hdrSupportedType) {
+                            case Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION:
+                                log.debug("CONFIG HDR dolby vision supported");
+                                displaySupportsDoVi(true);
+                                break;
+                            case Display.HdrCapabilities.HDR_TYPE_HDR10:
+                                log.debug("CONFIG HDR10 supported");
+                                displaySupportsHdr10(true);
+                                break;
+                            case Display.HdrCapabilities.HDR_TYPE_HLG:
+                                log.debug("CONFIG HDR HLG supported");
+                                displaySupportsHdrHLG(true);
+                                break;
+                            case Display.HdrCapabilities.HDR_TYPE_HDR10_PLUS:
+                                log.debug("CONFIG HDR10+ supported");
+                                displaySupportsHdr10Plus(true);
+                                break;
+                        }
+                    }
+                }
+            } else {
+                displaySupportsDoVi(false);
+                displaySupportsHdr10(false);
+                displaySupportsHdrHLG(false);
+                displaySupportsHdr10Plus(false);
+            }
+        } else {
+            displaySupportsDoVi(false);
+            displaySupportsHdr10(false);
+            displaySupportsHdrHLG(false);
+            displaySupportsHdr10Plus(false);
+        }
+    }
+
+    public static String getHdr(Context context) {
+        if (mWindow == null) {
+            return context.getResources().getStringArray(R.array.display_hdr)[0]; // Return "None" if window is not available
+        }
+        View v = mWindow.getDecorView();
+        Display d = v.getDisplay();
+        int hdrBitMask = 0;
+        if (Build.VERSION.SDK_INT >= 24) { // Check for HDR capability
+            Display.Mode currentMode = d.getMode();
+            Display.HdrCapabilities hdrCapabilities = d.getHdrCapabilities();
+            if (hdrCapabilities != null) {
+                int[] hdrSupportedTypes = hdrCapabilities.getSupportedHdrTypes();
+                for (int hdrSupportedType : hdrSupportedTypes) {
+                    switch (hdrSupportedType) {
+                        case Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION:
+                            hdrBitMask |= 8;
+                            break;
+                        case Display.HdrCapabilities.HDR_TYPE_HDR10:
+                            hdrBitMask |= 1;
+                            break;
+                        case Display.HdrCapabilities.HDR_TYPE_HLG:
+                            hdrBitMask |= 2;
+                            break;
+                        case Display.HdrCapabilities.HDR_TYPE_HDR10_PLUS:
+                            hdrBitMask |= 4;
+                            break;
+                    }
+                }
+            }
+        }
+        return getHdrScreenCapabilities(context, hdrBitMask);
+    }
+
 }

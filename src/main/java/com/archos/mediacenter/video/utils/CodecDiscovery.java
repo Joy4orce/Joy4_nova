@@ -47,7 +47,7 @@ public class CodecDiscovery {
 	}
 
 	public static void displaySupportsHdr10(boolean isSupported) {
-        log.debug("displaySupportsHdr10={}", isSupported);
+		log.debug("displaySupportsHdr10={}", isSupported);
 		// set bit 1 of hdrCapabilities to 1 if display supports HDR10
 		hdrCapabilities |= 1;
 	}
@@ -70,6 +70,11 @@ public class CodecDiscovery {
 		// concatenate all supported HDR formats supported by the screen
 		// perform a loop on getResources().getStringArray(R.array.display_hdr) [None, HDR10, HDR HLG, HDR10+, Dolby Vision] and concatenate the strings
 		// [None, HDR10, HDR HLG, HDR10+, Dolby Vision] based on display capabilities
+		return getHdrScreenCapabilities(context, hdrCapabilities);
+	}
+
+	public static String getHdrScreenCapabilities(Context context, int hdrCapabilities) {
+		// Concatenate all supported HDR formats supported by the screen
 		String[] hdrFormats = context.getResources().getStringArray(R.array.display_hdr);
 		StringBuilder sb = new StringBuilder();
 		if (hdrCapabilities == 0) {
@@ -82,7 +87,7 @@ public class CodecDiscovery {
 				}
 			}
 			if (sb.length() > 0) {
-				sb.setLength(sb.length() - 2); // remove trailing ", "
+				sb.setLength(sb.length() - 2); // Remove trailing ", "
 			}
 		}
 		return sb.toString();
@@ -171,8 +176,8 @@ public class CodecDiscovery {
 
 	public static String getTechnicalInfo(Context context) {
 		String technicalInfo = "";
-		technicalInfo += context.getResources().getString(R.string.supported_refresh_rates) + " " + CustomApplication.getSupportedRefreshRates() + " → " + Player.getRefreshRate();
-		technicalInfo += "\n" + context.getResources().getString(R.string.hdr_capability) + " " + getHdrScreenCapabilities(context);
+		technicalInfo += context.getResources().getString(R.string.supported_refresh_rates) + " " + CustomApplication.getSupportedRefreshRates() + " → " + Player.getRefreshRate() + " / " + Player.getFps();
+		technicalInfo += "\n" + context.getResources().getString(R.string.hdr_capability) + " " + getHdrScreenCapabilities(context) + " → " + Player.getHdr(context);
 		String supportedAudioCodecs = CustomApplication.getSupportedAudioCodecs();
 		if (!supportedAudioCodecs.isEmpty())
 			technicalInfo += "\n" + context.getResources().getString(R.string.hdmi_audio_capabilities) + " " + supportedAudioCodecs;
