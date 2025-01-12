@@ -175,7 +175,7 @@ public class CodecDiscovery {
 		technicalInfo += "\n" + context.getResources().getString(R.string.hdr_capability) + " " + getHdrScreenCapabilities(context);
 		String supportedAudioCodecs = CustomApplication.getSupportedAudioCodecs();
 		if (!supportedAudioCodecs.isEmpty())
-			technicalInfo += "\n" + context.getResources().getString(R.string.audio_capability) + " " + supportedAudioCodecs;
+			technicalInfo += "\n" + context.getResources().getString(R.string.hdmi_audio_capabilities) + " " + supportedAudioCodecs;
 		int maxAudioChannelCount = CustomApplication.getMaxAudioChannelCount();
 		if (maxAudioChannelCount > 0)
 			technicalInfo += "\n" + context.getResources().getString(R.string.max_audio_channels) + " " + maxAudioChannelCount;

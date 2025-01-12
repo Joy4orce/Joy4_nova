@@ -1022,7 +1022,7 @@
     <string name="enable_sponsor_summary">Enable sponsor link for donations: every contribution helps.</string>
 
     <string name="hdr_capability">HDR screen capabilities:</string>
-    <string name="audio_capability">Audio capabilities:</string>
+    <string name="hdmi_audio_capabilities">HDMI receiver audio capabilities:</string>
     <string name="max_audio_channels">Maximum audio channels:</string>
     <string name="supported_refresh_rates">Supported refresh rates:</string>
 
