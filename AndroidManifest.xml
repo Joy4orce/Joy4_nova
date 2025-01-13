@@ -215,7 +215,7 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
+                <data android:scheme=""/>
                 <data android:scheme="smb" />
                 <data android:scheme="smbj" />
                 <data android:scheme="ftps" />
@@ -249,6 +249,7 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme=""/>
                 <data android:scheme="file"/>
                 <data android:scheme="content"/>
                 <data android:scheme="http"/>
@@ -281,6 +282,7 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme=""/>
                 <data android:scheme="file"/>
                 <data android:scheme="content"/>
                 <data android:scheme="http"/>
@@ -321,6 +323,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
+                <data android:scheme=""/>                 
                 <data android:scheme="content" />
                 <data android:scheme="file" />
                 <data android:scheme="http" />
@@ -684,6 +687,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
+                <data android:scheme=""/>                 
                 <data android:scheme="content" />
                 <data android:scheme="file" />
                 <data android:scheme="http" />
@@ -1215,6 +1219,8 @@
                 <action android:name="archos.media.intent.action.VIDEO_SCANNER_SCAN_FILE" />
                 <action android:name="android.intent.action.MEDIA_SCANNER_SCAN_FILE" />
                 <action android:name="archos.intent.action.MEDIA_SCANNER_SCAN_FILE" />
+                 
+                <data android:scheme=""/>
                 <data android:scheme="smb" />
                 <data android:scheme="http" />
                 <data android:scheme="https" />
@@ -1239,6 +1245,7 @@
                 <action android:name="archos.media.intent.action.VIDEO_SCANNER_REMOVE_FILE" />
                 <action android:name="archos.intent.action.MEDIA_SCANNER_REMOVE_FILE" />
 
+                <data android:scheme=""/>                 
                 <data android:scheme="sftp" />
                 <data android:scheme="ftp" />
                 <data android:scheme="ftps" />
@@ -1255,6 +1262,8 @@
             <!-- Triggers metadata update -->
             <intent-filter>
                 <action android:name="archos.media.intent.action.VIDEO_SCANNER_METADATA_UPDATE" />
+
+                <data android:scheme=""/>                 
                 <data android:scheme="sftp" />
                 <data android:scheme="ftp" />
                 <data android:scheme="ftps" />
@@ -1428,6 +1437,7 @@
             <intent-filter>
                 <action android:name="archos.media.intent.action.VIDEO_SCANNER_SCAN_STARTED" />
 
+                <data android:scheme=""/>                 
                 <data android:scheme="sftp" />
                 <data android:scheme="ftp" />
                 <data android:scheme="upnp" />
@@ -1444,6 +1454,7 @@
             <intent-filter>
                 <action android:name="archos.media.intent.action.VIDEO_SCANNER_SCAN_FINISHED" />
 
+                <data android:scheme=""/>                 
                 <data android:scheme="sftp" />
                 <data android:scheme="ftp" />
                 <data android:scheme="upnp" />
