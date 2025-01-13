@@ -525,6 +525,8 @@
     <string name="preferences_force_software_decoding_summary">Jeśli niektóre filmy nie są odtwarzane poprawnie, może spróbować tej opcji</string>
     <string name="preferences_force_audio_passthrough">Przekazywanie audio</string>
     <string name="preferences_force_audio_passthrough_disabled">Wyłączone (zalecane)</string>
+    <string name="preferences_force_audio_passthrough_enable">Hermetyzacja Nova audio (eksperymentalna)</string>
+    <string name="preferences_force_audio_passthrough_enable2">Hermetyzacja systemu audio</string>
     <string name="preferences_force_audio_passthrough_summary">Wysyłaj skompresowany dźwięk przez HDMI lub S/PDIF. ⚠ Opcja eksperymentalna, może powodować utratę synchronizacji dźwięku z obrazem</string>
     <string name="preferences_parser_sync_mode">Tryb synchronizacji parsera</string>
     <string name="preferences_parser_sync_mode_cdata">Oparte na PTS (zalecane)</string>
@@ -546,6 +548,8 @@
     <string name="preferences_allow_3rd_party_player_summary">Inne kompatybilne aplikacje będą proponowane przez system Android podczas uruchamiania odtwarzania wideo. Pamiętaj, że niektóre funkcje nie będą działać (wznawianie, zakładki, itp.)</string>
     <string name="preference_tv_3d_automatic_switch">Włącz automatyczne przełączanie TV 3D\"</string>
     <string name="preference_tv_3d_automatic_switch_summary">Użyj tej funkcji tylko wtedy, gdy telewizor obsługuje 3D</string>
+    <string name="enable_android_frame_timing">Włącz synchronizację ramek systemu Android</string>
+    <string name="enable_android_frame_timing_summary">Delegowanie do Androida synchronizacji klatek w celu płynniejszego odtwarzania (eksperymentalne)</string>
     <string name="preference_tv_refreshrate_switch">Włącz automatyczne dostowanie częstotliwości odświeżania</string>
     <string name="preference_tv_refreshrate_switch_summary">Dostosowanie częstotliwości odświeżania ekranu do liczby ramek, aby wyelimować efekt szarpania obrazu (skuteczność zależy od telewizora)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Wyłączone</string>
@@ -622,7 +626,7 @@
     <string name="rotation_unlocked">Automatyczna rotacja ekranu włączona</string>
     <string name="network_reindex">Ponowne skanowanie zawartości</string>
     <!-- Help overlay -->
-    <string name="help_overlay_menu">Naciśnij klawisz strzałki w górę\naby wyświetlić menu telewizora</string>
+    <string name="help_overlay_menu">Naciśnij klawisz strzałki w górę,\naby wyświetlić menu telewizora</string>
     <string name="help_overlay_ssh_indexing_text">Wybierz opcję \"Dodaj jako skrót\", aby szybko wrócić do swojego serwera.</string>
     <string name="help_overlay_network_indexing_text1">Naciśnij ten element menu, aby zintegrować zawartość tego folderu i jego podfolderów z biblioteką wideo.</string>
     <string name="help_overlay_network_indexing_text1_lb">Naciśnij ten element menu, aby zintegrować zawartość tego folderu i jego podfolderów z biblioteką wideo.</string>

@@ -510,6 +510,8 @@
     <string name="preferences_force_software_decoding_summary">如果某些视频播放不正确，您可以尝试此选项</string>
     <string name="preferences_force_audio_passthrough">音频直通</string>
     <string name="preferences_force_audio_passthrough_disabled">已禁用 (推荐)</string>
+    <string name="preferences_force_audio_passthrough_enable">Nova 封装(实验性)</string>
+    <string name="preferences_force_audio_passthrough_enable2">系统封装</string>
     <string name="preferences_force_audio_passthrough_summary">通过 HDMI 或 S/PDIF 传输压缩音频。⚠实验性功能，可能导致 A/V不同步</string>
     <string name="preferences_parser_sync_mode">解析器同步模式</string>
     <string name="preferences_parser_sync_mode_cdata">基于 PTS (推荐)</string>
@@ -531,6 +533,8 @@
     <string name="preferences_allow_3rd_party_player_summary">在启动视频播放时安卓系统将提示其他兼容的视频播放器。 请注意，某些功能将无法工作 (恢复播放、书签等)</string>
     <string name="preference_tv_3d_automatic_switch">启用自动 3D 电视开关</string>
     <string name="preference_tv_3d_automatic_switch_summary">仅在您的 3D 电视支持的情况下使用此功能</string>
+    <string name="enable_android_frame_timing">启用 Android 帧时间</string>
+    <string name="enable_android_frame_timing_summary">将帧缓冲绘制时间交由 Android 控制，以实现更流畅的播放(实验性)</string>
     <string name="preference_tv_refreshrate_switch">启用自动刷新率切换</string>
     <string name="preference_tv_refreshrate_switch_summary">通过匹配最佳屏幕刷新率与视频帧率去除抖动效果(可能受设备支持限制)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">禁用</string>
