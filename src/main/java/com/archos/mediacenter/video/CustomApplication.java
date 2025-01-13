@@ -499,6 +499,10 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         }
     };
 
+    public static boolean isHdmiConnected() {
+        return hasHdmi;
+    }
+
     public static String[] audioEncodings = new String[] {"INVALID", "DEFAULT", "PCM_16BIT", "PCM_8BIT", "PCM_FLOAT",
             "AC3", "E_AC3", "DTS", "DTS_HD",
             "MP3", "AAC_LC", "AAC_HE_V1", "AAC_HE_V2",

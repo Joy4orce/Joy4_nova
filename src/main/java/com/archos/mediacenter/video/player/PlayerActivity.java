@@ -476,9 +476,11 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             if (action.equals(Intent.ACTION_SHUTDOWN)) {
                 finish();
             } else if (action.equals(ACTION_HDMI_PLUGGED)) {
+                log.debug("intent received hdmi");
                 boolean plugged = intent.getBooleanExtra(EXTRA_HDMI_PLUGGED_STATE, false);
                 int w = 0, h = 0;
                 mHdmiPlugged = plugged;
+                log.debug("intent received hdmi plugged=" + plugged);
                 mLudoHmdiPlugged = false;
                 if (plugged) {
                     int size[] = readHdmiSize();
@@ -827,7 +829,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 Integer.parseInt(mPreferences.getString(KEY_PLAYER_AUTO_FORMAT, "-1")));
         if (LibAvos.isAvailable()) {
             VideoPreferencesCommon.resetPassthroughPref(mPreferences); // note this resets the audio_speed if in passthrough to 1.0f in prefs
-            LibAvos.setPassthrough(Integer.parseInt(mPreferences.getString("force_audio_passthrough_multiple","0")));
+            // enable passthrough only if HDMI is connected and enabled in options
+            LibAvos.setPassthrough(CustomApplication.isHdmiConnected() ? Integer.parseInt(mPreferences.getString("force_audio_passthrough_multiple","0") ) : 0);
             if (mPreferences.getBoolean(VideoPreferencesCommon.KEY_FORCE_AUDIO_PASSTHROUGH, true)) {
                 LibAvos.setHdmiSupportedAudioCodecs(CustomApplication.allHdmiAudioCodecs);
             } else {
