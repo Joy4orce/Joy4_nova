@@ -366,6 +366,7 @@ public class VideoStoreImportImpl {
     public void doScan(Uri what) {
         mIsImportInterrupted = false;
         log.debug("doScan: Scanning Metadata single uri: " + what);
+        if (what == null) return;
         String path = what.getPath();
 
         if (path.endsWith("/"))
