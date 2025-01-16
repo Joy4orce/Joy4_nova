@@ -414,7 +414,11 @@ public class SubtitleManager {
                             int currentPosition = mCurrentSubtitle.getPosition() + (int) elapsedTime;
                             int realCurrentSubtitleDuration = mNextSubtitle.getPosition() - mCurrentSubtitle.getPosition();
                             mCurrentSubtitle.setDuration(realCurrentSubtitleDuration);
-                            mSubtitleDisplayLeft = mNextSubtitle.getPosition() - currentPosition;
+                            // need to correct time left only if the next subtitle starts before the current one ends
+                            if (mCurrentSubtitle.getPosition()+mCurrentSubtitle.getDuration() > mNextSubtitle.getPosition())
+                                mSubtitleDisplayLeft = mNextSubtitle.getPosition() - currentPosition;
+                            else
+                                mSubtitleDisplayLeft -= (int) (System.currentTimeMillis() - sleepStart);
                             log.debug("DispSubtitleThread sleep interrupt bcoz received new subtitle, recompute duration currentPosition={}, realCurrentSubtitleDuration={}, updated mSubtitleDisplayLeft={}", currentPosition, realCurrentSubtitleDuration, mSubtitleDisplayLeft);
                             if (mNextSubtitle.getDuration() == 0) { // this is an empty subtitle that is used to provide the correct duration
                                 log.debug("DispSubtitleThread sleep interrupt bcoz received empty Subtitle, dismiss mNextSubtitle");
