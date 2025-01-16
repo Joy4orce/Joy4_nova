@@ -786,10 +786,10 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private void upgradeActions(Context context) {
         log.info("upgradeActions: check for upgrade actions from version: " + novaPreviousVersionArray[0] + "." + novaPreviousVersionArray[1] + "." + novaPreviousVersionArray[2] + " to " + novaVersionArray[0] + "." + novaVersionArray[1] + "." + novaVersionArray[2]);
         // if nova is upgraded from 6.3.x and below 6.3.17 set enable_android_frame_timing to true
-        if (novaPreviousVersionArray[0] == 6 && novaPreviousVersionArray[1] == 3 && novaPreviousVersionArray[2] < 17) {
+        if (novaPreviousVersionArray[0] == 6 && novaPreviousVersionArray[1] == 3 && novaPreviousVersionArray[2] < 19) {
             PreferenceManager.getDefaultSharedPreferences(context)
                     .edit()
-                    .putBoolean(PlayerActivity.KEY_ENABLE_ANDROID_FRAME_TIMING, true)
+                    .putBoolean(PlayerActivity.KEY_ENABLE_ANDROID_FRAME_TIMING, false)
                     .commit();
         }
     }
