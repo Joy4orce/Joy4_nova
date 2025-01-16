@@ -106,9 +106,9 @@ public class SubtitleManager {
     private static final Pattern SSA_STRIKETHROUGH_TAG = Pattern.compile("\\{\\\\s1\\}(.*?)(?=\\{\\\\s0|$)");
     private static final String HTML_STRIKETHROUGH_TAG = "<s>$1</s>";
 
-    // alignment tag can contain a Word Joiner (WJ) \u2060 unicode character and be of the form \{{}\\u2060an8} or simply {\an8}
+    // alignment tag can contain a Word Joiner (WJ) \u2060 unicode character and be of the form \{{}\\u2060an8} or simply {\an8} or \{\\an8\}
     // 1 is BOTTOM_LEFT, 2 is BOTTOM_MID, 3 is BOTTOM_RIGHT, 4 is MID_LEFT, 5 is MID_MID, 6 is MID_RIGHT, 7 is TOP_LEFT, 8 is TOP_MID, 9 is TOP_RIGHT
-    private static final Pattern SUBRIP_ALIGNMENT_TAG = Pattern.compile("\\{(?:\\{\\})?\\\\(?:\\u2060)?an([1-9])\\}");
+    private static final Pattern SUBRIP_ALIGNMENT_TAG = Pattern.compile("\\\\?\\{(?:\\{\\})?\\\\?\\\\(?:\\u2060)?an([1-9])\\\\?\\}");
 
     private static class SubtitleHandler extends Handler {
         private final WeakReference<SubtitleManager> mSubtitleManager;
