@@ -1187,6 +1187,10 @@ public abstract class Browser extends Fragment implements AbsListView.OnScrollLi
         }
     }
     public void startDeletingDialog(List<Uri> uriToDelete){
+        if (uriToDelete == null || uriToDelete.isEmpty()) {
+            log.error("startDeletingDialog: uriToDelete list is empty or null");
+            return;
+        }
         mArchosGridView.getCheckedItemPosition();
         mDialogDeleting = new DeleteDialog();
         mDialogDeleting.show(getParentFragmentManager(), null);
