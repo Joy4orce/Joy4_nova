@@ -166,6 +166,7 @@ public class VideoStoreImportService extends Service implements Handler.Callback
 
     @Override
     public void onCreate() {
+        log.debug("onCreate");
         // executed on each startService
         n = createNotification();
         log.debug("onCreate: create notification + startService " + NOTIFICATION_ID);
@@ -186,16 +187,15 @@ public class VideoStoreImportService extends Service implements Handler.Callback
         // handles changes to mounted / unmounted volumes, needs to exist before foreground state
         // handler because it's used in there
         mVolumeState = new VolumeState(this);
-        mVolumeStateObserver = new VolumeState.Observer() {
-            @Override
-            public void onMountStateChanged(Volume... volumes) {
-                for (Volume volume : volumes) {
-                    log.debug("Change:" + volume.getMountPoint() + " to " + volume.getMountState());
-                    if (!volume.getMountState()) {
-                        mHandler
-                            .obtainMessage(MESSAGE_HIDE_VOLUME, DONT_KILL_SELF, volume.getStorageId())
-                            .sendToTarget();
-                    }
+        mVolumeStateObserver = volumes -> {
+            for (Volume volume : volumes) {
+                log.debug("Change:" + volume.getMountPoint() + " to " + volume.getMountState());
+                if (!volume.getMountState()) {
+                    mHandler
+                        .obtainMessage(MESSAGE_HIDE_VOLUME, DONT_KILL_SELF, volume.getStorageId())
+                        .sendToTarget();
+                } else {
+                    // unhide????
                 }
             }
         };
