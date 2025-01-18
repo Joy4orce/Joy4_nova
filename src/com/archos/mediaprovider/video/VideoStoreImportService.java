@@ -140,7 +140,7 @@ public class VideoStoreImportService extends Service implements Handler.Callback
             context.startService(serviceIntent);
             return true;
         }
-        log.debug("startIfHandles is false: do nothing");
+        log.debug("startIfHandles is false: do nothing with action " + action);
         return false;
     }
 
