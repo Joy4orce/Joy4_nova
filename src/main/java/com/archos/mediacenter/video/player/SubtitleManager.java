@@ -412,8 +412,7 @@ public class SubtitleManager {
                         if (mCurrentSubtitle != null && mNextSubtitle != null) {
                             // woke up from sleep by interrupt because getting new subtitle
                             int currentPosition = mCurrentSubtitle.getPosition() + (int) elapsedTime;
-                            int realCurrentSubtitleDuration = mNextSubtitle.getPosition() - mCurrentSubtitle.getPosition();
-                            // TODO MARC regression pgs stuck
+                            int realCurrentSubtitleDuration;
                             // need to correct time left only if the next subtitle starts before the current one ends
                             if (mCurrentSubtitle.getPosition()+mCurrentSubtitle.getDuration() > mNextSubtitle.getPosition()) {
                                 log.debug("DispSubtitleThread: cannot sleep after mNextSubtitle, adjust");
