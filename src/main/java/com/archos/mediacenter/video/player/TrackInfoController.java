@@ -71,17 +71,20 @@ public class TrackInfoController implements OnMenuItemClickListener, OnItemClick
         public final CharSequence name;
         public final CharSequence summary;
         public final int position;
-        public TrackInfo(int position, CharSequence name) {
+        public final boolean isExternal;
+        public TrackInfo(int position, CharSequence name, boolean isExternal) {
             super(TRACK_INFO);
             this.position = position;
             this.name = name;
             this.summary = null;
+            this.isExternal = isExternal;
         }
-        public TrackInfo(int position, CharSequence name, CharSequence summary) {
+        public TrackInfo(int position, CharSequence name, CharSequence summary, boolean isExternal) {
             super(TRACK_INFO);
             this.position = position;
             this.name = name;
             this.summary = summary;
+            this.isExternal = isExternal;
         }
         public String toString() {
             return this.name.toString();
@@ -112,8 +115,8 @@ public class TrackInfoController implements OnMenuItemClickListener, OnItemClick
         private static final long serialVersionUID = 1L;
         private int mTrackCount = 0;
 
-        public void addTrack(CharSequence name, CharSequence summary) {
-            add(new TrackInfo(mTrackCount++, name, summary));
+        public void addTrack(CharSequence name, CharSequence summary, boolean isExternal) {
+            add(new TrackInfo(mTrackCount++, name, summary, isExternal));
         }
 
         public void addSeparator() {
@@ -344,12 +347,12 @@ public class TrackInfoController implements OnMenuItemClickListener, OnItemClick
         }
     }
 
-    public void addTrack(CharSequence name) {
-        addTrack(name, null);
+    public void addTrack(CharSequence name, boolean isExternal) {
+        addTrack(name, null, isExternal);
     }
 
-    public void addTrack(CharSequence name, CharSequence summary) {
-        mTrackItemList.addTrack(name, summary);
+    public void addTrack(CharSequence name, CharSequence summary, boolean isExternal) {
+        mTrackItemList.addTrack(name, summary, isExternal);
         setVisible();
     }
 
@@ -405,5 +408,14 @@ public class TrackInfoController implements OnMenuItemClickListener, OnItemClick
     private void setVisible() {
         if (mMenuItem != null)
             mMenuItem.setVisible(getTrackCount()>1||mIsAlwaysDisplayed);
+    }
+
+    public boolean isExternal(int position) {
+        TrackItem item = mTrackItemList.get(position);
+        if (item instanceof TrackInfo) {
+            return ((TrackInfo)item).isExternal;
+        } else {
+            return false;
+        }
     }
 }

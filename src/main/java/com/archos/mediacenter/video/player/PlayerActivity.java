@@ -1573,8 +1573,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         ((TVCardDialog)dialogMainView.findViewById(R.id.card_view)).setOnDialogResultListener(new TVCardDialog.OnDialogResultListener() {     
             @Override
             public void onResult(int code) {
-               	mPreferences.edit().putInt(PlayerActivity.KEY_SUBTITLE_SIZE, mSubtitleManager.getSize()).apply();
-            	mPreferences.edit().putInt( PlayerActivity.KEY_SUBTITLE_VPOS, mSubtitleManager.getVerticalPosition()).apply();
+                mPreferences.edit().putInt(PlayerActivity.KEY_SUBTITLE_SIZE, mSubtitleManager.getSize()).apply();
+                mPreferences.edit().putInt( PlayerActivity.KEY_SUBTITLE_VPOS, mSubtitleManager.getVerticalPosition()).apply();
                 mPreferences.edit().putInt( PlayerActivity.KEY_SUBTITLE_COLOR, mSubtitleManager.getColor()).apply();
                 mPreferences.edit().putBoolean(PlayerActivity.KEY_SUBTITLE_OUTLINE, mSubtitleManager.getOutlineState()).apply();
                 mPlayerController.getTVMenuAdapter().setDiscrete(false);
@@ -3652,7 +3652,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 if (trackName.isEmpty())
                     name = getText(R.string.player_track) + " " + (i + 1);
                 CharSequence summary = audio.format;
-                mAudioInfoController.addTrack(name, summary);
+                mAudioInfoController.addTrack(name, summary, false);
             }
             mAudioInfoController.setTrack(mVideoInfo.audioTrack);
         }
@@ -3679,7 +3679,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             int nonePosition = 0;
 
             if (nbTrack != 0) {
-                mSubtitleInfoController.addTrack(getText(R.string.s_none)); // first track displayed is none
+                mSubtitleInfoController.addTrack(getText(R.string.s_none), false); // first track displayed is none
                 mVideoInfo.nbSubtitles = nbTrack; // nbSubtitles does not capture none track
                 String lang = null;
                 for (int i = 0; i < nbTrack; ++i) {
@@ -3691,15 +3691,15 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                         log.debug("onSubtitleMetadataUpdated: extsub name={}, path={}, videoPath={}, isExternal={}, langFromPath={}", vMetadata.getSubtitleTrack(i).name, vMetadata.getSubtitleTrack(i).path, vMetadata.getFile().getPath(), vMetadata.getSubtitleTrack(i).isExternal, lang);
                         if (lang != null) {
                             log.debug("onSubtitleMetadataUpdated: extsub name might not be null add track name with lang=" + lang);
-                            mSubtitleInfoController.addTrack(lang);
+                            mSubtitleInfoController.addTrack(lang, true);
                         } else { // this should never happen
                             log.warn("onSubtitleMetadataUpdated: extsub name and lang are null, add track name to unknown");
-                            mSubtitleInfoController.addTrack(getText(R.string.unknown_track_name));
+                            mSubtitleInfoController.addTrack(getText(R.string.unknown_track_name), true);
                         }
                     } else {
                         // internal subtitle get name from name
                         log.debug("onSubtitleMetadataUpdated: intsub add track name with name=" + vMetadata.getSubtitleTrack(i).name + " replacing language code in " + vMetadata.getSubtitleTrack(i).language);
-                        mSubtitleInfoController.addTrack(generateTrackName(mContext, vMetadata.getSubtitleTrack(i).name, vMetadata.getSubtitleTrack(i).language));
+                        mSubtitleInfoController.addTrack(generateTrackName(mContext, vMetadata.getSubtitleTrack(i).name, vMetadata.getSubtitleTrack(i).language), false);
                     }
                 }
                 mSubtitleInfoController.addSeparator();
