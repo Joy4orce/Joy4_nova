@@ -15,6 +15,8 @@
 
 package com.archos.mediacenter.video.browser.BrowserByIndexedVideos;
 
+import static com.archos.mediacenter.video.utils.VideoUtils.isColorDark;
+
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -23,6 +25,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.loader.content.Loader;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -225,17 +229,23 @@ public class BrowserByShow extends BrowserWithShowHeader {
 
     @Override
     protected void setColor(int color) {
-
         int darkColor = VideoInfoCommonClass.getDarkerColor(color);
         ColorDrawable[] colord = {new ColorDrawable(mLastColor), new ColorDrawable(darkColor)};
         TransitionDrawable trans = new TransitionDrawable(colord);
         mApplicationFrameLayout.setBackground(trans);
         trans.startTransition(200);
         mLastColor = darkColor;
-        getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        getActivity().getWindow().setStatusBarColor(VideoInfoCommonClass.getAlphaColor(darkColor, 160));
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            WindowCompat.setDecorFitsSystemWindows(getActivity().getWindow(), false);
+            WindowInsetsControllerCompat insetsController = new WindowInsetsControllerCompat(getActivity().getWindow(), getActivity().getWindow().getDecorView());
+            insetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            insetsController.setAppearanceLightStatusBars(isColorDark(darkColor));
+            insetsController.setAppearanceLightNavigationBars(isColorDark(darkColor));
+        } else {
+            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            getActivity().getWindow().setStatusBarColor(VideoInfoCommonClass.getAlphaColor(darkColor, 160));
+        }
     }
 
     @Override

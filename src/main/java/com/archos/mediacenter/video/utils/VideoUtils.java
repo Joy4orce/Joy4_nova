@@ -17,6 +17,7 @@ package com.archos.mediacenter.video.utils;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.net.Uri;
 import android.util.Log;
 
@@ -178,6 +179,14 @@ public class VideoUtils {
     public static int convertDpToPixel(Context ctx, int dp) {
         float density = ctx.getResources().getDisplayMetrics().density;
         return Math.round((float) dp * density);
+    }
+
+    // Helper function to determine if a color is dark
+    public static boolean isColorDark(int color) {
+        double darkness = 1 - (0.299 * Color.red(color)
+                + 0.587 * Color.green(color)
+                + 0.114 * Color.blue(color)) / 255;
+        return darkness >= 0.5;
     }
 
     // provide path for file like content://com.archos.media/external/video/media/51

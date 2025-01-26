@@ -14,6 +14,8 @@
 
 package com.archos.mediacenter.video.info;
 
+import static com.archos.mediacenter.video.utils.VideoUtils.isColorDark;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -26,6 +28,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
@@ -91,8 +95,6 @@ public class VideoInfoActivity extends AppCompatActivity {
         if(mCurrentPosition>0)
             mViewPager.setCurrentItem(mCurrentPosition);
         globalLayout.addView(mGlobalBackdrop, 0);
-
-
     }
 
     protected void onStop(){
@@ -104,10 +106,19 @@ public class VideoInfoActivity extends AppCompatActivity {
         return mGlobalBackdrop;
     }
 
-    public void setBackgroundColor(int color){
+    public void setBackgroundColor(int color) {
         getWindow().getDecorView().setBackgroundColor(color);
-        getWindow().setNavigationBarColor(color);
-        getWindow().setStatusBarColor(color);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+            WindowInsetsControllerCompat insetsController = new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView());
+            insetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            insetsController.setAppearanceLightStatusBars(isColorDark(color));
+            insetsController.setAppearanceLightNavigationBars(isColorDark(color));
+        } else {
+            // For older APIs, use the deprecated methods
+            getWindow().setNavigationBarColor(color);
+            getWindow().setStatusBarColor(color);
+        }
     }
 
     @Override

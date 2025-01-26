@@ -291,13 +291,24 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         AndroidThreeTen.init(this);
 
         if (BuildConfig.DEBUG) {
-            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-                    .detectLeakedSqlLiteObjects()
-                    .detectLeakedClosableObjects()
-                    .detectActivityLeaks()
-                    .detectLeakedRegistrationObjects()
-                    .penaltyLog()
-                    .build());
+            if (Build.VERSION.SDK_INT <= 31) {
+                StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                        .detectLeakedSqlLiteObjects()
+                        .detectLeakedClosableObjects()
+                        .detectActivityLeaks()
+                        .detectLeakedRegistrationObjects()
+                        .penaltyLog()
+                        .build());
+            } else {
+                StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                        .detectLeakedSqlLiteObjects()
+                        .detectLeakedClosableObjects()
+                        .detectActivityLeaks()
+                        .detectLeakedRegistrationObjects()
+                        .penaltyLog()
+                        .detectUnsafeIntentLaunch()
+                        .build());
+            }
         }
 
         // register lifecycle observer
