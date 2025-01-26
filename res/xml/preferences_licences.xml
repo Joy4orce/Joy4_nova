@@ -74,12 +74,28 @@
             android:data="https://github.com/UweTrottmann/tmdb-java" />
     </PreferenceScreen>
     <PreferenceScreen
+        android:summary="GNU LGPL and BSD-style license"
+        android:title="jsch"
+        app:iconSpaceReserved="false">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="https://github.com/mwiede/jsch" />
+    </PreferenceScreen>
+    <PreferenceScreen
         android:summary="Apache License, Version 2.0"
         android:title="smbj"
         app:iconSpaceReserved="false">
         <intent
             android:action="android.intent.action.VIEW"
             android:data="https://github.com/hierynomus/smbj" />
+    </PreferenceScreen>
+    <PreferenceScreen
+        android:summary="Apache License, Version 2.0"
+        android:title="sshj"
+        app:iconSpaceReserved="false">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="https://github.com/hierynomus/sshj" />
     </PreferenceScreen>
     <PreferenceScreen
         android:summary="Apache License, Version 2.0"
