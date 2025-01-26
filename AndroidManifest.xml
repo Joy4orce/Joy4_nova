@@ -1307,9 +1307,6 @@
             </intent-filter>
         </receiver>
 
-        <activity
-            android:name="com.archos.mediascraper.settings.ScraperPreferences"
-            android:theme="@style/Theme.AppCompat" />
         <activity android:name="com.archos.filecorelibrary.samba.SambaPreferenceActivity" />
 
         <activity
