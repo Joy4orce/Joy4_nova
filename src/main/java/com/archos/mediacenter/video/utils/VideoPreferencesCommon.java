@@ -477,7 +477,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         mWatchingUpNext = (CheckBoxPreference) findPreference(KEY_SHOW_WATCHING_UP_NEXT_ROW);
         mForceAudioPassthrough = (CheckBoxPreference) findPreference(KEY_FORCE_AUDIO_PASSTHROUGH);
         ListPreference mForceAudioPassthroughMultiple = (ListPreference) findPreference("force_audio_passthrough_multiple");
-        if (!CustomApplication.isHdmiConnected()) {
+        if (!CustomApplication.isPassthroughSupported()) {
             mForceAudioPassthrough.setEnabled(false);
             mForceAudioPassthroughMultiple.setEnabled(false);
         }

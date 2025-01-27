@@ -30,6 +30,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.media.AudioDeviceCallback;
+import android.media.AudioDeviceInfo;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -108,8 +110,11 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private static int[] hdmiAudioEncodingsFlags;
     private static long maxAudioChannelCount = 0;
     private static boolean hasHdmi = false;
+    private static boolean hasSpdif = false;
     private static String supportedRefreshRates = "";
     private static boolean isAudioPlugged = false;
+    private static AudioManager mAudioManager;
+    private static AudioDeviceCallback mAudioDeviceCallback;
     public static final long allHdmiAudioCodecs = 0b11111111111111111111111111111;
     private static boolean hasManageExternalStoragePermissionInManifest = false;
     public static boolean isManageExternalStoragePermissionInManifest() { return hasManageExternalStoragePermissionInManifest; }
@@ -394,6 +399,20 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             m.remove(Class.forName("android.media.VendorAudioTrackCallback"));
         } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException | NullPointerException e) {
         }
+
+        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if (Build.VERSION.SDK_INT >= 23) {
+            // Detect initial audio devices
+            AudioDeviceInfo[] devices = mAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
+            for (AudioDeviceInfo device : devices) {
+                if (device.getType() == AudioDeviceInfo.TYPE_HDMI) hasHdmi = true;
+                if (device.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) hasSpdif = true;
+                break;
+            }
+        } else {
+            // only set hasSpdif since hasHdmi should be caught by the broadcast receiver and be valid for lower APIs
+            hasSpdif = true;
+        }
     }
 
     private void launchSambaDiscovery() {
@@ -420,6 +439,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         if (networkState == null ) networkState = NetworkState.instance(mContext);
         if (foreground) {
             registerHdmiAudioPlugReceiver();
+            registerAudioDeviceCallback();
             if (!isVideStoreImportReceiverRegistered) {
                 log.debug("handleForeGround: app now in ForeGround registerReceiver for videoStoreImportReceiver");
                 ArchosUtils.addBreadcrumb(SentryLevel.INFO, "CustomApplication.handleForeGround", "app now in ForeGround registerReceiver for videoStoreImportReceiver");
@@ -447,6 +467,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             launchSambaDiscovery();
         } else {
             unRegisterHdmiAudioPlugReceiver();
+            unRegisterAudioDeviceCallback();
             if (isVideStoreImportReceiverRegistered) {
                 log.debug("handleForeGround: app now in BackGround unregisterReceiver for videoStoreImportReceiver");
                 ArchosUtils.addBreadcrumb(SentryLevel.INFO, "CustomApplication.handleForeGround", "app now in Background unregister videoStoreImportReceiver");
@@ -477,6 +498,39 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         isHDMIPlugReceiverRegistered = false;
     }
 
+    private void registerAudioDeviceCallback() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            mAudioDeviceCallback = new AudioDeviceCallback() {
+                @Override
+                public void onAudioDevicesAdded(AudioDeviceInfo[] addedDevices) {
+                    for (AudioDeviceInfo device : addedDevices) {
+                        if (device.getType() == AudioDeviceInfo.TYPE_HDMI) hasHdmi = true;
+                        if (device.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) hasSpdif = true;
+                        break;
+                    }
+                }
+                @Override
+                public void onAudioDevicesRemoved(AudioDeviceInfo[] removedDevices) {
+                    for (AudioDeviceInfo removedDevice : removedDevices) {
+                        if (removedDevice.getType() == AudioDeviceInfo.TYPE_HDMI) hasHdmi = false;
+                        if (removedDevice.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) hasSpdif = false;
+                        break;
+                    }
+                }
+            };
+            mAudioManager.registerAudioDeviceCallback(mAudioDeviceCallback, null);
+        } else {
+            // only set hasSpdif since hasHdmi should be caught by the broadcast receiver and be valid for lower APIs
+            hasSpdif = true;
+        }
+    }
+
+    private void unRegisterAudioDeviceCallback() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            mAudioManager.unregisterAudioDeviceCallback(mAudioDeviceCallback);
+        }
+    }
+
     private final BroadcastReceiver mHdmiAudioPlugReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -501,6 +555,10 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
 
     public static boolean isHdmiConnected() {
         return hasHdmi;
+    }
+
+    public static boolean isPassthroughSupported () {
+        return hasHdmi || hasSpdif;
     }
 
     public static String[] audioEncodings = new String[] {"INVALID", "DEFAULT", "PCM_16BIT", "PCM_8BIT", "PCM_FLOAT",
