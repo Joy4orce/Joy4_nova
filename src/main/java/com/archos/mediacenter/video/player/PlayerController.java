@@ -405,6 +405,46 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         showTVMenu(false);
     }
 
+    private void adjustSeekBarForInsets(View seekBar) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            seekBar.setOnApplyWindowInsetsListener((v, insets) -> {
+                Insets systemBarsInsets = insets.getInsets(WindowInsets.Type.systemBars());
+                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                layoutParams.bottomMargin = systemBarsInsets.bottom; // Set bottom margin to navigation bar height
+                v.setLayoutParams(layoutParams);
+                return insets;
+            });
+        } else {
+            seekBar.setOnApplyWindowInsetsListener((v, insets) -> {
+                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                layoutParams.bottomMargin = insets.getSystemWindowInsetBottom(); // Set bottom margin to navigation bar height
+                v.setLayoutParams(layoutParams);
+                return insets;
+            });
+        }
+    }
+
+    private void adjustVolumeBarForInsets(View volumeBar) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            volumeBar.setOnApplyWindowInsetsListener((v, insets) -> {
+                Insets systemBarsInsets = insets.getInsets(WindowInsets.Type.systemBars());
+                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                //layoutParams.topMargin = systemBarsInsets.top; // Adjust for status bar -> not needed
+                layoutParams.bottomMargin = systemBarsInsets.bottom; // Adjust for navigation bar
+                v.setLayoutParams(layoutParams);
+                return insets;
+            });
+        } else {
+            volumeBar.setOnApplyWindowInsetsListener((v, insets) -> {
+                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                //layoutParams.topMargin = insets.getSystemWindowInsetTop(); // Adjust for status bar -> not needed
+                layoutParams.bottomMargin = insets.getSystemWindowInsetBottom(); // Adjust for navigation bar
+                v.setLayoutParams(layoutParams);
+                return insets;
+            });
+        }
+    }
+
     /*
      * 
      * Init controller initialize what is in player_controller_inside.xml. Main view means that this 
@@ -417,6 +457,9 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         // next TV menu
 
         View mControlBar = v.findViewById(R.id.control_bar);
+        if (mControlBar != null) {
+            adjustSeekBarForInsets(mControlBar); // Adjust seek bar for navigation bar insets
+        }
         if(mControlBar!=null &&isMainView){
             mControlBar.setOnFocusChangeListener(new OnFocusChangeListener() {
                 @Override
@@ -463,6 +506,11 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         }
 
         View volumeBar = v.findViewById(R.id.volume_bar);
+
+        if (volumeBar != null) {
+            adjustVolumeBarForInsets(volumeBar); // Adjust volume bar for system bar insets
+        }
+
         if(isChromeOS(mContext)) {
             if (volumeBar != null) volumeBar.setVisibility(View.GONE);
             mControlBar.setPadding(0,0,0,0);

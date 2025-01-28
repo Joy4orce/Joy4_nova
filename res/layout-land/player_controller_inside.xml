@@ -47,6 +47,7 @@
         android:layout_height="@dimen/player2014_bar_width"
         android:layout_alignParentBottom="true"
         android:layout_marginRight="0dip"
+        android:layout_marginBottom="0dp"
         android:layout_toRightOf="@+id/volume_bar"
         android:background="@drawable/player_bar_2014"
         android:orientation="horizontal"

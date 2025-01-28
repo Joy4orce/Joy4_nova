@@ -20,8 +20,10 @@ import com.archos.medialib.Subtitle.SubtitleAlignment;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -32,9 +34,9 @@ import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.RelativeLayout;
 
 import androidx.core.content.ContextCompat;
 import androidx.core.text.HtmlCompat;
@@ -547,6 +549,25 @@ public class SubtitleManager {
             mSubtitleSpacer.setRenderingSurface(uiSurface);
     }
 
+    private void adjustSubtitleForInsets() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            mSubtitleSpacer.setOnApplyWindowInsetsListener((v, insets) -> {
+                Insets systemBarsInsets = insets.getInsets(WindowInsets.Type.systemBars());
+                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                layoutParams.bottomMargin = systemBarsInsets.bottom; // Adjust for navigation bar
+                v.setLayoutParams(layoutParams);
+                return insets;
+            });
+        } else {
+            mSubtitleSpacer.setOnApplyWindowInsetsListener((v, insets) -> {
+                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                layoutParams.bottomMargin = insets.getSystemWindowInsetBottom(); // Adjust for navigation bar
+                v.setLayoutParams(layoutParams);
+                return insets;
+            });
+        }
+    }
+
     private void attachWindow() {
         if (mSubtitleLayout != null)
             return;
@@ -560,6 +581,7 @@ public class SubtitleManager {
         mSubtitleSpacerParams = mSubtitleSpacer.getLayoutParams();
         mSubtitleSpacerParams.height = mSubtitleEvadedVPos;
         setUIExternalSurface(mUiSurface);
+        adjustSubtitleForInsets();
         mPlayerView.addView(mSubtitleLayout, mScreenWidth, mScreenHeight);
     }
 

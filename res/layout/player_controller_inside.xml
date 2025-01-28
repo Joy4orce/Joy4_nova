@@ -50,6 +50,7 @@
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="0dip"
         android:layout_marginRight="0dip"
+        android:layout_marginBottom="0dp"
         android:background="@drawable/player_bar_2014"
         android:descendantFocusability="blocksDescendants"
         android:orientation="vertical"

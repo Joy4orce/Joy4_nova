@@ -9,13 +9,15 @@
     android:layout_height="fill_parent"
     android:layout_alignParentLeft="true"
     android:layout_alignParentTop="true"
+    android:layout_marginTop="0dp"
+    android:layout_marginBottom="0dp"
     android:background="@drawable/player_bar_2014"
     android:descendantFocusability="blocksDescendants"
     android:focusable="false"
     android:gravity="center"
     android:orientation="vertical"
     android:visibility="gone"
-    tools:context=".video.player.PlayerActivity" >
+    tools:context="com.archos.mediacenter.video.player.PlayerActivity" >
 
     <com.archos.mediacenter.utils.RepeatingImageButton
         android:id="@+id/volume_up"
