@@ -558,7 +558,8 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     }
 
     public static boolean isPassthroughSupported () {
-        return hasHdmi || hasSpdif;
+        //return hasHdmi || hasSpdif;
+        return true;
     }
 
     public static String[] audioEncodings = new String[] {"INVALID", "DEFAULT", "PCM_16BIT", "PCM_8BIT", "PCM_FLOAT",
