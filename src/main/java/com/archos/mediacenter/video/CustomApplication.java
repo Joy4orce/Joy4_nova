@@ -107,7 +107,9 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private static boolean isNetworkStateListenerAdded = false;
     private static boolean isHDMIPlugReceiverRegistered = false;
     private static long hdmiAudioEncodingFlag = 0;
+    private static long spdifAudioEncodingFlag = 0;
     private static int[] hdmiAudioEncodingsFlags;
+    private static int[] spdifAudioEncodingsFlags;
     private static long maxAudioChannelCount = 0;
     private static boolean hasHdmi = false;
     private static boolean hasSpdif = false;
@@ -405,8 +407,19 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             // Detect initial audio devices
             AudioDeviceInfo[] devices = mAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
             for (AudioDeviceInfo device : devices) {
-                if (device.getType() == AudioDeviceInfo.TYPE_HDMI) hasHdmi = true;
-                if (device.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) hasSpdif = true;
+                log.debug("onCreate: initial audio device " + device.getType() + " " + device.getProductName() + " capabilities " + getSupportedAudioCodecs(getEncodingFlags(device.getEncodings())));
+                if (device.getType() == AudioDeviceInfo.TYPE_HDMI) {
+                    hasHdmi = true;
+                    hdmiAudioEncodingsFlags = device.getEncodings();
+                    hdmiAudioEncodingFlag = getEncodingFlags(hdmiAudioEncodingsFlags);
+                    log.debug("onCreate: hdmi initial audio device");
+                }
+                if (device.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
+                    hasSpdif = true;
+                    spdifAudioEncodingsFlags = device.getEncodings();
+                    spdifAudioEncodingFlag = getEncodingFlags(spdifAudioEncodingsFlags);
+                    log.debug("onCreate: spdif initial audio device");
+                }
                 break;
             }
         } else {
@@ -504,16 +517,34 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                 @Override
                 public void onAudioDevicesAdded(AudioDeviceInfo[] addedDevices) {
                     for (AudioDeviceInfo device : addedDevices) {
-                        if (device.getType() == AudioDeviceInfo.TYPE_HDMI) hasHdmi = true;
-                        if (device.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) hasSpdif = true;
+                        if (device.getType() == AudioDeviceInfo.TYPE_HDMI) {
+                            hasHdmi = true;
+                            hdmiAudioEncodingsFlags = device.getEncodings();
+                            hdmiAudioEncodingFlag = getEncodingFlags(hdmiAudioEncodingsFlags);
+                            log.debug("registerAudioDeviceCallback: hdmi detected capabilities " + getSupportedAudioCodecs(hdmiAudioEncodingFlag));
+                        }
+                        if (device.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
+                            hasSpdif = true;
+                            spdifAudioEncodingsFlags = device.getEncodings();
+                            spdifAudioEncodingFlag = getEncodingFlags(spdifAudioEncodingsFlags);
+                            log.debug("registerAudioDeviceCallback: spdif detected capabilities " + getSupportedAudioCodecs(spdifAudioEncodingFlag));
+                        }
                         break;
                     }
                 }
                 @Override
                 public void onAudioDevicesRemoved(AudioDeviceInfo[] removedDevices) {
                     for (AudioDeviceInfo removedDevice : removedDevices) {
-                        if (removedDevice.getType() == AudioDeviceInfo.TYPE_HDMI) hasHdmi = false;
-                        if (removedDevice.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) hasSpdif = false;
+                        if (removedDevice.getType() == AudioDeviceInfo.TYPE_HDMI) {
+                            hasHdmi = false;
+                            hdmiAudioEncodingFlag = 0;
+                            hdmiAudioEncodingsFlags = null;
+                        }
+                        if (removedDevice.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
+                            hasSpdif = false;
+                            spdifAudioEncodingFlag = 0;
+                            spdifAudioEncodingsFlags = null;
+                        }
                         break;
                     }
                 }
@@ -637,10 +668,14 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     }
 
     public static String getSupportedAudioCodecs() {
+        return getSupportedAudioCodecs(hdmiAudioEncodingFlag);
+    }
+
+    public static String getSupportedAudioCodecs(long audioEncodingFlag) {
         StringBuilder supportedCodecs = new StringBuilder();
-        log.debug("getSupportedAudioCodecs: hdmiAudioEncodingFlag=" + hdmiAudioEncodingFlag);
+        log.debug("getSupportedAudioCodecs: audioEncodingFlag=" + audioEncodingFlag);
         for (int i = 2; i < audioEncodings.length; i++) {
-            if ((hdmiAudioEncodingFlag & (1L << i)) != 0) {
+            if ((audioEncodingFlag & (1L << i)) != 0) {
                 supportedCodecs.append(audioEncodings[i]).append(", ");
             }
         }
