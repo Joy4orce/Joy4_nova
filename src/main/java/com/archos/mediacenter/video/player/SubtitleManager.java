@@ -178,7 +178,7 @@ public class SubtitleManager {
 
             subtitle.setAlignment(getAlignment(subtitle.getText()));
 
-            log.debug("displayView: Text, mIsSubtitleGfx=false, alignment={}", subtitle.getAlignment());
+            log.debug("displayView: Text, mIsSubtitleGfx=false, alignment={} for text={}", subtitle.getAlignment(), subtitle.getText());
 
             mSubtitleTxtView.setVisibility(View.VISIBLE);
 
