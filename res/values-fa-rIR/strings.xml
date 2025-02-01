@@ -324,12 +324,34 @@
     <string name="menu_brightness_settings">روشنایی</string>
     <string name="menu_player_settings">ساماندهی</string>
     <string name="menu_change_folder">تغییر پوشه </string>
+    <string name="menu_change_folder_details">پوشه ای را برای شروع انتخاب کنید</string>
+    <string name="unlock_instructions">برای باز کردن قفل مدتی روی آیکون فشار دهید</string>
+    <string name="seek_to_percentage">پرش به %s%%</string>
+    <string name="set_audio_speed_to">سرعت صدا %s</string>
     <!-- Subtitles/Audio languages -->
     <!-- Subtitles in filename HI = Hearing Impaired -->
+    <string name="subs_HI">نا/کم شنوا</string>
     <!-- Subtitles in filename SDH = Subtitles for the Deaf and Hard of Hearing -->
+    <string name="subs_SDH">زیرنویس برای ناشنوایان و کم شنوایان</string>
     <!-- opensubtitles REST API not recognized languages ea=Spanish (LA)|ex=Extremaduran|me=Montenegrin|ma=Manipuri|pr=Dari|sp=Spanish (EU)|sx=Santali|sy=Syriac|tp=Toki Pona|ze=Chinese bilingual -->
     <string name="s_brazilian">برزیلی</string>
     <string name="s_chinese">چینی</string>
+    <string name="s_chinese_simplified">چینی ساده شده</string>
+    <string name="s_traditional_chinese">چینی سنتی</string>
+    <string name="s_chinese_bilingual">چینی دو زبانه</string>
+    <string name="s_chinese_mainland">چینی (سرزمین اصلی چین)</string>
+    <string name="s_chinese_hk">چینی (هنگ کنگ)</string>
+    <string name="s_chinese_tw">چینی (تایوان)</string>
+    <string name="s_spanish_la">اسپانیایی (LA)</string>
+    <string name="s_extremaduran">اکسترمادوران</string>
+    <string name="s_montenegrin">مونته نگرو</string>
+    <string name="s_manipuri">مانیپوری</string>
+    <string name="s_dari">دری</string>
+    <string name="s_portuguese_mz">پرتغالی (MZ)</string>
+    <string name="s_spanish_eu">اسپانیایی (اتحادیه اروپا)</string>
+    <string name="s_santali">سانتالی</string>
+    <string name="s_syriac">سریانی</string>
+    <string name="s_toki_pona">Toki Pona</string>
     <string name="s_none">هیچ کدام</string>
     <!-- Player errors -->
     <string name="player_err_cantplayvideo">نمی‌توان ویدئو را پخش نمود</string>
@@ -363,10 +385,36 @@
     <string name="player_plugin_video_audio_msg">این فایل دارای یک قالب ویدیویی <xliff:g id="video">%1$s</xliff:g> و یک قالب صوتی <xliff:g id="audio">%2$s</xliff:g> است.</string>
     <string name="player_plugin_purchase_msg">باید <xliff:g id="plugin">%1$s</xliff:g> را خریداری کنید</string>
     <string name="player_plugin_purchase">رفتن به فروشگاه</string>
+    <string name="player_plugin_purchase_archos_msg">می توانید افزونه های کدک اضافی را در www.archos.com خریداری کنید.</string>
+    <string name="player_plugin_purchase_google_play_msg">می توانید افزایه های کدک اضافی را در Google Play خریداری کنید.</string>
+    <string name="player_plugin_purchase_google_play_button">به Google Play بروید</string>
+    <string name="plugin_update_required_title">به روز رسانی کدک مورد نیاز است</string>
+    <string name="plugin_update_required_message">به نظر می رسد که شما قبلا کدک های اضافی برای Nova Video Player نصب کرده اید.\n\nاین نسخه جدید Nova Video Player نیاز به بروز رسانی این کدک ها دارد.\n\nلطفا برای به روز رسانی و نصب مجدد کدک ها به Google Play بروید.</string>
     <!-- Subtitles wizard -->
+    <string name="get_subtitles_on_drive">انتخاب زیرنویس از حافظه</string>
+    <string name="subtitles_wizard_no_files">فایل زیرنویس یافت نشد</string>
+    <string name="subtitles_wizard_current_files">فایل‌های زیرنویس فعلی</string>
+    <string name="subtitles_wizard_available_files">فایل‌های زیرنویس موجود</string>
+    <string name="subtitles_wizard_associate">مرتبط سازی این فایل به ویدیو</string>
     <string name="subtitles_wizard_delete">هذف این پرونده</string>
     <string name="subtitles_wizard_empty_list">پرونده‌ای یافت نشد</string>
+    <string name="subtitles_wizard_add_files">می توانید فایل های زیرنویس بیشتری را در این پوشه کپی کنید تا آنها را به این ویدیو مرتبط کنید.</string>
+    <string name="subtitles_wizard_help">هر یک از فایل های زیرنویس موجود را انتخاب کنید تا آن را با ویدیو %s مرتبط کنید. فایل به منظور مطابقت با نام ویدیو تغییر نام می دهد.</string>
+    <string name="subtitles_wizard_empty_list_help">هیچ فایل زیرنویسی پیدا نشد شما باید ابتدا یک یا چند فایل زیرنویس را در این پوشه کپی کنید تا آنها را با ویدیو %s مرتبط کنید.</string>
+    <string name="subtitles_wizard_cache">کش</string>
     <!-- Subloader -->
+    <string name="get_subtitles_online">دریافت زیرنویس آنلاین</string>
+    <string name="toast_subloader_sub_found">زیرنویس‌های پیدا شده برای این زبان</string>
+    <string name="toast_subloader_sub_not_found">برای این زبان زیرنویسی پیدا نشد</string>
+    <string name="toast_subloader_service_unreachable">اختلال در سرویس زیرنویس آنلاین</string>
+    <string name="menu_subloader_allfolder">دریافت زیرنویس‌های گمشده</string>
+    <string name="dialog_subloader_copying">در حال کپی زیرنویس…</string>
+    <string name="dialog_subloader_downloading">در حال دانلود زیرنویس…</string>
+    <string name="dialog_subloader_sumup">دانلود به پایان رسید</string>
+    <string name="dialog_subloader_success">زیرنویس‌های پیدا شده برای:</string>
+    <string name="dialog_subloader_fails">زیرنویسی پیدا نشد برای:</string>
+    <string name="sub_force_all_title">دانلود اجباری زیرنویس</string>
+    <string name="sub_force_all">همه ویدیوهای شما از قبل حداقل یک زیرنویس دارند. آیا می خواهید زیرنویس‌های جدید را به اجبار دانلود کنید؟</string>
     <string name="dialog_subloader_nonetwork_title">بدون اتصال اینترنت</string>
     <string name="dialog_subloader_nonetwork_message">برای دانلود زیرنویس ها نیاز به اتصال به اینترنت است</string>
     <string name="dialog_subloader_connecting">اتصال به سرویس opensubtitle...</string>
@@ -386,14 +434,55 @@
     <string name="subtitle_outline">طرح کلی زیرنویس</string>
     <!-- Subtitle Delay Dialog -->
     <string name="subtitle_delay_speed">تنظیم سرعت</string>
+    <string name="subtitle_delay_radio_none">هیچ</string>
+    <string name="subtitle_delay_radio_ntsc2pal">زیرنویس خیلی سریع</string>
+    <string name="subtitle_delay_radio_pal2ntsc">زیرنویس خیلی آهسته</string>
     <!-- Browser.CommonDetailsView -->
     <!-- Add a space after the right quote
     because the right part of the quote is
     not visible otherwise -->
+    <string name="quotation_format">&#x201C;%s&#x201D;&#x2003;</string>
+    <string name="error_permission">مجوزها کافی نیست</string>
+    <string name="error_permission_storage">Nova Video Player برای خواندن ویدیوهای محلی به مجوز ذخیره‌سازی نیاز دارد، لطفاً این اجازه را بدهید.</string>
+    <string name="error_permission_all_file_access">Nova Video Player برای مدیریت صحیح ویدیوها/فایل‌های NFO به تمام مجوزهای مدیریت حافظه خارجی نیاز دارد، لطفاً این مجوز را اعطا کنید.</string>
+    <string name="allow">اجازه دادن</string>
+    <string name="exit">خروج</string>
     <!-- torrent -->
+    <string name="error">خطایی رخ داد</string>
+    <string name="error_protocol_not_supported">خطا: پروتکل پشتیبانی نمی شود</string>
+    <string name="error_loading_torrent">خطا هنگام بارگیری تورنت</string>
+    <string name="error_downloading_not_enough_space">خطا هنگام دانلود تورنت: فضای کافی نیست</string>
+    <string name="loading_torrent">در حال بارگیری تورنت…</string>
+    <string name="error_no_video_file">بدون فایل ویدیویی</string>
+    <string name="torrent_file_to_play">انتخاب فایلی برای پخش</string>
+    <string name="torrent_buy_premium_message">پخش تورنت فقط در نسخه پولی در دسترس است</string>
+    <string name="torrent_buy_premium">خرید نسخه پولی</string>
     <!-- Shortcuts -->
+    <string name="browse_net_server">مرور اشتراک‌های شبکه</string>
+    <string name="add_smb_server">مرور سرور SMB</string>
+    <string name="add_network_server">افزودن اشتراک شبکه</string>
+    <string name="add_to_shortcuts">ایجاد میانبر</string>
+    <string name="add_ssh_server">مرور سرور FTP</string>
+    <string name="add_ssh_shortcut">افزودن به عنوان میانبر</string>
+    <string name="ssh_prompt">نوع FTP</string>
+    <string name="protocol_prompt">نوع پروتکل</string>
+    <string name="ssh_empty_view"> \"شما می توانید از سرور ftp خود مرور و پخش کنید\"</string>
     <string name="remove_from_shortcuts">هذف میانبر</string>
+    <string name="shortcut_added">میانبر %s ایجاد شد</string>
+    <string name="shortcut_removed">میانبر %s حذف شد</string>
+    <string name="server_not_available">در حال حاضر سرور در دسترس نیست</string>
+    <string name="cannot_open_shortcut">محتوای این میانبر در حال حاضر در دسترس نیست.\nلطفا بررسی کنید که مجوزهای لازم را دارید.</string>
+    <string name="network_shortcuts">میانبرهای شبکه</string>
+    <string name="media_servers">سرور های رسانه</string>
+    <string name="shortcut_list_empty">هیچ میانبر شبکه ای ایجاد نشده است.\n\nبرای ایجاد میانبر برای پوشه های راه دور دلخواه خود، روی پوشه های مورد نظر طولانی کلیک کنید و \"%s\" را در نوار اقدام بالا انتخاب کنید.</string>
+    <string name="ftp_shortcut_list_empty">برای ایجاد میانبر برای پوشه های راه دور دلخواه خود، هنگام مرور سرور، \"%s\" را در نوار اقدام بالا انتخاب کنید.</string>
+    <string name="indexed_folders">پوشه‌های فهرست شده</string>
     <string name="ftp_shortcuts">میانبرهای FTP</string>
+    <string name="add_to_indexed_folders">فهرست کردن پوشه</string>
+    <string name="add_to_library">افزودن به کتابخانه</string>
+    <string name="add_all_items_to_library">فوراً همه ویدیوها را به کتابخانه اضافه می‌کنید؟</string>
+    <string name="invalid_host">قالب آدرس میزبان معتبر نیست</string>
+    <string name="upnp_indexing_warning_message">نمایه سازی UPnP به اندازه نمایه سازی SMB امکان ندارد.\nتوصیه می شود اگر سرور یا رایانه شخصی شما از آن پشتیبانی می کند، به جای آن یک پوشه SMB را فهرست کنید.\n</string>
     <string name="ssh_password">گذرواژه</string>
     <string name="ssh_username">نام کاربری</string>
     <!-- Preferences -->

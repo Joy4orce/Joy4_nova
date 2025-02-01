@@ -42,7 +42,7 @@
     <string name="play_from_beginning">Odtwórz od początku</string>
     <!-- Dialog box button -->
     <!--The fast scroll thumb will show one character from this string depending on the position in the list -->
-    <string name="fast_scroll_alphabet"> AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ</string>
+    <string name="fast_scroll_alphabet">\u0020AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ</string>
     <!-- The string used in file/folder infos dialog. -->
     <string name="info_duration">Czas trwania:</string>
     <string name="video_sources">Źródła</string>
@@ -154,7 +154,7 @@
     <string name="delete_bookmark">Usuń zakładkę</string>
     <string name="mark_as_watched">Oznacz jako obejrzany</string>
     <string name="mark_as_not_watched">Oznacz jako nie obejrzany</string>
-    <string name="upnp_not_allowed">Brak zezwolenia na dostęp do serwera UPnP. Należy zmienić konfigurację dostępu. </string>
+    <string name="upnp_not_allowed">Brak zezwolenia na dostęp do serwera UPnP. Należy zmienić konfigurację dostępu.</string>
     <string name="scrap_no_info">Nie masz opisu dla tego filmu lub programu telewizyjnego.</string>
     <string name="scrap_remove">Usuń opis</string>
     <string name="scrap_remove_short">Usuń</string>
@@ -197,8 +197,8 @@
     <string name="next_episode">Następny odcinek</string>
     <string name="list_episodes">Lista odcinków</string>
     <string name="how_to_mark_season_watched">Kliknij na sezon, aby zaznaczyć wszystkie odcinki jako obejrzane lub nieobejrzane</string>
-    <string name="how_to_unindex_season">Naciśnij na sezon aby usunąć wszystkie jego odcinki z biblioteki</string>
-    <string name="how_to_delete_season">Naciśnij na sezon aby usunąć wszystkie jego odcinki</string>
+    <string name="how_to_unindex_season">Naciśnij na sezon, aby usunąć wszystkie jego odcinki z biblioteki</string>
+    <string name="how_to_delete_season">Naciśnij na sezon, aby usunąć wszystkie jego odcinki</string>
     <string name="mark_show_watched">Oznacz wszystkie odcinki jako obejrzane lub nieobejrzane</string>
     <string name="unindex_show">Usuń wszystkie odcinki z biblioteki</string>
     <string name="delete_show">Usuń wszystkie odcinki</string>
@@ -212,7 +212,7 @@
     </plurals>
     <string name="scrap_processing">Pobieranie metadanych…</string>
     <string name="scrap_no_network">Brak połączenia z siecią.</string>
-    <string name="scrap_enable_network_first">"\"Aby umożliwić uruchomienie aplikacji należy najpierw aktywować połączenie z siecią\"."</string>
+    <string name="scrap_enable_network_first">"Aby umożliwić uruchomienie aplikacji należy najpierw aktywować połączenie z siecią."</string>
     <string name="scrap_failed">Nie znaleziono filmu w bazie danych.</string>
     <string name="start_auto_scraper_activity">Wyszukaj informacje w Internecie</string>
     <string name="scraper_settigns">Plakat &amp; opis</string>
@@ -254,7 +254,7 @@
     <string name="info_resume">Wznów od pozycji</string>
     <string name="info_bookmark">Pozycja zakładki</string>
     <string name="info_file">Informacje o pliku</string>
-    <string name="use_remote_resume">Używaj wznawiania z sieci</string>
+    <string name="use_remote_resume">Używać wznawiania z sieci?</string>
     <!-- VIDEO COVER ROLL -->
     <string name="you_have_no_recently_added_video">Nie znaleziono ostatnio dodanych plików wideo</string>
     <string name="you_have_no_recently_played_video">Nie znaleziono ostatnio odtwarzanych plików wideo</string>
@@ -335,7 +335,7 @@
     <string name="menu_player_settings">Ustawienia</string>
     <string name="menu_change_folder">Zmień folder</string>
     <string name="menu_change_folder_details">Wybierz folder startowy</string>
-    <string name="unlock_instructions">Przytrzymaj na ikonie aby odblokować</string>
+    <string name="unlock_instructions">Przytrzymaj na ikonie, aby odblokować</string>
     <string name="seek_to_percentage">Przeskakiwanie do %s%%</string>
     <string name="set_audio_speed_to">Prędkość odtwarzania %s</string>
     <!-- Subtitles/Audio languages -->
@@ -372,7 +372,7 @@
     <string name="player_err_sizetoobig">Rozmiar obrazu jest zbyt duży</string>
     <string name="player_err_unknown">Nieznany błąd.</string>
     <string name="player_err_critical">Błąd serwera mediów.</string>
-    <string name="player_err_forcodec">dla kodeku</string>
+    <string name="player_err_forcodec">dla kodeka</string>
     <string name="player_err_notinterleaved">Strumieniowanie wideo i audio nie przeplata się.</string>
     <string name="player_err_codec">Kodek</string>
     <string name="player_err_isnotsupported">nie jest obsługiwany.</string>
@@ -403,8 +403,8 @@
     <!-- Subtitles wizard -->
     <string name="get_subtitles_on_drive">Wybierz napisy z dysku</string>
     <string name="subtitles_wizard_no_files">Nie znaleziono napisów</string>
-    <string name="subtitles_wizard_current_files">Aktualne pliki napisów:</string>
-    <string name="subtitles_wizard_available_files">Dostępne pliki napisów:</string>
+    <string name="subtitles_wizard_current_files">Aktualne pliki napisów</string>
+    <string name="subtitles_wizard_available_files">Dostępne pliki napisów</string>
     <string name="subtitles_wizard_associate">Powiąż ten plik z wideo</string>
     <string name="subtitles_wizard_delete">Usuń ten plik</string>
     <string name="subtitles_wizard_empty_list">Nie znaleziono pliku</string>
@@ -476,7 +476,7 @@
     <string name="add_ssh_shortcut">Dodaj jako skrót</string>
     <string name="ssh_prompt">Typ FTP</string>
     <string name="protocol_prompt">Typ protokołu</string>
-    <string name="ssh_empty_view"> \"Możesz przeglądać i odtwarzać ze swojego serwera ftp\"</string>
+    <string name="ssh_empty_view"> \"Możesz przeglądać i odtwarzać ze swojego serwera FTP\"</string>
     <string name="remove_from_shortcuts">Usuń skrót</string>
     <string name="shortcut_added">Utworzono skrót %s</string>
     <string name="shortcut_removed">Skrót %s usunięty</string>
@@ -499,7 +499,7 @@
     <string name="remove_from_indexed_folders">Usuń z biblioteki</string>
     <string name="indexed_folder_removed">Folder %s usunięty z biblioteki</string>
     <string name="indexed_folders_list_empty">Brak obecnie indeksowanych folderów sieciowych.\n\nMożesz dodać zawartość folderu sieciowego do biblioteki przeglądając ten folder i wybierając \"%s\" na górnym pasku akcji.</string>
-    <string name="indexed_folders_list_empty_ftp">Brak aktualnie zindeksowanych folderów ftp.</string>
+    <string name="indexed_folders_list_empty_ftp">Brak aktualnie zindeksowanych folderów FTP.</string>
     <string name="indexed_folders_list_empty_network">Brak folderów sieciowych obecnie indeksowanych.</string>
     <string name="open_indexed_folder">"Otwórz"</string>
     <string name="rescan_indexed_folders">Ponowne skanowanie wszystkich indeksowanych folderów</string>
@@ -536,7 +536,7 @@
     <string name="preferences_stream_buffer_size_summary">Ilość pamięci podręcznej przed analizatorem do rozwiązywania problemów buforowania w MB</string>
     <string name="preferences_stream_max_iframe_size_title">Maksymalny rozmiar i-frame</string>
     <string name="preferences_stream_max_iframe_size_summary">Maksymalny rozmiar kompresji i-frame w MB</string>
-    <string name="preferences_force_passthrough">Wymuś przekazywanie dźwięku</string>
+    <string name="preferences_force_passthrough">Wymuś przekazywanie dźwięku wprost</string>
     <string name="preferences_force_passthrough_summary">Jeśli włączona jest funkcja przekazywania dźwięku, wymuś ją, nawet jeśli kodek audio nie jest obsługiwany przez odbiornik AV</string>
     <string name="preferences_playback_speed">Prędkość odtwarzania</string>
     <string name="preferences_playback_speed_summary">Włącz możliwość zmiany prędkości odtwarzania. ⚠️ Eksperymentalne może powodować choppy wideo</string>
@@ -546,7 +546,7 @@
     <string name="preferences_enable_downmix_androidtv_summary">Zawsze miksuj ścieżkę dźwiękową wielu kanałów do stereo (wybierz, jeśli kanały głosowe nie są słyszalne)</string>
     <string name="preferences_allow_3rd_party_player">Zezwól na używanie innego odtwarzacza wideo</string>
     <string name="preferences_allow_3rd_party_player_summary">Inne kompatybilne aplikacje będą proponowane przez system Android podczas uruchamiania odtwarzania wideo. Pamiętaj, że niektóre funkcje nie będą działać (wznawianie, zakładki, itp.)</string>
-    <string name="preference_tv_3d_automatic_switch">Włącz automatyczne przełączanie TV 3D\"</string>
+    <string name="preference_tv_3d_automatic_switch">Włącz automatyczne przełączanie TV 3D</string>
     <string name="preference_tv_3d_automatic_switch_summary">Użyj tej funkcji tylko wtedy, gdy telewizor obsługuje 3D</string>
     <string name="enable_android_frame_timing">Włącz synchronizację ramek systemu Android</string>
     <string name="enable_android_frame_timing_summary">Delegowanie do Androida synchronizacji klatek w celu płynniejszego odtwarzania (eksperymentalne)</string>
@@ -555,8 +555,8 @@
     <string name="preferences_tv_refreshrate_switch_disabled">Wyłączone</string>
     <string name="preferences_tv_refreshrate_switch_mode_selection">Wybór trybu wyświetlania dopasowany do liczby klatek na sekundę wideo</string>
     <string name="preferences_tv_refreshrate_switch_match_frame_rate">Funkcja dopasowywania szybkości klatek w systemie Android 12</string>
-    <string name="preference_remove_dolby_vision">Wyłącz dolby vision</string>
-    <string name="preference_remove_dolby_vision_summary">Użyj standardowych kodeków wideo zamiast dolby vision</string>
+    <string name="preference_remove_dolby_vision">Wyłącz Dolby Vision</string>
+    <string name="preference_remove_dolby_vision_summary">Użyj standardowych kodeków wideo zamiast Dolby Vision</string>
     <string name="preference_cutout_short_edges">Pełny ekran na wyświetlaczu z wycięciami</string>
     <string name="preference_cutout_short_edges_summary">Zezwalaj na pełny ekran na wyświetlaczu z wycięciami</string>
     <string name="category_languages">Napisy</string>
@@ -643,18 +643,18 @@
     <string name="share_folders_smbj_summary">Włącz szybszą przepustowość SMB, ale ogranicza obsługę protokołu powyżej wersji 2</string>
     <string name="share_folders_sshj">Użyj nowszej implementacji SFTP</string>
     <string name="share_folders_sshj_summary">Włącz nową implementację SFTP dla linków SFTP</string>
-    <string name="share_folders_smbv2">Włącz obsługę SMBv2</string>
+    <string name="share_folders_smbv2">Włącz obsługę SMB v2</string>
     <string name="share_folders_smbv2_summary">Włącz obsługę protokołu udostępniania sieci SMB w wersji 2.</string>
     <string name="share_folders_smb_resolv">Porządek wyszukiwania SMB</string>
     <string name="share_folders_smb_resolv_summary">Włącz BCAST, DNS (domyślnie: DNS, BCAST). Zmień, jeśli serwer nie odpowiada lub SMB działa wolno.</string>
     <string name="share_folders_smb_disable_tcp_discovery">Wyłącz wyszukiwanie SMB TCP</string>
     <string name="share_folders_smb_disable_tcp_discovery_summary">Wyłącz wykrywanie TCP, jeśli na niektórych urządzeniach występują niestabilne WiFi.</string>
-    <string name="share_folders_smb_disable_udp_discovery">Wyłącz wyszukiwanie SMB TCP</string>
-    <string name="share_folders_smb_disable_udp_discovery_summary">Wyłącz wyszukiwanie UDP, jeśli na niektórych urządzeniach występują niestabilne Wi-Fi (np. ogień 10 HD).</string>
+    <string name="share_folders_smb_disable_udp_discovery">Wyłącz wyszukiwanie SMB UTP</string>
+    <string name="share_folders_smb_disable_udp_discovery_summary">Wyłącz wyszukiwanie UDP, jeśli na niektórych urządzeniach występują niestabilne Wi-Fi (np. Amazon Fire 10 HD).</string>
     <string name="share_folders_smb_disable_mdns_discovery">Wyłącz wyszukiwanie SMB TCP</string>
     <string name="share_folders_smb_disable_mdns_discovery_summary">Wyłącz odkrywanie mDNS, jeśli na niektórych urządzeniach występują niestabilne WiFi.</string>
     <string name="share_folders_smb_discovery_limited_to_mdsn">Ogranicz odkrycie SMB do mDNS</string>
-    <string name="share_folders_smb_discovery_limited_to_mdsn_summary">Wyłącz odkrywanie UDP/TCP, jeśli na niektórych urządzeniach występują niestabilne Wi-Fi (np. ogień 10 HD). ⚠️ Zapobiegnie prawidłowemu odkrywaniu w ChromeOS.</string>
+    <string name="share_folders_smb_discovery_limited_to_mdsn_summary">Wyłącz odkrywanie UDP/TCP, jeśli na niektórych urządzeniach występują niestabilne Wi-Fi (np. Amazon Fire 10 HD). ⚠️ Zapobiegnie prawidłowemu odkrywaniu w ChromeOS.</string>
     <string name="connection_abnormally_long">Nawiązywanie połączenia trwa zbyt długo. Zresetować?</string>
     <string name="connection_reset">Resetowanie</string>
     <!-- Info dialog, not indexed file -->
@@ -796,7 +796,7 @@
     <string name="trakt_signin_title">Zaloguj się</string>
     <string name="trakt_wipe_dialog_title">Wylogować z Trakt.tv\?</string>
     <string name="trakt_wipe_title">Wylogowano z Trakt.tv</string>
-    <string name="trakt_live_scrobbling_title">Rzeźba żywa</string>
+    <string name="trakt_live_scrobbling_title">Funkcjonujący scrobbler</string>
     <string name="trakt_live_scrobbling_summary">Udostępnij materiały oglądane na Trakt</string>
     <string name="trakt_getfull_summary">Trakt scrobbler jest dostępny tylko w płatnej wersji</string>
     <string name="trakt_sync_collection_title">Synchronizuj seriale i kolekcje filmowe</string>
@@ -872,7 +872,7 @@
     <string name="last_rescan_occured">Ostatni skan:</string>
     <string name="error_permission_display_over_apps">Tryb okna wymaga specjalnych uprawnień do wyświetlania nad innymi aplikacjami. Proszę przyznać Nova Video Player uprawnienia do wyświetlania nad innymi aplikacjami, aby przełączyć się na tryb okna.</string>
     <string name="intro_overlay_text">Dotknij, aby przesyłać do telewizora</string>
-    <string name="drawer_open">otwarta szuflada</string>
+    <string name="drawer_open">draweropen</string>
     <string name="drawer_close">drawer_close</string>
     <string name="view_more">Zobacz więcej</string>
     <string name="nfo_export_in_progress">Trwa eksportowanie NFO</string>
