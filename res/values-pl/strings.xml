@@ -18,7 +18,7 @@
     <string name="nfo_export_category">Eksport informacji o mediach</string>
     <string name="nfo_export_auto_title">Automatyczny eksport po wyszukaniu</string>
     <string name="nfo_export_manual_title">Eksportuj zaktualizowane wideo</string>
-    <string name="nfo_export_auto_summary">Antomatycznie eksportuj pliki .nfo po wyszukaniu online</string>
+    <string name="nfo_export_auto_summary">Automatycznie eksportuj pliki .nfo po wyszukaniu online</string>
     <string name="nfo_export_manual_summary">Eksportuj pliki .nfo wszystkich zaktualizowanych plików video</string>
     <string name="nfo_export_button">Eksportuj .nfo</string>
     <string name="nfo_export_folder">Eksportuj wszystko z tego folderu do .nfo</string>
