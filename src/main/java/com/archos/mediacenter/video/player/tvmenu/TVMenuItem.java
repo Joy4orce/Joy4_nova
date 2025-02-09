@@ -124,12 +124,14 @@ public class TVMenuItem extends LinearLayout implements Checkable, TVSlaveView{
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            ViewParent parent = getParent();
-            while (parent != null && !(parent instanceof TVMenu)) {
-                parent = parent.getParent();
-            }
-            if (parent instanceof TVMenu) {
-                return ((TVMenu) parent).onKeyDown(event.getKeyCode(), event);
+            if (event.getKeyCode()!= KeyEvent.KEYCODE_BACK) { // Exclude back button
+                ViewParent parent = getParent();
+                while (parent!= null &&!(parent instanceof TVMenu)) {
+                    parent = parent.getParent();
+                }
+                if (parent instanceof TVMenu) {
+                    return ((TVMenu) parent).onKeyDown(event.getKeyCode(), event);
+                }
             }
         }
         return super.dispatchKeyEvent(event);
