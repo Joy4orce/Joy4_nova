@@ -652,7 +652,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         }
     }
 
-    private long getEncodingFlags(int encodings[]) {
+    private long getEncodingFlags(int[] encodings) {
         if (encodings == null)
             return 0;
         long encodingFlags = 0;
