@@ -3271,16 +3271,19 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
     int positionToSubtitleTrack(int position, int nbTracks) { // nbTracks does not count none track
         // subtitleTracks are between 0<=track<=nbTrack and none track is nbTrack
+        if (nbTracks == 0) return 0; // to avoid division by 0
         if (position == 0) return nbTracks; // position 0 is none track thus return nbTracks
         else return (position - 1) % (nbTracks + 1);
     }
 
     int positionToPlayerSubtitleTrack(int position, int nbTracks) { // nbTracks does not count none track
+        if (nbTracks == 0) return -1; // to avoid division by 0
         if (position == 0) return -1; // position 0 is none track thus return -1 for the player
         else return (position - 1) % nbTracks;
     }
 
     int subtitleTrackToPosition(int subtitleTrack, int nbTracks) { // nbTracks does not count none track
+        if (nbTracks == 0) return 0;
         // position is between 0<=position<=nbTrack with 0 is none track
         if (nbTracks >= 0) return (subtitleTrack + 1) % (nbTracks + 1);
         else return 0;
@@ -3294,6 +3297,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     }
 
     int nextVideoInfoSubtitleTrack(int subtitleTrack, int nbTracks) { // nbTracks does not count none track
+        if (nbTracks == 0) return 0; // to avoid division by 0
         // subtitleTracks are between 0<=track<=nbTrack and none track is nbTrack
         // none track is covered in nextSubtitleTrack
         return (subtitleTrack == nbTracks - 1) ? nbTracks : (subtitleTrack + 1) % (nbTracks + 1);
