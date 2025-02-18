@@ -542,12 +542,16 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
         if (mActivity == null) return;
         setOnSearchClickedListener(new View.OnClickListener() {
             public void onClick(View view) {
-                Intent intent = new Intent(mActivity, VideoSearchActivity.class);
-                intent.putExtra(VideoSearchActivity.EXTRA_SEARCH_MODE, VideoSearchActivity.SEARCH_MODE_ALL);
-                startActivity(intent);
+                if (mActivity != null) {
+                    Intent intent = new Intent(mActivity, VideoSearchActivity.class);
+                    intent.putExtra(VideoSearchActivity.EXTRA_SEARCH_MODE, VideoSearchActivity.SEARCH_MODE_ALL);
+                    startActivity(intent);
+                } else {
+                    log.warn("onClick: search clicked but mActivity is null!");
+                }
             }
         });
-        setOnItemViewClickedListener(new MainViewClickedListener(mActivity));
+        if (mActivity != null) setOnItemViewClickedListener(new MainViewClickedListener(mActivity));
     }
 
     private void loadRows() {
