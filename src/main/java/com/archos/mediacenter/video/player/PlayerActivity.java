@@ -1613,11 +1613,20 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             @Override
             public void onClick(View view) {
                 saveSettingCB.toggle();
+                log.debug("createTVAudioDelayDialog:onClick saveSettingCB.isChecked()=" + saveSettingCB.isChecked());
             }
         });
+        // View hierarchy is
+        // TVCardDialog
+        //└── LinearLayout
+        //    └── TVScrollView
+        //        └── TVMenu
+        //            ├── AudioDelayTVPicker
+        //            └── TVMenuItem (saveSettingCB)
         tvPicker.init(PlayerService.sPlayerService.getAudioDelay(), new AudioDelayPickerAbstract.OnAudioDelayChangedListener() {
             @Override
             public void onAudioDelayChanged(AudioDelayPickerAbstract view, int delay) {
+                log.debug("createTVAudioDelayDialog:onAudioDelayChanged delay=" + delay);
                 PlayerActivity.this.onAudioDelayChange(null, delay);
             }
         });
@@ -1627,9 +1636,11 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             public void onResult(int code) {
                 mPlayerController.getTVMenuAdapter().setDiscrete(false);
                 if(saveSettingCB.isChecked()){
+                    log.debug("createTVAudioDelayDialog:onResult save audio delay=" + PlayerService.sPlayerService.getAudioDelay() + " in prefs");
                     mPreferences.edit().putInt(getString(R.string.save_delay_setting_pref_key), PlayerService.sPlayerService.getAudioDelay()).apply();
                 }
                 else {
+                    log.debug("createTVAudioDelayDialog:onResult do not save audio delay and carve 0 in prefs");
                     mPreferences.edit().putInt(getString(R.string.save_delay_setting_pref_key), 0).apply();
                 }
             }

@@ -29,10 +29,16 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 
 
 public class TVCardDialog extends FrameLayout implements TVSlaveView  {
+
+    private static final Logger log = LoggerFactory.getLogger(TVCardDialog.class);
+
     private int pos;
     private int originalWidth;
     private float originalX;
@@ -136,6 +142,7 @@ public class TVCardDialog extends FrameLayout implements TVSlaveView  {
     }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        log.debug("onKeyDown keyCode:{}", keyCode);
         //click mapping
         if (keyCode==KeyEvent.KEYCODE_DPAD_CENTER && ocl != null) {
             this.ocl.onClick(this);
@@ -212,6 +219,7 @@ public class TVCardDialog extends FrameLayout implements TVSlaveView  {
         super.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
+                log.debug("onFocusChange hasFocus:{}", hasFocus);
                 ofcl.onFocusChange(v, hasFocus);
                 if (ocl == null && others.size() > 0)
                     others.get(0).requestFocus();

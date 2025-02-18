@@ -18,7 +18,12 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ScrollView;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TVScrollView extends ScrollView {
+
+    private static final Logger log = LoggerFactory.getLogger(TVScrollView.class);
 
     private TVOnScrollListener tv;
     public TVScrollView(Context context, AttributeSet attrs, int defStyle) {

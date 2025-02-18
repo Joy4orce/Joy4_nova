@@ -28,10 +28,16 @@ import java.util.ArrayList;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.player.FocusableTVCardView;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Created by alexandre on 24/10/14.
  */
 public class TVMenu extends LinearLayout implements FocusableTVCardView, TVSlaveView{
+
+    private static final Logger log = LoggerFactory.getLogger(TVMenu.class);
+
     LinearLayout ll;
     Context mContext;
 
@@ -92,6 +98,7 @@ public class TVMenu extends LinearLayout implements FocusableTVCardView, TVSlave
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        log.debug("onKeyDown keyCode: " + keyCode);
         if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
             int nextIndex = current + 1;
             while (nextIndex < ti.size() && (!ti.get(nextIndex).isEnabled() || isSeparator(ti.get(nextIndex)))) {

@@ -27,10 +27,16 @@ import android.widget.Switch;
 import android.widget.TextView;
 import com.archos.mediacenter.video.R;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Created by alexandre on 24/10/14.
  */
 public class TVMenuItem extends LinearLayout implements Checkable, TVSlaveView{
+
+    private static final Logger log = LoggerFactory.getLogger(TVMenuItem.class);
+
     private boolean isChecked;
     private String text;
     private boolean isDisabled; // Add this field
@@ -72,6 +78,7 @@ public class TVMenuItem extends LinearLayout implements Checkable, TVSlaveView{
         });  
     }
     public void setFocus(boolean hasFocus){
+        log.debug("setFocus hasFocus:{}", hasFocus);
         if(hasFocus){
      
             this.setBackgroundResource(R.color.video_info_next_prev_button_focused);
@@ -137,9 +144,9 @@ public class TVMenuItem extends LinearLayout implements Checkable, TVSlaveView{
         return super.dispatchKeyEvent(event);
     }
 
-
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event){
+        log.debug("onKeyUp keyCode:{}", keyCode);
         //click mapping
         if(TVUtils.isOKKey(keyCode) &&ocl!=null) {
             this.ocl.onClick(this);
@@ -149,26 +156,32 @@ public class TVMenuItem extends LinearLayout implements Checkable, TVSlaveView{
     }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event){
+        log.debug("onKeyDown keyCode:{}", keyCode);
         //click mapping   
         if(TVUtils.isOKKey(keyCode) &&ocl!=null) {
             return true;
         }
         if (this.getParent() != null && this.getParent() instanceof TVMenu) {
-            
             ViewParent p;
             View v = this;
             while((p=v.getParent())!=null){
-                if(p instanceof TVCardView)
-                    return ((TVCardView)p).onKeyDown(keyCode, event);
-                else if(p instanceof TVCardDialog)
-                    return ((TVCardDialog)p).onKeyDown(keyCode, event);
-                else if(p instanceof View)
-                    v=(View)p;
-                else 
+                if(p instanceof TVCardView) {
+                    log.debug("onKeyDown keyCode:{} in TVCardView, propagate", keyCode);
+                    return ((TVCardView) p).onKeyDown(keyCode, event);
+                } else if(p instanceof TVCardDialog) {
+                    log.debug("onKeyDown keyCode:{} in TVCardDialog, propagate", keyCode);
+                    return ((TVCardDialog) p).onKeyDown(keyCode, event);
+                } else if(p instanceof View) {
+                    log.debug("onKeyDown keyCode:{} in View, propagate", keyCode);
+                    v = (View) p;
+                } else {
+                    log.debug("onKeyDown keyCode:{} in unknown parent, break", keyCode);
                     break;
+                }
             }
                
         }
+        log.debug("onKeyDown keyCode:{} not handled", keyCode);
         return false;
     }
 
