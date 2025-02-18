@@ -18,8 +18,13 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public abstract class AudioDelayPickerAbstract extends FrameLayout {
+
+    private static final Logger log = LoggerFactory.getLogger(AudioDelayPickerAbstract.class);
 
     private int mSign = 1;
     private int mMinute = 0;
@@ -73,6 +78,7 @@ public abstract class AudioDelayPickerAbstract extends FrameLayout {
         mMinute = (int) delay / 60 / 1000;
         mSecond = (int) (delay % (60 * 1000)) / 1000;
         mMilliSecond = (int) (delay % 1000);
+        log.debug("updateDelay: delay=" + delay + " mMinute=" + mMinute + " mSecond=" + mSecond + " mMilliSecond=" + mMilliSecond);
     }
 
     public void setStep(int step){
@@ -82,14 +88,17 @@ public abstract class AudioDelayPickerAbstract extends FrameLayout {
     public void setMin(int min) {
         hasMin = true;
         mMin = min - min % mStep;
+        log.debug("setMin: mMin=" + mMin);
     }
 
     public void setMax(int max) {
         hasMax = true;
         mMax= (int)(max - Math.IEEEremainder(max, mStep));
+        log.debug("setMax: mMax=" + mMax);
     }
 
     public void init(int delay, OnAudioDelayChangedListener onDelayChangedListener) {
+        log.debug("init: delay=" + delay);
         updateDelay(delay);
         mOnDelayChangedListener = onDelayChangedListener;
     }
