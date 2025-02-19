@@ -26,6 +26,7 @@ import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediacenter.utils.BlacklistedDbAdapter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -80,6 +81,16 @@ public class Blacklist {
             "/tiktok",
             "/DCIM/TikTok",
     };
+
+    private static final List<String> BLACKLISTED_DIRS = new ArrayList<>(Arrays.asList(
+            "#recycle", // synology trash
+            "#snapshot", // synology snapshots
+            "@Recycle" // qnap trash
+    ));
+
+    public boolean isDirectoryBlacklisted(String directoryName) {
+        return BLACKLISTED_DIRS.contains(directoryName);
+    }
 
     public String[] getBlackListCamDirs() {
         return BLACKLISTED_CAM_DIRS;

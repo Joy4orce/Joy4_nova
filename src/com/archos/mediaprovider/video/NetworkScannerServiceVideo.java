@@ -573,6 +573,12 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
                 return false;
             }
 
+            // Check if the directory is blacklisted (e.g. #recycle on synology)
+            if (mBlacklist.isDirectoryBlacklisted(directory.getName())) {
+                log.debug("skipping " + directory.getName() + ", blacklisted directory!");
+                return false;
+            }
+
             // everything else is scanned
             return true;
         }
