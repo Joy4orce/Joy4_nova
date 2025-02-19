@@ -26,6 +26,9 @@ import com.archos.mediacenter.video.browser.MainActivity;
 import com.archos.mediacenter.video.leanback.MainActivityLeanback;
 import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Locale;
 
 /**
@@ -35,8 +38,7 @@ import java.util.Locale;
  */
 public class EntryActivity extends AppCompatActivity {
 
-    private static final String TAG = "EntryActivity";
-    private static boolean DBG = true;
+    private static final Logger log = LoggerFactory.getLogger(EntryActivity.class);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +46,7 @@ public class EntryActivity extends AppCompatActivity {
         ((CustomApplication) getApplication()).loadLocale();
         super.onCreate(savedInstanceState);
 
-        if (DBG) Log.d(TAG, "onCreate");
+        log.debug("onCreate");
 
         Class activityToLaunch = null;
         if (UiChoiceDialog.applicationIsInLeanbackMode(this)) {
