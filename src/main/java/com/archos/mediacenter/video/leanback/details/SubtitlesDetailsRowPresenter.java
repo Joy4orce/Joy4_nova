@@ -211,7 +211,7 @@ public class SubtitlesDetailsRowPresenter extends FullWidthRowPresenter implemen
             }
             int index = i + offset;
             sb.append(Integer.toString(index + 1)).append(".").append(SEP)
-              .append(generateTrackName(c, list.get(index).name, list.get(index).language)).append(SEP);
+              .append(generateTrackName(c, list.get(index).name, list.get(index).language, c.getResources().getStringArray(R.array.subtitles_types)[list.get(index).format], false)).append(SEP);
         }
         return sb.toString();
     }

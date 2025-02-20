@@ -164,12 +164,12 @@ public class VideoInfoCommonClass {
                 }
                 VideoMetadata.AudioTrack audio = videoMetadata.getAudioTrack(i);
                 if (audioTrackNb == 1) {  // name of the track only if there is only one
-                    String language = generateTrackName(audio.name, audio.language);
+                    String language = generateTrackName(audio.name, audio.language, audio.format, true);
                     if (!language.isEmpty()) sb.append(language).append(SEP); // avoid adding space if language is unknown
                 }
                 if (audioTrackNb > 1) {  // number and name of the track only if there are more than one track
                     sb.append(Integer.toString(i + 1)).append('.').append(SEP);
-                    String language = generateTrackName(audio.name, audio.language);
+                    String language = generateTrackName(audio.name, audio.language, audio.format, true);
                     if (!language.isEmpty()) sb.append(language).append(SEP); // avoid adding space if language is unknown
                 }
                 sb.append(audio.format).append(SEP);

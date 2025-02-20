@@ -1038,7 +1038,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
             if(videoMetadata!=null) {
                 for (int i = 0; i < subtitleTrackNb; ++i) {
                     if (!videoMetadata.getSubtitleTrack(i).isExternal) { //manage external subs with sub manager
-                        lines.add((totSubs + 1) + ": " + generateTrackName(mContext, videoMetadata.getSubtitleTrack(i).name, videoMetadata.getSubtitleTrack(i).language));
+                        lines.add((totSubs + 1) + ": " + generateTrackName(mContext, videoMetadata.getSubtitleTrack(i).name, videoMetadata.getSubtitleTrack(i).language, getResources().getStringArray(R.array.subtitles_types)[videoMetadata.getSubtitleTrack(i).format], false));
                         totSubs++;
                     }
                 }

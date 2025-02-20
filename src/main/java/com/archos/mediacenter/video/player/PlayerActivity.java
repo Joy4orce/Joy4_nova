@@ -3660,8 +3660,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             String trackName = null;
             for (int i = 0; i < nbTrack; ++i) {
                 VideoMetadata.AudioTrack audio = vMetadata.getAudioTrack(i);
-                log.debug("onAudioMetadataUpdated: name={}, format={}", audio.name, audio.format);
-                trackName = generateTrackName(mContext, audio.name, audio.language);
+                log.debug("onAudioMetadataUpdated: name={}, language={}, format={}", audio.name, audio.language, audio.format);
+                trackName = generateTrackName(mContext, audio.name, audio.language, audio.format, true);
                 CharSequence name = trackName;
                 // when no name use track number instead of R.string.unknown_track_name th
                 if (trackName.isEmpty())
@@ -3714,7 +3714,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                     } else {
                         // internal subtitle get name from name
                         log.debug("onSubtitleMetadataUpdated: intsub add track name with name=" + vMetadata.getSubtitleTrack(i).name + " replacing language code in " + vMetadata.getSubtitleTrack(i).language);
-                        mSubtitleInfoController.addTrack(generateTrackName(mContext, vMetadata.getSubtitleTrack(i).name, vMetadata.getSubtitleTrack(i).language), false);
+                        mSubtitleInfoController.addTrack(generateTrackName(mContext, vMetadata.getSubtitleTrack(i).name, vMetadata.getSubtitleTrack(i).language, getResources().getStringArray(R.array.subtitles_types)[vMetadata.getSubtitleTrack(i).format], true), false);
                     }
                 }
                 mSubtitleInfoController.addSeparator();

@@ -29,13 +29,13 @@ public class ISO639codes {
 
     private static final Logger log = LoggerFactory.getLogger(ISO639codes.class);
 
-    static public String generateTrackName(Context context, String string, String lang) {
+    static public String generateTrackName(Context context, String string, String lang, String format, boolean titleFirst) {
         // generate track name as "title (language)" from lang XYZ or XY letter code
-        String result = com.archos.mediacenter.utils.ISO639codes.generateTrackName(string, lang);
+        String result = com.archos.mediacenter.utils.ISO639codes.generateTrackName(string, lang, format, titleFirst);
         if (result.startsWith("s_"))
             result =  VideoUtils.getLanguageString(context, result).toString();
         log.debug("generateTrackName: exception string={} result={}", string, result);
-        if (result == null || result.isEmpty()) {
+        if (result.isEmpty()) {
             result = context.getText(R.string.unknown_track_name).toString();
         }
         return result;
