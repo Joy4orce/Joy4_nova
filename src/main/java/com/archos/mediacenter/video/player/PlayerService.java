@@ -532,7 +532,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel nc = new NotificationChannel(notifChannelId, notifChannelName,
-                    nm.IMPORTANCE_LOW);
+                    NotificationManager.IMPORTANCE_LOW);
             nc.setDescription(notifChannelDescr);
             if (nm != null)
                 nm.createNotificationChannel(nc);
@@ -542,9 +542,25 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setTicker(null).setOnlyAlertOnce(true).setOngoing(true).setAutoCancel(true);
 
+        Intent playIntent = new Intent(PLAY_INTENT);
+        PendingIntent playPendingIntent = PendingIntent.getBroadcast(this, 1, playIntent,
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) ? PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT : PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Intent pauseIntent = new Intent(PAUSE_INTENT);
+        PendingIntent pausePendingIntent = PendingIntent.getBroadcast(this, 2, pauseIntent,
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) ? PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT : PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Intent fullscreenIntent = new Intent(FULLSCREEN_INTENT);
+        PendingIntent fullscreenPendingIntent = PendingIntent.getBroadcast(this, 3, fullscreenIntent,
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) ? PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT : PendingIntent.FLAG_UPDATE_CURRENT);
+
         Intent notificationIntent = new Intent("DISPLAY_FLOATING_PLAYER");
-        PendingIntent contentIntent = PendingIntent.getBroadcast(this, 0, notificationIntent,
-                ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) ? PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT: PendingIntent.FLAG_UPDATE_CURRENT));
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) ? PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT : PendingIntent.FLAG_UPDATE_CURRENT);
+
+        PendingIntent exitIntent = PendingIntent.getBroadcast(this, 4, new Intent(EXIT_INTENT),
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) ? PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT : PendingIntent.FLAG_UPDATE_CURRENT);
+
         nb.setContentIntent(contentIntent);
         String title = "";
         if(getVideoInfo()!=null&&PlayerService.sPlayerService.getVideoInfo().scraperTitle!=null&&!PlayerService.sPlayerService.getVideoInfo().scraperTitle.isEmpty())
@@ -555,22 +571,22 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
             title = FileUtils.getFileNameWithoutExtension(mUri);
         nb.setContentTitle(getString(R.string.now_playing));
         nb.setContentText(title);
-        if(mPlayer!=null){
-            if(mPlayer.isPlaying())
-                nb.addAction(new NotificationCompat.Action(R.drawable.video_pause, getString(R.string.floating_player_pause), PendingIntent.getBroadcast(this, 0, new Intent(PAUSE_INTENT),
-                        ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) ? PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT: PendingIntent.FLAG_UPDATE_CURRENT))));
-            else if(mPlayer.isInPlaybackState())
-                nb.addAction(new NotificationCompat.Action(R.drawable.video_play, getString(R.string.floating_player_play),  PendingIntent.getBroadcast(this, 0, new Intent(PLAY_INTENT),
-                        ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) ? PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT: PendingIntent.FLAG_UPDATE_CURRENT))));
-
+        if (mPlayer != null) {
+            if (mPlayer.isPlaying()) {
+                nb.addAction(new NotificationCompat.Action(R.drawable.video_pause, getString(R.string.floating_player_pause), pausePendingIntent));
+            } else if (mPlayer.isInPlaybackState()) {
+                nb.addAction(new NotificationCompat.Action(R.drawable.video_play, getString(R.string.floating_player_play), playPendingIntent));
+            }
         }
-        if(isDicreteOrMinimized)
+
+        if (isDicreteOrMinimized) {
             nb.addAction(new NotificationCompat.Action(R.drawable.ic_menu_unfade, getString(R.string.floating_player_restore), contentIntent));
-        else
-            nb.addAction(new NotificationCompat.Action(R.drawable.video_format_fullscreen, getString(R.string.format_fullscreen), PendingIntent.getBroadcast(this, 0, new Intent(FULLSCREEN_INTENT),
-                    ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) ? PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT: PendingIntent.FLAG_UPDATE_CURRENT))));
-        nb.setDeleteIntent(PendingIntent.getBroadcast(this, 0, new Intent(EXIT_INTENT),
-                ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) ? PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT: PendingIntent.FLAG_UPDATE_CURRENT)));
+        } else {
+            nb.addAction(new NotificationCompat.Action(R.drawable.video_format_fullscreen, getString(R.string.format_fullscreen), fullscreenPendingIntent));
+        }
+
+        nb.setDeleteIntent(exitIntent);
+
         //notif.bigContentView = new RemoteViews(getPackageName(), R.layout.notification_controls);
         ServiceCompat.startForeground(this, PLAYER_NOTIFICATION_ID, nb.build(),
                 (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK : 0
