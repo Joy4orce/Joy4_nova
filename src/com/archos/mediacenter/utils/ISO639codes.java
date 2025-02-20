@@ -433,32 +433,51 @@ public class ISO639codes {
         return result;
     }
 
-    public static String generateTrackName(String string, String lang) {
+    public static String generateTrackName(String string, String lang, String format, boolean titleFirst) {
         // generate track name as "title (language)" from lang XYZ or XY letter code
         // avoid name=" " with starting space seen in Modern Family show
         String cleanString;
         if (string == null) cleanString = "";
         else cleanString = removeStartingSpacesAndSurroundingParenthesis(string);
         String language =  "";
-        String result = "";
+        String result = ""; // will be interpreted by Video as R.string.unknown_track_name
         if (lang != null && ! lang.isEmpty()) {
             if (lang.equals("und") || lang.equals("Unknown")) language = ""; // und = undefined
             else language = ISO639codes.getLanguageNameForLetterCode(lang);
         }
-        if (! cleanString.isEmpty()) {
-            if (language != null && ! language.isEmpty()) {
-                result = cleanString + " (" + language + ")";
+        if (titleFirst) {
+            if (!cleanString.isEmpty()) {
+                result = capitalizeFirstLetter(cleanString);
+                if (language != null && !language.isEmpty()) {
+                    result += " (" + language + ")";
+                }
             } else {
-                result = cleanString;
+                if (language != null && !language.isEmpty()) {
+                    result = capitalizeFirstLetter(language);
+                } else {
+                    result = ""; // will be interpreted by Video as R.string.unknown_track_name
+                }
             }
         } else {
-            if (language != null && ! language.isEmpty()) {
+            if (language != null && !language.isEmpty()) {
                 result = capitalizeFirstLetter(language);
+                if (format != null && !format.isEmpty()) {
+                    result += " (" + format + ")";
+                }
+                if (!cleanString.isEmpty()) {
+                    result += ": " + cleanString;
+                }
             } else {
-                result = ""; // will be interpreted by Video as R.string.unknown_track_name
+                if (!cleanString.isEmpty()) {
+                    result = cleanString;
+                }
+                if (format != null && !format.isEmpty()) {
+                    if (result.isEmpty()) result = format;
+                    else result += " (" + format + ")";
+                }
             }
         }
-        log.debug("generateTrackName: input={}, lang={} -> cleanString={}, language={} -> result={}", string, lang, cleanString, language,result);
+        log.debug("generateTrackName: input={}, lang={}, format{} -> cleanString={}, language={} -> result={}", string, lang, format, cleanString, language,result);
         return result;
     }
 
