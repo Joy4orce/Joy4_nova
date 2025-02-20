@@ -3713,7 +3713,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                     } else {
                         // internal subtitle get name from name
                         log.debug("onSubtitleMetadataUpdated: intsub add track name with name=" + vMetadata.getSubtitleTrack(i).name + " replacing language code in " + vMetadata.getSubtitleTrack(i).language);
-                        mSubtitleInfoController.addTrack(generateTrackName(mContext, vMetadata.getSubtitleTrack(i).name, vMetadata.getSubtitleTrack(i).language, getResources().getStringArray(R.array.subtitles_types)[vMetadata.getSubtitleTrack(i).format], true), false);
+                        mSubtitleInfoController.addTrack(generateTrackName(mContext, vMetadata.getSubtitleTrack(i).name, vMetadata.getSubtitleTrack(i).language, getResources().getStringArray(R.array.subtitles_types)[vMetadata.getSubtitleTrack(i).format], false), false);
                     }
                 }
                 mSubtitleInfoController.addSeparator();
