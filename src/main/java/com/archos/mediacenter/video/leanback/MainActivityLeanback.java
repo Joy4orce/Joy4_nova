@@ -18,14 +18,12 @@ import static com.archos.filecorelibrary.FileUtils.hasManageExternalStoragePermi
 
 import android.content.Intent;
 
-import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.preference.PreferenceManager;
 import androidx.annotation.NonNull;
 
-import android.util.Log;
 import android.view.KeyEvent;
 
 import com.archos.mediacenter.video.CustomApplication;
@@ -45,8 +43,6 @@ import com.archos.environment.ArchosUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Locale;
 
 public class MainActivityLeanback extends LeanbackActivity {
 
@@ -75,6 +71,7 @@ public class MainActivityLeanback extends LeanbackActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        log.debug("onCreate");
         ((CustomApplication) getApplication()).loadLocale();
         super.onCreate(savedInstanceState);
 
@@ -99,6 +96,7 @@ public class MainActivityLeanback extends LeanbackActivity {
 
     @Override
     protected void onDestroy(){
+        log.debug("onDestroy");
         super.onDestroy();
         UnavailablePosterBroadcastReceiver.unregisterReceiver(this);
     }
