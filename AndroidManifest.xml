@@ -1498,6 +1498,7 @@
         <activity
             android:name="com.archos.mediacenter.video.leanback.MainActivityLeanback"
             android:exported="true"
+            android:launchMode="singleTask"
             android:label="@string/nova"
             android:taskAffinity="archos.task.video"
             android:theme="@style/MyLeanbackTheme">

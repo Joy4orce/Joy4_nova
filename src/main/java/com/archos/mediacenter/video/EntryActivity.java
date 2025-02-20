@@ -57,6 +57,7 @@ public class EntryActivity extends AppCompatActivity {
 
         final Intent originIntent = getIntent();
         Intent i = new Intent();
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         i.setClass(this, activityToLaunch);
 
         if (originIntent.getData()!=null) {
