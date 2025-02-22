@@ -15,13 +15,18 @@
 package com.archos.mediacenter.video.player.tvmenu;
 
 import android.content.Context;
+import android.os.Build;
+import android.text.Html;
+import android.text.SpannableString;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Checkable;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 

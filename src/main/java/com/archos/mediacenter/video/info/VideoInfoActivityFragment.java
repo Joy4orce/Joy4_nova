@@ -109,6 +109,7 @@ import com.archos.mediascraper.NfoWriter;
 import com.archos.mediascraper.Scraper;
 import com.archos.mediascraper.ScraperTrailer;
 import com.archos.mediascraper.ShowTags;
+import com.archos.mediascraper.StringUtils;
 import com.archos.mediascraper.VideoTags;
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollView;
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
@@ -1036,9 +1037,12 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
             ArrayList<CharSequence> lines = new ArrayList<>();
             int totSubs = 0;
             if(videoMetadata!=null) {
+                VideoMetadata.SubtitleTrack subTrack = null;
                 for (int i = 0; i < subtitleTrackNb; ++i) {
+                    subTrack = videoMetadata.getSubtitleTrack(i);
                     if (!videoMetadata.getSubtitleTrack(i).isExternal) { //manage external subs with sub manager
-                        lines.add((totSubs + 1) + ": " + generateTrackName(mContext, videoMetadata.getSubtitleTrack(i).name, videoMetadata.getSubtitleTrack(i).language, getResources().getStringArray(R.array.subtitles_types)[videoMetadata.getSubtitleTrack(i).format], false));
+                        log.debug("updateSubtitleInfo: int subtitleTrack {} {} {} {}", i, subTrack.name, subTrack.language, subTrack.format);
+                        lines.add((totSubs + 1) + ": " + StringUtils.removeHtmlTags(generateTrackName(mContext, subTrack.name, subTrack.language, getResources().getStringArray(R.array.subtitles_types)[subTrack.format], false)));
                         totSubs++;
                     }
                 }

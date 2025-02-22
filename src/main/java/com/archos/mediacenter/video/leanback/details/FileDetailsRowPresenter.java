@@ -30,6 +30,7 @@ import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.adapters.object.Video;
 import com.archos.mediacenter.video.info.VideoInfoCommonClass;
 import com.archos.mediacenter.video.utils.VideoMetadata;
+import com.archos.mediascraper.StringUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -201,9 +202,9 @@ public class FileDetailsRowPresenter extends FullWidthRowPresenter implements Ba
             }
             int index = i + offset;
             sb.append(Integer.toString(index + 1)).append(".").append(separator)
-                    .append(generateTrackName(context, videoMetadata.getSubtitleTrack(index).name, videoMetadata.getSubtitleTrack(index).language, context.getResources().getStringArray(R.array.subtitles_types)[videoMetadata.getSubtitleTrack(index).format], false) + separator);
+                    .append(StringUtils.removeHtmlTags(generateTrackName(context, videoMetadata.getSubtitleTrack(index).name, videoMetadata.getSubtitleTrack(index).language, context.getResources().getStringArray(R.array.subtitles_types)[videoMetadata.getSubtitleTrack(index).format], false)) + separator);
         }
-        return sb.toString();
+        return StringUtils.removeHtmlTags(sb.toString());
     }
 
     private void hideAudioVideoSubs(FileDetailsViewHolder vh) {

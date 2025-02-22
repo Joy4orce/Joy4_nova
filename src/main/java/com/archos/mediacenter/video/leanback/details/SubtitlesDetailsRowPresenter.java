@@ -22,6 +22,9 @@ import android.net.Uri;
 import androidx.leanback.widget.RowHeaderPresenter;
 import androidx.leanback.widget.RowPresenter;
 
+import android.os.Build;
+import android.text.Html;
+import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +35,7 @@ import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.subtitlesmanager.SubtitleManager;
 import com.archos.mediacenter.video.browser.adapters.object.Video;
 import com.archos.mediacenter.video.utils.VideoMetadata;
+import com.archos.mediascraper.StringUtils;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -213,7 +217,17 @@ public class SubtitlesDetailsRowPresenter extends FullWidthRowPresenter implemen
             sb.append(Integer.toString(index + 1)).append(".").append(SEP)
               .append(generateTrackName(c, list.get(index).name, list.get(index).language, c.getResources().getStringArray(R.array.subtitles_types)[list.get(index).format], false)).append(SEP);
         }
-        return sb.toString();
+        return StringUtils.removeHtmlTags(sb.toString());
+        /*
+        SpannableString spannableString;
+        String formattedText = sb.toString().replace("\n", "<br>");
+        if (Build.VERSION.SDK_INT >= 24) {
+            spannableString = new SpannableString(Html.fromHtml(formattedText, Html.FROM_HTML_MODE_LEGACY));
+        } else {
+            spannableString = new SpannableString(Html.fromHtml(formattedText));
+        }
+        return spannableString;
+         */
     }
 
     private String getFormattedExternalSubList(int number, int offset, List<SubtitleManager.SubtitleFile> list) {
@@ -227,7 +241,17 @@ public class SubtitlesDetailsRowPresenter extends FullWidthRowPresenter implemen
             sb.append(Integer.toString(index + 1)).append(".").append(SEP)
               .append(capitalizeFirstLetter(list.get(index).mName)).append(SEP);
         }
-        return sb.toString();
+        SpannableString spannableString;
+        return StringUtils.removeHtmlTags(sb.toString());
+        /*
+        String formattedText = sb.toString().replace("\n", "<br>");
+        if (Build.VERSION.SDK_INT >= 24) {
+            spannableString = new SpannableString(Html.fromHtml(formattedText, Html.FROM_HTML_MODE_LEGACY));
+        } else {
+            spannableString = new SpannableString(Html.fromHtml(formattedText));
+        }
+        return spannableString;
+         */
     }
 
 }
