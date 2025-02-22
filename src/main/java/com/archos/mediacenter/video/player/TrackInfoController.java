@@ -17,6 +17,9 @@ package com.archos.mediacenter.video.player;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Build;
+import android.text.Html;
+import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,7 +35,6 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.ListPopupWindow;
-import androidx.core.view.MenuItemCompat;
 
 import com.archos.mediacenter.video.R;
 
@@ -190,9 +192,17 @@ public class TrackInfoController implements OnMenuItemClickListener, OnItemClick
                 case TRACK_INFO:
                     TrackInfo trackInfo = (TrackInfo) item;
                     RadioButton radio;
+                    SpannableString spannableText;
+                    // Apply SpannableString only for checkable items (RadioButtons)
 
-                    if (trackInfo.name != null)
-                        ((TextView)v.findViewById(R.id.name)).setText(trackInfo.name);
+                    if (trackInfo.name != null) {
+                        if (Build.VERSION.SDK_INT >= 24) {
+                            spannableText = new SpannableString(Html.fromHtml(trackInfo.name.toString(), Html.FROM_HTML_MODE_LEGACY));
+                        } else {
+                            spannableText = new SpannableString(Html.fromHtml(trackInfo.name.toString()));
+                        }
+                        ((TextView) v.findViewById(R.id.name)).setText(spannableText);
+                    }
                     if (trackInfo.summary != null) {
                         TextView textView = (TextView)v.findViewById(R.id.summary);
                         if (textView != null)
