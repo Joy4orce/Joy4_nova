@@ -521,7 +521,7 @@
     <string name="preferences_about">O aplikacji</string>
     <string name="preferences_category_complete">Pełna wersja</string>
     <string name="preferences_category_video">Wideo</string>
-    <string name="preferences_force_software_decoding">Wymuś dekoder softwarowy</string>
+    <string name="preferences_force_software_decoding">Wymuś dekoder programowy</string>
     <string name="preferences_force_software_decoding_summary">Jeśli niektóre filmy nie są odtwarzane poprawnie, może spróbować tej opcji</string>
     <string name="preferences_force_audio_passthrough">Przekazywanie audio</string>
     <string name="preferences_force_audio_passthrough_disabled">Wyłączone (zalecane)</string>

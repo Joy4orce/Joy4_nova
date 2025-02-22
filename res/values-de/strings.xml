@@ -325,9 +325,9 @@
     <string name="menu_player_settings">Einstellungen</string>
     <string name="menu_change_folder">Ordner ändern</string>
     <string name="menu_change_folder_details">Wählen Sie den Start-Ordner</string>
-    <string name="unlock_instructions">Zum entsperren lange auf das Icon drücken</string>
+    <string name="unlock_instructions">Zum Entsperren lange auf das Icon drücken</string>
     <string name="seek_to_percentage">Vorwärtssuche bis %s%%</string>
-    <string name="set_audio_speed_to">\"Audio-Geschwindigkeit %s</string>
+    <string name="set_audio_speed_to">Audio-Geschwindigkeit %s</string>
     <!-- Subtitles/Audio languages -->
     <!-- Subtitles in filename HI = Hearing Impaired -->
     <!-- Subtitles in filename SDH = Subtitles for the Deaf and Hard of Hearing -->
@@ -350,7 +350,7 @@
     <string name="s_none">Kein</string>
     <!-- Player errors -->
     <string name="player_err_cantplayvideo">Video kann nicht abgespielt werden</string>
-    <string name="player_err_cantplaysound">Audiospur kann nicht abgespielt werden</string>
+    <string name="player_err_cantplaysound">Tonspur kann nicht abgespielt werden</string>
     <string name="audiocodec_not_supported">Der Audiocodec (<xliff:g id="codec">%s</xliff:g>) wird nicht unterstützt.</string>
     <string name="videocodec_not_supported">Der Videocodec (<xliff:g id="codec">%s</xliff:g>) wird nicht unterstützt.</string>
     <string name="player_err_file">Die Video-Datei wurde nicht gefunden.</string>
@@ -444,6 +444,7 @@
     <string name="exit">Beenden</string>
     <!-- torrent -->
     <string name="error">Es ist ein Fehler aufgetreten</string>
+    <string name="error_protocol_not_supported">Fehler: Protokoll nicht unterstützt</string>
     <string name="error_loading_torrent">Fehler beim Torrent-Laden</string>
     <string name="error_downloading_not_enough_space">Fehler beim Torrent-Herunterladen: Nicht genug Speicherplatz</string>
     <string name="loading_torrent">Lade Torrent…</string>
@@ -528,11 +529,12 @@
     <string name="preferences_enable_downmix_androidtv_summary">Immer mehrere Audiokanäle zu Stereo downmixen. (Auswählen, wenn Sprachkanäle nicht hörbar sind)</string>
     <string name="preferences_allow_3rd_party_player">Videos mit anderen Apps abspielen</string>
     <string name="preferences_allow_3rd_party_player_summary">Kompatible Apps werden zum Abspielen vorgeschlagen. Einige Features wie Fortsetzungspunkte und Lesezeichen werden allerdings nicht funktionieren.</string>
-    <string name="preference_tv_3d_automatic_switch">Automatische 3D-Umschaltung\"</string>
-    <string name="preference_tv_3d_automatic_switch_summary">Nur für TV-Geräte mit 3D-Wiedergabe\"</string>
+    <string name="preference_tv_3d_automatic_switch">Automatische 3D-Umschaltung</string>
+    <string name="preference_tv_3d_automatic_switch_summary">Nur für TV-Geräte mit 3D-Wiedergabe</string>
     <string name="enable_android_frame_timing_summary">\"Frame blit timing\" für eine ruckelfreiere Wiedergabe auf Android delegieren (experimentell)</string>
     <string name="preference_tv_refreshrate_switch">Automatische Aktualisierungsrate aktivieren</string>
     <string name="preference_tv_refreshrate_switch_summary">Entferne den Richtereffekt, indem du die beste Bildschirmwiederholungsrate an die Bildwiederholrate anpassst (Geräteunterstützung kann variieren)</string>
+    <string name="preferences_tv_refreshrate_switch_disabled">Deaktiviert</string>
     <string name="preference_remove_dolby_vision">Deaktiviere Dolby-Vision</string>
     <string name="preference_remove_dolby_vision_summary">Bevorzuge Standard-Video-Codecs gegenüber Dolby Vision</string>
     <string name="preference_cutout_short_edges">Vollbild mit Beschnitt</string>
@@ -546,6 +548,10 @@
     <string name="summary_list_preference_primary">Wählen Sie die Sprachen aus in denen Untertitel gesucht werden sollen</string>
     <string name="favSubLang_title">Bevorzugte Sprache</string>
     <string name="favSubLang_summary">Wählen Sie Ihre bevorzugte Untertitel Sprache aus</string>
+    <string name="favAudioLang_title">Bevorzugte Tonspur-Sprache</string>
+    <string name="favAudioLang_summary">Wählen Sie Ihre bevorzugte Tonspur-Sprache</string>
+    <string name="ui_language_title">Änderung der Sprache der Benutzeroberfläche</string>
+    <string name="UiLang_title">Sprache der Benutzeroberfläche</string>
     <string name="ui_mode_title">Benutzeroberflächen-Modus</string>
     <string name="ui_mode_summary">Wählen Sie zwischen TV und Telefon/Tablet-Benutzeroberfläche</string>
     <string name="preferences_video_about">Über</string>
