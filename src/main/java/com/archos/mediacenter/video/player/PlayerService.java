@@ -77,7 +77,6 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 import static com.archos.filecorelibrary.FileUtils.removeFileSlashSlash;
-import static com.archos.mediacenter.utils.ISO639codes.findLanguageInString;
 import static com.archos.mediacenter.utils.ISO639codes.isLanguageInString;
 import static com.archos.mediacenter.video.browser.subtitlesmanager.ISO639codes.generateTrackName;
 import static com.archos.mediacenter.video.browser.subtitlesmanager.SubtitleManager.getSubLanguageFromSubPathAndVideoPath;
@@ -1308,7 +1307,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         // VideoDbInfo sets audioTrack to -1 when file has not been played or restores playerParams
         for (int i = 0; i < nbTrack; ++i) {
             if (vMetadata.getAudioTrack(i).supported) {
-                trackName = generateTrackName(getApplicationContext(), vMetadata.getAudioTrack(i).name, vMetadata.getAudioTrack(i).language);
+                trackName = generateTrackName(getApplicationContext(), vMetadata.getAudioTrack(i).name, vMetadata.getAudioTrack(i).language, vMetadata.getAudioTrack(i).format, true);
                 if (firstSupportedTrack == null) {
                     log.debug("onAudioMetadataUpdated: identify firstSupportedTrack={}({})", i, trackName);
                     firstSupportedTrack = i;
