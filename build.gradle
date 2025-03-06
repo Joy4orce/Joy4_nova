@@ -144,7 +144,7 @@ android {
     defaultConfig {
         applicationId = "org.courville.nova"
         generatedDensities = []
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 35
         multiDexEnabled true
         // below version tracks the one from F-Droid or universal package when generated with ./gradlew -Puniversal
