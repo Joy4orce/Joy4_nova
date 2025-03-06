@@ -6,7 +6,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/volume_bar"
     android:layout_width="@dimen/player2014_bar_width"
-    android:layout_height="fill_parent"
+    android:layout_height="match_parent"
     android:layout_alignParentLeft="true"
     android:layout_alignParentTop="true"
     android:layout_marginTop="0dp"

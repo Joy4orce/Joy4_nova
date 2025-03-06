@@ -674,7 +674,6 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
         mPlayerController = new PlayerController(mContext, getWindow(), (ViewGroup)mRootView, mSurfaceController, this, actionBar);
         mPlayerController.setVideoTitleEnabled(true);
-        mPlayerController.setOnShowHideListener(mOnShowHideListener);
 
         mAudioInfoController = new TrackInfoController(mContext, getLayoutInflater(), menuAnchor, actionBar);
         mAudioInfoController.setListener(this);
@@ -3501,18 +3500,6 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     protected boolean forceExitOnTouch() {
         return mForceExitOnTouch;
     }
-
-    PlayerController.OnShowHideListener mOnShowHideListener = new PlayerController.OnShowHideListener() {
-        public void onShow() {
-        }
-
-        public void onHide() {
-        }
-
-        public void onBottomBarHeightChange(int height) {
-            mSubtitleManager.setBottomBarHeight(height);
-        };
-    };
 
     private boolean setPlayerAudioTrack(int audioTrack) {
         log.debug("setPlayerAudioTrack: " + audioTrack);

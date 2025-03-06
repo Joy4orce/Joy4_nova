@@ -15,7 +15,6 @@
 package com.archos.mediacenter.video.player;
 
 import static androidx.core.content.ContextCompat.getDrawable;
-import static androidx.core.content.ContextCompat.getSystemService;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
@@ -42,6 +41,7 @@ import androidx.appcompat.app.ActionBar;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -53,6 +53,7 @@ import android.view.View.OnFocusChangeListener;
 import android.view.View.OnGenericMotionListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -164,18 +165,14 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     final private Context       mContext;
     private IPlayerControl      mPlayer;
     private Window              mWindow;
-    private int                 mLayoutWidth;
-    private int                 mLayoutHeight;
+    private int                 mLayoutWidth, mLayoutHeight;
     final private boolean       mSw600dp; // are we using the sw600dp ressources?
 
     private int                 mActionBarHeight = 0;
     private int                 mSystemBarHeight = 0;
     private SurfaceController   mSurfaceController;
     private Settings            mSettings;
-    private OnShowHideListener  mOnShowHideListener = null;
-    private View                mControllerView;
-    private View                mControllerViewLeft;
-    private View                mControllerViewRight;
+    private View                mRootView, mControllerView, mControllerViewLeft,mControllerViewRight;
     private ViewGroup           mPlayerView;
     private ActionBar           mActionBar;
 
@@ -223,11 +220,8 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     private boolean             mSeekComplete;
     private int                 mSeekKeyDirection;
 
-    private boolean             mControlBarShowing;
-    private boolean             mSystemBarShowing;
-    private boolean             mSystemBarGone;
-    private boolean             mActionBarShowing;
-    private boolean             mVolumeBarShowing;
+    private static boolean      mControlBarShowing, mSystemBarShowing, mSystemBarGone, mActionBarShowing, mVolumeBarShowing, mNavigationBarShowing, mIsNavBarOnBottom, mIsGestureAreaShowing;
+    private static int          mGestureAreaHeight, mControlBarHeight;
 
     private boolean             mVolumeBarEnabled = false;
 
@@ -272,12 +266,6 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         void switchSubtitleTrack();
         void switchAudioTrack();
         void setSubtitleDelay(int delay);
-    }
-
-    public interface OnShowHideListener {
-        void onShow();
-        void onHide();
-        void onBottomBarHeightChange(int height);
     }
 
     public PlayerController(Context context, Window window, ViewGroup playerView, SurfaceController surfaceController, Settings settings, ActionBar actionBar) {
@@ -325,7 +313,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
                 }
                 return false;
             }
-        }, getActionBarView());
+        }, MiscUtils.getActionBarView(mWindow));
         mActionBar.getCustomView().setOnTouchListener(new View.OnTouchListener() {
 
             @Override
@@ -405,46 +393,6 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         showTVMenu(false);
     }
 
-    private void adjustSeekBarForInsets(View seekBar) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            seekBar.setOnApplyWindowInsetsListener((v, insets) -> {
-                Insets systemBarsInsets = insets.getInsets(WindowInsets.Type.systemBars());
-                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-                layoutParams.bottomMargin = systemBarsInsets.bottom; // Set bottom margin to navigation bar height
-                v.setLayoutParams(layoutParams);
-                return insets;
-            });
-        } else {
-            seekBar.setOnApplyWindowInsetsListener((v, insets) -> {
-                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-                layoutParams.bottomMargin = insets.getSystemWindowInsetBottom(); // Set bottom margin to navigation bar height
-                v.setLayoutParams(layoutParams);
-                return insets;
-            });
-        }
-    }
-
-    private void adjustVolumeBarForInsets(View volumeBar) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            volumeBar.setOnApplyWindowInsetsListener((v, insets) -> {
-                Insets systemBarsInsets = insets.getInsets(WindowInsets.Type.systemBars());
-                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-                //layoutParams.topMargin = systemBarsInsets.top; // Adjust for status bar -> not needed
-                layoutParams.bottomMargin = systemBarsInsets.bottom; // Adjust for navigation bar
-                v.setLayoutParams(layoutParams);
-                return insets;
-            });
-        } else {
-            volumeBar.setOnApplyWindowInsetsListener((v, insets) -> {
-                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-                //layoutParams.topMargin = insets.getSystemWindowInsetTop(); // Adjust for status bar -> not needed
-                layoutParams.bottomMargin = insets.getSystemWindowInsetBottom(); // Adjust for navigation bar
-                v.setLayoutParams(layoutParams);
-                return insets;
-            });
-        }
-    }
-
     /*
      * 
      * Init controller initialize what is in player_controller_inside.xml. Main view means that this 
@@ -457,9 +405,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         // next TV menu
 
         View mControlBar = v.findViewById(R.id.control_bar);
-        if (mControlBar != null) {
-            adjustSeekBarForInsets(mControlBar); // Adjust seek bar for navigation bar insets
-        }
+
         if(mControlBar!=null &&isMainView){
             mControlBar.setOnFocusChangeListener(new OnFocusChangeListener() {
                 @Override
@@ -506,10 +452,6 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         }
 
         View volumeBar = v.findViewById(R.id.volume_bar);
-
-        if (volumeBar != null) {
-            adjustVolumeBarForInsets(volumeBar); // Adjust volume bar for system bar insets
-        }
 
         if(isChromeOS(mContext)) {
             if (volumeBar != null) volumeBar.setVisibility(View.GONE);
@@ -640,48 +582,15 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         }
     }
 
-    public int getNavigationBarHeight() {
-        int navigationBarHeight = 0;
-        Resources resources = mContext.getResources();
-        int resourceIdNavBarHeight = resources.getIdentifier("navigation_bar_height", "dimen", "android");
-        // check if navigation bar is displayed because chromeos reports a navigation_bar_height of 84 but there is none displayed
-        if (resourceIdNavBarHeight > 0 && hasNavigationBar(resources))
-            navigationBarHeight = resources.getDimensionPixelSize(resourceIdNavBarHeight);
-        log.debug("getNavigationBarHeight: navigationBarHeight=" + navigationBarHeight);
-        return navigationBarHeight;
-    }
 
-    public boolean isGestureAreaDisplayed() {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
-            WindowManager windowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-            if (windowManager != null) {
-                WindowMetrics windowMetrics = windowManager.getCurrentWindowMetrics();
-                Insets insets = windowMetrics.getWindowInsets().getInsetsIgnoringVisibility(WindowInsets.Type.systemGestures());
-                return insets.bottom > 0;
-            }
-        }
-        return false;
-    }
-
-    public int getGestureAreaHeight() {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
-            WindowManager windowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-            if (windowManager != null) {
-                WindowMetrics windowMetrics = windowManager.getCurrentWindowMetrics();
-                Insets insets = windowMetrics.getWindowInsets().getInsetsIgnoringVisibility(WindowInsets.Type.systemGestures());
-                return insets.bottom;
-            }
-        }
-        return 0;
-    }
 
     private void attachWindow() {
 
-        log.debug("CONFIG attachWindow getStatusBarHeight=" + getStatusBarHeight() +
-                ", getNavigationBarHeight=" + getNavigationBarHeight() +
-                ", getActionBarHeight=" + getActionBarHeight() +
-                ", getGestureAreaHeight=" + getGestureAreaHeight() +
-                ", isGestureAreaDisplayed=" + isGestureAreaDisplayed() +
+        log.debug("CONFIG attachWindow getStatusBarHeight=" + MiscUtils.getStatusBarHeight(mContext) +
+                ", getNavigationBarHeight=" + MiscUtils.getNavigationBarHeight(mContext) +
+                ", getActionBarHeight=" + MiscUtils.getActionBarHeight(mContext) +
+                ", getGestureAreaHeight=" + MiscUtils.getGestureAreaHeight(mContext) +
+                ", isGestureAreaDisplayed=" + MiscUtils.isGestureAreaDisplayed(mContext) +
                 ", ");
 
         if (mControllerView != null)
@@ -725,8 +634,37 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         log.debug("CONFIG attachWindow: layout WxH " + mLayoutWidth + "x" + mLayoutHeight);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mLayoutWidth, mLayoutHeight);
         mPlayerView.addView(mControllerView, params);
-        log.debug("CONFIG attachWindow, updateOrientation();");
-        updateOrientation();
+        log.debug("CONFIG attachWindow, adjustControllerViewForInsets();");
+
+        if (mControllerView != null) {
+            mRootView = mControllerView.getRootView();
+            // note OnApplyWindowInsetsListener does not update when navigation bar fades away, OnGlobalLayoutListener or addOnPreDrawListener are constantly triggering -> only setOnSystemUiVisibilityChangeListener works
+            // however setOnSystemUiVisibilityChangeListener is unreliable on Android 6.0 thus use addOnLayoutChangeListener
+            // in reality we need to do combination of setOnApplyWindowInsetsListener to get insets but not updated when UI mode changes and thus combine with setOnSystemUiVisibilityChangeListener
+
+            // insets observer is needed for rotation
+            mControllerView.setOnApplyWindowInsetsListener((v, insets) -> {
+                log.debug("attachWindow, onApplyWindowInsetsListener");
+                adjustView();
+                return insets;
+            });
+
+            // ui visibility listener is needed for UI mode changes
+            mRootView.setOnSystemUiVisibilityChangeListener(visibility -> {
+                mNavigationBarShowing = (visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
+                mSystemBarShowing = (visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0;
+                mActionBarShowing = (visibility & View.SYSTEM_UI_FLAG_LOW_PROFILE) == 0;
+                mIsNavBarOnBottom = MiscUtils.isNavigationBarOnBottom(mRootView, mContext);
+                mIsGestureAreaShowing = MiscUtils.isGestureAreaDisplayed(mContext);
+                mGestureAreaHeight = MiscUtils.getGestureAreaHeight(mContext);
+                // assume that controlBar (seek bar + controls) is visible if mNavigationBarShowing || mIsGestureAreaShowing
+                mControlBarHeight = (mNavigationBarShowing || mIsGestureAreaShowing ? mControlBar.getHeight() : 0);
+                log.debug("attachWindow, setOnSystemUiVisibilityChangeListener: mNavigationBarShowing={}, mSystemBarShowing={}, mActionBarShowing={}, mControlBarShowing={}, mIsNavBarOnBottom={}, mIsGestureAreaShowing={}",
+                        mNavigationBarShowing, mSystemBarShowing, mActionBarShowing, mControlBarShowing, mIsNavBarOnBottom, mIsGestureAreaShowing);
+                adjustView();
+            });
+
+        }
         log.debug("CONFIG attachWindow, mPlayerView.addView");
 
         initMenuAdapter(mControllerViewLeft);
@@ -752,79 +690,19 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         showControlBar(mControlBarShowing);
     }
 
-    public void updateOrientation() {
-        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.N_MR1) {
-            int rotation = ((WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
-            log.debug("CONFIG updateOrientation, orientation is " + PlayerActivity.getHumanReadableRotation(rotation) + "(" + rotation + "), isRotationLocked " + PlayerActivity.isRotationLocked());
+    private void adjustView() {
+        MiscUtils.adjustViewLayoutForInsets(mContext, mRootView, mControllerView,"mControllerView",
+                mNavigationBarShowing, mSystemBarShowing, mActionBarShowing, mControlBarShowing, mIsNavBarOnBottom, mIsGestureAreaShowing, 0, 0,
+                true, true, true, true,
+                true, true, true, true);
+    }
 
-            if (PlayerActivity.isRotationLocked()) { // if rotation is locked pick forced orientation rotation
-                log.debug("CONFIG updateSizes RotationLocked overriding rotation from " + rotation + " to " + PlayerActivity.getLockedRotation());
-                rotation = PlayerActivity.getLockedRotation();
-            }
+    public static int getControlBarCurrentHeight() {
+        return mControlBarHeight;
+    }
 
-            SharedPreferences mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-            RelativeLayout.LayoutParams relativeParams = ((RelativeLayout.LayoutParams) mControllerView.getLayoutParams());
-            int shiftUp = 0;
-            int shiftLeft = 0;
-            log.debug("CONFIG updateOrientation, rotation is " + PlayerActivity.getHumanReadableRotation(rotation) + "(" + rotation + "), isSystemBarOnBottom " + isSystemBarOnBottom(mContext) + ", isChromeOS " + isChromeOS(mContext) + ", isGestureAreaDisplayed " + isGestureAreaDisplayed() + ", getGestureAreaHeight " + getGestureAreaHeight() + ", getNavigationBarHeight " + getNavigationBarHeight() + ", getStatusBarHeight " + getStatusBarHeight() + ", getActionBarHeight " + getActionBarHeight() + ", getSystemBarHeight getSystemBarHeight()");
-            switch (rotation) {
-                case Surface.ROTATION_270:
-                    log.debug("CONFIG updateOrientation, rotation is 270 shifting right from getNavigationBarHeight=" + getNavigationBarHeight());
-                    ((RelativeLayout.LayoutParams) mControllerView.getLayoutParams()).addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-                    if (isSystemBarOnBottom(mContext)) {
-                        log.debug("CONFIG updateOrientation, SystemBarOnBottom shifting up by getNavigationBarHeight=" + getNavigationBarHeight());
-                        shiftUp += getNavigationBarHeight();
-                    } else {
-                        log.debug("CONFIG updateOrientation, ! SystemBarOnBottom shifting right by getNavigationBarHeight=" + getNavigationBarHeight());
-                        shiftLeft += getNavigationBarHeight();
-                    }
-                    log.debug("CONFIG updateOrientation, rotation is 270, shifting, margin (L,T,R,B)=(shiftLeft=" + shiftLeft + ",0,0,shiftUp=" + shiftUp + ")");
-                    relativeParams.setMargins(shiftLeft, 0, 0, shiftUp);
-                    break;
-                case Surface.ROTATION_90:
-                    log.debug("CONFIG updateOrientation: rotation is 90");
-                    // FIXME: ALIGN_PARENT_RIGHT should have been simpler but results in shifted layout by safeInsetRight+safeInsetLeft+navigationBarHeight
-                    log.debug("CONFIG updateOrientation: ALIGN_PARENT_LEFT");
-                    ((RelativeLayout.LayoutParams) mControllerView.getLayoutParams()).addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-                    if(mPreferences.getBoolean("enable_cutout_mode_short_edges", true)) {
-                        log.debug("CONFIG updateOrientation: cutout_mode_short_edges is enabled, shifting right, margin (L,T,R,B)=(PlayerActivity.safeInsetLeft=" + PlayerActivity.safeInset.get(0) + ",0,0,0)");
-                        relativeParams.setMargins(PlayerActivity.safeInset.get(0), 0, 0, 0); // safeInset.get(0) is safeInsetLeft
-                    }
-                    break;
-                case Surface.ROTATION_0:
-                    // FIXME: this is the only way found to get in portrait the seekbar on top of navigationBar
-                    if(mPreferences.getBoolean("enable_cutout_mode_short_edges", true)) {
-                        log.debug("CONFIG updateOrientation: rotation is 0, cutout_mode_short_edges is enabled, ALIGN_PARENT_BOTTOM");
-                        ((RelativeLayout.LayoutParams) mControllerView.getLayoutParams()).addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                    } else {
-                        log.debug("CONFIG updateOrientation: rotation is 0, cutout_mode_short_edges is enabled, ALIGN_PARENT_TOP");
-                        ((RelativeLayout.LayoutParams) mControllerView.getLayoutParams()).addRule(RelativeLayout.ALIGN_PARENT_TOP);
-                    }
-                    log.debug("CONFIG updateOrientation, rotation is 0, shifting up, margin (L,T,R,B)=(0,0,0,getNavigationBarHeight()+getGestureAreaHeight()=" + (getNavigationBarHeight() + getGestureAreaHeight()) + ")");
-                    relativeParams.setMargins(0, 0, 0, getNavigationBarHeight() + getGestureAreaHeight());
-                    break;
-                case Surface.ROTATION_180:
-                    log.debug("CONFIG updateOrientation, rotation is 180");
-                    ((RelativeLayout.LayoutParams) mControllerView.getLayoutParams()).addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                    if(mPreferences.getBoolean("enable_cutout_mode_short_edges", true)) {
-                        log.debug("CONFIG updateOrientation: rotation is 180, cutout_mode_short_edges -> shiftUp=PlayerActivity.safeInsetTop=" + PlayerActivity.safeInset.get(1));
-                        shiftUp += PlayerActivity.safeInset.get(1); // safeInset.get(1) is safeInsetTop
-                    }
-                    if (isSystemBarOnBottom(mContext)) {
-                        log.debug("CONFIG updateOrientation: rotation is 180, SystemBarOnBottom -> shiftUp=getNavigationBarHeight()+getGestureAreaHeight()=" + (getNavigationBarHeight() + getGestureAreaHeight()));
-                        shiftUp += getNavigationBarHeight()+getGestureAreaHeight();
-                    }
-                    if (shiftUp>0) {
-                        log.debug("CONFIG updateOrientation, rotation is 180, shiftUp>0, margin (L,T,R,B)=(0,0,0,shiftUp=" + shiftUp + ")");
-                        relativeParams.setMargins(0, 0, 0, shiftUp);
-                    } else {
-                        log.debug("CONFIG updateOrientation, rotation is 180, shiftUp<=0 -> no setMargins update!");
-                    }
-                    break;
-            }
-            mControllerView.setLayoutParams(relativeParams);
-            mControllerView.requestLayout();
-        }
+    public static boolean isControlBarShowing() {
+        return mControlBarShowing;
     }
 
     private void showHelpOverlay(View controllerView) {
@@ -855,10 +733,6 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
 
         mPlayer = player;
         updatePausePlay();
-    }
-
-    public void setOnShowHideListener(OnShowHideListener onShowHideListener) {
-        mOnShowHideListener = onShowHideListener;
     }
 
     /**
@@ -903,55 +777,16 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         return mControlBarShowing || mActionBarShowing || mVolumeBarShowing;
     }
 
-    public boolean isControlBarShowing() {
-        return mControlBarShowing;
-    }
-
     private void setVisibility(final View view, boolean show, boolean doAnim) {
-        if (mIsStopped) {
-            return;
-        }
-        if (show) {
-            view.setVisibility(View.VISIBLE);
-        } else {
-            view.setVisibility(View.GONE);
-        }
+        if (mIsStopped) return;
+        if (show) view.setVisibility(View.VISIBLE);
+        else view.setVisibility(View.GONE);
     }
 
     private void showActionBar(boolean show) {
         if (mActionBarShowing != show) {
-            if (show) {
-                if(mVolumeBar!=null){
-                    mVolumeBar.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);                    
-                    RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)  mVolumeBar.getLayoutParams();
-                  
-                    lp.topMargin=getStatusBarHeight();
-                    log.debug("showActionBar getStatusBarHeight=" + lp.topMargin);
-                    mVolumeBar.setLayoutParams(lp);
-                }
-                if(mVolumeBar2!=null){
-                    mVolumeBar2.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);                    
-                    RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)  mVolumeBar2.getLayoutParams();
-                    lp.topMargin=getStatusBarHeight();
-                    log.debug("showActionBar getStatusBarHeight=" + lp.topMargin);
-                    mVolumeBar2.setLayoutParams(lp);
-                }
-                mActionBar.show();
-            } else {
-                if(mVolumeBar!=null){
-                    mVolumeBar.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);                    
-                    RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)  mVolumeBar.getLayoutParams();
-                    lp.topMargin=0;
-                    mVolumeBar.setLayoutParams(lp);
-                }
-                if(mVolumeBar2!=null){
-                    mVolumeBar2.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);                    
-                    RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams)  mVolumeBar2.getLayoutParams();
-                    lp.topMargin=0;
-                    mVolumeBar2.setLayoutParams(lp);
-                }
-                mActionBar.hide();
-            }
+            if (show) mActionBar.show();
+            else mActionBar.hide();
             mActionBarShowing = show;
         }
     }
@@ -962,6 +797,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         return mControlBar;
     }
     protected void showSystemBar(boolean show) {
+        log.debug("showSystemBar {}", show);
         if (mSystemBarShowing == show) return;
         mSystemUiVisibility = mPlayerView.getSystemUiVisibility();
         int systemUiFlag = View.SYSTEM_UI_FLAG_LOW_PROFILE;
@@ -983,6 +819,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     }
 
     private void showControlBar(boolean show) {
+        log.debug("showControlBar {}", show);
         if (mControlBar != null && mControlBarShowing != show) {
             log.debug("showControlBar "+String.valueOf(show));
             setVisibility(mControlBar, show, true);
@@ -999,7 +836,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
 
             if (show) {
                 setProgress();
-               
+
                 updateButtons();
                 updatePausePlay();
                 updateFormat();
@@ -1010,6 +847,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     }
 
     private void showVolumeBar(boolean show) {
+        log.debug("showVolumeBar {}", show);
         if (mVolumeBarEnabled && mVolumeBarShowing != show) {
             log.debug("showVolumeBar, volume2");
             setVisibility(mVolumeBar, show, true);
@@ -1027,19 +865,6 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
      */
     public void show() {
         show(FLAG_SIDE_ALL_EXCEPT_UNLOCK_INSTRUCTIONS, SHOW_TIMEOUT);
-    }
-
-    private void updateBottomBarHeight() {
-        if (mOnShowHideListener != null) {
-            int height;
-            if (mControlBarShowing)
-                height = mControlBar.getHeight() + mSystemBarHeight;
-            else if (!mSystemBarGone)
-                height = mSystemBarHeight;
-            else
-                height = 0;
-            mOnShowHideListener.onBottomBarHeightChange(height);
-        }
     }
 
     private void setOSDVisibility(boolean visible, int flags) {
@@ -1062,7 +887,6 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         if((flags & FLAG_SIDE_UNLOCK_INSTRUCTIONS)!=0){
             showUnlockInstructions(visible);
         }
-        updateBottomBarHeight();
     }
 
     /**
@@ -1088,9 +912,6 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
             flags |= FLAG_SIDE_SYSTEM_BAR;
         }
         setOSDVisibility(true, flags);
-
-        if (mOnShowHideListener != null)
-            mOnShowHideListener.onShow();
 
         if (timeout != 0 && Player.sPlayer.isPlaying()) {
             sendFadeOut(timeout);
@@ -1125,8 +946,6 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
 
         if (!isShowing()) {
             mHandler.removeMessages(MSG_FADE_OUT);
-            if (mOnShowHideListener != null)
-                mOnShowHideListener.onHide();
         }
     }
 
@@ -2509,83 +2328,6 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         mSystemUiVisibility |= STATUS_BAR_DISABLE_NOTIFICATION_ALERTS;
         mPlayerView.setSystemUiVisibility(mSystemUiVisibility);
         manualVisibilityChange=true;
-    }
-
-    public int getStatusBarHeight() {
-        int result = 0;
-        int resourceId = mContext.getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0)
-            result = mContext.getResources().getDimensionPixelSize(resourceId);
-        return result;
-    }
-
-    private static boolean hasNavigationBar(Resources resources) {
-        int navBarId = resources.getIdentifier("config_showNavigationBar", "bool", "android");
-        log.debug("hasNavigationBar: navBarId=" + navBarId + ", hasNavBar=" + resources.getBoolean(navBarId));
-        return navBarId > 0 && resources.getBoolean(navBarId);
-    }
-
-    public boolean isNavBarAtBottom() {
-        // detect navigation bar orientation https://stackoverflow.com/questions/21057035/detect-android-navigation-bar-orientation
-        final boolean isNavAtBottom = (mContext.getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE)
-                || (mContext.getResources().getConfiguration().smallestScreenWidthDp >= 600);
-        log.debug("isNavBarAtBottom: NavBarAtBottom=" + isNavAtBottom);
-        return isNavAtBottom;
-    }
-
-    public static boolean isSystemBarOnBottom(Context mContext) {
-        Resources res=mContext.getResources();
-        Configuration cfg=res.getConfiguration();
-        DisplayMetrics dm=res.getDisplayMetrics();
-        boolean canMove=(dm.widthPixels != dm.heightPixels &&
-                cfg.smallestScreenWidthDp < 600);
-        return(!canMove || dm.widthPixels < dm.heightPixels);
-    }
-
-    public static boolean hasNavBar(Resources resources) {
-        int id = resources.getIdentifier("config_showNavigationBar", "bool", "android");
-        if (id > 0) return resources.getBoolean(id);
-        else return false;
-    }
-
-    public static int getSystemBarHeight(Resources resources) {
-        if (!hasNavBar(resources))
-            return 0;
-        int orientation = resources.getConfiguration().orientation;
-        //Only phone between 0-599 has navigationbar can move
-        boolean isSmartphone = resources.getConfiguration().smallestScreenWidthDp < 600;
-        if (isSmartphone && Configuration.ORIENTATION_LANDSCAPE == orientation) return 0;
-        int id = resources
-                .getIdentifier(orientation == Configuration.ORIENTATION_PORTRAIT ? "navigation_bar_height" : "navigation_bar_height_landscape", "dimen", "android");
-        if (id > 0) return resources.getDimensionPixelSize(id);
-        return 0;
-    }
-
-    public static int getSystemBarWidth(Resources resources) {
-        if (hasNavBar(resources)) return 0;
-        int orientation = resources.getConfiguration().orientation;
-        //Only phone between 0-599 has navigationbar can move
-        boolean isSmartphone = resources.getConfiguration().smallestScreenWidthDp < 600;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE && isSmartphone) {
-            int id = resources.getIdentifier("navigation_bar_width", "dimen", "android");
-            if (id > 0) return resources.getDimensionPixelSize(id);
-        }
-        return 0;
-    }
-
-    public int getActionBarHeight() {
-        int actionBarHeight = 0;
-        final TypedArray styledAttributes = mContext.getTheme().obtainStyledAttributes(
-            new int[] { android.R.attr.actionBarSize }
-        );
-        actionBarHeight = (int) styledAttributes.getDimension(0, 0);
-        styledAttributes.recycle();
-        return actionBarHeight;
-    }
-
-    public View getActionBarView() {
-        View v = mWindow.getDecorView();
-        return v.findViewById(R.id.action_bar_container);
     }
 
     private void setRecursiveOnTouchListener(OnTouchListener t, View v){

@@ -3,7 +3,7 @@
     xmlns:ads="http://schemas.android.com/apk/res-auto"
     android:id="@+id/playerControllers"
     android:layout_width="wrap_content"
-    android:layout_height="fill_parent"
+    android:layout_height="match_parent"
     android:layout_weight="1" >
 
     <include
@@ -27,14 +27,12 @@
 		    android:scrollbars="horizontal" >
 
 	    </FrameLayout>
-
-
-
     </FrameLayout>
+
     <FrameLayout
         android:id="@+id/play_touch_zone"
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="match_parent"
         android:scrollbars="horizontal"
         android:layout_marginTop="?attr/actionBarSize"
         android:layout_above="@+id/control_bar"
@@ -45,11 +43,11 @@
 
     <LinearLayout
         android:id="@+id/control_bar"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginLeft="0dip"
-        android:layout_marginRight="0dip"
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp"
         android:layout_marginBottom="0dp"
         android:background="@drawable/player_bar_2014"
         android:descendantFocusability="blocksDescendants"
@@ -57,7 +55,7 @@
         android:visibility="gone" >
 
         <RelativeLayout
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dip"
             android:layout_marginRight="10dip"
@@ -66,7 +64,7 @@
             <com.archos.mediacenter.utils.seekbar.ArchosProgressSlider
                 android:id="@+id/seek_progress"
                 style="@style/PlayerSliderHorizontal"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:paddingBottom="13dip"
@@ -106,7 +104,8 @@
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_width="fill_parent"
+            android:id="@+id/button_bar"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="-6dip" >
 

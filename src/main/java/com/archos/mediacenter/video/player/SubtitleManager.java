@@ -15,9 +15,11 @@
 package com.archos.mediacenter.video.player;
 
 import com.archos.mediacenter.video.R;
+import com.archos.mediacenter.video.utils.MiscUtils;
 import com.archos.medialib.Subtitle;
 import com.archos.medialib.Subtitle.SubtitleAlignment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Insets;
@@ -29,11 +31,13 @@ import android.os.Looper;
 import android.os.Message;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.ViewGroup.LayoutParams;
@@ -54,7 +58,8 @@ public class SubtitleManager {
 
     private Context             mContext;
     private ViewGroup           mPlayerView;
-    private WindowManager              mWindow;
+    private View                mRootView;
+    private WindowManager       mWindow;
     private WindowManager.LayoutParams mLayoutParams = null;
     private Resources           mRes;
     private View                mSubtitleLayout = null;
@@ -72,6 +77,9 @@ public class SubtitleManager {
     SpannableStringBuilder      mSpannableStringBuilder = null;
     TextShadowSpan              mTextShadowSpan = null;
     private boolean mIsSubtitleGfx = false;
+
+    private boolean mNavigationBarShowing, mSystemBarShowing, mActionBarShowing, mIsNavBarOnBottom, mIsGestureAreaShowing;
+    private int mGestureAreaHeight, mControlBarHeight;
 
     Surface                     mUiSurface;
     private boolean mForbidWindow ;
@@ -176,7 +184,10 @@ public class SubtitleManager {
         log.debug("displayView sub duration={}", subtitle.getDuration());
 
         if (subtitle.isText()) {
-            mIsSubtitleGfx = false;
+            if (mIsSubtitleGfx) {
+                mIsSubtitleGfx = false;
+                adjustView(); // we need to adjust the view because it was initialized with mIsSubtitleGfx=false
+            } else mIsSubtitleGfx = false;
 
             subtitle.setAlignment(getAlignment(subtitle.getText()));
 
@@ -206,7 +217,13 @@ public class SubtitleManager {
             // need to Invalidate View to force an update!
             mSubtitleTxtView.postInvalidate();
         } else if (subtitle.isBitmap()) {
-            mIsSubtitleGfx = true;
+            if (! mIsSubtitleGfx) {
+                mIsSubtitleGfx = true;
+                adjustView(); // we need to adjust the view because it was initialized with mIsSubtitleGfx=true
+            } else {
+                mIsSubtitleGfx = true;
+            }
+
             log.debug("displayView: Bitmap bounds={}, mIsSubtitleGfx=true", subtitle.getBounds());
             Rect bounds = subtitle.getBounds();
             mSubtitleGfxView.setSubtitle(subtitle.getBitmap(), bounds, subtitle.getFrameWidth(), subtitle.getFrameHeight());
@@ -416,7 +433,7 @@ public class SubtitleManager {
                             int currentPosition = mCurrentSubtitle.getPosition() + (int) elapsedTime;
                             int realCurrentSubtitleDuration;
                             // need to correct time left only if the next subtitle starts before the current one ends
-                            if (mCurrentSubtitle.getPosition()+mCurrentSubtitle.getDuration() > mNextSubtitle.getPosition()) {
+                            if (mCurrentSubtitle.getPosition() + mCurrentSubtitle.getDuration() > mNextSubtitle.getPosition()) {
                                 log.debug("DispSubtitleThread: cannot sleep after mNextSubtitle, adjust");
                                 realCurrentSubtitleDuration = mNextSubtitle.getPosition() - mCurrentSubtitle.getPosition();
                                 mCurrentSubtitle.setDuration(realCurrentSubtitleDuration);
@@ -517,6 +534,7 @@ public class SubtitleManager {
     }
 
     public void setScreenSize(int displayWidth, int displayHeight) {
+        log.debug("setScreenSize: {}x{}", displayWidth, displayHeight);
         mScreenWidth = displayWidth;
         mScreenHeight = displayHeight;
         if (mSubtitleLayout != null) {
@@ -549,25 +567,6 @@ public class SubtitleManager {
             mSubtitleSpacer.setRenderingSurface(uiSurface);
     }
 
-    private void adjustSubtitleForInsets() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            mSubtitleSpacer.setOnApplyWindowInsetsListener((v, insets) -> {
-                Insets systemBarsInsets = insets.getInsets(WindowInsets.Type.systemBars());
-                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-                layoutParams.bottomMargin = systemBarsInsets.bottom; // Adjust for navigation bar
-                v.setLayoutParams(layoutParams);
-                return insets;
-            });
-        } else {
-            mSubtitleSpacer.setOnApplyWindowInsetsListener((v, insets) -> {
-                ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
-                layoutParams.bottomMargin = insets.getSystemWindowInsetBottom(); // Adjust for navigation bar
-                v.setLayoutParams(layoutParams);
-                return insets;
-            });
-        }
-    }
-
     private void attachWindow() {
         if (mSubtitleLayout != null)
             return;
@@ -579,10 +578,48 @@ public class SubtitleManager {
         mSubtitleTxtView.setScreenSize(mScreenWidth, mScreenHeight);
         mSubtitleTxtView.setUIMode(mUiMode);
         mSubtitleSpacerParams = mSubtitleSpacer.getLayoutParams();
+        log.debug("attachWindow: mSubtitleSpacerParams.height={}", mSubtitleSpacerParams.height);
         mSubtitleSpacerParams.height = mSubtitleEvadedVPos;
         setUIExternalSurface(mUiSurface);
-        adjustSubtitleForInsets();
+
+        if (mSubtitleLayout != null) {
+            mRootView = mSubtitleLayout.getRootView();
+            // note OnApplyWindowInsetsListener does not update when navigation bar fades away, OnGlobalLayoutListener or addOnPreDrawListener are constantly triggering -> only setOnSystemUiVisibilityChangeListener works
+            // however setOnSystemUiVisibilityChangeListener is unreliable on Android 6.0 thus use addOnLayoutChangeListener
+            // in reality we need to do combination of setOnApplyWindowInsetsListener to get insets but not updated when UI mode changes and thus combine with setOnSystemUiVisibilityChangeListener
+
+            // insets observer is needed for rotation
+            mSubtitleLayout.setOnApplyWindowInsetsListener((v, insets) -> {
+                log.debug("attachWindow, onApplyWindowInsetsListener, mIsSubtitleGfx={}", mIsSubtitleGfx);
+                adjustView();
+                return insets;
+            });
+
+            // ui visibility listener is needed for UI mode changes
+            mRootView.setOnSystemUiVisibilityChangeListener(visibility -> {
+                mNavigationBarShowing = (visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
+                mSystemBarShowing = (visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0;
+                mActionBarShowing = (visibility & View.SYSTEM_UI_FLAG_LOW_PROFILE) == 0;
+                mIsNavBarOnBottom = MiscUtils.isNavigationBarOnBottom(mRootView, mContext);
+                mIsGestureAreaShowing = MiscUtils.isGestureAreaDisplayed(mContext);
+                mGestureAreaHeight = MiscUtils.getGestureAreaHeight(mContext);
+                log.debug("attachWindow, setOnSystemUiVisibilityChangeListener: mNavigationBarShowing={}, mSystemBarShowing={}, mActionBarShowing={}, mControlBarShowing={}, mIsNavBarOnBottom={}, mIsGestureAreaShowing={}",
+                        mNavigationBarShowing, mSystemBarShowing, mActionBarShowing, PlayerController.isControlBarShowing(), mIsNavBarOnBottom, mIsGestureAreaShowing);
+                // extra parameters injected for subtitles handling that need to be shifted up above controlBar of playerController if the mSubtitleEvadedVPos is not shifting them already above
+                adjustView();
+            });
+
+        }
+
         mPlayerView.addView(mSubtitleLayout, mScreenWidth, mScreenHeight);
+    }
+
+    private void adjustView() {
+        MiscUtils.adjustViewLayoutForInsets(mContext, mRootView, mSubtitleLayout, "mSubtitleLayout",
+                mNavigationBarShowing, mSystemBarShowing, mActionBarShowing, PlayerController.isControlBarShowing(), mIsNavBarOnBottom, mIsGestureAreaShowing,
+                (PlayerController.isControlBarShowing() ? PlayerController.getControlBarCurrentHeight() : 0), mSubtitleEvadedVPos,
+                false && ! mIsSubtitleGfx, true && ! mIsSubtitleGfx, false && ! mIsSubtitleGfx, true && ! mIsSubtitleGfx,
+                false && ! mIsSubtitleGfx, true && ! mIsSubtitleGfx, false && ! mIsSubtitleGfx, true && ! mIsSubtitleGfx);
     }
 
     private void detachWindow() {
@@ -709,46 +746,6 @@ public class SubtitleManager {
     }
 
     /**
-     * Whether Subtitle minimum Vertical Position should be above the StatusBar
-     * or not. Only changes the Vertical Position if it is too low.
-     *
-     * @param evadeStatusBar <ul>
-     *            <li><b>true</b> to place subtitles above the System StatusBar
-     *            <li><b>false</b> to place Subtitles without considering the
-     *            StatusBar
-     *            </ul>
-     */
-    private void setBottomBarHeightInternal(int height) {
-        log.debug("setBottomBarHeightInternal: {}", height);
-        if (height > 0) {
-            int minPos = height;
-            int newPos = Math.max(minPos, mSubtitleVPosPixel);
-            setVerticalPositionInternal(newPos);
-        } else {
-            setVerticalPositionInternal(mSubtitleVPosPixel);
-        }
-    }
-
-    private Runnable mSetStatusBarEvadeRunnable = new Runnable() {
-        public void run() {
-            setBottomBarHeightInternal(0);
-        }
-    };
-
-    public void setBottomBarHeight(int height) {
-        mHandler.removeCallbacks(mSetStatusBarEvadeRunnable);
-        if (height > 0) {
-            setBottomBarHeightInternal(height);
-        } else {
-            /*
-             * wait a little: avoid a glitch
-             * (subtitles being displayed under the system bar for 100ms)
-             */
-            mHandler.postDelayed(mSetStatusBarEvadeRunnable, 250);
-        }
-    }
-
-    /**
      * Sets Subtitle Vertical Position by sizing an invisible view<br>
      * Space below Subtitle is max 1/3 of mScreenHeight.
      * @param pos 0..255.
@@ -793,6 +790,7 @@ public class SubtitleManager {
 
     public void onSeekStart(int pos) {
         if (mDispSubtitleThread != null) {
+            log.debug("onSeekStart: clear");
             mDispSubtitleThread.clear();
             mDispSubtitleThread.interrupt();
         }
