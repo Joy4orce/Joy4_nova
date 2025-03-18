@@ -19,28 +19,24 @@ import com.archos.mediacenter.video.utils.MiscUtils;
 import com.archos.medialib.Subtitle;
 import com.archos.medialib.Subtitle.SubtitleAlignment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.ViewGroup.LayoutParams;
+import androidx.preference.PreferenceManager;
+import android.content.SharedPreferences;
 
 import androidx.core.content.ContextCompat;
 import androidx.core.text.HtmlCompat;
@@ -84,6 +80,8 @@ public class SubtitleManager {
     Surface                     mUiSurface;
     private boolean mForbidWindow ;
     DispSubtitleThread mDispSubtitleThread = null;
+    private static int mRoundCornerRadius = 0;
+    private static boolean mFullScreenWithCutout = true;
 
     public static final int SUBTITLE_TYPE_NONE = 0;
     public static final int SUBTITLE_TYPE_TEXT = 1;
@@ -568,8 +566,9 @@ public class SubtitleManager {
     }
 
     private void attachWindow() {
-        if (mSubtitleLayout != null)
-            return;
+        SharedPreferences mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        if (mPreferences != null) mFullScreenWithCutout = mPreferences.getBoolean("enable_cutout_mode_short_edges", true);
+        if (mSubtitleLayout != null) return;
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mSubtitleLayout = inflater.inflate(R.layout.subtitle_layout, mPlayerView, false);
         mSubtitleSpacer = (SubtitleSpacerView) mSubtitleLayout.findViewById(R.id.subtitle_spacer);
@@ -615,11 +614,14 @@ public class SubtitleManager {
     }
 
     private void adjustView() {
+        // strategy is videoView avoids cutout if not in fullscreen
+        // adjust subtitle text height (bottom/top) to avoid system bars and playerController bar only if text subtitle but not left/right
+        boolean avoidCutout = ! mFullScreenWithCutout;
         MiscUtils.adjustViewLayoutForInsets(mContext, mRootView, mSubtitleLayout, "mSubtitleLayout",
                 mNavigationBarShowing, mSystemBarShowing, mActionBarShowing, PlayerController.isControlBarShowing(), mIsNavBarOnBottom, mIsGestureAreaShowing,
                 (PlayerController.isControlBarShowing() ? PlayerController.getControlBarCurrentHeight() : 0), mSubtitleEvadedVPos,
-                false && ! mIsSubtitleGfx, true && ! mIsSubtitleGfx, false && ! mIsSubtitleGfx, true && ! mIsSubtitleGfx,
-                false && ! mIsSubtitleGfx, true && ! mIsSubtitleGfx, false && ! mIsSubtitleGfx, true && ! mIsSubtitleGfx);
+                false, ! mIsSubtitleGfx, false, ! mIsSubtitleGfx,
+                avoidCutout, avoidCutout, avoidCutout, avoidCutout, true);
     }
 
     private void detachWindow() {

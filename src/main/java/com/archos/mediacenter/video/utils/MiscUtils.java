@@ -28,7 +28,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.DisplayCutout;
+import android.view.RoundedCorner;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -37,14 +39,20 @@ import android.view.WindowManager;
 import android.view.WindowMetrics;
 
 import static android.content.Context.UI_MODE_SERVICE;
+import static android.view.RoundedCorner.POSITION_BOTTOM_LEFT;
+import static android.view.RoundedCorner.POSITION_BOTTOM_RIGHT;
+import static android.view.RoundedCorner.POSITION_TOP_LEFT;
+import static android.view.RoundedCorner.POSITION_TOP_RIGHT;
 
 import com.archos.mediacenter.video.R;
+import com.archos.mediacenter.video.player.Player;
 import com.archos.mediacenter.video.player.PlayerActivity;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -63,6 +71,9 @@ public class MiscUtils {
     private static final int DELAY_MILLIS_GESTURE_NAVIGATION = 2300; // Delay for applying relayout
 
     private static Runnable relayoutRunnable;
+
+    private static int mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom;
+    private static int mVideoWidth, mVideoHeight, mVideoAspect;
 
     public static boolean isGooglePlayServicesAvailable(Context context){
         try {
@@ -285,97 +296,181 @@ public class MiscUtils {
         return v.findViewById(R.id.action_bar_container);
     }
 
-    // additionalBottomMargin is the additional bottom margin to apply to the viewlayout for example on subtitles that needs to be shifted also on top of the playerController controlBar (seek + controls) if not already above with subtitleVposPixel
-    // alreadyAppliedBottomMargin is the bottom margin already applied to viewlayout for example on subtitles to shift them up to take into account not to apply if subtitles are already above the intent layout
+    public static int getRoundCornersRadius(WindowInsets insets) {
+        // determine round edges radius
+        // needed to shift subs when using left/right top/bottom positions
+        int radius = 0;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            final RoundedCorner topRight = insets.getRoundedCorner(POSITION_TOP_RIGHT);
+            final int radiusTopRight = (topRight != null ? topRight.getRadius() : 0);
+            final RoundedCorner topLeft = insets.getRoundedCorner(POSITION_TOP_LEFT);
+            final int radiusTopLeft = (topLeft != null ? topLeft.getRadius() : 0);
+            final RoundedCorner bottomRight = insets.getRoundedCorner(POSITION_BOTTOM_RIGHT);
+            final int radiusBottomRight = (bottomRight != null ? bottomRight.getRadius() : 0);
+            final RoundedCorner bottomLeft = insets.getRoundedCorner(POSITION_BOTTOM_LEFT);
+            final int radiusBottomLeft = (bottomLeft != null ? bottomLeft.getRadius() : 0);
+            radius = Math.max(Math.max(radiusTopLeft, radiusTopRight), Math.max(radiusBottomLeft, radiusBottomRight));
+        }
+        return radius;
+    }
+
+    // Design principles
+    // videoView does not avoid round edges
+    // videoView can avoid cutout conditionally resulting in shifting videoView of screen size minus cutout safe insets
+    // subtitleTextView avoids round edges to avoid text clipping
+    // subtitleTextView and subtitleGfxView are centered in the videoView
+    // subtitleTextView a
+    // subtitleGfxView has a fixed size and is centered in the videoView and does not avoid round edges to preserve aspect ratio
+    // playerControllerView always avoids cutouts and navigation bar or gesture navigation area
+    // -> videoViewLeftMargin=cutoutLeft, videoViewRightMargin=cutoutRight, videoViewTopMargin=cutoutTop, videoViewBottomMargin=cutoutBottom
+    // -> subViewleftMargin=(cl-cr)/2-max[cl+cr,max(cl,r)+max(cr,r)]/2, subViewRightMargin=(cr-cl)/2+max[cl+cr,max(cl,r)+max(cr,r)]/2, subViewTopMargin=(ct-cb)/2-max[ct+cb,max(ct,r)+max(cb,r)]/2, subViewBottomMargin=(ct-cb)/2+max[ct+cb,max(ct,r)+max(cb,r)]/2
+
+    // Calculus to center subtitle view inside video view when cutout margins are applied on video view and subtitle view avoids round edges
+    // Screen width w by height h in sizes. video window and subtitle window.
+    // Both windows are of screen height h.
+    // The video window due to cutout in the screen need to occupy between abscisses [cl, w-cr] (i.e. cl left margin and cr right margin).
+    // Because of round edges to avoid text clipping, subtitle window needs to occupy between abscisses [max(cr, r), w-max(cl,r)] where r is the round egde radius.
+    // The video window is set but I want to adjust size of the subtitle window to be centered inside the video window but in respecting the [max(cr, r), w-max(cl,r)] abscisses boundary.
+    // Below is the calculus to derive left and right margin to apply to this subtitle window
+    // Wv=w-cl-cr, Ws=w-max(cl,r)-max(cr,r)
+    // subtitle new width for centering W=min(Wv,Ws)=w-max[cl+cr,max(cl,r)+max(cr,r)]
+    // both centers coincides c=cl+Wv/2=w/2+(cl-cr)/2
+    // subtitleLeftMargin slm=c-W/2=w/2+(cl-cr)/2-w/2-max[cl+cr,max(cl,r)+max(cr,r)]/2=(cl-cr)/2-max[cl+cr,max(cl,r)+max(cr,r)]/2
+    // subtitleRightMargin srm=w-c-W/2=w-w/2-(cl-cr)/2-w/2+max[cl+cr,max(cl,r)+max(cr,r)]/2=(cr-cl)/2+max[cl+cr,max(cl,r)+max(cr,r)]/2
 
     public static void adjustViewLayoutForInsets(Context context, View rootView, View viewLayout, String viewName, boolean navigationBarShowing, boolean systemBarShowing, boolean actionBarShowing,
                                                  boolean controlBarShowing, boolean isNavBarOnBottom, boolean isGestureAreaShowing, int additionalBottomMargin, int alreadyAppliedBottomMargin,
                                                  boolean adjustLeft, boolean adjustTop, boolean adjustRight, boolean adjustBottom,
-                                                 boolean applyCutoutLeft, boolean applyCutoutTop, boolean applyCutoutRight, boolean applyCutoutBottom) {
+                                                 boolean avoidCutoutLeft, boolean avoidCutoutTop, boolean avoidCutoutRight, boolean avoidCutoutBottom,
+                                                 boolean avoidRoundEdges) {
         log.debug("adjustViewLayoutForInsets: {} navigationBarShowing={}, systemBarShowing={}, actionBarShowing={}, controlBarShowing={}, isNavBarOnBottom={}, isGestureAreaShowing={}, additionalBottomMargin={}, alreadyAppliedBottomMargin={}",
                 viewName, navigationBarShowing, systemBarShowing, actionBarShowing, controlBarShowing, isNavBarOnBottom, isGestureAreaShowing, additionalBottomMargin, alreadyAppliedBottomMargin);
         log.debug("adjustViewLayoutForInsets: {} getNavigationBarHeight()={}, getGestureAreaHeight()={}, getStatusBarHeight()={}, getActionBarHeight()={}, getSystemBarHeight()={}",
                 viewName, MiscUtils.getNavigationBarHeight(context), MiscUtils.getGestureAreaHeight(context), MiscUtils.getStatusBarHeight(context), MiscUtils.getActionBarHeight(context), MiscUtils.getSystemBarHeight(context.getResources()));
+        log.debug("adjustViewLayoutForInsets: videoSurface=({},{}), ar={}, screen=({},{})", Player.sPlayer.getVideoWidth(), Player.sPlayer.getVideoHeight(), Player.sPlayer.getVideoAspect(), PlayerActivity.getScreenWidth(), PlayerActivity.getScreenHeight());
         int left, top, right, bottom;
         left = top = right = bottom = 0;
+        int systemBarLeft, systemBarTop, systemBarRight, systemBarBottom;
+        boolean navAreaPresentOnBottom = (isGestureAreaShowing || (isNavBarOnBottom && navigationBarShowing));
         int rotation = (PlayerActivity.isRotationLocked() ? PlayerActivity.getLockedRotation(): ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation());
+
+        WindowInsets insets = rootView.getRootWindowInsets();
+        if (insets == null) return;
+        setCutoutMetrics(insets, rootView, null);
+        if (avoidCutoutLeft) left = mCutoutLeft;
+        if (avoidCutoutTop) top = mCutoutTop;
+        if (avoidCutoutRight) right = mCutoutRight;
+        if (avoidCutoutBottom) bottom = mCutoutBottom;
+        int radius = 0; // round edges radius needed to shift subs when using l/r/t/b positions to be determined below
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            WindowInsets insets = rootView.getRootWindowInsets();
-            if (insets == null) return;
             Insets systemBarsInsets = insets.getInsets(WindowInsets.Type.systemBars());
             Insets navigationBarInsets = insets.getInsets(WindowInsets.Type.navigationBars());
             Insets statusBarInsets = insets.getInsets(WindowInsets.Type.statusBars());
-            DisplayCutout cutout = insets.getDisplayCutout();
-            log.debug("adjustViewLayoutForInsets: {} LTRB systemBarsInsets=({},{},{},{}), navigationBarInsets=({},{},{},{}), statusBarInsets=({},{},{},{}), cutout=({},{},{},{})",
+            radius = getRoundCornersRadius(insets);
+            log.debug("adjustViewLayoutForInsets: {} LTRB systemBarsInsets=({},{},{},{}), navigationBarInsets=({},{},{},{}), statusBarInsets=({},{},{},{}), cutout=({},{},{},{}), roundedCornerRadius={}",
                     viewName, systemBarsInsets.left, systemBarsInsets.top, systemBarsInsets.right, systemBarsInsets.bottom,
                     navigationBarInsets.left, navigationBarInsets.top, navigationBarInsets.right, navigationBarInsets.bottom,
                     statusBarInsets.left, statusBarInsets.top, statusBarInsets.right, statusBarInsets.bottom,
-                    (cutout == null ? 0 : cutout.getSafeInsetLeft()), (cutout == null ? 0 : cutout.getSafeInsetTop()), (cutout == null ? 0 : cutout.getSafeInsetRight()), (cutout == null ? 0 : cutout.getSafeInsetBottom()));
-            if (cutout != null) {
-                if (applyCutoutLeft) left = cutout.getSafeInsetLeft();
-                if (applyCutoutTop) top = cutout.getSafeInsetTop();
-                if (applyCutoutRight) right = cutout.getSafeInsetRight();
-                if (applyCutoutBottom) bottom = cutout.getSafeInsetBottom();
-            }
-            if (adjustLeft && systemBarShowing) left += systemBarsInsets.left;
-            if (adjustTop && systemBarShowing) top += statusBarInsets.top;
-            if (adjustRight && systemBarShowing) right += systemBarsInsets.right;
-            if (adjustBottom && navigationBarShowing && isNavBarOnBottom) bottom += systemBarsInsets.bottom; // bottom margin is 0 if no navigation bar
+                    mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom, radius);
+
+            systemBarLeft= systemBarsInsets.left;
+            systemBarTop= systemBarsInsets.top;
+            systemBarRight= systemBarsInsets.right;
+            systemBarBottom= systemBarsInsets.bottom;
         } else {
-            WindowInsets insets = rootView.getRootWindowInsets();
-            if (insets == null) return;
-            DisplayCutout cutout = null;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                cutout = rootView.getRootWindowInsets().getDisplayCutout();
-                if (cutout != null) {
-                    if (applyCutoutLeft) left = cutout.getSafeInsetLeft();
-                    if (applyCutoutTop) top = cutout.getSafeInsetTop();
-                    if (applyCutoutRight) right = cutout.getSafeInsetRight();
-                    if (applyCutoutBottom) bottom = cutout.getSafeInsetBottom();
-                }
-            }
             log.debug("adjustViewLayoutForInsets: {} LTRB insets=({},{},{},{}), cutout=({},{},{},{})", viewName, insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(), insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom(),
-                    (cutout == null ? 0 : cutout.getSafeInsetLeft()), (cutout == null ? 0 : cutout.getSafeInsetTop()), (cutout == null ? 0 : cutout.getSafeInsetRight()), (cutout == null ? 0 : cutout.getSafeInsetBottom()));
-            if (adjustLeft && systemBarShowing) left += insets.getSystemWindowInsetLeft();
-            if (adjustTop && systemBarShowing) top += insets.getSystemWindowInsetTop();
-            if (adjustRight && systemBarShowing) right += insets.getSystemWindowInsetRight();
-            if (adjustBottom && navigationBarShowing && isNavBarOnBottom) bottom += insets.getSystemWindowInsetBottom(); // bottom margin is 0 if no navigation bar
+                    mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom);
+            radius = 0;
+            systemBarLeft = insets.getSystemWindowInsetLeft();
+            systemBarTop = insets.getSystemWindowInsetTop();
+            systemBarRight = insets.getSystemWindowInsetRight();
+            systemBarBottom = insets.getSystemWindowInsetBottom();
         }
+        if (avoidRoundEdges) { // at this point left/top/right/bottom is already set to cutout insets if applied
+            // this centers the subtitle view inside the video view avoiding text clipping due to round edges
+            left = Math.round((left - right) / 2.0f - Math.max(left + right, Math.max(left, radius) + Math.max(right, radius)) / 2.0f);
+            top = Math.round((top - bottom) / 2.0f - Math.max(top + bottom, Math.max(top, radius) + Math.max(bottom, radius)) / 2.0f);
+            right = Math.round((right - left) / 2.0f + Math.max(left + right, Math.max(left, radius) + Math.max(right, radius)) / 2.0f);
+            bottom = Math.round((bottom - top) / 2.0f + Math.max(top + bottom, Math.max(top, radius) + Math.max(bottom, radius)) / 2.0f);
+        }
+        if (adjustLeft && systemBarShowing) left += systemBarLeft;
+        if (adjustTop && systemBarShowing) top += systemBarTop;
+        if (adjustRight && systemBarShowing) right += systemBarRight;
+        if (adjustBottom && navAreaPresentOnBottom) bottom += systemBarBottom; // bottom margin is 0 if no navigation bar
         ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) viewLayout.getLayoutParams();
         int prevLeft, prevTop, prevRight, prevBottom;
         prevLeft = layoutParams.leftMargin; prevTop = layoutParams.topMargin; prevRight = layoutParams.rightMargin; prevBottom = layoutParams.bottomMargin;
         log.debug("adjustViewLayoutForInsets, {} orientation is {}({}), isRotationLocked={}", viewName, PlayerActivity.getHumanReadableRotation(rotation), rotation, PlayerActivity.isRotationLocked());
-        layoutParams.leftMargin = left;
-        layoutParams.topMargin = top;
-        layoutParams.rightMargin = right;
         // extra logic for subtitles handling that need to be shifted up above controlBar of playerController if the subtitleVposPixel is not shifting them already above
-        int shiftBottom = bottom + additionalBottomMargin - alreadyAppliedBottomMargin;
         // Whether Subtitle minimum Vertical Position should be above the StatusBar or not. Only changes the Vertical Position if it is too low.
-        layoutParams.bottomMargin = Math.max(shiftBottom, 0);
+        int shiftBottom = Math.max(bottom + additionalBottomMargin - alreadyAppliedBottomMargin, 0);
         log.debug("adjustViewLayoutForInsets: {} layoutParams ({},{},{},{})->({},{},{},{})",
                 viewName, prevLeft, prevTop, prevRight, prevBottom,
-                layoutParams.leftMargin, layoutParams.topMargin, layoutParams.rightMargin, layoutParams.bottomMargin);
-        if (prevBottom > 0 && bottom == 0) {
+                left, top, right, shiftBottom);
+        if (prevBottom > 0 && shiftBottom == 0 && navAreaPresentOnBottom) {
             log.debug("adjustViewLayoutForInsets: Delaying relayout due to give time to navigation bar to fade out");
             // Schedule the delayed relayout
             if (relayoutRunnable != null) {
                 log.debug("adjustViewLayoutForInsets: Cancel previous delayed relayout");
                 handler.removeCallbacks(relayoutRunnable);
             }
+            final int finalLeft, finalTop, finalRight, finalShiftBottom;
+            finalLeft = left; finalTop = top; finalRight = right; finalShiftBottom = shiftBottom;
             relayoutRunnable = () -> {
+                layoutParams.leftMargin = finalLeft;
+                layoutParams.topMargin = finalTop;
+                layoutParams.rightMargin = finalRight;
+                layoutParams.bottomMargin = finalShiftBottom;
                 viewLayout.setLayoutParams(layoutParams);
                 viewLayout.forceLayout();
                 viewLayout.requestLayout();
                 log.debug("adjustViewLayoutForInsets: Delayed relayout applied");
             };
+            int delay = 0;
+            if (isGestureAreaShowing) {
+                delay = DELAY_MILLIS_GESTURE_NAVIGATION;
+            } else if (isNavBarOnBottom && navigationBarShowing) { // TODO MARC true because already in test above
+                delay = DELAY_MILLIS_NORMAL;
+            }
             // wait a little: avoid a glitch (subtitles being displayed under the system bar for x ms), note that gesture bar fades away slowly
-            handler.postDelayed(relayoutRunnable, (isGestureAreaShowing ? DELAY_MILLIS_GESTURE_NAVIGATION : DELAY_MILLIS_NORMAL));
+            handler.postDelayed(relayoutRunnable, delay);
         } else {
             // Apply the relayout immediately
+            layoutParams.leftMargin = left;
+            layoutParams.topMargin = top;
+            layoutParams.rightMargin = right;
+            layoutParams.bottomMargin = shiftBottom;
             viewLayout.setLayoutParams(layoutParams);
             viewLayout.forceLayout();
             viewLayout.requestLayout();
             log.debug("adjustViewLayoutForInsets: Immediate relayout applied");
+        }
+    }
+
+    public interface CutoutMetricsSetter {
+        void setCutoutMetrics(int left, int top, int right, int bottom);
+    }
+
+    public static void setCutoutMetrics(WindowInsets insets, View rootView, CutoutMetricsSetter setter) {
+        DisplayCutout cutout = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            cutout = insets.getDisplayCutout();
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            cutout = rootView.getRootWindowInsets().getDisplayCutout();
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && cutout != null) {
+            mCutoutLeft = cutout.getSafeInsetLeft();
+            mCutoutTop = cutout.getSafeInsetTop();
+            mCutoutRight = cutout.getSafeInsetRight();
+            mCutoutBottom = cutout.getSafeInsetBottom();
+            if (setter != null) {
+                setter.setCutoutMetrics(mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom);
+            }
+        } else {
+            mCutoutLeft = mCutoutTop = mCutoutRight = mCutoutBottom = 0;
+            if (setter != null) {
+                setter.setCutoutMetrics(0, 0, 0, 0);
+            }
         }
     }
 }

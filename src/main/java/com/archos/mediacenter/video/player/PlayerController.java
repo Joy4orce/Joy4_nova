@@ -22,11 +22,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
@@ -41,23 +37,17 @@ import androidx.appcompat.app.ActionBar;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.view.Display;
-import android.view.DisplayCutout;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.Surface;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnGenericMotionListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.Window;
-import android.view.WindowInsets;
 import android.view.WindowManager;
-import android.view.WindowMetrics;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -258,6 +248,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     private long                mLastTouchEventTime = -1;
     private View mPlayPauseTouchZone;
     private boolean mPlayPauseOnTouchActivated = false;
+    private static boolean mFullScreenWithCutout = true;
 
     private GestureDetector gestureDetector;
     private float currentBrightness;
@@ -571,7 +562,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         mLayoutWidth = layoutWidth;
         mLayoutHeight = layoutHeight;
         mSystemBarHeight = displayHeight - mLayoutHeight;
-        log.debug("CONFIG setSizes layout: " + mLayoutWidth + "x" + mLayoutHeight + " / display: " + displayWidth + "x" + displayHeight + ", systemBarHeight: " + mSystemBarHeight);
+        log.debug("CONFIG setSizes layout: {}x{} / display: {}x{}, systemBarHeight: {}", mLayoutWidth, mLayoutHeight, displayWidth, displayHeight, mSystemBarHeight);
         if (mControllerView != null) {
             log.debug("CONFIG setSizes, mControllerView != null, recreate whole layout");
             // size changed and maybe orientation too, recreate the whole layout
@@ -585,16 +576,14 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
 
 
     private void attachWindow() {
+        SharedPreferences mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        if (mPreferences != null) mFullScreenWithCutout = mPreferences.getBoolean("enable_cutout_mode_short_edges", true);
 
-        log.debug("CONFIG attachWindow getStatusBarHeight=" + MiscUtils.getStatusBarHeight(mContext) +
-                ", getNavigationBarHeight=" + MiscUtils.getNavigationBarHeight(mContext) +
-                ", getActionBarHeight=" + MiscUtils.getActionBarHeight(mContext) +
-                ", getGestureAreaHeight=" + MiscUtils.getGestureAreaHeight(mContext) +
-                ", isGestureAreaDisplayed=" + MiscUtils.isGestureAreaDisplayed(mContext) +
-                ", ");
+        log.debug("CONFIG attachWindow getStatusBarHeight={}, getNavigationBarHeight={}, getActionBarHeight={}, getGestureAreaHeight={}, isGestureAreaDisplayed={}, ",
+                MiscUtils.getStatusBarHeight(mContext), MiscUtils.getNavigationBarHeight(mContext), MiscUtils.getActionBarHeight(mContext),
+                MiscUtils.getGestureAreaHeight(mContext), MiscUtils.isGestureAreaDisplayed(mContext));
 
-        if (mControllerView != null)
-            return;
+        if (mControllerView != null) return;
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         int layoutID=R.layout.player_controller;
         mControllerView = inflater.inflate(layoutID, null);
@@ -674,7 +663,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         //help overlay
         if(mContext instanceof PlayerActivity){
             if(((PlayerActivity)mContext).isPluggedOnTv()){
-                SharedPreferences mPreferences =  mContext.getSharedPreferences(MediaUtils.SHARED_PREFERENCES_NAME, mContext.MODE_PRIVATE);
+                mPreferences =  mContext.getSharedPreferences(MediaUtils.SHARED_PREFERENCES_NAME, mContext.MODE_PRIVATE);
                 if(!mPreferences.getBoolean(PLAYER_HELP_OVERLAY_KEY, false)){
                     showHelpOverlay(mControllerViewLeft);
                     if(mControllerViewRight!=null && UIMode!=VideoEffect.NORMAL_2D_MODE){
@@ -694,7 +683,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         MiscUtils.adjustViewLayoutForInsets(mContext, mRootView, mControllerView,"mControllerView",
                 mNavigationBarShowing, mSystemBarShowing, mActionBarShowing, mControlBarShowing, mIsNavBarOnBottom, mIsGestureAreaShowing, 0, 0,
                 true, true, true, true,
-                true, true, true, true);
+                true, true, true, true, false);
     }
 
     public static int getControlBarCurrentHeight() {

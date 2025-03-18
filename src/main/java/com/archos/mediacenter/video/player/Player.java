@@ -1201,6 +1201,7 @@ public class Player implements IPlayerControl,
     public int getVideoHeight(){
         return mVideoHeight;
     }
+    public double getVideoAspect() { return mVideoAspect; }
     public void onVideoSizeChanged(IMediaPlayer mp, int width, int height) {
         mVideoWidth = width;
         mVideoHeight = height;

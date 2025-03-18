@@ -1,6 +1,5 @@
 package com.archos.mediacenter.video.player;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.PictureInPictureParams;
@@ -23,9 +22,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Insets;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.hardware.display.DisplayManager;
 import android.media.AudioManager;
@@ -38,9 +35,9 @@ import android.os.Message;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
-import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -102,6 +99,7 @@ import com.archos.mediacenter.video.player.tvmenu.TVMenuItem;
 import com.archos.mediacenter.video.player.tvmenu.TVUtils;
 import com.archos.mediacenter.video.player.tvmenu.TimerDelayTVPicker;
 import com.archos.mediacenter.video.utils.CodecDiscovery;
+import com.archos.mediacenter.video.utils.MiscUtils;
 import com.archos.mediacenter.video.utils.SubtitlesDownloaderActivity2;
 import com.archos.mediacenter.video.utils.VideoMetadata;
 import com.archos.mediacenter.video.utils.VideoMetadata.AudioTrack;
@@ -121,12 +119,8 @@ import org.slf4j.LoggerFactory;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -146,7 +140,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         SubtitleDelayPickerDialog.OnDelayChangeListener, AudioDelayPickerDialog.OnAudioDelayChangeListener,
         AudioSpeedPickerDialog.OnAudioSpeedChangeListener,
         DialogInterface.OnDismissListener, TrackInfoListener,
-        IndexHelper.Listener, PermissionChecker.PermissionListener {
+        IndexHelper.Listener, PermissionChecker.PermissionListener, MiscUtils.CutoutMetricsSetter {
 
     private static final Logger log = LoggerFactory.getLogger(PlayerActivity.class);
 
@@ -250,71 +244,21 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     private boolean mLaunchFloatingPlayer;
     private boolean mIsReadytoStart;
     private PermissionChecker mPermissionChecker;
-
-    public static ArrayList<Integer> safeInset = new ArrayList<Integer>();
-    public static int safeInsetRotation;
-
-    public static boolean hasCutout = false;
-    public static boolean seekBarOverlapWithCutout = true;
+    private static int mScreenWidth, mScreenHeight;
+    private static int mCurrentRotation;
+    // screen cutouts
+    private static int mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom;
+    private static boolean mFullScreenWithCutout = true;
 
     private NetworkState networkState = null;
     private PropertyChangeListener propertyChangeListener = null;
 
-    public void setCutoutMetrics() {
-        // create list of 4 elements {L,T,R,B}
-        if (safeInset.size() != 4) {
-            log.debug("CONFIG setCutoutMetrics safeInset list is of size " + safeInset.size() + ", resetting the list to zero elements");
-            safeInset.clear();
-            for (int i = 0; i < 4; i++)
-                safeInset.add(0);
-        }
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                DisplayCutout cutout = getWindow().getDecorView().getRootWindowInsets().getDisplayCutout();
-                if (cutout == null) {
-                    log.debug("CONFIG device without cutout");
-                } else {
-                    hasCutout = true;
-                    List<Rect> rects = cutout.getBoundingRects();
-                    if (rects.size() == 1) {
-                        log.debug("one cutout");
-                        Rect rect = rects.get(0);
-                        log.debug("CONFIG cutout bounding rect " + rect);
-                    } else {
-                        log.debug("CONFIG cutout: more than one cutout");
-                        for (Rect rect : rects) {
-                            log.debug("CONFIG cutout: cutout bounding rect " + rect);
-                        }
-                    }
-                    safeInset.set(0, cutout.getSafeInsetLeft());
-                    safeInset.set(1, cutout.getSafeInsetTop());
-                    safeInset.set(2, cutout.getSafeInsetRight());
-                    safeInset.set(3, cutout.getSafeInsetBottom());
-                    safeInsetRotation = ((WindowManager) this.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
-                    log.debug("CONFIG setCutoutMetrics safeInset=" + safeInset);
-                }
-            }
-        } catch (Exception e) {
-            log.warn("CONFIG cutout evaluation exception, perhaps view not attached yet!!!");
-        }
-    }
-
-    private void updateInsetsOnRotation() {
-        int rotation = ((WindowManager) this.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
-        if (isRotationLocked()) { // if rotation is locked pick forced orientation rotation
-            log.debug("CONFIG updateSizes RotationLocked overriding rotation from " + rotation + " to " + mLockedRotation);
-            rotation = mLockedRotation;
-        }
-        log.debug("CONFIG updateInsetsOnRotation: " +
-                "safeInsetRotation=" + safeInsetRotation + " (" + getHumanReadableRotation(safeInsetRotation) + ")" +
-                ", orientation=" + rotation + " (" + getHumanReadableRotation(rotation) + ")");
-        if (rotation != safeInsetRotation) {
-            //ROTATION_0 = 0; ROTATION_90 = 1; ROTATION_180 = 2; ROTATION_270 = 3;
-            log.debug("CONFIG updateInsetsOnRotation: before rotation safeInset=" + safeInset + " and safeInsetRotation=" + safeInsetRotation);
-            Collections.rotate(safeInset, safeInsetRotation - rotation);
-            safeInsetRotation = rotation;
-            log.debug("CONFIG updateInsetsOnRotation: after rotation safeInset=" + safeInset + " and safeInsetRotation=" + safeInsetRotation);
-        }
+    @Override
+    public void setCutoutMetrics(int left, int top, int right, int bottom) {
+        mCutoutLeft = left;
+        mCutoutTop = top;
+        mCutoutRight = right;
+        mCutoutBottom = bottom;
     }
 
     private Handler mHandler = new Handler() {
@@ -409,7 +353,6 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     private boolean mForceSWDecoding;
     private boolean mStopped;
     private boolean mHdmiPlugged = false;
-    private boolean mLudoHmdiPlugged = false;
     private int mNotificationMode;
     private MenuItem mInfoMenuItem;
     private MenuItem mBookmarkMenuItem;
@@ -481,15 +424,13 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 int w = 0, h = 0;
                 mHdmiPlugged = plugged;
                 log.debug("intent received hdmi plugged=" + plugged);
-                mLudoHmdiPlugged = false;
                 if (plugged) {
-                    int size[] = readHdmiSize();
+                    // update HDMI screen size
+                    int[] size = readHdmiSize(mContext);
                     if (size != null) {
                         w = size[0];
                         h = size[1];
-                        log.debug("intent received ludo hdmi");
                         mSurfaceController.setHdmiPlugged(plugged, w, h);
-                        mLudoHmdiPlugged = plugged;
                     }
                 }
             }
@@ -506,61 +447,38 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         return (TVUtils.isTV(this) || mHdmiPlugged);
     }
 
-    public static int[] readHdmiSize() {
-        final String filename = "/sys/devices/omapdss/display1/timings";
-
-        FileReader reader = null;
-        try {
-            reader = new FileReader(filename);
-            char[] buf = new char[512];
-            int n = reader.read(buf);
-            if (n > 1) {
-                int w, h, endIdx = 0, startIdx = 0;
-                String string = new String(buf, 0, n-1);
-                // 148500,1920/88/148/44,1080/4/36/5
-
-                startIdx = string.indexOf(',', 0);
-                if (startIdx == -1)
-                    return null;
-                startIdx++;
-                endIdx = string.indexOf('/', startIdx);
-                if (endIdx == -1)
-                    return null;
-                w = Integer.parseInt(string.substring(startIdx, endIdx));
-                startIdx = string.indexOf(',', endIdx);
-                if (startIdx == -1)
-                    return null;
-                startIdx++;
-                endIdx = string.indexOf('/', startIdx);
-                if (endIdx == -1)
-                    return null;
-                h = Integer.parseInt(string.substring(startIdx, endIdx));
-
-                int ret[] = new int[2];
-                ret[0] = w;
-                ret[1] = h;
+    public static int[] readHdmiSize(Context context) {
+        DisplayManager displayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
+        Display[] displays = displayManager.getDisplays();
+        for (Display display : displays) {
+            if ((display.getFlags() & Display.FLAG_PRESENTATION) != 0) {
+                DisplayMetrics metrics = new DisplayMetrics();
+                display.getRealMetrics(metrics);
+                int width = metrics.widthPixels;
+                int height = metrics.heightPixels;
+                log.debug("readHdmiSize: size=({},{})", width,height);
+                int[] ret = new int[2];
+                ret[0] = width;
+                ret[1] = height;
                 return ret;
-            } else {
-                return null;
-            }
-        } catch (IOException ex) {
-            log.warn("readHdmiSize: couldn't read hdmi state from " + filename + ": " + ex);
-            return null;
-        } catch (NumberFormatException ex) {
-            log.warn("readHdmiSize: couldn't read hdmi state from " + filename + ": " + ex);
-            return null;
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ex) {
-                }
             }
         }
+        log.debug("readHdmiSize: no external HDMI display found.");
+        return null;
     }
 
     public void setUIExternalSurface(Surface uiSurface) {
         mSubtitleManager.setUIExternalSurface(uiSurface);
+    }
+
+    private void avoidCutoutIfNeeded() {
+        log.debug("CONFIG avoidCutoutIfNeeded: avoidIt={}, cutout=({},{},{},{}), screen=({},{})",
+                ! mFullScreenWithCutout,
+                mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom,
+                mScreenWidth, mScreenHeight);
+        if (mFullScreenWithCutout) mRootView.setPadding(0, 0, 0, 0);
+        else mRootView.setPadding(mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom);
+        getWindow().getDecorView().setOnApplyWindowInsetsListener(null);
     }
 
     @Override
@@ -588,11 +506,12 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         // cutout mode: display below cutout
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            if(mPreferences.getBoolean("enable_cutout_mode_short_edges", true)) {
+            if (mPreferences.getBoolean("enable_cutout_mode_short_edges", true)) {
+                mFullScreenWithCutout = true;
                 log.debug("onCreate applying LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES");
                 attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-            }
-            else {
+            } else {
+                mFullScreenWithCutout = false;
                 log.debug("onCreate applying LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER");
                 attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
             }
@@ -613,22 +532,27 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         mRootView = findViewById(R.id.root);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            //getWindow().getDecorView().setOnApplyWindowInsetsListener( new View.OnApplyWindowInsetsListener() {
             mRootView.setOnApplyWindowInsetsListener( new View.OnApplyWindowInsetsListener() {
-            @SuppressLint("NewApi")
                 @Override
                 public WindowInsets onApplyWindowInsets(View view, WindowInsets insets) {
-                    log.debug("setOnApplyWindowInsetsListener");
-                    setCutoutMetrics();
+                    //NOTE do not do updateSizes() here otherwise player controller is not displayed
+                    MiscUtils.setCutoutMetrics(insets, mRootView, PlayerActivity.this);
+                    if (mFullScreenWithCutout) mSurfaceController.setCutoutMetrics(0, 0, 0, 0);
+                    else mSurfaceController.setCutoutMetrics(mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom);
+                    log.debug("CONFIG onApplyWindowInsets: cutout=({},{},{},{})", mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom);
+                    // perform the cutout avoidance here
+                    avoidCutoutIfNeeded();
                     getWindow().getDecorView().setOnApplyWindowInsetsListener(null);
                     // needed on Bravia for HDR content to avoid grey bars cf. issue #270
                     // avoid emulator UI glitch
-                    if (!(isEmulator() || isChromeOS(mContext))) getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    if (!(isEmulator() || isChromeOS(mContext)))
+                        getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                     return view.onApplyWindowInsets(insets);
                 }
             });
         }
 
+        // needed otherwise the playerController does not appear
         mRootView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View v, int left, final int top, int right, final int bottom, int oldLeft, final int oldTop, int oldRight, final int oldBottom) {
@@ -645,6 +569,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 }
             }
         });
+
         // We use the ActionBar for the top-right menu only
         // our PlayerController puts the Title in there
         ActionBar actionBar = getSupportActionBar();
@@ -695,12 +620,14 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 @Override
                 public void onDisplayChanged(int displayId) {
                     orientation = ((WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
-                    if(safeInsetRotation != orientation) {
+                    if(mCurrentRotation != orientation) {
+                        mCurrentRotation = orientation;
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                log.debug("CONFIG onDisplayChanged do updateInsetsOnRotation()+updateSizes() and safeInsetRotation=" + safeInsetRotation + ", orientation=" + orientation);
-                                updateInsetsOnRotation();
+                                log.debug("CONFIG onDisplayChanged do updateSizes() rotation={}({})->{}({})",
+                                        getHumanReadableRotation(mCurrentRotation), mCurrentRotation,
+                                        getHumanReadableRotation(orientation), orientation);
                                 // needed to update dimensions when unchecking autorot
                                 updateSizes();
                             }
@@ -1075,25 +1002,23 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
         boolean isPortrait = ((1.0f*layoutHeight/layoutWidth)>1.0);
         boolean isSeenPortrait = ((1.0f*displayHeight/displayWidth)>1.0);
-        log.debug("CONFIG updateSizes: isPortrait " + isPortrait + ", isSeenPortrait " + isSeenPortrait);
 
-        // hack to fix fullscreen height on chromeos pixelbook (and more?) since it reports 2400x1440 insteqd of 2400x1600 but ok in multiWindow
+        // hack to fix fullscreen height on chromeos pixelbook (and more?) since it reports 2400x1440 instead of 2400x1600 but ok in multiWindow
         if(isChromeOS(mContext)&&(layoutWidth == displayWidth)&&(layoutHeight != displayHeight)) {
             log.warn("CONFIG updateSizes: hack correcting on chromeOS layoutHeight from " + layoutHeight + " to " + displayHeight);
             layoutHeight = displayHeight;
         }
 
-        log.debug("CONFIG updateSizes layout WxH=" + layoutWidth + "x" + layoutHeight +
-                ", display WxH=" + displayWidth + "x" + displayHeight);
+        log.debug("CONFIG updateSizes isPortrait={}, isSeenPortrait={}, isInMultiWindowMode()={}, isInPictureInPictureMode()={}, layout=({},{}), display=({},{})",
+                isPortrait, isSeenPortrait, isInMultiWindowMode, isInPictureInPictureMode,
+                layoutWidth, layoutHeight, displayWidth, displayHeight);
 
         // if rotation is locked reverse w/h but only if we have a difference of portrait/landscape perception between layout and screen dimension
         if (isRotationLocked()&&(isPortrait != isSeenPortrait)) {
             displayWidth = realPoint.y;
             displayHeight = realPoint.x;
-            log.debug("CONFIG updateSizes RotationLocked overriding display WxH=" + displayWidth + "x" + displayHeight);
+            log.debug("CONFIG updateSizes RotationLocked overriding display ({},{})", displayWidth, displayHeight);
         }
-
-        log.debug("CONFIG updateSizes isInMultiWindowMode(): " + isInMultiWindowMode + ", isInPictureInPictureMode(): " + isInPictureInPictureMode);
 
         if (!isInPictureInPictureMode&&!isInMultiWindowMode) {
             width = displayWidth;
@@ -1103,6 +1028,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             height = layoutHeight;
         }
 
+        // Note: mRootView contains player.xml layout and must cover full screen including cutout
         log.debug("CONFIG updateSizes: trueFullscreen size WxH=" + width+"x"+height);
         if(!isChromeOS(mContext)) { //keeping things as it was on other devices
             ViewGroup.LayoutParams lp = mRootView.getLayoutParams();
@@ -1110,10 +1036,12 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             lp.height = height;
             mRootView.setLayoutParams(lp);
         }
+        mScreenHeight = height;
+        mScreenWidth = width;
         mSurfaceController.setScreenSize(width, height);
         mSubtitleManager.setScreenSize(width, height);
         if(!isInPictureInPictureMode) {
-            log.debug("CONFIG updateSizes: mPlayerController.setSizes layout WxH=" + layoutWidth + "x" + layoutHeight + ", display WxH=" + displayWidth + "x" + displayHeight);
+            log.debug("CONFIG updateSizes: not PIP mPlayerController.setSizes layout=({},{}), display=({},{})", layoutWidth, layoutHeight, displayWidth, displayHeight);
             mPlayerController.setSizes(displayWidth, displayHeight, layoutWidth, layoutHeight);
             // Close the menus if needed
             mAudioInfoController.resetPopup();
@@ -1126,6 +1054,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             // note that in multiwindow mode chromeos returns correct height but not in full screen thus it works here
             vpos = (int) ((layoutHeight / (float)(displayHeight<displayWidth?displayHeight:displayWidth)) * vpos);
         }
+        log.debug("CONFIG updateSizes: mSubtitleManager.setSize({}), vpos={}", size, vpos);
         mSubtitleManager.setSize(size);
         setSubtitleVpos(vpos, "updateSizes");
     }
@@ -1145,63 +1074,29 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     }
 
     public static String getHumanReadableRotation(int rotation) {
-        String sRotation = "";
-        switch(rotation) {
-            case Surface.ROTATION_0:
-                sRotation ="0°";
-                break;
-            case Surface.ROTATION_90:
-                sRotation ="90°";
-                break;
-            case Surface.ROTATION_180:
-                sRotation ="180°";
-                break;
-            case Surface.ROTATION_270:
-                sRotation ="270°";
-                break;
-        }
-        return sRotation;
-    }
-
-    private static String getHumanReadableOrientation(int orientation) {
-        String sOrientation = "";
-        switch(orientation) {
-            case Configuration.ORIENTATION_LANDSCAPE:
-                sOrientation ="landscape";
-                break;
-            case Configuration.ORIENTATION_PORTRAIT:
-                sOrientation ="portrait";
-                break;
-            case Configuration.ORIENTATION_UNDEFINED:
-                sOrientation ="undefined";
-                break;
-        }
-        return sOrientation;
+        return switch (rotation) {
+            case Surface.ROTATION_0 -> "0°";
+            case Surface.ROTATION_90 -> "90°";
+            case Surface.ROTATION_180 -> "180°";
+            case Surface.ROTATION_270 -> "270°";
+            default -> "";
+        };
     }
 
     private static String getHumanReadableActivityOrientation(int orientation) {
-        String sOrientation = "";
-        switch(orientation) {
-            case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
-                sOrientation ="landscape";
-                break;
-            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
-                sOrientation ="reverse landscape";
-                break;
-            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
-                sOrientation ="portrait";
-                break;
-            case ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED:
-                sOrientation ="unspecified";
-                break;
-        }
-        return sOrientation;
+        return switch (orientation) {
+            case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE -> "landscape";
+            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE -> "reverse landscape";
+            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT -> "portrait";
+            case ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED -> "unspecified";
+            default -> "";
+        };
     }
 
     private void setLockRotation(boolean avpLock) {
         Display display = getWindowManager().getDefaultDisplay();
         int rotation = display.getRotation();
-        log.debug("CONFIG setLockRotation, rotation status: " + rotation + ", i.e. " + getHumanReadableRotation(rotation));
+        log.debug("CONFIG setLockRotation, rotation status: {}, i.e. {}", rotation, getHumanReadableRotation(rotation));
 
         boolean systemLock;
         try {
@@ -1213,7 +1108,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         log.debug("avpLock: " + avpLock + " systemLock: " + systemLock);
         if (mIsRotationLocked) {
             int tmpOrientation = getResources().getConfiguration().orientation;
-            log.debug("CONFIG setLockRotation: current orientation is " + getHumanReadableOrientation(tmpOrientation));
+            log.debug("CONFIG setLockRotation: current orientation is " + getHumanReadableActivityOrientation(tmpOrientation));
             int wantedOrientation;
 
             if (tmpOrientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -2790,10 +2685,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         if (!isPluggedOnTv() || MainActivity.mStereoForced) {
             viewType = VideoEffect.EFFECT_STEREO_SPLIT;
         } else {
-            if (mLudoHmdiPlugged)
-                viewType = VideoEffect.EFFECT_STEREO_MERGE_ARCHOS;
-            else
-                viewType = VideoEffect.EFFECT_STEREO_MERGE;
+            viewType = VideoEffect.EFFECT_STEREO_MERGE;
         }
 
         if (viewMode == VideoEffect.NORMAL_2D_MODE)
@@ -3884,6 +3776,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
     private SurfaceController.Listener mSurfaceListener = new SurfaceController.Listener() {
         public void onSwitchVideoFormat(int fmt, int autoFmt) {
+            log.debug("CONFIG onSwitchVideoFormat: fmt=" + fmt + ", autoFmt=" + autoFmt);
             SharedPreferences.Editor editor = mPreferences.edit();
             editor.putString(KEY_PLAYER_FORMAT, String.valueOf(fmt));
             editor.putString(KEY_PLAYER_AUTO_FORMAT, String.valueOf(autoFmt));
@@ -3898,5 +3791,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             invalidateOptionsMenu();
         }
     }
+
+    public static int getScreenWidth() { return mScreenWidth; }
+    public static int getScreenHeight() { return mScreenHeight; }
 
 }
