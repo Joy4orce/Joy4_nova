@@ -334,8 +334,8 @@ public class MiscUtils {
     // Below is the calculus to derive left and right margin to apply to this subtitle window
     // Wv=w-cl-cr, Ws=w-max(cl,r)-max(cr,r)
     // subtitle new width for centering W=min(Wv,Ws)=w-max[cl+cr,max(cl,r)+max(cr,r)]
-    // both centers coincides c=cl+Wv/2=w/2+(cl-cr)/2
-    // subtitleLeftMargin slm=c-W/2=w/2+(cl-cr)/2-w/2-max[cl+cr,max(cl,r)+max(cr,r)]/2=(cl-cr)/2-max[cl+cr,max(cl,r)+max(cr,r)]/2
+    // both centers coincides c=cl+Wv/2=w/2+(cl-cr)/2 (computed only with Wv)
+    // subtitleLeftMargin slm=c-W/2=w/2+(cl-cr)/2-w/2+max[cl+cr,max(cl,r)+max(cr,r)]/2=(cl-cr)/2+max[cl+cr,max(cl,r)+max(cr,r)]/2
     // subtitleRightMargin srm=w-c-W/2=w-w/2-(cl-cr)/2-w/2+max[cl+cr,max(cl,r)+max(cr,r)]/2=(cr-cl)/2+max[cl+cr,max(cl,r)+max(cr,r)]/2
 
     public static void adjustViewLayoutForInsets(Context context, View rootView, View viewLayout, String viewName, boolean navigationBarShowing, boolean systemBarShowing, boolean actionBarShowing,
@@ -388,8 +388,8 @@ public class MiscUtils {
         }
         if (avoidRoundEdges) { // at this point left/top/right/bottom is already set to cutout insets if applied
             // this centers the subtitle view inside the video view avoiding text clipping due to round edges
-            left = Math.round((left - right) / 2.0f - Math.max(left + right, Math.max(left, radius) + Math.max(right, radius)) / 2.0f);
-            top = Math.round((top - bottom) / 2.0f - Math.max(top + bottom, Math.max(top, radius) + Math.max(bottom, radius)) / 2.0f);
+            left = Math.round((left - right) / 2.0f + Math.max(left + right, Math.max(left, radius) + Math.max(right, radius)) / 2.0f);
+            top = Math.round((top - bottom) / 2.0f + Math.max(top + bottom, Math.max(top, radius) + Math.max(bottom, radius)) / 2.0f);
             right = Math.round((right - left) / 2.0f + Math.max(left + right, Math.max(left, radius) + Math.max(right, radius)) / 2.0f);
             bottom = Math.round((bottom - top) / 2.0f + Math.max(top + bottom, Math.max(top, radius) + Math.max(bottom, radius)) / 2.0f);
         }
