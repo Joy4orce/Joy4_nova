@@ -338,6 +338,11 @@ public class MiscUtils {
     // subtitleLeftMargin slm=c-W/2=w/2+(cl-cr)/2-w/2+max[cl+cr,max(cl,r)+max(cr,r)]/2=(cl-cr)/2+max[cl+cr,max(cl,r)+max(cr,r)]/2
     // subtitleRightMargin srm=w-c-W/2=w-w/2-(cl-cr)/2-w/2+max[cl+cr,max(cl,r)+max(cr,r)]/2=(cr-cl)/2+max[cl+cr,max(cl,r)+max(cr,r)]/2
 
+    public static int calcMarginAvoidEdge(int left, int right, int radius) {
+        // this is for left margin but holds with permutations
+        return Math.round((left - right) / 2.0f + Math.max(left + right, Math.max(left, radius) + Math.max(right, radius)) / 2.0f);
+    }
+
     public static void adjustViewLayoutForInsets(Context context, View rootView, View viewLayout, String viewName, boolean navigationBarShowing, boolean systemBarShowing, boolean actionBarShowing,
                                                  boolean controlBarShowing, boolean isNavBarOnBottom, boolean isGestureAreaShowing, int additionalBottomMargin, int alreadyAppliedBottomMargin,
                                                  boolean adjustLeft, boolean adjustTop, boolean adjustRight, boolean adjustBottom,
@@ -388,10 +393,10 @@ public class MiscUtils {
         }
         if (avoidRoundEdges) { // at this point left/top/right/bottom is already set to cutout insets if applied
             // this centers the subtitle view inside the video view avoiding text clipping due to round edges
-            left = Math.round((left - right) / 2.0f + Math.max(left + right, Math.max(left, radius) + Math.max(right, radius)) / 2.0f);
-            top = Math.round((top - bottom) / 2.0f + Math.max(top + bottom, Math.max(top, radius) + Math.max(bottom, radius)) / 2.0f);
-            right = Math.round((right - left) / 2.0f + Math.max(left + right, Math.max(left, radius) + Math.max(right, radius)) / 2.0f);
-            bottom = Math.round((bottom - top) / 2.0f + Math.max(top + bottom, Math.max(top, radius) + Math.max(bottom, radius)) / 2.0f);
+            left = calcMarginAvoidEdge(left, right, radius);
+            top = calcMarginAvoidEdge(top, bottom, radius);
+            right = calcMarginAvoidEdge(right, left, radius);
+            bottom = calcMarginAvoidEdge(bottom, top, radius);
         }
         if (adjustLeft && systemBarShowing) left += systemBarLeft;
         if (adjustTop && systemBarShowing) top += systemBarTop;
