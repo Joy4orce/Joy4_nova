@@ -343,11 +343,14 @@ public class MiscUtils {
         return Math.round((left - right) / 2.0f + Math.max(left + right, Math.max(left, radius) + Math.max(right, radius)) / 2.0f);
     }
 
+
     public static void adjustViewLayoutForInsets(Context context, View rootView, View viewLayout, String viewName, boolean navigationBarShowing, boolean systemBarShowing, boolean actionBarShowing,
                                                  boolean controlBarShowing, boolean isNavBarOnBottom, boolean isGestureAreaShowing, int additionalBottomMargin, int alreadyAppliedBottomMargin,
                                                  boolean adjustLeft, boolean adjustTop, boolean adjustRight, boolean adjustBottom,
                                                  boolean avoidCutoutLeft, boolean avoidCutoutTop, boolean avoidCutoutRight, boolean avoidCutoutBottom,
                                                  boolean avoidRoundEdges) {
+        // additionalBottomMargin is the margin to apply to the bottom of the view (captures for subtitleView the height of playerController control bar being an external component if displayed)
+        // alreadyAppliedBottomMargin is the margin already applied to the bottom of the view (captures the vertical position of subtitleView set in subtitles settings)
         log.debug("adjustViewLayoutForInsets: {} navigationBarShowing={}, systemBarShowing={}, actionBarShowing={}, controlBarShowing={}, isNavBarOnBottom={}, isGestureAreaShowing={}, additionalBottomMargin={}, alreadyAppliedBottomMargin={}",
                 viewName, navigationBarShowing, systemBarShowing, actionBarShowing, controlBarShowing, isNavBarOnBottom, isGestureAreaShowing, additionalBottomMargin, alreadyAppliedBottomMargin);
         log.debug("adjustViewLayoutForInsets: {} getNavigationBarHeight()={}, getGestureAreaHeight()={}, getStatusBarHeight()={}, getActionBarHeight()={}, getSystemBarHeight()={}",
@@ -391,17 +394,21 @@ public class MiscUtils {
             systemBarRight = insets.getSystemWindowInsetRight();
             systemBarBottom = insets.getSystemWindowInsetBottom();
         }
+        // avoidRoundEdges is false for gfx subtitleView
         if (avoidRoundEdges) { // at this point left/top/right/bottom is already set to cutout insets if applied
             // this centers the subtitle view inside the video view avoiding text clipping due to round edges
+            // avoiding round edges is only needed for left/right margins, benefit to limit to left/right is to not shift too high subs in landscape mode
             left = calcMarginAvoidEdge(left, right, radius);
-            top = calcMarginAvoidEdge(top, bottom, radius);
+            top = calcMarginAvoidEdge(top, bottom, 0);
             right = calcMarginAvoidEdge(right, left, radius);
-            bottom = calcMarginAvoidEdge(bottom, top, radius);
+            bottom = calcMarginAvoidEdge(bottom, top, 0);
         }
-        if (adjustLeft && systemBarShowing) left += systemBarLeft;
-        if (adjustTop && systemBarShowing) top += systemBarTop;
-        if (adjustRight && systemBarShowing) right += systemBarRight;
-        if (adjustBottom && navAreaPresentOnBottom) bottom += systemBarBottom; // bottom margin is 0 if no navigation bar
+        int uncompressibleBottom = bottom; // keep it for later since it represents the bottom margin that cannot be compressed i.e. not influenced by OSD playerController or system bars
+        // only shift if not already overlapping
+        if (adjustLeft && systemBarShowing && left < systemBarLeft) left += systemBarLeft - left;
+        if (adjustTop && systemBarShowing && top < systemBarTop) top += systemBarTop - top;
+        if (adjustRight && systemBarShowing && right < systemBarRight) right += systemBarRight - right;
+        if (adjustBottom && navAreaPresentOnBottom && bottom < systemBarBottom) bottom += systemBarBottom - bottom; // bottom margin is 0 if no navigation bar
         ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) viewLayout.getLayoutParams();
         int prevLeft, prevTop, prevRight, prevBottom;
         prevLeft = layoutParams.leftMargin; prevTop = layoutParams.topMargin; prevRight = layoutParams.rightMargin; prevBottom = layoutParams.bottomMargin;
@@ -412,7 +419,7 @@ public class MiscUtils {
         log.debug("adjustViewLayoutForInsets: {} layoutParams ({},{},{},{})->({},{},{},{})",
                 viewName, prevLeft, prevTop, prevRight, prevBottom,
                 left, top, right, shiftBottom);
-        if (prevBottom > 0 && shiftBottom == 0 && navAreaPresentOnBottom) {
+        if (prevBottom > uncompressibleBottom && shiftBottom == uncompressibleBottom && navAreaPresentOnBottom) {
             log.debug("adjustViewLayoutForInsets: Delaying relayout due to give time to navigation bar to fade out");
             // Schedule the delayed relayout
             if (relayoutRunnable != null) {
