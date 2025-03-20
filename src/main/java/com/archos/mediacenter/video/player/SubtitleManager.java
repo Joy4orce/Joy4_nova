@@ -621,7 +621,7 @@ public class SubtitleManager {
                 mNavigationBarShowing, mSystemBarShowing, mActionBarShowing, PlayerController.isControlBarShowing(), mIsNavBarOnBottom, mIsGestureAreaShowing,
                 (PlayerController.isControlBarShowing() ? PlayerController.getControlBarCurrentHeight() : 0), mSubtitleEvadedVPos,
                 false, ! mIsSubtitleGfx, false, ! mIsSubtitleGfx,
-                avoidCutout, avoidCutout, avoidCutout, avoidCutout, true);
+                avoidCutout, avoidCutout, avoidCutout, avoidCutout, ! mIsSubtitleGfx);
     }
 
     private void detachWindow() {
