@@ -19,18 +19,18 @@
     <string name="nfo_export_auto_title">Exportar automáticamente después de la búsqueda</string>
     <string name="nfo_export_manual_title">Exportar vídeos ya indexados</string>
     <string name="nfo_export_auto_summary">Exporta automáticamente archivos .nfo después de una búsqueda online correcta</string>
-    <string name="nfo_export_manual_summary">Exporta archivos .nfo de todos los videos ya analizados</string>
+    <string name="nfo_export_manual_summary">Exportar archivos .nfo de cada video ya indexado</string>
     <string name="nfo_export_button">Exportar .nfo</string>
     <string name="nfo_export_folder">Exportar todo en esta carpeta a .nfo</string>
     <string name="nfo_export_all">Exportar toda la biblioteca a .nfo</string>
     <string name="nfo_export_exporting">Exportando .nfo</string>
     <string name="nfo_export_exporting_all">todo</string>
     <string name="nfo_export_in_progress">Exportación de datos NFO en curso</string>
-    <string name="rescrap_in_progress">Reindexando toda la biblioteca</string>
-    <string name="rescraping_collection">Reindexando colección</string>
-    <string name="rescraping_collections">Reindexando colecciones</string>
-    <string name="rescraping_noimage_collections">Reindexando colecciones sin imagen</string>
-    <string name="rescrap_all_title">Reindexar todo</string>
+    <string name="rescrap_in_progress">Procesando toda la biblioteca</string>
+    <string name="rescraping_collection">Procesando colección</string>
+    <string name="rescraping_collections">Procesando colecciones</string>
+    <string name="rescraping_noimage_collections">Procesando colecciones sin cartel</string>
+    <string name="rescrap_all_title">Procesar todo</string>
     <!-- trakt.tv -->
     <string name="trakt_toast_syncing_error">Imposible sincronizar con trakt</string>
     <!-- Title of screen when no sd card is present -->
@@ -136,7 +136,7 @@
     -->
     <!-- Audio Search displays this label when displaying an artist. Copy from packages/providers/MediaProvider/res -->
     <string name="artist_label">Artista</string>
-    <string name="scraping_in_progress">Indexación en progreso</string>
+    <string name="scraping_in_progress">Procesado en progreso</string>
     <string name="remaining_videos_to_process">Archivos de medios por ser procesados:</string>
     <string name="video_store_import">Importando archivos de medios locales</string>
 </resources>
