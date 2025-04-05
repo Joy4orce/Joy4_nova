@@ -324,13 +324,15 @@ public class MiscUtils {
     // playerControllerView always avoids cutouts and navigation bar or gesture navigation area
     // -> videoViewLeftMargin=cutoutLeft, videoViewRightMargin=cutoutRight, videoViewTopMargin=cutoutTop, videoViewBottomMargin=cutoutBottom
     // -> subViewleftMargin=(cl-cr)/2-max[cl+cr,max(cl,r)+max(cr,r)]/2, subViewRightMargin=(cr-cl)/2+max[cl+cr,max(cl,r)+max(cr,r)]/2, subViewTopMargin=(ct-cb)/2-max[ct+cb,max(ct,r)+max(cb,r)]/2, subViewBottomMargin=(ct-cb)/2+max[ct+cb,max(ct,r)+max(cb,r)]/2
+    // In case of subtitleGfxView, it needs to be scaled along with the videoView (surfaceControllerView) that can be larger than the screen size. Thus an additional negative margin needs to be applied to match with virtual screen size
+    // Player.sPlayer.getSurfaceControllerWidth(), Player.sPlayer.getSurfaceControllerHeight() is for the video surface used
 
     // Calculus to center subtitle view inside video view when cutout margins are applied on video view and subtitle view avoids round edges
     // Screen width w by height h in sizes. video window and subtitle window.
     // Both windows are of screen height h.
-    // The video window due to cutout in the screen need to occupy between abscisses [cl, w-cr] (i.e. cl left margin and cr right margin).
-    // Because of round edges to avoid text clipping, subtitle window needs to occupy between abscisses [max(cr, r), w-max(cl,r)] where r is the round egde radius.
-    // The video window is set but I want to adjust size of the subtitle window to be centered inside the video window but in respecting the [max(cr, r), w-max(cl,r)] abscisses boundary.
+    // The video window due to cutout in the screen need to occupy between abscissa [cl, w-cr] (i.e. cl left margin and cr right margin).
+    // Because of round edges to avoid text clipping, subtitle window needs to occupy between abscissa [max(cr, r), w-max(cl,r)] where r is the round edge radius.
+    // The video window is set but I want to adjust size of the subtitle window to be centered inside the video window but in respecting the [max(cr, r), w-max(cl,r)] abscissa boundary.
     // Below is the calculus to derive left and right margin to apply to this subtitle window
     // Wv=w-cl-cr, Ws=w-max(cl,r)-max(cr,r)
     // subtitle new width for centering W=min(Wv,Ws)=w-max[cl+cr,max(cl,r)+max(cr,r)]
@@ -344,17 +346,23 @@ public class MiscUtils {
     }
 
 
+    // this adjust margins but not view size
     public static void adjustViewLayoutForInsets(Context context, View rootView, View viewLayout, String viewName, boolean navigationBarShowing, boolean systemBarShowing, boolean actionBarShowing,
-                                                 boolean controlBarShowing, boolean isNavBarOnBottom, boolean isGestureAreaShowing, int additionalBottomMargin, int alreadyAppliedBottomMargin,
+                                                 boolean controlBarShowing, boolean isNavBarOnBottom, boolean isGestureAreaShowing,
+                                                 int additionalBottomMargin, int alreadyAppliedBottomMargin,
                                                  boolean adjustLeft, boolean adjustTop, boolean adjustRight, boolean adjustBottom,
                                                  boolean avoidCutoutLeft, boolean avoidCutoutTop, boolean avoidCutoutRight, boolean avoidCutoutBottom,
-                                                 boolean avoidRoundEdges) {
+                                                 boolean avoidRoundEdges, boolean applyGlobalShift) {
         // additionalBottomMargin is the margin to apply to the bottom of the view (captures for subtitleView the height of playerController control bar being an external component if displayed)
         // alreadyAppliedBottomMargin is the margin already applied to the bottom of the view (captures the vertical position of subtitleView set in subtitles settings)
+        // globalShiftLeft and globalShiftUp are to shift the view globally in the screen and needed for subtitleGfxView to match the videoView (surfaceControllerView) that can be larger than the screen size
         log.debug("adjustViewLayoutForInsets: {} navigationBarShowing={}, systemBarShowing={}, actionBarShowing={}, controlBarShowing={}, isNavBarOnBottom={}, isGestureAreaShowing={}, additionalBottomMargin={}, alreadyAppliedBottomMargin={}",
                 viewName, navigationBarShowing, systemBarShowing, actionBarShowing, controlBarShowing, isNavBarOnBottom, isGestureAreaShowing, additionalBottomMargin, alreadyAppliedBottomMargin);
         log.debug("adjustViewLayoutForInsets: {} getNavigationBarHeight()={}, getGestureAreaHeight()={}, getStatusBarHeight()={}, getActionBarHeight()={}, getSystemBarHeight()={}",
                 viewName, MiscUtils.getNavigationBarHeight(context), MiscUtils.getGestureAreaHeight(context), MiscUtils.getStatusBarHeight(context), MiscUtils.getActionBarHeight(context), MiscUtils.getSystemBarHeight(context.getResources()));
+        log.debug("adjustViewLayoutForInsets: {} additionalBottomMargin={}, alreadyAppliedBottomMargin={}", viewName, additionalBottomMargin, alreadyAppliedBottomMargin);
+        log.debug("adjustViewLayoutForInsets: {} adjust=({},{},{},{}), avoidCutout=({},{},{},{}), avoidRoundEdges={}, applyGlobalShift={}",
+                viewName, adjustLeft, adjustTop, adjustRight, adjustBottom, avoidCutoutLeft, avoidCutoutTop, avoidCutoutRight, avoidCutoutBottom, avoidRoundEdges, applyGlobalShift);
         log.debug("adjustViewLayoutForInsets: videoSurface=({},{}), ar={}, screen=({},{})", Player.sPlayer.getVideoWidth(), Player.sPlayer.getVideoHeight(), Player.sPlayer.getVideoAspect(), PlayerActivity.getScreenWidth(), PlayerActivity.getScreenHeight());
         int left, top, right, bottom;
         left = top = right = bottom = 0;
@@ -369,6 +377,17 @@ public class MiscUtils {
         if (avoidCutoutTop) top = mCutoutTop;
         if (avoidCutoutRight) right = mCutoutRight;
         if (avoidCutoutBottom) bottom = mCutoutBottom;
+        int screenVideoAvailableWidth = PlayerActivity.getScreenWidth() - left - right; // screen width minus cutout insets if applied which provides width of area for videoView
+        int screenVideoAvailableHeight = PlayerActivity.getScreenHeight() - top - bottom; // screen height minus cutout insets if applied which provides height of area for videoView
+
+        // when not null this is the shift to apply to recenter the subtitleView when larger then the screen
+        int globalShiftLeft = Math.min(Math.round((screenVideoAvailableWidth - Player.sPlayer.getSurfaceControllerWidth()) / 2.0f), 0);
+        int globalShiftUp = Math.min(Math.round((screenVideoAvailableHeight - Player.sPlayer.getSurfaceControllerHeight()) / 2.0f), 0);
+
+        // when not null this is the margin to apply to center the subtitleView in the allowed video space
+        int centerLeftMargin = Math.max(Math.round((screenVideoAvailableWidth - Player.sPlayer.getSurfaceControllerWidth()) / 2.0f), 0);
+        int centerTopMargin = Math.max(Math.round((screenVideoAvailableHeight - Player.sPlayer.getSurfaceControllerHeight()) / 2.0f), 0);
+
         int radius = 0; // round edges radius needed to shift subs when using l/r/t/b positions to be determined below
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             Insets systemBarsInsets = insets.getInsets(WindowInsets.Type.systemBars());
@@ -380,11 +399,10 @@ public class MiscUtils {
                     navigationBarInsets.left, navigationBarInsets.top, navigationBarInsets.right, navigationBarInsets.bottom,
                     statusBarInsets.left, statusBarInsets.top, statusBarInsets.right, statusBarInsets.bottom,
                     mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom, radius);
-
-            systemBarLeft= systemBarsInsets.left;
-            systemBarTop= systemBarsInsets.top;
-            systemBarRight= systemBarsInsets.right;
-            systemBarBottom= systemBarsInsets.bottom;
+            systemBarLeft = systemBarsInsets.left;
+            systemBarTop = systemBarsInsets.top;
+            systemBarRight = systemBarsInsets.right;
+            systemBarBottom = systemBarsInsets.bottom;
         } else {
             log.debug("adjustViewLayoutForInsets: {} LTRB insets=({},{},{},{}), cutout=({},{},{},{})", viewName, insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(), insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom(),
                     mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom);
@@ -412,14 +430,19 @@ public class MiscUtils {
         ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) viewLayout.getLayoutParams();
         int prevLeft, prevTop, prevRight, prevBottom;
         prevLeft = layoutParams.leftMargin; prevTop = layoutParams.topMargin; prevRight = layoutParams.rightMargin; prevBottom = layoutParams.bottomMargin;
+        if (applyGlobalShift) { // debias the previous margins
+            prevLeft -= globalShiftLeft + centerLeftMargin;
+            prevTop -= globalShiftUp + centerTopMargin;
+        }
         log.debug("adjustViewLayoutForInsets, {} orientation is {}({}), isRotationLocked={}", viewName, PlayerActivity.getHumanReadableRotation(rotation), rotation, PlayerActivity.isRotationLocked());
         // extra logic for subtitles handling that need to be shifted up above controlBar of playerController if the subtitleVposPixel is not shifting them already above
         // Whether Subtitle minimum Vertical Position should be above the StatusBar or not. Only changes the Vertical Position if it is too low.
         int shiftBottom = Math.max(bottom + additionalBottomMargin - alreadyAppliedBottomMargin, 0);
-        log.debug("adjustViewLayoutForInsets: {} layoutParams ({},{},{},{})->({},{},{},{})",
+        log.debug("adjustViewLayoutForInsets: {} layoutParams ({},{},{},{})->({},{},{},{}), applyGlobalShift={}, globalShift=({},{}), centerShift=({},{})",
                 viewName, prevLeft, prevTop, prevRight, prevBottom,
-                left, top, right, shiftBottom);
-        if (prevBottom > uncompressibleBottom && shiftBottom == uncompressibleBottom && navAreaPresentOnBottom) {
+                left, top, right, shiftBottom, applyGlobalShift, globalShiftLeft, globalShiftUp, centerLeftMargin, centerTopMargin);
+        // do not delay when having a gfx subtitle or floating player hence ! applyGlobalShift
+        if (! applyGlobalShift && prevBottom > uncompressibleBottom && shiftBottom == uncompressibleBottom && navAreaPresentOnBottom) {
             log.debug("adjustViewLayoutForInsets: Delaying relayout due to give time to navigation bar to fade out");
             // Schedule the delayed relayout
             if (relayoutRunnable != null) {
@@ -430,9 +453,15 @@ public class MiscUtils {
             finalLeft = left; finalTop = top; finalRight = right; finalShiftBottom = shiftBottom;
             relayoutRunnable = () -> {
                 layoutParams.leftMargin = finalLeft;
+                if (applyGlobalShift) layoutParams.leftMargin += globalShiftLeft + centerLeftMargin;
                 layoutParams.topMargin = finalTop;
+                if (applyGlobalShift) layoutParams.topMargin += globalShiftUp + centerTopMargin;
                 layoutParams.rightMargin = finalRight;
                 layoutParams.bottomMargin = finalShiftBottom;
+                if (applyGlobalShift) {
+                    layoutParams.height = Player.sPlayer.getSurfaceControllerHeight();
+                    layoutParams.width = Player.sPlayer.getSurfaceControllerWidth();
+                }
                 viewLayout.setLayoutParams(layoutParams);
                 viewLayout.forceLayout();
                 viewLayout.requestLayout();
@@ -441,7 +470,7 @@ public class MiscUtils {
             int delay = 0;
             if (isGestureAreaShowing) {
                 delay = DELAY_MILLIS_GESTURE_NAVIGATION;
-            } else if (isNavBarOnBottom && navigationBarShowing) { // TODO MARC true because already in test above
+            } else if (isNavBarOnBottom && navigationBarShowing) {
                 delay = DELAY_MILLIS_NORMAL;
             }
             // wait a little: avoid a glitch (subtitles being displayed under the system bar for x ms), note that gesture bar fades away slowly
@@ -449,14 +478,21 @@ public class MiscUtils {
         } else {
             // Apply the relayout immediately
             layoutParams.leftMargin = left;
+            if (applyGlobalShift) layoutParams.leftMargin += globalShiftLeft + centerLeftMargin;
             layoutParams.topMargin = top;
+            if (applyGlobalShift) layoutParams.topMargin += globalShiftUp + centerTopMargin;
             layoutParams.rightMargin = right;
             layoutParams.bottomMargin = shiftBottom;
+            if (applyGlobalShift) {
+                layoutParams.height = Player.sPlayer.getSurfaceControllerHeight();
+                layoutParams.width = Player.sPlayer.getSurfaceControllerWidth();
+            }
             viewLayout.setLayoutParams(layoutParams);
             viewLayout.forceLayout();
             viewLayout.requestLayout();
             log.debug("adjustViewLayoutForInsets: Immediate relayout applied");
         }
+        log.debug("adjustViewLayoutForInsets: {} finalLayoutMargins=({},{},{},{}), wh=({},{})", viewName, layoutParams.leftMargin, layoutParams.topMargin, layoutParams.rightMargin, layoutParams.bottomMargin, layoutParams.width, layoutParams.height);
     }
 
     public interface CutoutMetricsSetter {

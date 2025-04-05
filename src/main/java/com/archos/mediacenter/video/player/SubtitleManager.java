@@ -56,7 +56,6 @@ public class SubtitleManager {
     private ViewGroup           mPlayerView;
     private View                mRootView;
     private WindowManager       mWindow;
-    private WindowManager.LayoutParams mLayoutParams = null;
     private Resources           mRes;
     private View                mSubtitleLayout = null;
     SubtitleGfxView             mSubtitleGfxView = null;
@@ -73,6 +72,8 @@ public class SubtitleManager {
     SpannableStringBuilder      mSpannableStringBuilder = null;
     TextShadowSpan              mTextShadowSpan = null;
     private boolean mIsSubtitleGfx = false;
+    private boolean isFirstTime = true;
+    private Subtitle currentSubtitle = null;
 
     private boolean mNavigationBarShowing, mSystemBarShowing, mActionBarShowing, mIsNavBarOnBottom, mIsGestureAreaShowing;
     private int mGestureAreaHeight, mControlBarHeight;
@@ -182,10 +183,15 @@ public class SubtitleManager {
         log.debug("displayView sub duration={}", subtitle.getDuration());
 
         if (subtitle.isText()) {
-            if (mIsSubtitleGfx) {
+            if (mIsSubtitleGfx || isFirstTime) { // transition or first time we need to adjustView
+                setScreenSize(mScreenWidth, mScreenHeight);
                 mIsSubtitleGfx = false;
-                adjustView(); // we need to adjust the view because it was initialized with mIsSubtitleGfx=false
-            } else mIsSubtitleGfx = false;
+                isFirstTime = false;
+                log.debug("displayView: Text, mIsSubtitleGfx=false adjustView");
+                // reset the layout params to get full screen text subs since before it was gfx subs with different layout
+                setScreenSize(mScreenWidth, mScreenHeight);
+                adjustView(); // we need to adjust the view to reflect the change
+            }
 
             subtitle.setAlignment(getAlignment(subtitle.getText()));
 
@@ -215,13 +221,12 @@ public class SubtitleManager {
             // need to Invalidate View to force an update!
             mSubtitleTxtView.postInvalidate();
         } else if (subtitle.isBitmap()) {
-            if (! mIsSubtitleGfx) {
+            if (! mIsSubtitleGfx || isFirstTime) { // transition or first time we need to adjustView
+                isFirstTime = false;
                 mIsSubtitleGfx = true;
+                log.debug("displayView: Bitmap, mIsSubtitleGfx=true adjustView");
                 adjustView(); // we need to adjust the view because it was initialized with mIsSubtitleGfx=true
-            } else {
-                mIsSubtitleGfx = true;
             }
-
             log.debug("displayView: Bitmap bounds={}, mIsSubtitleGfx=true", subtitle.getBounds());
             Rect bounds = subtitle.getBounds();
             mSubtitleGfxView.setSubtitle(subtitle.getBitmap(), bounds, subtitle.getFrameWidth(), subtitle.getFrameHeight());
@@ -402,6 +407,7 @@ public class SubtitleManager {
                     // we have a subtitle that is not displayed yet
                     if (mCurrentSubtitle == null) { // new subtitle only considered if current one is not null
                         mCurrentSubtitle = mNextSubtitle; // the next subtitle has a duration > 0 other wise it would have been filtered out before
+                        currentSubtitle = mCurrentSubtitle;
                         mNextSubtitle = null;
                         displaySubtitle(mCurrentSubtitle);
                         mSubtitleDisplayLeft = mCurrentSubtitle.getDuration();
@@ -461,6 +467,7 @@ public class SubtitleManager {
                         if (mCurrentSubtitle != null) {
                             removeSubtitle(mCurrentSubtitle);
                             mCurrentSubtitle = null;
+                            currentSubtitle = null;
                             mSubtitleDisplayLeft = 0;
                         }
                     }
@@ -532,24 +539,29 @@ public class SubtitleManager {
     }
 
     public void setScreenSize(int displayWidth, int displayHeight) {
-        log.debug("setScreenSize: {}x{}", displayWidth, displayHeight);
+        log.debug("setScreenSize: {}x{} mIsSubtitleGfx={}, mSubtitleLayout={}", displayWidth, displayHeight, mIsSubtitleGfx, (mSubtitleLayout == null ? "null" : "not null"));
         mScreenWidth = displayWidth;
         mScreenHeight = displayHeight;
         if (mSubtitleLayout != null) {
-            if (mLayoutParams != null) {
-                mLayoutParams.width = mScreenWidth;
-                mLayoutParams.height = mScreenHeight;
-                mWindow.updateViewLayout(mSubtitleLayout, mLayoutParams);
-            } else {
-                ViewGroup.LayoutParams lp = mSubtitleLayout.getLayoutParams();
-                lp.width = mScreenWidth;
-                lp.height = mScreenHeight;
-                mPlayerView.updateViewLayout(mSubtitleLayout, lp);
-            }
+            // reset layout params to get full screen text subs since before it could have been gfx subs with different layout
+            ViewGroup.LayoutParams lp = mSubtitleLayout.getLayoutParams();
+            lp.width = mScreenWidth;
+            lp.height = mScreenHeight;
+            mPlayerView.updateViewLayout(mSubtitleLayout, lp);
         }
-        if(mSubtitleTxtView!=null)
-            mSubtitleTxtView.setScreenSize(displayWidth, displayHeight);
+        if (currentSubtitle != null) displaySubtitle(currentSubtitle); // redisplay when changing screen size or video surface format
+        if(mSubtitleTxtView!=null) mSubtitleTxtView.setScreenSize(displayWidth, displayHeight);
         setSize(mSubtitleSize);
+        updateSubtitleLayout();
+    }
+
+    public void updateSubtitleLayout() {
+        log.debug("updateSubtitleLayout");
+        // surface change redisplay sub to adjust surface size
+        if (! isFirstTime) adjustView();
+        if (currentSubtitle != null) {
+            displaySubtitle(currentSubtitle);
+        }
     }
     
     public void setUIExternalSurface(Surface uiSurface) {
@@ -590,7 +602,7 @@ public class SubtitleManager {
             // insets observer is needed for rotation
             mSubtitleLayout.setOnApplyWindowInsetsListener((v, insets) -> {
                 log.debug("attachWindow, onApplyWindowInsetsListener, mIsSubtitleGfx={}", mIsSubtitleGfx);
-                adjustView();
+                if (! isFirstTime) adjustView();
                 return insets;
             });
 
@@ -605,7 +617,7 @@ public class SubtitleManager {
                 log.debug("attachWindow, setOnSystemUiVisibilityChangeListener: mNavigationBarShowing={}, mSystemBarShowing={}, mActionBarShowing={}, mControlBarShowing={}, mIsNavBarOnBottom={}, mIsGestureAreaShowing={}",
                         mNavigationBarShowing, mSystemBarShowing, mActionBarShowing, PlayerController.isControlBarShowing(), mIsNavBarOnBottom, mIsGestureAreaShowing);
                 // extra parameters injected for subtitles handling that need to be shifted up above controlBar of playerController if the mSubtitleEvadedVPos is not shifting them already above
-                adjustView();
+                if (! isFirstTime) adjustView();
             });
 
         }
@@ -617,11 +629,14 @@ public class SubtitleManager {
         // strategy is videoView avoids cutout if not in fullscreen
         // adjust subtitle text height (bottom/top) to avoid system bars and playerController bar only if text subtitle but not left/right
         boolean avoidCutout = ! mFullScreenWithCutout;
+        // Player.sPlayer.getSurfaceControllerWidth(), Player.sPlayer.getSurfaceControllerHeight() is for the videoView but virtualScreen is larger
+        // do not apply globalShift if in floating player mode
+        log.debug("adjustView: mIsSubtitleGfx={}", mIsSubtitleGfx);
         MiscUtils.adjustViewLayoutForInsets(mContext, mRootView, mSubtitleLayout, "mSubtitleLayout",
                 mNavigationBarShowing, mSystemBarShowing, mActionBarShowing, PlayerController.isControlBarShowing(), mIsNavBarOnBottom, mIsGestureAreaShowing,
-                (PlayerController.isControlBarShowing() ? PlayerController.getControlBarCurrentHeight() : 0), mSubtitleEvadedVPos,
+                (! mIsSubtitleGfx && PlayerController.isControlBarShowing() ? PlayerController.getControlBarCurrentHeight() : 0), (mIsSubtitleGfx ? 0 :mSubtitleEvadedVPos),
                 false, ! mIsSubtitleGfx, false, ! mIsSubtitleGfx,
-                avoidCutout, avoidCutout, avoidCutout, avoidCutout, ! mIsSubtitleGfx);
+                avoidCutout, avoidCutout, avoidCutout, avoidCutout, ! mIsSubtitleGfx, mIsSubtitleGfx && ! Player.sPlayer.isFloatingPlayer());
     }
 
     private void detachWindow() {
@@ -796,10 +811,5 @@ public class SubtitleManager {
             mDispSubtitleThread.clear();
             mDispSubtitleThread.interrupt();
         }
-    }
-
-    public boolean isSubtitleGfx() {
-        // this method is unreliable since it needs to have a sub displayed to know if it is gfx or not
-        return mIsSubtitleGfx;
     }
 }

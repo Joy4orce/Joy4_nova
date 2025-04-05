@@ -1451,4 +1451,8 @@ public class Player implements IPlayerControl,
         return getHdrScreenCapabilities(context, hdrBitMask);
     }
 
+    public int getSurfaceControllerHeight() { return mSurfaceController.getViewHeight(); }
+    public int getSurfaceControllerWidth() { return mSurfaceController.getViewWidth(); }
+    public boolean isFloatingPlayer() { return mContext instanceof FloatingPlayerService; }
+
 }

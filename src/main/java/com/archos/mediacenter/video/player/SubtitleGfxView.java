@@ -60,6 +60,8 @@ public class SubtitleGfxView extends View {
     float mScaleFactor = 1.0f;
     int mVerticalMargin = 0;
     int mHorizontalMargin = 0;
+    private int mDesiredWidth = 0;
+    private int mDesiredHeight = 0;
 
     private Surface mExternalSurface = null;
     // Subtitle size is multiplied with a ratio, Range to be set here
@@ -141,7 +143,10 @@ public class SubtitleGfxView extends View {
     }
 
     public void setSubtitle(Bitmap bitmap, Rect subtitleOriginalBounds, int frameWidth, int frameHeight) {
-
+        // mFrameWidth and mFrameHeight are the original size of the subtitle frame
+        // original width of gfx sub frame (1920 for pgs, 720 for vobsub)
+        // original height of gfx sub frame (1080 for pgs, 576 for vobsub)
+        // it needs to be rescaled to video PlayerController.getSurfaceWidth(); PlayerController.getSurfaceHeight();
         mBitmap = bitmap;
         mSubtitleOriginalBounds = subtitleOriginalBounds;
         mSubtitleOriginalRect = new Rect(0, 0, mBitmap.getWidth(), mBitmap.getHeight());
@@ -149,60 +154,72 @@ public class SubtitleGfxView extends View {
         mOriginalHeight = subtitleOriginalBounds.bottom - subtitleOriginalBounds.top; // subtitle height using frameHeight resolution
         mFrameWidth = frameWidth;
         mFrameHeight = frameHeight;
-
-        log.debug("setSubtitle: bitmap={}, subtitleOriginalBounds={}, frameWidth={}, frameHeight={}", bitmap == null ? "null" : "not null", subtitleOriginalBounds, frameWidth, frameHeight);
+        // desired width/height is the surface
+        if (Player.sPlayer.isFloatingPlayer()) { // in floating player mode surfaceController is no more
+            mDesiredWidth = mDisplayWidth;
+            mDesiredHeight = mDisplayHeight;
+        } else {
+            mDesiredWidth = Player.sPlayer.getSurfaceControllerWidth();
+            mDesiredHeight = Player.sPlayer.getSurfaceControllerHeight();
+        }
+        log.debug("setSubtitle: bitmap={}, subtitleOriginalBounds={}, frame=({},{}), mSubtitleOriginalRect={}", bitmap == null ? "null" : "not null", subtitleOriginalBounds, frameWidth, frameHeight, mSubtitleOriginalRect);
         if (mBitmap == null) {
             log.debug("setSubtitle: no bitmap, ignore");
             setVisibility(View.INVISIBLE);
             return;
         }
 
-        //Rect mFrameBounds = new Rect(0, 0, frameWidth, frameHeight);
-        //Rect mScreenBounds = new Rect(0, 0, mDisplayWidth, mDisplayHeight);
-        //Rect mScaledFrameBounds;
-
         float frameRatio = mFrameWidth / (float) mFrameHeight;
         float screenRatio = mDisplayWidth / (float) mDisplayHeight;
+        float videoSurfaceRatio = mDesiredWidth / (float) mDesiredHeight;
 
-        if (frameRatio > screenRatio) {
+        // if surfaceScaleWidth != surfaceScaleHeight then we scale the bitmap (correspond to stretch mode)
+        float surfaceScaleWidth = mDesiredWidth / (float) Player.sPlayer.getVideoWidth();
+        float surfaceScaleHeight = mDesiredHeight / (float) Player.sPlayer.getVideoHeight();
+
+        // set the SubtitleGfxView layout to be of height mSurfaceControllerHeight and width mSurfaceControllerWidth
+        log.debug("setSubtitle: frameRatio={}, screenRatio={}, display=({},{}), surface=({},{}), videoSurfaceRatio={}, surfaceScaleRatio={}",
+                frameRatio, screenRatio, mDisplayWidth, mDisplayHeight, mDesiredWidth, mDesiredHeight, videoSurfaceRatio, surfaceScaleWidth / surfaceScaleHeight);
+        if (frameRatio > videoSurfaceRatio) {
             // frame to be scaled to fill full width and centered in height with equal margin on top and bottom
-            mScaleFactor = mDisplayWidth / (float) mFrameWidth;
-            int scaledHeight = (int) (frameHeight * mScaleFactor); // Calculate the scaled height based on width
-            mVerticalMargin = (mDisplayHeight - scaledHeight) / 2;
-            //mScaledFrameBounds = new Rect(0, mVerticalMargin, mDisplayWidth, mVerticalMargin + scaledHeight);
+            mScaleFactor = mDesiredWidth / (float) mFrameWidth;
+            //int scaledHeight = (int) (frameHeight * mScaleFactor); // Calculate the scaled height based on width
+            int scaledHeight = (int) (frameHeight * mScaleFactor * surfaceScaleHeight / surfaceScaleWidth); // Calculate the scaled height based on width
+            mVerticalMargin = (mDesiredHeight - scaledHeight) / 2;
             mScaledSubtitlesBounds = new Rect(
                     (int) (mSubtitleOriginalBounds.left * mScaleFactor),
-                    mVerticalMargin + (int) (mSubtitleOriginalBounds.top * mScaleFactor),
+                    mVerticalMargin + (int) (mSubtitleOriginalBounds.top * mScaleFactor * surfaceScaleHeight / surfaceScaleWidth),
                      (int) (mSubtitleOriginalBounds.right * mScaleFactor),
-                    mVerticalMargin + (int) (mSubtitleOriginalBounds.bottom * mScaleFactor)
+                    mVerticalMargin + (int) (mSubtitleOriginalBounds.bottom * mScaleFactor * surfaceScaleHeight / surfaceScaleWidth)
             );
         } else {
             // frame to be scaled to fill full height and centered in width with equal margin on left and right
             // covers portrait modes
-            mScaleFactor = mDisplayHeight / (float) mFrameHeight;
-            int scaledWidth = (int) (frameWidth * mScaleFactor); // Calculate the scaled width based on height
-            mHorizontalMargin = (mDisplayWidth - scaledWidth) / 2;
-            //mScaledFrameBounds = new Rect(mHorizontalMargin, 0, mHorizontalMargin + scaledWidth, mDisplayHeight);
+            mScaleFactor = mDesiredHeight / (float) mFrameHeight;
+            int scaledWidth = (int) (frameWidth * mScaleFactor * surfaceScaleWidth / surfaceScaleHeight); // Calculate the scaled width based on height
+            mHorizontalMargin = (mDesiredWidth - scaledWidth) / 2;
             mScaledSubtitlesBounds = new Rect(
-                    mHorizontalMargin + (int) (mSubtitleOriginalBounds.left * mScaleFactor),
+                    mHorizontalMargin + (int) (mSubtitleOriginalBounds.left * mScaleFactor * surfaceScaleWidth / surfaceScaleHeight),
                     (int) (mSubtitleOriginalBounds.top * mScaleFactor),
-                    mHorizontalMargin + (int) (mSubtitleOriginalBounds.right * mScaleFactor),
+                    mHorizontalMargin + (int) (mSubtitleOriginalBounds.right * mScaleFactor * surfaceScaleWidth / surfaceScaleHeight),
                     (int) (mSubtitleOriginalBounds.bottom * mScaleFactor)
             );
         }
 
         log.debug("setSubtitle: ({}x{})->({},{}), mSubtitlesOriginalBounds={}, mScaledSubtitlesBounds={}, mScaleFactor={}, mVerticalMargin={}, mHorizontalMargin={}",
-                mFrameWidth, mFrameHeight, mDisplayWidth, mDisplayHeight, mSubtitleOriginalBounds, mScaledSubtitlesBounds, mScaleFactor, mVerticalMargin, mHorizontalMargin);
+                mFrameWidth, mFrameHeight, mDesiredWidth, mDesiredHeight, mSubtitleOriginalBounds, mScaledSubtitlesBounds, mScaleFactor, mVerticalMargin, mHorizontalMargin);
 
         double ratio;
         if (mOriginalWidth > mOriginalHeight) {
             // Original size = landscape => compare the longest sizes
-            int longestDisplaySize = (mDisplayWidth > mDisplayHeight) ? mDisplayWidth : mDisplayHeight;
+            //int longestDisplaySize = Math.max(mDisplayWidth, mDisplayHeight);
+            int longestDisplaySize = Math.max(mDesiredWidth, mDesiredHeight);
             ratio = longestDisplaySize / (float) mOriginalWidth;
         }
         else {
             // Original size = portrait => compare the shortest sizes
-            int shortestDisplaySize = (mDisplayWidth > mDisplayHeight) ? mDisplayHeight : mDisplayWidth;
+            //int shortestDisplaySize = Math.min(mDisplayWidth, mDisplayHeight);
+            int shortestDisplaySize = Math.min(mDesiredWidth, mDesiredHeight);
             ratio = shortestDisplaySize / (float) mOriginalWidth;
         }
 
@@ -220,6 +237,7 @@ public class SubtitleGfxView extends View {
         }
         mDrawX = mScaledSubtitlesBounds.left;
         mDrawY = RECT_COORDINATES ? mScaledSubtitlesBounds.top : 0;
+        log.debug("setSubtitle: mDrawWidth={}, mDrawHeight={}, mDrawX={}, mDrawY={}", mDrawWidth, mDrawHeight, mDrawX, mDrawY);
 
         if (getVisibility() != View.VISIBLE) {
             setVisibility(View.VISIBLE);
@@ -250,15 +268,24 @@ public class SubtitleGfxView extends View {
             setSubtitle(mBitmap, mSubtitleOriginalBounds, mFrameWidth, mFrameHeight);
         }
     }
-    
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (mBitmap == null) {
+            log.debug("onMeasure: no bitmap, setMeasuredDimension(0, 0)");
             setMeasuredDimension(0, 0);
         } else {
             if (RECT_COORDINATES) { // use full screen
-                setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
+                if (mDesiredWidth > 0 && mDesiredHeight > 0) {
+                    // Use the desired dimensions set by the SurfaceController
+                    log.debug("onMeasure: use desired dimensions, setMeasuredDimension({}, {})", mDesiredWidth, mDesiredHeight);
+                    setMeasuredDimension(mDesiredWidth, mDesiredHeight);
+                } else {
+                    log.debug("onMeasure: use full screen, setMeasuredDimension({}, {})", MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
+                    // Fall back to the default behavior
+                    setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));                }
             } else { // use subtitle size
+                log.debug("onMeasure: use subtitle size, setMeasuredDimension({}, {})", MeasureSpec.getSize(widthMeasureSpec), getPaddingTop() + getPaddingBottom() + mDrawHeight);
                 setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec),
                         getPaddingTop() + getPaddingBottom() + mDrawHeight);
             }

@@ -681,9 +681,10 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
 
     private void adjustView() {
         MiscUtils.adjustViewLayoutForInsets(mContext, mRootView, mControllerView,"mControllerView",
-                mNavigationBarShowing, mSystemBarShowing, mActionBarShowing, mControlBarShowing, mIsNavBarOnBottom, mIsGestureAreaShowing, 0, 0,
+                mNavigationBarShowing, mSystemBarShowing, mActionBarShowing, mControlBarShowing, mIsNavBarOnBottom, mIsGestureAreaShowing,
+                0, 0,
                 true, true, true, true,
-                true, true, true, true, false);
+                true, true, true, true, false, false);
     }
 
     public static int getControlBarCurrentHeight() {

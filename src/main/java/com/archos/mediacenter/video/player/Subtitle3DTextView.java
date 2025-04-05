@@ -155,6 +155,7 @@ public class Subtitle3DTextView extends LinearLayout {
     }
 
     public void setScreenSize(int displayWidth, int displayHeight) {
+        log.debug("setScreenSize: displayWidth={}, displayHeight={}", displayWidth, displayHeight);
         getLayoutParams().height = displayHeight;
     }
 }

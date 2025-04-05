@@ -3781,6 +3781,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             editor.putString(KEY_PLAYER_FORMAT, String.valueOf(fmt));
             editor.putString(KEY_PLAYER_AUTO_FORMAT, String.valueOf(autoFmt));
             editor.apply(); // commit is blocking .. avoid
+            // Update the subtitle layout when the video format changes
+            mSubtitleManager.updateSubtitleLayout();
         }
     };
 
@@ -3794,5 +3796,4 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
     public static int getScreenWidth() { return mScreenWidth; }
     public static int getScreenHeight() { return mScreenHeight; }
-
 }

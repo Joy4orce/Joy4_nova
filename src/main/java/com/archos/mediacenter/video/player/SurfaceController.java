@@ -99,6 +99,8 @@ public class SurfaceController {
     private double      mVideoAspect = 1.0f;
     private VideoFormat mVideoFormat = new VideoFormat(3);
     private VideoFormat mAutoVideoFormat = new VideoFormat(4);
+    private int         mSurfaceWidth = 0;
+    private int         mSurfaceHeight = 0;
     
     private int mEffectMode = VideoEffect.getDefaultMode();
     private int mEffectType = VideoEffect.getDefaultType();
@@ -360,10 +362,11 @@ public class SurfaceController {
         // Note: do not set margins of mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom here, delegate to PlayerActivity
         mView.setLayoutParams(lp);
         mView.invalidate();
-
+        mSurfaceWidth = dcw;
+        mSurfaceHeight = dch;
         log.debug("CONFIG updateSurface: ({},{})->({},{}) / formatCrop: ({},{}) / mEffectMode: {}", vw, vh, dcw, dch, cropW, cropH, mEffectMode);
     }
 
-    public int getViewHeight() { return mView.getHeight(); }
-    public int getViewWidth() { return mView.getWidth(); }
+    public int getViewWidth() { return mSurfaceWidth; }
+    public int getViewHeight() { return mSurfaceHeight; }
 }
