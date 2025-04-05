@@ -205,7 +205,7 @@
     <string name="no_episode_watched">Brak obejrzanych odcinków</string>
     <string name="all_episodes_watched">Wszystkie odcinki obejrzane</string>
     <plurals name="n_episodes_watched">
-        <item quantity="one">%d obejrzanych odcinków</item>
+        <item quantity="one">%d obejrzany odcinek</item>
         <item quantity="few">%d obejrzanych odcinków</item>
         <item quantity="many">%d obejrzanych odcinków</item>
         <item quantity="other">%d obejrzanych odcinków</item>
@@ -275,16 +275,16 @@
     </plurals>
     <plurals name="Nepisodes">
         <!-- number of episodes is one -->
-        <item quantity="one"><xliff:g id="count">%d</xliff:g> Odcinek</item>
-        <item quantity="few"><xliff:g id="count">%d</xliff:g> Odcinki</item>
-        <item quantity="many"><xliff:g id="count">%d</xliff:g> Odcinki</item>
+        <item quantity="one">1 odcinek</item>
+        <item quantity="few"><xliff:g id="count">%d</xliff:g> odcinków</item>
+        <item quantity="many"><xliff:g id="count">%d</xliff:g> odcinków</item>
         <!-- number of episodes is not equal to one -->
-        <item quantity="other"><xliff:g id="count">%d</xliff:g> Odcinków</item>
+        <item quantity="other"><xliff:g id="count">%d</xliff:g> odcinki</item>
     </plurals>
     <plurals name="Nseasons">
         <item quantity="one">1 sezon</item>
-        <item quantity="few">1 sezon</item>
-        <item quantity="many">1 sezon</item>
+        <item quantity="few"><xliff:g id="count">%d</xliff:g> sezonów</item>
+        <item quantity="many"><xliff:g id="count">%d</xliff:g> sezonów</item>
         <item quantity="other"><xliff:g id="count">%d</xliff:g> sezonów</item>
     </plurals>
     <!-- Media Center -->
@@ -399,7 +399,7 @@
     <string name="player_plugin_purchase_google_play_msg">Możesz kupić dodatkowe wtyczki kodeków w Google Play.</string>
     <string name="player_plugin_purchase_google_play_button">Przejdź do Sklep Play</string>
     <string name="plugin_update_required_title">Wymagana aktualizacja kodeka</string>
-    <string name="plugin_update_required_message">Wygląda na to, że już masz dodatkowe kodeki zainstalowane dla Nova wideo Player.\n\nThis Nowa wersja Nova Video Player wymaga aktualizacji tych kodeków.\n\nPrzejdź proszę do Google Play, aby zaktualizować i ponownie zainstalować kodeki.</string>
+    <string name="plugin_update_required_message">Wygląda na to, że już masz dodatkowe kodeki zainstalowane dla Nova Video Player.\n\nThis Nowa wersja Nova Video Player wymaga aktualizacji tych kodeków.\n\nPrzejdź proszę do Google Play, aby zaktualizować i ponownie zainstalować kodeki.</string>
     <!-- Subtitles wizard -->
     <string name="get_subtitles_on_drive">Wybierz napisy z dysku</string>
     <string name="subtitles_wizard_no_files">Nie znaleziono napisów</string>
@@ -670,7 +670,7 @@
     <string name="ask_to_mail_media_DB">Czy chcesz wysłać swoją bazę danych wideo do zespołu programistów Nova, aby pomóc im sprawdzić błąd?\n\nPliki wideo nie są (kurs) obsługiwane, ale pełna lista nazw plików.</string>
     <string name="no_email_installed">Nie odnaleziono klienta poczty e-mail</string>
     <string name="zipping_library_before_mailing">Zainicjowanie kopii biblioteki przed wysłaniem jej…</string>
-    <string name="zipped_library_mail_subject">Zrzut bazy danych video Nova</string>
+    <string name="zipped_library_mail_subject">Zrzut Nova Video Database</string>
     <string name="zipped_library_mail_text">Proszę opisać problem, którego doświadczasz\n\n</string>
     <string name="sort_mode">Tryb sortowania</string>
     <string name="sort_by_name_asc">Sortuj po nazwie (a &gt; z)</string>
@@ -840,7 +840,7 @@
     <string name="leanback_unscrap">@string/scrap_remove</string>
     <string name="leanback_legacy_ui">Starszy interfejs</string>
     <string name="leanback_hint_long_press_on_back">Wskazówka: długie naciśnięcie przycisku powrotu zamyka przeglądarkę plików</string>
-    <string name="leanback_archos_video_webview">Nova Video Basic WebView</string>
+    <string name="leanback_archos_video_webview">Nova Video WebView</string>
     <string name="file_access_error">Nie udało się uzyskać dostępu do pliku</string>
     <string name="interface_size">Wielkość interfejsu</string>
     <string name="interface_size_summary">Zmień to w przypadku, gdy interfejs użytkownika jest zbyt mały lub zbyt duży</string>
@@ -885,7 +885,7 @@
     <string name="rescrap_all_movies_title">Zaktualizuj wszystkie filmy</string>
     <string name="rescrap_all_collections_title">Zaktualizuj wszystkie zbiory</string>
     <string name="nfo_export_manual_title">Eksportuj zaktualizowane wideo</string>
-    <string name="nfo_export_manual_summary">Eksportuj pliki .nfo wszystkich zaktualizowanych plików video</string>
+    <string name="nfo_export_manual_summary">Eksportuj pliki .nfo wszystkich zaktualizowanych plików wideo</string>
     <string name="db_export_manual_title">Eksportuj bazę multimediów</string>
     <string name="db_export_manual_summary">Eksportuj plik media.db do /sdcard dla celów debugowania</string>
     <string name="db_export_in_progress">Eksport bazy danych w toku</string>

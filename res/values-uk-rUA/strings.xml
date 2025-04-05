@@ -525,6 +525,8 @@
     <string name="preferences_force_software_decoding_summary">Можете спробувати цей параметр, якщо деякі відеозаписи не відтворюються коректно</string>
     <string name="preferences_force_audio_passthrough">Пряме виведення звуку</string>
     <string name="preferences_force_audio_passthrough_disabled">Вимкнено (рекомендовано)</string>
+    <string name="preferences_force_audio_passthrough_enable">Інкапсуляція Nova (експериментальна)</string>
+    <string name="preferences_force_audio_passthrough_enable2">Системна інкапсуляція</string>
     <string name="preferences_force_audio_passthrough_summary">Передача стисненого аудіо через HDMI або S/PDIF. ⚠ Може призвести до розсинхронізації звуку та відео</string>
     <string name="preferences_parser_sync_mode">Режим синхронізації аналізатора</string>
     <string name="preferences_parser_sync_mode_cdata">PTS (рекомендовано)</string>
@@ -546,6 +548,8 @@
     <string name="preferences_allow_3rd_party_player_summary">При запуску відтворення буде запропоновано вибір інших програвачів. Деякі функції при цьому можуть не працювати (поновлення, закладки тощо)</string>
     <string name="preference_tv_3d_automatic_switch">Автоматичне перемикання режиму 3D</string>
     <string name="preference_tv_3d_automatic_switch_summary">Використовуйте цю функцію, лише якщо ваш 3D-телевізор її підтримує</string>
+    <string name="enable_android_frame_timing">Увімкнути синхронізацію кадрів Android</string>
+    <string name="enable_android_frame_timing_summary">Використовувати синхронізацію кадрів Android для більш плавного відтворення (експериментально)</string>
     <string name="preference_tv_refreshrate_switch">Увімкнути автоматичне перемикання частоти оновлення</string>
     <string name="preference_tv_refreshrate_switch_summary">Усунення посмикування зображення шляхом синхронізації частоти кадрів екрана і файлу (залежить від підтримки пристроєм)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Вимкнено</string>
