@@ -471,16 +471,6 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         mSubtitleManager.setUIExternalSurface(uiSurface);
     }
 
-    private void avoidCutoutIfNeeded() {
-        log.debug("CONFIG avoidCutoutIfNeeded: avoidIt={}, cutout=({},{},{},{}), screen=({},{})",
-                ! mFullScreenWithCutout,
-                mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom,
-                mScreenWidth, mScreenHeight);
-        if (mFullScreenWithCutout) mRootView.setPadding(0, 0, 0, 0);
-        else mRootView.setPadding(mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom);
-        getWindow().getDecorView().setOnApplyWindowInsetsListener(null);
-    }
-
     @Override
     protected void onCreate(Bundle icicle) {
         log.debug("onCreate");
@@ -540,8 +530,6 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                     if (mFullScreenWithCutout) mSurfaceController.setCutoutMetrics(0, 0, 0, 0);
                     else mSurfaceController.setCutoutMetrics(mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom);
                     log.debug("CONFIG onApplyWindowInsets: cutout=({},{},{},{})", mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom);
-                    // perform the cutout avoidance here
-                    avoidCutoutIfNeeded();
                     getWindow().getDecorView().setOnApplyWindowInsetsListener(null);
                     // needed on Bravia for HDR content to avoid grey bars cf. issue #270
                     // avoid emulator UI glitch

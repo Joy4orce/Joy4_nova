@@ -109,6 +109,8 @@ public class SurfaceController {
     private int mCutoutTop = 0;
     private int mCutoutRight = 0;
     private int mCutoutBottom = 0;
+    private int mMarginLeft = 0;
+    private int mMarginTop = 0;
 
     public SurfaceController(View rootView) {
         ViewGroup mLp = (ViewGroup)rootView;
@@ -355,13 +357,26 @@ public class SurfaceController {
 
         log.debug("CONFIG updateSurface: setLayoutParams({},{})", dcw, dch);
 
-        // set the view size to display size but keep the cutout margins
+        // margins to avoid cutout
+        mMarginLeft = (int)((mCutoutLeft - mCutoutRight)/ 2.0f);
+        mMarginTop = (int)((mCutoutTop - mCutoutBottom)/ 2.0f);
+
         ViewGroup.LayoutParams lp = mView.getLayoutParams();
-        lp.width = dcw;
-        lp.height = dch;
-        // Note: do not set margins of mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom here, delegate to PlayerActivity
-        mView.setLayoutParams(lp);
+        if (lp instanceof ViewGroup.MarginLayoutParams marginParams) {
+            log.debug("MARC works with MarginLayoutParams"); // TODO MARC it works!!!
+            lp.width = dcw;
+            lp.height = dch;
+            // video view is centered on the screen, in order to avoid cutout it needs to be shifted slightly
+            marginParams.setMargins(mMarginLeft, mMarginTop, 0, 0);
+            mView.setLayoutParams(marginParams);
+        } else {
+            log.debug("MARC works with LayoutParams NO MARGIN");
+            lp.width = dcw;
+            lp.height = dch;
+            mView.setLayoutParams(lp);
+        }
         mView.invalidate();
+
         mSurfaceWidth = dcw;
         mSurfaceHeight = dch;
         log.debug("CONFIG updateSurface: ({},{})->({},{}) / formatCrop: ({},{}) / mEffectMode: {}", vw, vh, dcw, dch, cropW, cropH, mEffectMode);
@@ -369,4 +384,6 @@ public class SurfaceController {
 
     public int getViewWidth() { return mSurfaceWidth; }
     public int getViewHeight() { return mSurfaceHeight; }
+    public int getMarginLeft() { return mMarginLeft; }
+    public int getMarginTop() { return mMarginTop; }
 }
