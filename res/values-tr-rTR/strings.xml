@@ -97,6 +97,10 @@
     <string name="all_collections_format">Tüm koleksiyonlar - %d</string>
     <string name="all_collection_watched">Tüm koleksiyon izlendi</string>
     <string name="all_collection_unwatched">Koleksiyon izlenmedi</string>
+    <plurals name="n_movies_watched">
+        <item quantity="one">%d izlenen film</item>
+        <item quantity="other">%d film izlendi</item>
+    </plurals>
     <string name="not_watched_movies_format">İzlenmedi  -  %d</string>
     <string name="not_watched_animes_format">İzlenmedi - %d</string>
     <string name="no_movie_watched">Film izlenmedi</string>
@@ -293,6 +297,7 @@ izlenen bölümler %d</item>
     <string name="switch_to_list">Liste</string>
     <string name="switch_to_grid">Izgara</string>
     <!-- VideoPlayer -->
+    <string name="player_track">Trakt</string>
     <string name="player_loading_video">Video yükleniyor\u2026</string>
     <string name="player_audio_track_toast">Ses parçası:</string>
     <string name="player_subtitle_track_toast">Altyazı parçası:</string>
@@ -338,9 +343,26 @@ izlenen bölümler %d</item>
     <!-- Subtitles in filename HI = Hearing Impaired -->
     <string name="subs_HI">İşitme engelliler</string>
     <!-- Subtitles in filename SDH = Subtitles for the Deaf and Hard of Hearing -->
+    <string name="subs_SDH">Sağırlar ve İşitme Engelliler İçin Altyazılar</string>
     <!-- opensubtitles REST API not recognized languages ea=Spanish (LA)|ex=Extremaduran|me=Montenegrin|ma=Manipuri|pr=Dari|sp=Spanish (EU)|sx=Santali|sy=Syriac|tp=Toki Pona|ze=Chinese bilingual -->
     <string name="s_brazilian">Brezilya</string>
     <string name="s_chinese">Çince</string>
+    <string name="s_chinese_simplified">Basitleştirilmiş Çince</string>
+    <string name="s_traditional_chinese">Geleneksel Çince</string>
+    <string name="s_chinese_bilingual">Çince iki dilli</string>
+    <string name="s_chinese_mainland">Çince (Çin Anakarası)</string>
+    <string name="s_chinese_hk">Çince (Hong Kong)</string>
+    <string name="s_chinese_tw">Çince (Tayvan)</string>
+    <string name="s_spanish_la">İspanyolca (LA)</string>
+    <string name="s_extremaduran">Extremaduran</string>
+    <string name="s_montenegrin">Karadağca</string>
+    <string name="s_manipuri">Manipuri</string>
+    <string name="s_dari">Darice</string>
+    <string name="s_portuguese_mz">Portekizce (MZ)</string>
+    <string name="s_spanish_eu">İspanyolca (EU)</string>
+    <string name="s_santali">Santalice</string>
+    <string name="s_syriac">Süryanice</string>
+    <string name="s_toki_pona">Toki Pona</string>
     <string name="s_none">Boş</string>
     <!-- Player errors -->
     <string name="player_err_cantplayvideo">Video oynatılamıyor</string>
@@ -409,10 +431,13 @@ desteklenmiyor.</string>
     <string name="dialog_subloader_nonetwork_title">İnternet bağlantısı yok</string>
     <string name="dialog_subloader_nonetwork_message">Altyazıları indirmek için internet bağlantısı gereklidir</string>
     <string name="dialog_subloader_connecting">Www.opensubtitles.com sitesine bağlanıyor…</string>
+    <string name="opensubtitles_quota_download_remaining">OpenSubtitles indirme kotası: %d/%d kaldı</string>
     <string name="dialog_subloader_credentials">Altyazı kimlik bilgilerini açar</string>
     <string name="dialog_subloader_credentials_empty">Geçerli bir kullanıcı adı ve şifre belirlemelisiniz!</string>
     <string name="toast_subloader_credentials_empty">Altyazıları indirebilmek için ayarlarda açılan altyazı kimlik bilgilerinizi sağlayın</string>
     <string name="toast_subloader_login_failed">Yanlış açık altyazı kimlik bilgileri veya hizmet mevcut değil</string>
+    <string name="toast_subloader_quota_exceeded">OpenSubtitles indirme kotası aşıldı</string>
+    <string name="opensubtitles_quota_reset_time_remaining">Kota %s içinde sıfırlanıyor</string>
     <!-- Subtitle Settings Dialog -->
     <string name="subtitle_settings_title">Altyazı Ayarları</string>
     <string name="subtitle_sample_text">\"örnekleme\"</string>
@@ -423,6 +448,8 @@ desteklenmiyor.</string>
     <!-- Subtitle Delay Dialog -->
     <string name="subtitle_delay_speed">Hız Ayarı</string>
     <string name="subtitle_delay_radio_none">boş</string>
+    <string name="subtitle_delay_radio_ntsc2pal">Altyazılar çok hızlı</string>
+    <string name="subtitle_delay_radio_pal2ntsc">Altyazılar çok yavaş</string>
     <!-- Browser.CommonDetailsView -->
     <!-- Add a space after the right quote
     because the right part of the quote is
@@ -430,10 +457,12 @@ desteklenmiyor.</string>
     <string name="quotation_format">&#x201C;%s&#x201D;&#x2003;</string>
     <string name="error_permission">Yeterli izin yok</string>
     <string name="error_permission_storage">Nova Video Player\'ın yerel videoları okumak için depolama iznine ihtiyacı var, lütfen bu izni verin.</string>
+    <string name="error_permission_all_file_access">Nova Video Player\'ın yerel videoları/NFO dosyalarını düzgün bir şekilde yönetebilmesi için tüm harici depolama yönetimi izinlerine ihtiyacı vardır, lütfen bu izni verin.</string>
     <string name="allow">İzin ver</string>
     <string name="exit">Çıkış</string>
     <!-- torrent -->
     <string name="error">Bir hata oluştu</string>
+    <string name="error_protocol_not_supported">Hata: protokol desteklenmiyor</string>
     <string name="error_loading_torrent">Torrent yüklenirken hata oluştu</string>
     <string name="error_downloading_not_enough_space">Torrent indirilirken hata oluştu: yeterli alan yok</string>
     <string name="loading_torrent">Torrent yükleniyor…</string>
@@ -442,10 +471,14 @@ desteklenmiyor.</string>
     <string name="torrent_buy_premium_message">Torrent akışı yalnızca ücretli sürümde kullanılabilir</string>
     <string name="torrent_buy_premium">Premium sürümü satın alın</string>
     <!-- Shortcuts -->
+    <string name="browse_net_server">Bir ağ paylaşımına göz atın</string>
+    <string name="add_smb_server">Bir SMB sunucusuna göz atın</string>
+    <string name="add_network_server">Bir ağ paylaşımı ekleyin</string>
     <string name="add_to_shortcuts">Kısayol oluştur</string>
     <string name="add_ssh_server">Bir FTP sunucusuna göz atın</string>
     <string name="add_ssh_shortcut">Kısayol olarak ekle</string>
     <string name="ssh_prompt">FTP türü</string>
+    <string name="protocol_prompt">Protokol türü</string>
     <string name="ssh_empty_view"> \"Kendi ftp sunucunuza göz atabilir ve oynatabilirsiniz\"</string>
     <string name="remove_from_shortcuts">Kısayolu kaldır</string>
     <string name="shortcut_added">%s kısayol oluşturuldu</string>
@@ -461,11 +494,16 @@ desteklenmiyor.</string>
     <string name="add_to_indexed_folders">Dizin klasörü</string>
     <string name="add_to_library">Kütüphaneye ekle</string>
     <string name="add_all_items_to_library">Tüm videolar hemen kitaplığa eklensin mi?</string>
+    <string name="invalid_host">Geçerli bir ana bilgisayar adresi biçimi değil</string>
+    <string name="invalid_port">Geçerli bir port biçimi değil</string>
+    <string name="invalid_path">Geçerli bir yol biçimi değil</string>
+    <string name="shortcut_folder_added">%s klasörü kısayol olarak eklendi</string>
     <string name="indexed_folder_added">%s klasör kitaplığa eklendi</string>
     <string name="remove_from_indexed_folders">Kütüphaneden kaldır</string>
     <string name="indexed_folder_removed">%s klasör kitaplıktan kaldırıldı</string>
     <string name="indexed_folders_list_empty">Şu anda dizine alınmış ağ klasörü yok. \n\nBir ağ klasörünün içeriğini bu klasöre göz atarak ve üst eylem çubuğunda \"%s\" seçeneğini seçerek kitaplığa ekleyebilirsiniz.</string>
     <string name="indexed_folders_list_empty_ftp">Şu anda dizine eklenen ftp klasörü yok.</string>
+    <string name="indexed_folders_list_empty_network">Şu anda dizine eklenmiş ağ klasörü yok.</string>
     <string name="open_indexed_folder">"Aç"</string>
     <string name="rescan_indexed_folders">Dizine eklenen tüm klasörleri yeniden tara</string>
     <string name="last_rescan_never">Asla</string>
@@ -477,28 +515,51 @@ desteklenmiyor.</string>
     <string name="ssh_password">Şifre</string>
     <string name="ssh_username">Kullanıcı Adı</string>
     <string name="ssh_shortcut_name">Kısayol adı</string>
+    <string name="smb_domain">Alan adı (isteğe bağlı)</string>
     <!-- Preferences -->
     <string name="preferences">Tercihler</string>
     <string name="get_the_ad_free_version">Reklamsız sürümü Google Play\'de edinin</string>
     <string name="upgrade_to_add_free_version">Reklamsız sürüme geçin</string>
     <string name="upgrade_to_add_free_version_description">Reklamları kaldırmak ve tüm özellikleri etkinleştirmek için uygulama lisansını satın alın</string>
+    <string name="preferences_about">Hakkında</string>
     <string name="preferences_category_complete">Tam sürüm</string>
     <string name="preferences_category_video">Video</string>
     <string name="preferences_force_software_decoding">Yazılım kod çözmeyi zorla</string>
     <string name="preferences_force_software_decoding_summary">Bazı videolar düzgün oynatılmıyorsa bu seçeneği deneyebilirsiniz</string>
     <string name="preferences_force_audio_passthrough">Ses geçişi</string>
     <string name="preferences_force_audio_passthrough_disabled">Devre dışı (önerilir)</string>
+    <string name="preferences_force_audio_passthrough_enable">Nova kapsülleme (deneysel)</string>
+    <string name="preferences_force_audio_passthrough_enable2">Sistem kapsülleme</string>
+    <string name="preferences_force_audio_passthrough_summary">Sıkıştırılmış sesi HDMI veya S/PDIF üzerinden iletin. ⚠ Deneysel kullanımda A/V senkronizasyonu bozulabilir</string>
+    <string name="preferences_parser_sync_mode">Ayrıştırıcı senkronizasyon modu</string>
+    <string name="preferences_parser_sync_mode_cdata">PTS tabanlı (önerilir)</string>
+    <string name="preferences_parser_sync_mode_sample">örnek tabanlı</string>
+    <string name="preferences_parser_sync_mode_summary">Lavc ayrıştırıcısındaki senkronizasyon modu. ⚠ Deneysel, A/V birikmiş gecikmeye neden olabilir</string>
+    <string name="preferences_stream_buffer_size_title">Akış arabellek boyutu</string>
+    <string name="preferences_stream_buffer_size_summary">MB cinsinden arabelleğe alma sorunlarını çözmek için ayrıştırıcıdan önce kullanılan önbellek miktarı</string>
+    <string name="preferences_stream_max_iframe_size_title">Maksimum i-frame boyutu</string>
+    <string name="preferences_stream_max_iframe_size_summary">MB cinsinden maksimum sıkıştırılmış i-frame boyutu</string>
+    <string name="preferences_force_passthrough">Ses geçişini zorla</string>
+    <string name="preferences_force_passthrough_summary">Geçiş etkinleştirilmişse, AV alıcısı yeteneklerini kontrol etmek yerine ses kodeğinin AV alıcısı tarafından desteklenmediği iddia edilse bile bunu uygulayın</string>
+    <string name="preferences_playback_speed">Oynatma hızını etkinleştir</string>
+    <string name="preferences_playback_speed_summary">Oynatma hızını değiştirme olanağını etkinleştirin. ⚠ Deneysel, kesik kesik videoyla sonuçlanabilir</string>
     <string name="preferences_disable_downmix_title">Ses stereo downmix\'i devre dışı bırak</string>
     <string name="preferences_disable_downmix_summary">Her zaman tüm kanalları çözmek ve ses çıkışı yeteneğine bağlı olarak Android downmix izin (ses kanalları kaybetme neden olabilir)</string>
+    <string name="preferences_enable_downmix_androidtv_title">Strereo sesi düşürmeye zorla</string>
+    <string name="preferences_enable_downmix_androidtv_summary">Her zaman birden fazla kanal ses parçasını stereo sese düşürün (ses kanalları duyulamıyorsa seçilmelidir)</string>
     <string name="preferences_allow_3rd_party_player">Başka bir video oynatıcı kullanılmasına izin ver</string>
     <string name="preferences_allow_3rd_party_player_summary">Video oynatımı başlatılırken Android tarafından diğer uyumlu video oynatıcı uygulamaları önerilecektir. Bazı özelliklerin çalışmadığını unutmayın (özgeçmiş, yer imleri vb.)</string>
     <string name="preference_tv_3d_automatic_switch">Otomatik 3D TV anahtarını etkinleştir</string>
     <string name="preference_tv_3d_automatic_switch_summary">Bu özelliği yalnızca 3D TV\'niz destekliyorsa kullanın</string>
+    <string name="enable_android_frame_timing">Android kare zamanlamasını etkinleştir</string>
+    <string name="enable_android_frame_timing_summary">Daha akıcı oynatma için kare blit zamanlamasını Android\'e devredin (deneysel)</string>
     <string name="preference_tv_refreshrate_switch">Otomatik yenileme hızı anahtarını etkinleştirin</string>
     <string name="preference_tv_refreshrate_switch_summary">En iyi ekran yenileme hızını video kare hızına uyarlayarak titreme efektini kaldırın (cihaz desteği değişiklik gösterebilir)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Devre dışı bırakıldı</string>
     <string name="preferences_tv_refreshrate_switch_mode_selection">Video fps ile eşleşen ekran modu seçimi</string>
     <string name="preferences_tv_refreshrate_switch_match_frame_rate">Android 12+kare hızı eşleştirme özelliği</string>
+    <string name="preference_remove_dolby_vision">Dolby Vision\'ı devre dışı bırak</string>
+    <string name="preference_remove_dolby_vision_summary">Dolby vision yerine standart video kodeklerini kullanın</string>
     <string name="preference_cutout_short_edges">Ekran kesimli tam ekran video</string>
     <string name="preference_cutout_short_edges_summary">Kesikli yatay tam ekran videoya izin ver</string>
     <string name="category_languages">Altyazı</string>
@@ -511,15 +572,21 @@ desteklenmiyor.</string>
     <string name="favSubLang_title">Altyazı okuma dili</string>
     <string name="favSubLang_summary">Altyazı okumak için favori dilinizi seçin</string>
     <string name="favAudioLang_title">Ses tercih edilen dil</string>
+    <string name="favAudioLang_summary">Favori ses parçası dilinizi seçin</string>
+    <string name="ui_language_title">Kullanıcı arayüzü dilini seçin</string>
+    <string name="UiLang_title">Kullanıcı arayüzü dili</string>
+    <string name="UiLang_summary">Nova kullanıcı arayüzü dilini ayarlayın, sistem varsayılanını kullanmak için sistemi seçin</string>
     <string name="ui_mode_title">Kullanıcı arayüzü modu</string>
     <string name="ui_mode_summary">TV ve Tablet/Telefon kullanıcı arayüzü arasında seçim yapın</string>
     <string name="preferences_video_about">Hakkında</string>
     <string name="preferences_video_os_text">Alt Yazı Sağlayıcıları</string>
+    <string name="preferences_video_tmdb_text">Film/TV Şovu bilgileri tarafından sağlanmıştır</string>
     <string name="preferences_video_tvdb_text">TV Şovu tarafından sağlanan bilgiler</string>
     <string name="preferences_video_trakt_text">Video scrobbler tarafından sağlanmıştır</string>
     <string name="preferences_video_licenses">Lisanslar</string>
     <string name="preferences_network_mobile_vpn_summary">Yalnızca VPN yapılandırması ile kullanın ve veri kullanımınıza dikkat edin.</string>
     <string name="preferences_network_mobile_vpn_title">Mobil bağlantıda ağ paylaşımını etkinleştir</string>
+    <string name="preferences_network_prefer_vpn_summary">Yerel ağ arayüzleri üzerinden VPN kullanın.</string>
     <string name="preferences_video_advanced">Gelişmiş</string>
     <string name="preferences_video_advanced_quit_title">Düzenli tercihler</string>
     <string name="preferences_video_advanced_quit_summary">Düzenli tercihlere dönün</string>
