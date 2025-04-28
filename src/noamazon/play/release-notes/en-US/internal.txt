@@ -3,4 +3,5 @@
 - fix audio delay picker focus on Android TV
 - new subtitle title format
 - upgrade ffmpeg to 7.1.1 and dav1d to 1.5.1
+- fix external player stopping after a while
 - stability enhancements
