@@ -1,11 +1,6 @@
-- add pgs subtitles support
-- support subtitle position SSA tags
-- true passthrough support of TrueHD & DTS:X on FireStick4kMax 2023 (requires nova encapsulation mode 1)
-- select proper dolby vision codec based on profile
-- add locale setting in nova for devices with restricted language support
-- experimental smoother video playback
-- 2025 banners
-- apply ITU-R BS.775-3 coefficients for stereo downmix
-- fix nova use as external player with kodi
-- fix 7.1 stereo downmix
-- target SDK 34
+- target SDK 35, raise min SDK to 23 (Android 6.0)
+- blacklist recycle bins on popular NAS
+- fix audio delay picker focus on Android TV
+- new subtitle title format
+- upgrade ffmpeg to 7.1.1 and dav1d to 1.5.1
+- stability enhancements
