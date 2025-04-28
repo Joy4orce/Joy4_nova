@@ -28,6 +28,7 @@ import com.archos.mediacenter.utils.trakt.TraktService;
 import com.archos.mediacenter.utils.videodb.IndexHelper;
 import com.archos.mediacenter.utils.videodb.VideoDbInfo;
 import com.archos.mediacenter.video.browser.TorrentObserverService;
+import com.archos.mediacenter.video.player.ExternalPlayerService;
 import com.archos.mediacenter.video.player.PrivateMode;
 import com.archos.mediaprovider.video.VideoStore;
 import com.archos.mediascraper.ScrapeDetailResult;
@@ -107,6 +108,9 @@ public class ExternalPlayerResultListener implements ExternalPlayerWithResultSta
                 ", mVideoDbInfo!=null " + (mVideoDbInfo!=null) +
                 ", mPlayerUri " + mPlayerUri
         );
+
+        ExternalPlayerService.stopService(mContext);
+
         // Some external video player api specs:
         // vlc https://wiki.videolan.org/Android_Player_Intents/ https://wiki.videolan.org/MediaControlAPI
         // justplayer https://github.com/moneytoo/Player/issues/203
