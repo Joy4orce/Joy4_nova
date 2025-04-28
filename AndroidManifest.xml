@@ -1154,6 +1154,11 @@
         <service android:name="com.archos.mediacenter.video.player.PlayerService"
             android:exported="true" android:foregroundServiceType="mediaPlayback"/>
 
+        <service
+            android:name=".player.ExternalPlayerService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
         <service android:name="com.archos.mediascraper.AutoScrapeService"/>
         <service android:name="com.archos.mediascraper.AllCollectionScrapeService"/>
         <service android:name="com.archos.mediacenter.video.browser.FileManagerService"/>

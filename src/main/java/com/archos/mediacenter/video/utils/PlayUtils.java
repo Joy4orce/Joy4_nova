@@ -19,23 +19,23 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import androidx.core.content.FileProvider;
-import androidx.preference.PreferenceManager;
-
 import android.os.Parcelable;
 import android.widget.Toast;
 
+import androidx.core.content.FileProvider;
+import androidx.preference.PreferenceManager;
+
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.filecorelibrary.MetaFile2;
 import com.archos.filecorelibrary.MimeUtils;
 import com.archos.filecorelibrary.StreamOverHttp;
-import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediacenter.filecoreextension.upnp2.StreamUriFinder;
 import com.archos.mediacenter.utils.videodb.IndexHelper;
 import com.archos.mediacenter.utils.videodb.VideoDbInfo;
-import com.archos.mediacenter.video.BuildConfig;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.adapters.object.Video;
 import com.archos.mediacenter.video.browser.subtitlesmanager.SubtitleManager;
+import com.archos.mediacenter.video.player.ExternalPlayerService;
 import com.archos.mediacenter.video.player.PlayerActivity;
 import com.archos.mediacenter.video.player.PlayerService;
 import com.archos.mediacenter.video.player.TorrentLoaderActivity;
@@ -49,7 +49,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * Created by vapillon on 15/04/15.
@@ -395,6 +394,7 @@ public class PlayUtils implements IndexHelper.Listener {
             } else {
                 ExternalPlayerResultListener.getInstance().init(context, video.getUri(), dataUri, mVideoDbInfo);
                 if (!((Activity) context).isFinishing()) {
+                    ExternalPlayerService.startService(context);
                     externalPlayerWithResultStarter.startActivityWithResultListener(intent);
                 }
             }

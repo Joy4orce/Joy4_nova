@@ -1032,4 +1032,8 @@
     <string name="networks">Networks:</string>
     <string name="premiered">Premiered:</string>
 
+    <string name="external_player_service_title">External player playback</string>
+    <string name="external_player_service_description">Nova Video Player provides content for an external player</string>
+    <string name="stop">Stop</string>
+
 </resources>
