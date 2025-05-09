@@ -655,33 +655,35 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
                 }
             }
             else if (action.getId() == VideoActionAdapter.ACTION_LIST_EPISODES) {
-                // In this case mVideo is a tvshow Episode
-                Episode mEpisode = (Episode) mVideo;
-                // ShowId is obtained via EpisodeTags
-                EpisodeTags tagsE = (EpisodeTags) mVideo.getFullScraperTags(getActivity());
-                long mShowId = tagsE.getShowId();
-                // TvshowLoader is a CursorLoader
-                TvshowLoader mTvshowLoader = new TvshowLoader(getActivity(), mShowId);
-                Cursor mCursor = mTvshowLoader.loadInBackground();
-                if(mCursor != null && mCursor.getCount()>0) {
-                    mCursor.moveToFirst();
-                    TvshowCursorMapper mTvShowCursorMapper = new TvshowCursorMapper();
-                    mTvShowCursorMapper.bindColumns(mCursor);
-                    Tvshow mTvshow = (Tvshow) mTvShowCursorMapper.bind(mCursor);
-                    final Intent intent = new Intent(getActivity(), TvshowActivity.class);
-                    intent.putExtra(TvshowFragment.EXTRA_TVSHOW, mTvshow);
-                    // Launch next activity with slide animation
-                    // Starting from lollipop we need to give an empty "SceneTransitionAnimation" for this to work
-                    mOverlay.hide(); // hide the top-right overlay else it slides across the screen!
-                    startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle());
-                    // Delay the finish the "old" activity, else it breaks the animation
-                    mHandler.postDelayed(new Runnable() {
-                        public void run() {
-                            Activity activity = getActivity();
-                            if (activity != null) activity.finish(); // better safe than sorry
-                        }
-                    }, 1000);
-                 }
+                if (mVideo instanceof Episode) {
+                    // In this case mVideo is a tvshow Episode
+                    Episode mEpisode = (Episode) mVideo;
+                    // ShowId is obtained via EpisodeTags
+                    EpisodeTags tagsE = (EpisodeTags) mVideo.getFullScraperTags(getActivity());
+                    long mShowId = tagsE.getShowId();
+                    // TvshowLoader is a CursorLoader
+                    TvshowLoader mTvshowLoader = new TvshowLoader(getActivity(), mShowId);
+                    Cursor mCursor = mTvshowLoader.loadInBackground();
+                    if (mCursor != null && mCursor.getCount() > 0) {
+                        mCursor.moveToFirst();
+                        TvshowCursorMapper mTvShowCursorMapper = new TvshowCursorMapper();
+                        mTvShowCursorMapper.bindColumns(mCursor);
+                        Tvshow mTvshow = (Tvshow) mTvShowCursorMapper.bind(mCursor);
+                        final Intent intent = new Intent(getActivity(), TvshowActivity.class);
+                        intent.putExtra(TvshowFragment.EXTRA_TVSHOW, mTvshow);
+                        // Launch next activity with slide animation
+                        // Starting from lollipop we need to give an empty "SceneTransitionAnimation" for this to work
+                        mOverlay.hide(); // hide the top-right overlay else it slides across the screen!
+                        startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(getActivity()).toBundle());
+                        // Delay the finish the "old" activity, else it breaks the animation
+                        mHandler.postDelayed(new Runnable() {
+                            public void run() {
+                                Activity activity = getActivity();
+                                if (activity != null) activity.finish(); // better safe than sorry
+                            }
+                        }, 1000);
+                    }
+                }
             }
             else if (action.getId() == VideoActionAdapter.ACTION_NEXT_EPISODE) {
                 final Intent intent = new Intent(getActivity(), VideoDetailsActivity.class);
