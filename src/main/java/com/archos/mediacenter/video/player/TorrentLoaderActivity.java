@@ -91,55 +91,46 @@ public class TorrentLoaderActivity extends AppCompatActivity implements TorrentT
 
     private Handler mHandler = new Handler(){
         @Override
-        public void handleMessage(Message msg) {                    
-            if(msg.what == LOADING_FINISHED){
-                if(mFiles!=null&& !mFiles.isEmpty()&&!isDialogDisplayed)   {
-                    if (!isFinishing() && mProgress != null && mProgress.isShowing()) {
+        public void handleMessage(Message msg) {
+            if (msg.what == LOADING_FINISHED) {
+                if (mFiles != null && !mFiles.isEmpty() && !isDialogDisplayed) {
+                    if (!isFinishing() && !isDestroyed() && mProgress != null && mProgress.isShowing()) {
                         mProgress.dismiss();
                     }
-                    if(mFiles.size()>1){
-                        isDialogDisplayed = true;
-                        new AlertDialog.Builder(TorrentLoaderActivity.this).setTitle(R.string.torrent_file_to_play)
-                        .setOnCancelListener(new OnCancelListener() {
-
-                            @Override
-                            public void onCancel(DialogInterface dialog) {
-                                TorrentLoaderActivity.this.finish();
-                                isDialogDisplayed =false;
-                            }
-                        })
-                        .setItems(mFiles.keySet().toArray(new CharSequence[mFiles.size()]), new OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                                startPlayerActivity(mFiles.keySet().toArray(new String[mFiles.size()])[which]);
-                                isDialogDisplayed = false;
-
-                            }
-                        })
-                        .setNegativeButton(android.R.string.no, new OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                TorrentLoaderActivity.this.finish();
-                            }
-                        })
-                        .create().show();
+                    if (!isFinishing() && !isDestroyed()) {
+                        if (mFiles.size() > 1) {
+                            isDialogDisplayed = true;
+                            new AlertDialog.Builder(TorrentLoaderActivity.this)
+                                    .setTitle(R.string.torrent_file_to_play)
+                                    .setOnCancelListener(dialog -> {
+                                        TorrentLoaderActivity.this.finish();
+                                        isDialogDisplayed = false;
+                                    })
+                                    .setItems(mFiles.keySet().toArray(new CharSequence[mFiles.size()]), (dialog, which) -> {
+                                        dialog.dismiss();
+                                        startPlayerActivity(mFiles.keySet().toArray(new String[mFiles.size()])[which]);
+                                        isDialogDisplayed = false;
+                                    })
+                                    .setNegativeButton(android.R.string.no, (dialog, which) -> TorrentLoaderActivity.this.finish())
+                                    .create()
+                                    .show();
+                        } else {
+                            startPlayerActivity(mFiles.keySet().toArray(new String[mFiles.size()])[0]);
+                        }
                     }
-                    else{
-                        startPlayerActivity(mFiles.keySet().toArray(new String[mFiles.size()])[0]);
+                } else if (!isFinishing() && mFiles != null && mFiles.isEmpty()) {
+                    if (mProgress != null && mProgress.isShowing()) {
+                        mProgress.dismiss();
                     }
-                }
-                else if(!isFinishing() && mFiles!=null&&mFiles.isEmpty()){
-                    mProgress.dismiss();
                     showErrorDialog(getString(R.string.error_no_video_file));
                 }
-            }
-            else if(msg.what == ERROR_DIALOG){
-                if (!isFinishing() && mProgress != null && mProgress.isShowing()) {
+            } else if (msg.what == ERROR_DIALOG) {
+                if (!isFinishing() && !isDestroyed() && mProgress != null && mProgress.isShowing()) {
                     mProgress.dismiss();
                 }
-                if(!isClosingService)
+                if (!isClosingService) {
                     showErrorDialog(getString(R.string.error_loading_torrent));
+                }
             }
         }
     };
