@@ -155,12 +155,16 @@ public class SubtitleGfxView extends View {
         mFrameWidth = frameWidth;
         mFrameHeight = frameHeight;
         // desired width/height is the surface
-        if (Player.sPlayer.isFloatingPlayer()) { // in floating player mode surfaceController is no more
+        if (Player.sPlayer != null && Player.sPlayer.isFloatingPlayer()) { // in floating player mode surfaceController is no more
             mDesiredWidth = mDisplayWidth;
             mDesiredHeight = mDisplayHeight;
-        } else {
+        } else if (Player.sPlayer != null ) {
             mDesiredWidth = Player.sPlayer.getSurfaceControllerWidth();
             mDesiredHeight = Player.sPlayer.getSurfaceControllerHeight();
+        } else {
+            log.error("setSubtitle: Player.sPlayer is null, cannot determine desired dimensions.");
+            setVisibility(View.INVISIBLE);
+            return;
         }
         log.debug("setSubtitle: bitmap={}, subtitleOriginalBounds={}, frame=({},{}), mSubtitleOriginalRect={}", bitmap == null ? "null" : "not null", subtitleOriginalBounds, frameWidth, frameHeight, mSubtitleOriginalRect);
         if (mBitmap == null) {
