@@ -181,13 +181,15 @@ public class ManualVideoScrappingSearchFragment extends ManualScrappingSearchFra
                     }
                 }
 
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        progressDialog.setProgress(1);
-                        progressDialog.setMessage(getString(R.string.scrap_change_finalizing));
-                    }
-                });
+                if (getActivity() != null && ! getActivity().isFinishing() && ! getActivity().isDestroyed()) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressDialog.setProgress(1);
+                            progressDialog.setMessage(getString(R.string.scrap_change_finalizing));
+                        }
+                    });
+                }
 
                 // saving will trigger database change notification and reloading in
                 // VideoInfoActivity
@@ -195,14 +197,16 @@ public class ManualVideoScrappingSearchFragment extends ManualScrappingSearchFra
         
                 // Update Trakt
                 TraktService.onNewVideo(getActivity());
-                
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        progressDialog.dismiss();
-                        getActivity().finish();
-                    }
-                });
+
+                if (getActivity() != null && ! getActivity().isFinishing() && ! getActivity().isDestroyed()) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressDialog.dismiss();
+                            getActivity().finish();
+                        }
+                    });
+                }
             }
         }.start();
     }
