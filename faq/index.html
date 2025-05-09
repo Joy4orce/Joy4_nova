@@ -151,12 +151,20 @@ Note that only the last 100 played entries are synced from trakt to reduce netwo
 
 <h2>Trakt complains about no Internet connection.</h2>
 
-<p>Trakt can report that there is no Internet connection when you use specific adblocking or a Pi-hole. In order to overcome this issue you need to whitelist these domains:</p>
+<p>Trakt can report that there is no Internet connection when you use specific adblocking (Pi-hole or AdGuard). In order to overcome this issue you need to whitelist these domains:</p>
 
 <p><code>
 static.criteo.net
 www.google-analytics.com
 stats.g.doubleclick.net
+</code></p>
+
+<p>With AdGuard you need to add the following corresponding personalized filtering rules:</p>
+
+<p><code>
+@@||static.criteo.net^
+@@||www.google-analytics.com^
+@@||stats.g.doubleclick.net^
 </code></p>
 
 <h2>What are the different play modes.</h2>
@@ -239,6 +247,11 @@ Sad that an app that has more than 500k active users and 2M downloads on Google 
 <p>Due to Android storage restrictions for API31, local NFO/JPG media information files for videos stored on local/HDD storage have been moved to nova public application folder located <code>/sdcard/Android/data/org.courville.nova/files/nfoPoster</code>.</p>
 
 <p>Note that due to API31 restrictions, NFO files co-located with videos on local storage are invisible to nova since Google refuses to grant <code>MANAGE_EXTERNAL_STORAGE</code> permission to nova (cf. section above).</p>
+
+<h2>How to exclude some folders from media indexing?</h2>
+
+<p>For local storage or remote network shares, creating a <code>.nomedia</code> empty file in a folder will instruct nova to not index the video files included in this folder.
+Note that this is a global Android practice and since nova is relying on Android multimedia indexing for local storage, it is inherently supported.</p>
 
 <h2>I’d like to request a new feature.</h2>
 
