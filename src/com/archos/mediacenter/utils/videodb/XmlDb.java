@@ -493,14 +493,14 @@ public class XmlDb implements Callback {
             try {
                 os.write(xmlContent.getBytes());
             } catch (IOException e) {
-                log.error("writeXml: Error: " + e);
+                log.error("writeXml: Error writing " + e);
                 return false;
             } finally {
                 if(os!=null)
                     try {
                         os.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        log.error("writeXml: Error closing " + e);
                     }
             }
         }
