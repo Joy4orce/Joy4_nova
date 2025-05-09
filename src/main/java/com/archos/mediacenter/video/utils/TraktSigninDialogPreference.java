@@ -36,11 +36,12 @@ import com.archos.mediacenter.video.utils.oauth.OAuthDialog;
 
 import org.apache.oltu.oauth2.client.request.OAuthClientRequest;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TraktSigninDialogPreference extends Preference {
 
-    private final static boolean DBG = false;
-    private static final String TAG = TraktSigninDialogPreference.class.getSimpleName();
+    private static final Logger log = LoggerFactory.getLogger(TraktSigninDialogPreference.class);
 
 	OAuthDialog od=null;
     private DialogInterface.OnDismissListener mOnDismissListener;
@@ -81,7 +82,7 @@ public class TraktSigninDialogPreference extends Preference {
             OAuthCallback codeCallBack = data -> {
                 // TODO Auto-generated method stub
                 if (data.code != null) {
-                    if (DBG) Log.d(TAG,"onClick: data.code is not null");
+                   log.debug("onClick: data.code is not null");
                     if (context instanceof Activity) {
                         Activity activity = (Activity) context;
                         if (activity.isFinishing() || activity.isDestroyed()) {
@@ -93,7 +94,7 @@ public class TraktSigninDialogPreference extends Preference {
                     AsyncTask t1 = new AsyncTask() {
                         @Override
                         protected void onPreExecute() {
-                            if (DBG) Log.d(TAG,"OAuthCallback.onPreExecute: show dialog");
+                            log.debug("OAuthCallback.onPreExecute: show dialog");
                             // Check again before showing the dialog
                             if (context instanceof Activity) {
                                 Activity activity = (Activity) context;
@@ -107,13 +108,13 @@ public class TraktSigninDialogPreference extends Preference {
 
                         @Override
                         protected Object doInBackground(Object... params) {
-                            if (DBG) Log.d(TAG,"OAuthCallback.doInBackground: get trakt accessToken");
+                            log.debug("OAuthCallback.doInBackground: get trakt accessToken");
                             return Trakt.getAccessToken(oa.code);
                         }
 
                         @Override
                         protected void onPostExecute(Object result) {
-                            if (DBG) Log.d(TAG,"OAuthCallback.onPostExecute: store trakt accessToken and notify change");
+                            log.debug("OAuthCallback.onPostExecute: store trakt accessToken and notify change");
                             if (mProgress.isShowing()) {
                                 mProgress.dismiss();
                             }
@@ -129,7 +130,7 @@ public class TraktSigninDialogPreference extends Preference {
                     };
                     t1.execute();
                 } else {
-                    if (DBG) Log.d(TAG,"onClick: data.code null!");
+                    log.debug("onClick: data.code null!");
                     if (!(context instanceof Activity) || ((Activity) context).isFinishing() || ((Activity) context).isDestroyed()) {
                         return;
                     }
@@ -156,7 +157,7 @@ public class TraktSigninDialogPreference extends Preference {
             }
         } catch (OAuthSystemException e) {
             // TODO Auto-generated catch block
-            Log.e(TAG, "onClick: caught OAuthSystemException", e);
+            log.error("onClick: caught OAuthSystemException", e);
         }
         
     }
@@ -172,10 +173,10 @@ public class TraktSigninDialogPreference extends Preference {
 	public void showDialog(boolean boolean1) {
 		// TODO Auto-generated method stub
 		if(boolean1) {
-            if (DBG) Log.d(TAG, "showDialog: trigger onClick");
+            log.debug("showDialog: trigger onClick");
             this.onClick();
         } else {
-            if (DBG) Log.d(TAG, "showDialog: dismiss dialog");
+            log.debug("showDialog: dismiss dialog");
             dismissDialog();
         }
 	}
