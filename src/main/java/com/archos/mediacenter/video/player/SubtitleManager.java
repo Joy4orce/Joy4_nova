@@ -629,6 +629,7 @@ public class SubtitleManager {
         // strategy is videoView avoids cutout if not in fullscreen
         // adjust subtitle text height (bottom/top) to avoid system bars and playerController bar only if text subtitle but not left/right
         boolean avoidCutout = ! mFullScreenWithCutout;
+        boolean isFloatingPlayer = Player.sPlayer != null && Player.sPlayer.isFloatingPlayer();
         // Player.sPlayer.getSurfaceControllerWidth(), Player.sPlayer.getSurfaceControllerHeight() is for the videoView but virtualScreen is larger
         // do not apply globalShift if in floating player mode
         log.debug("adjustView: mIsSubtitleGfx={}", mIsSubtitleGfx);
@@ -636,7 +637,7 @@ public class SubtitleManager {
                 mNavigationBarShowing, mSystemBarShowing, mActionBarShowing, PlayerController.isControlBarShowing(), mIsNavBarOnBottom, mIsGestureAreaShowing,
                 (! mIsSubtitleGfx && PlayerController.isControlBarShowing() ? PlayerController.getControlBarCurrentHeight() : 0), (mIsSubtitleGfx ? 0 :mSubtitleEvadedVPos),
                 false, ! mIsSubtitleGfx, false, ! mIsSubtitleGfx,
-                avoidCutout, avoidCutout, avoidCutout, avoidCutout, ! mIsSubtitleGfx, mIsSubtitleGfx && ! Player.sPlayer.isFloatingPlayer());
+                avoidCutout, avoidCutout, avoidCutout, avoidCutout, ! mIsSubtitleGfx, mIsSubtitleGfx && ! isFloatingPlayer);
     }
 
     private void detachWindow() {
