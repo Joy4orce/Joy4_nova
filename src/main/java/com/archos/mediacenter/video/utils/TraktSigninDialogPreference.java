@@ -82,6 +82,13 @@ public class TraktSigninDialogPreference extends Preference {
                 // TODO Auto-generated method stub
                 if (data.code != null) {
                     if (DBG) Log.d(TAG,"onClick: data.code is not null");
+                    if (context instanceof Activity) {
+                        Activity activity = (Activity) context;
+                        if (activity.isFinishing() || activity.isDestroyed()) {
+                            // check again before displaying dialog
+                            return;
+                        }
+                    }
                     NovaProgressDialog mProgress = NovaProgressDialog.show(getContext(), "", getContext().getResources().getString(R.string.connecting), true, true);
                     AsyncTask t1 = new AsyncTask() {
                         @Override
@@ -101,8 +108,7 @@ public class TraktSigninDialogPreference extends Preference {
                         @Override
                         protected Object doInBackground(Object... params) {
                             if (DBG) Log.d(TAG,"OAuthCallback.doInBackground: get trakt accessToken");
-                            final Trakt.accessToken res = Trakt.getAccessToken(oa.code);
-                            return res;
+                            return Trakt.getAccessToken(oa.code);
                         }
 
                         @Override
