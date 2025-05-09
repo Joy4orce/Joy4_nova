@@ -194,7 +194,7 @@ public enum ShortcutDbAdapter {
      * Close the shortcut database
      */
     public void close() {
-        if (mDb != null) {
+        if (mDb != null && mDb.isOpen()) {
             mDb.close();
         }
         if (mDbHelper != null) {
@@ -207,7 +207,6 @@ public enum ShortcutDbAdapter {
      * @return
      */
     public Cursor queryAllShortcuts(Context context) {
-
         return getAllShortcuts(context, null, null);
     }
 
@@ -294,6 +293,10 @@ public enum ShortcutDbAdapter {
     public Cursor getAllShortcuts(Context context, String where, String [] whereArgs) {
         try {
             open(context);
+            if (mDb == null || !mDb.isOpen()) {
+                Log.e(TAG, "getAllShortcuts: Database is closed or null!");
+                return null;
+            }
             return mDb.query(mDatabaseTable,
                     SHORTCUT_COLS,
                     where,
@@ -304,7 +307,7 @@ public enum ShortcutDbAdapter {
         }
         catch (SQLiteException | NullPointerException e) {
             // The table corresponding to this type does not exist yet
-            Log.w(TAG, e);
+            Log.w(TAG, "getAllShortcuts: Exception occurred", e);
             return null;
         }
     }
