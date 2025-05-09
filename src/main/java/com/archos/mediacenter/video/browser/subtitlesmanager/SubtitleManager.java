@@ -164,28 +164,32 @@ public class SubtitleManager {
                     String nameSource = FileUtils.getFileNameWithoutExtension(upnpNiceUri);
                     String nameDest = FileUtils.getFileNameWithoutExtension(fileUri);
                     if (subsDir != null) {
-                        for (File file : subsDir.listFiles()) {
-                            Uri fileUri = Uri.fromFile(file);
-                            String nameWithoutExtension = FileUtils.getFileNameWithoutExtension(fileUri);
-                            String extension = MimeUtils.getExtension(FileUtils.getName(fileUri));
-                            String lang = MimeUtils.getExtension(nameWithoutExtension);
-                            if (nameWithoutExtension.startsWith(nameSource)) {
-                                try {
-                                    Uri destFile = Uri.withAppendedPath(destinationDir,
-                                            nameDest + (lang != null && !lang.isEmpty() ? ("." + lang) : "") + "." + extension
-                                    );
+                        try {
+                            for (File file : subsDir.listFiles()) {
+                                Uri fileUri = Uri.fromFile(file);
+                                String nameWithoutExtension = FileUtils.getFileNameWithoutExtension(fileUri);
+                                String extension = MimeUtils.getExtension(FileUtils.getName(fileUri));
+                                String lang = MimeUtils.getExtension(nameWithoutExtension);
+                                if (nameWithoutExtension.startsWith(nameSource)) {
                                     try {
-                                        FileEditorFactory.getFileEditorForUrl(destFile, mContext).delete();
+                                        Uri destFile = Uri.withAppendedPath(destinationDir,
+                                                nameDest + (lang != null && !lang.isEmpty() ? ("." + lang) : "") + "." + extension
+                                        );
+                                        try {
+                                            FileEditorFactory.getFileEditorForUrl(destFile, mContext).delete();
+                                        } catch (Exception e) {
+                                            log.error("preFetchHTTPSubtitlesAndPrepareUpnpSubs: caught exception", e);
+                                        }
+                                        FileEditorFactory.getFileEditorForUrl(Uri.fromFile(file), mContext).copyFileTo(destFile, mContext);
+                                        prefetchedListOfSubs.add(destFile.getPath());
+                                        log.trace("preFetchHTTPSubtitlesAndPrepareUpnpSubs: copy " + nameWithoutExtension + " -> " + destFile.getPath());
                                     } catch (Exception e) {
                                         log.error("preFetchHTTPSubtitlesAndPrepareUpnpSubs: caught exception", e);
                                     }
-                                    FileEditorFactory.getFileEditorForUrl(Uri.fromFile(file), mContext).copyFileTo(destFile, mContext);
-                                    prefetchedListOfSubs.add(destFile.getPath());
-                                    log.trace("preFetchHTTPSubtitlesAndPrepareUpnpSubs: copy " + nameWithoutExtension + " -> " + destFile.getPath());
-                                } catch (Exception e) {
-                                    log.error("preFetchHTTPSubtitlesAndPrepareUpnpSubs: caught exception", e);
                                 }
                             }
+                        } catch (NullPointerException npe) {
+                            log.error("preFetchHTTPSubtitlesAndPrepareUpnpSubs: caught NullPointerException for {}", subsDir.getPath(), npe);
                         }
                     }
                 }
