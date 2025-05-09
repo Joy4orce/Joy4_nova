@@ -356,6 +356,10 @@ public class MiscUtils {
         // additionalBottomMargin is the margin to apply to the bottom of the view (captures for subtitleView the height of playerController control bar being an external component if displayed)
         // alreadyAppliedBottomMargin is the margin already applied to the bottom of the view (captures the vertical position of subtitleView set in subtitles settings)
         // globalShiftLeft and globalShiftUp are to shift the view globally in the screen and needed for subtitleGfxView to match the videoView (surfaceControllerView) that can be larger than the screen size
+        if (Player.sPlayer == null) {
+            log.debug("adjustViewLayoutForInsets: {} Player.sPlayer is null, aborting", viewName);
+            return;
+        }
         log.debug("adjustViewLayoutForInsets: {} navigationBarShowing={}, systemBarShowing={}, actionBarShowing={}, controlBarShowing={}, isNavBarOnBottom={}, isGestureAreaShowing={}, additionalBottomMargin={}, alreadyAppliedBottomMargin={}",
                 viewName, navigationBarShowing, systemBarShowing, actionBarShowing, controlBarShowing, isNavBarOnBottom, isGestureAreaShowing, additionalBottomMargin, alreadyAppliedBottomMargin);
         log.debug("adjustViewLayoutForInsets: {} getNavigationBarHeight()={}, getGestureAreaHeight()={}, getStatusBarHeight()={}, getActionBarHeight()={}, getSystemBarHeight()={}",
