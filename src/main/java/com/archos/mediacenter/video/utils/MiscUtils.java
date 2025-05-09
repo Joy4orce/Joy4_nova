@@ -27,8 +27,8 @@ import android.graphics.Insets;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.RoundedCorner;
 import android.view.View;
@@ -38,7 +38,6 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
 
-import static android.content.Context.UI_MODE_SERVICE;
 import static android.view.RoundedCorner.POSITION_BOTTOM_LEFT;
 import static android.view.RoundedCorner.POSITION_BOTTOM_RIGHT;
 import static android.view.RoundedCorner.POSITION_TOP_LEFT;
@@ -65,7 +64,7 @@ public class MiscUtils {
 
     public static boolean hasCutout = false;
 
-    private static final Handler handler = new Handler();
+    private static Handler handler;
     private static final int DELAY_MILLIS_NORMAL = 250; // Delay for applying relayout
     // AUTODIM_TIMEOUT_MS = 2250 in https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/src/com/android/systemui/navigationbar/views/NavigationBar.java
     private static final int DELAY_MILLIS_GESTURE_NAVIGATION = 2300; // Delay for applying relayout
@@ -74,6 +73,16 @@ public class MiscUtils {
 
     private static int mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom;
     private static int mVideoWidth, mVideoHeight, mVideoAspect;
+
+    public static Handler getHandler() {
+        if (handler == null) {
+            if (Looper.myLooper() == null) {
+                Looper.prepare(); // prepare lopper if necessary
+            }
+            handler = new Handler(Looper.getMainLooper()); // use main lopper
+        }
+        return handler;
+    }
 
     public static boolean isGooglePlayServicesAvailable(Context context){
         try {
@@ -451,7 +460,7 @@ public class MiscUtils {
             // Schedule the delayed relayout
             if (relayoutRunnable != null) {
                 log.debug("adjustViewLayoutForInsets: Cancel previous delayed relayout");
-                handler.removeCallbacks(relayoutRunnable);
+                getHandler().removeCallbacks(relayoutRunnable);
             }
             final int finalLeft, finalTop, finalRight, finalShiftBottom;
             finalLeft = left; finalTop = top; finalRight = right; finalShiftBottom = shiftBottom;
@@ -478,7 +487,7 @@ public class MiscUtils {
                 delay = DELAY_MILLIS_NORMAL;
             }
             // wait a little: avoid a glitch (subtitles being displayed under the system bar for x ms), note that gesture bar fades away slowly
-            handler.postDelayed(relayoutRunnable, delay);
+            getHandler().postDelayed(relayoutRunnable, delay);
         } else {
             // Apply the relayout immediately
             layoutParams.leftMargin = left;
