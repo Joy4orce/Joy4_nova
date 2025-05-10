@@ -392,7 +392,10 @@ public class MiscUtils {
         if (avoidCutoutBottom) bottom = mCutoutBottom;
         int screenVideoAvailableWidth = PlayerActivity.getScreenWidth() - left - right; // screen width minus cutout insets if applied which provides width of area for videoView
         int screenVideoAvailableHeight = PlayerActivity.getScreenHeight() - top - bottom; // screen height minus cutout insets if applied which provides height of area for videoView
-
+        if (Player.sPlayer.getSurfaceControllerWidth() == 0 || Player.sPlayer.getSurfaceControllerHeight() == 0) {
+            log.debug("adjustViewLayoutForInsets: {} Player.sPlayer.getSurfaceControllerWidth() or getSurfaceControllerHeight() is 0, aborting", viewName);
+            return;
+        }
         // when not null this is the shift to apply to recenter the subtitleView when larger then the screen
         int globalShiftLeft = Math.min(Math.round((screenVideoAvailableWidth - Player.sPlayer.getSurfaceControllerWidth()) / 2.0f), 0);
         int globalShiftUp = Math.min(Math.round((screenVideoAvailableHeight - Player.sPlayer.getSurfaceControllerHeight()) / 2.0f), 0);
