@@ -300,10 +300,10 @@ public class VideoDbInfo implements Parcelable {
         if (traktLibrary != -1)
             values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_LIBRARY, traktLibrary);
         if (traktResume != -1)
-            values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_LIBRARY, traktLibrary);
+            values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_RESUME, traktResume);
 
         if (videoStereo != -1)
-            values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_RESUME, traktResume);
+            values.put(VideoStore.Video.VideoColumns.ARCHOS_VIDEO_STEREO, videoStereo);
 
         if (videoDefinition != -1)
             values.put(VideoStore.Video.VideoColumns.ARCHOS_VIDEO_DEFINITION, videoDefinition);
