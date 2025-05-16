@@ -173,6 +173,8 @@ In order to avoid this issue, select "Disable SMB UDP discovery" in Nova setting
 
 ## Opensubtitles login issues after v6.2.40.
 
+Note that you need to use your opensubtitles.com credentials (not your opensubtitle.org one) and input your username (not your email) to login to opensubtitles.com.
+
 Opensubtitles has announced to all app developers that starting January 2024, XML-RPC will not be supported anymore and that REST-API needs to be used (cf. https://github.com/nova-video-player/aos-AVP/issues/852).
 
 As a consequence, old opensubtitles.org logins will not be supported anymore and users need to register an account at opensubtitles.com to continue to use the service with nova.
