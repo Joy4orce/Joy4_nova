@@ -5,7 +5,7 @@ buildscript {
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.8.2'
+        classpath 'com.android.tools.build:gradle:8.9.2'
         //classpath 'app.brant:amazonappstorepublisher:0.1.0'
         //classpath 'com.github.BrantApps.gradle-amazon-app-store-publisher:amazonappstorepublisher:master-SNAPSHOT'
     }
@@ -13,7 +13,7 @@ buildscript {
 
 plugins {
     id "com.github.triplet.play" version "3.12.1"
-    id "io.sentry.android.gradle" version "5.3.0" apply false
+    id "io.sentry.android.gradle" version "5.5.0" apply false
     //id "app.brant.amazonappstorepublisher" version "0.1.0"
 }
 
@@ -322,12 +322,12 @@ android {
 dependencies {
     implementation project(':FileCoreLibrary')
     implementation project(':MediaLib')
-    implementation 'androidx.lifecycle:lifecycle-process:2.8.7'
+    implementation 'androidx.lifecycle:lifecycle-process:2.9.0'
     // needed for old Android versions when using java 17
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
     implementation 'com.jakewharton.threetenabp:threetenabp:1.4.9'
     implementation 'com.squareup.picasso:picasso:2.8'
-    implementation 'androidx.tvprovider:tvprovider:1.0.0'
+    implementation 'androidx.tvprovider:tvprovider:1.1.0'
     implementation 'androidx.media:media:1.7.0'
     // last sdk34 core release is 1.13.1
     implementation 'androidx.core:core:1.16.0'
@@ -343,11 +343,11 @@ dependencies {
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.leanback:leanback:1.2.0'
     implementation 'androidx.leanback:leanback-preference:1.2.0'
-    implementation 'androidx.tvprovider:tvprovider:1.0.0'
+    implementation 'androidx.tvprovider:tvprovider:1.1.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
     implementation 'com.github.tony19:logback-android:3.0.0'
-    implementation 'io.sentry:sentry-android:8.3.0'
-    implementation 'io.sentry:sentry:8.3.0'
+    implementation 'io.sentry:sentry-android:8.11.1'
+    implementation 'io.sentry:sentry:8.11.1'
 }
 
 configurations { // try to exclude device specific libraries interfering
