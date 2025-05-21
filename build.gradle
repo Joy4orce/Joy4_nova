@@ -82,6 +82,7 @@ android {
         exclude 'META-INF/NOTICE.txt'
         exclude 'META-INF/beans.xml'
         exclude 'META-INF/maven'
+        exclude 'META-INF/versions/**/OSGI-INF/MANIFEST.MF'
         exclude 'README'
     }
 
