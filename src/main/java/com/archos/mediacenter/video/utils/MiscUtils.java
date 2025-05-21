@@ -51,7 +51,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -367,6 +366,10 @@ public class MiscUtils {
         // globalShiftLeft and globalShiftUp are to shift the view globally in the screen and needed for subtitleGfxView to match the videoView (surfaceControllerView) that can be larger than the screen size
         if (Player.sPlayer == null) {
             log.debug("adjustViewLayoutForInsets: {} Player.sPlayer is null, aborting", viewName);
+            return;
+        }
+        if (viewLayout == null || rootView == null) {
+            log.debug("adjustViewLayoutForInsets: {} viewLayout or rootView is null, aborting", viewName);
             return;
         }
         log.debug("adjustViewLayoutForInsets: {} navigationBarShowing={}, systemBarShowing={}, actionBarShowing={}, controlBarShowing={}, isNavBarOnBottom={}, isGestureAreaShowing={}, additionalBottomMargin={}, alreadyAppliedBottomMargin={}",
