@@ -209,6 +209,11 @@ Note that due to API31 restrictions, NFO files co-located with videos on local s
 For local storage or remote network shares, creating a `.nomedia` empty file in a folder will instruct nova to not index the video files included in this folder.
 Note that this is a global Android practice and since nova is relying on Android multimedia indexing for local storage, it is inherently supported.
 
+## Audio boost effect acts temporarily
+
+This can be avoided by selecting PCM instead of Automatic in Android All settings -> Display & Sound -> Advanced sound settings -> Select formats.
+This option removes the adaptive normalization of the sound that seems to be Android TV default behavior canceling nova's boost mode after a while.
+
 ## I’d like to request a new feature.
 
 Feel free to join our [Reddit community](https://www.reddit.com/r/NovaVideoPlayer) or open a feature request on [github project issue](https://github.com/nova-video-player/aos-AVP/issues).
