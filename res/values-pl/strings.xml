@@ -98,10 +98,10 @@
     <string name="all_collection_watched">Obejrzano cały zbiór</string>
     <string name="all_collection_unwatched">Zbiór nie obejrzany</string>
     <plurals name="n_movies_watched">
-        <item quantity="one">%d obejrzanych filmów</item>
-        <item quantity="few">%d obejrzanych filmów</item>
+        <item quantity="one">%d obejrzany film</item>
+        <item quantity="few">%d obejrzane filmy</item>
         <item quantity="many">%d obejrzanych filmów</item>
-        <item quantity="other">%d obejrzanych filmów</item>
+        <item quantity="other">%d obejrzane filmy</item>
     </plurals>
     <string name="not_watched_movies_format">Nieobejrzane - %d</string>
     <string name="not_watched_animes_format">Nieobejrzane - %d</string>
@@ -208,11 +208,11 @@
         <item quantity="one">%d obejrzany odcinek</item>
         <item quantity="few">%d obejrzanych odcinków</item>
         <item quantity="many">%d obejrzanych odcinków</item>
-        <item quantity="other">%d obejrzanych odcinków</item>
+        <item quantity="other">%d obejrzane odcinki</item>
     </plurals>
     <string name="scrap_processing">Pobieranie metadanych…</string>
-    <string name="scrap_no_network">Brak połączenia z siecią.</string>
-    <string name="scrap_enable_network_first">"Aby umożliwić uruchomienie aplikacji należy najpierw aktywować połączenie z siecią."</string>
+    <string name="scrap_no_network">Brak połączenia z siecią</string>
+    <string name="scrap_enable_network_first">"Aby umożliwić uruchomienie aplikacji należy najpierw aktywować połączenie z siecią"</string>
     <string name="scrap_failed">Nie znaleziono filmu w bazie danych.</string>
     <string name="start_auto_scraper_activity">Wyszukaj informacje w Internecie</string>
     <string name="scraper_settigns">Plakat &amp; opis</string>
@@ -226,13 +226,13 @@
     <string name="scraper_no_files">Brak plików do przetworzenia</string>
     <string name="scraper_no_new_files">Brak nowych plików do przetworzenia</string>
     <string name="scraper_no_new_files_in_folder">Brak nowych plików w tym folderze do przetworzenia</string>
-    <string name="scraper_folder_no_files">Nadal jest %d filmów, dla których wcześniej nie znaleziono informacji.</string>
-    <string name="scraper_folder_no_file">Jednak nadal pozostał jeden plik wideo dla którego poprzednio nie znaleziono informacji.</string>
+    <string name="scraper_folder_no_files">Nadal jest %d filmów, dla których wcześniej nie znaleziono informacji</string>
+    <string name="scraper_folder_no_file">Jednak nadal pozostał jeden plik wideo dla którego nie znaleziono informacji</string>
     <string name="scraper_folder_try_again">Czy chcesz spróbować ponownie?</string>
     <string name="scraper_notification_title">Wyszukiwanie informacji w Internecie</string>
     <string name="scraper_notification_progress">\"%1$d z %2$d plików przetworzono</string>
     <string name="scraper_no_episode_found">Nie znaleziono odcinka</string>
-    <string name="scraper_suggest_message">Możesz przeglądać plakaty i informacje online dla swoich filmów korzystając z menu \"Szukaj informacji online\".</string>
+    <string name="scraper_suggest_message">Możesz przeglądać plakaty i informacje online dla swoich filmów korzystając z menu \"Szukaj informacji online\"</string>
     <string name="scraper_no_movie_text">Obecnie nie posiadasz plakatów ani opisów dla swoich filmów</string>
     <string name="scraper_no_movie_button_label">Wyszukaj informacje o filmie online</string>
     <string name="scraper_no_tv_show_text">Nie masz aktualnie plakatu ani opisu dla twoich seriali</string>
@@ -268,15 +268,15 @@
     <string name="you_have_no_anime_shows">Nie ma seriali animowanych</string>
     <string name="you_have_no_non_scraped_videos">Brak nierozpoznanych multimediów</string>
     <plurals name="Nmovies">
-        <item quantity="one">film</item>
-        <item quantity="few"><xliff:g id="count">%d</xliff:g> Filmy</item>
+        <item quantity="one">Jeden film</item>
+        <item quantity="few"><xliff:g id="count">%d</xliff:g> filmy</item>
         <item quantity="many"><xliff:g id="count">%d</xliff:g> Filmów</item>
-        <item quantity="other"><xliff:g id="count">%d</xliff:g> Filmów</item>
+        <item quantity="other"><xliff:g id="count">%d</xliff:g> filmy</item>
     </plurals>
     <plurals name="Nepisodes">
         <!-- number of episodes is one -->
-        <item quantity="one">1 odcinek</item>
-        <item quantity="few"><xliff:g id="count">%d</xliff:g> odcinków</item>
+        <item quantity="one">jeden odcinek</item>
+        <item quantity="few"><xliff:g id="count">%d</xliff:g> odcinki</item>
         <item quantity="many"><xliff:g id="count">%d</xliff:g> odcinków</item>
         <!-- number of episodes is not equal to one -->
         <item quantity="other"><xliff:g id="count">%d</xliff:g> odcinki</item>
@@ -344,23 +344,23 @@
     <!-- Subtitles in filename SDH = Subtitles for the Deaf and Hard of Hearing -->
     <string name="subs_SDH">Napisy dla osób głuchych i niedosłyszących</string>
     <!-- opensubtitles REST API not recognized languages ea=Spanish (LA)|ex=Extremaduran|me=Montenegrin|ma=Manipuri|pr=Dari|sp=Spanish (EU)|sx=Santali|sy=Syriac|tp=Toki Pona|ze=Chinese bilingual -->
-    <string name="s_brazilian">Brazylijski</string>
+    <string name="s_brazilian">brazylijski</string>
     <string name="s_chinese">chiński</string>
-    <string name="s_chinese_simplified">Uproszczony chiński</string>
-    <string name="s_traditional_chinese">Chiński (tradycyjny)</string>
-    <string name="s_chinese_bilingual">Chiński dwujęzyczny</string>
-    <string name="s_chinese_mainland">Chiński (Mainland China)</string>
-    <string name="s_chinese_hk">Chiński (Hongkong)</string>
-    <string name="s_chinese_tw">Chiński (Tajwan)</string>
-    <string name="s_spanish_la">Hiszpański (LA)</string>
-    <string name="s_extremaduran">Estremadurski</string>
-    <string name="s_montenegrin">Czarnogórski</string>
-    <string name="s_manipuri">Manipuri</string>
-    <string name="s_dari">Dari</string>
-    <string name="s_portuguese_mz">Portugalski (MZ)</string>
-    <string name="s_spanish_eu">Hiszpański (UE)</string>
-    <string name="s_santali">Santali</string>
-    <string name="s_syriac">Syriac</string>
+    <string name="s_chinese_simplified">uproszczony chiński</string>
+    <string name="s_traditional_chinese">chiński (tradycyjny)</string>
+    <string name="s_chinese_bilingual">chiński dwujęzyczny</string>
+    <string name="s_chinese_mainland">chiński (Mainland China)</string>
+    <string name="s_chinese_hk">chiński (Hongkong)</string>
+    <string name="s_chinese_tw">chiński (Tajwan)</string>
+    <string name="s_spanish_la">hiszpański (LA)</string>
+    <string name="s_extremaduran">estremadurski</string>
+    <string name="s_montenegrin">czarnogórski</string>
+    <string name="s_manipuri">manipuri</string>
+    <string name="s_dari">dari</string>
+    <string name="s_portuguese_mz">portugalski (MZ)</string>
+    <string name="s_spanish_eu">hiszpański (UE)</string>
+    <string name="s_santali">santali</string>
+    <string name="s_syriac">syriac</string>
     <string name="s_toki_pona">Toki Pona</string>
     <string name="s_none">Brak</string>
     <!-- Player errors -->
@@ -371,12 +371,12 @@
     <string name="player_err_file">Plik wideo nie istnieje.</string>
     <string name="player_err_sizetoobig">Rozmiar obrazu jest zbyt duży</string>
     <string name="player_err_unknown">Nieznany błąd.</string>
-    <string name="player_err_critical">Błąd serwera mediów.</string>
+    <string name="player_err_critical">Błąd serwera mediów</string>
     <string name="player_err_forcodec">dla kodeka</string>
-    <string name="player_err_notinterleaved">Strumieniowanie wideo i audio nie przeplata się.</string>
+    <string name="player_err_notinterleaved">Strumieniowanie wideo i audio nie przeplata się</string>
     <string name="player_err_codec">Kodek</string>
     <string name="player_err_isnotsupported">nie jest obsługiwany.</string>
-    <string name="player_err_fileNoLicense">Brak licencji dla tego pliku.</string>
+    <string name="player_err_fileNoLicense">Brak licencji dla tego pliku</string>
     <string name="player_err_fileerror">Plik jest uszkodzony lub niekompletny.</string>
     <string name="player_err_connection_failed">Połączenie nie powiodło się.</string>
     <string name="player_err_video_decoder_error">Błąd dekodera wideo:</string>
@@ -399,7 +399,7 @@
     <string name="player_plugin_purchase_google_play_msg">Możesz kupić dodatkowe wtyczki kodeków w Google Play.</string>
     <string name="player_plugin_purchase_google_play_button">Przejdź do Sklep Play</string>
     <string name="plugin_update_required_title">Wymagana aktualizacja kodeka</string>
-    <string name="plugin_update_required_message">Wygląda na to, że już masz dodatkowe kodeki zainstalowane dla Nova Video Player.\n\nThis Nowa wersja Nova Video Player wymaga aktualizacji tych kodeków.\n\nPrzejdź proszę do Google Play, aby zaktualizować i ponownie zainstalować kodeki.</string>
+    <string name="plugin_update_required_message">Wygląda na to, że już masz dodatkowe kodeki zainstalowane dla Nova Video Player.\n\nThis Nowa wersja Nova Video Player wymaga aktualizacji tych kodeków.\n\nPrzejdź proszę do Google Play, aby zaktualizować i ponownie zainstalować kodeki</string>
     <!-- Subtitles wizard -->
     <string name="get_subtitles_on_drive">Wybierz napisy z dysku</string>
     <string name="subtitles_wizard_no_files">Nie znaleziono napisów</string>
@@ -453,8 +453,8 @@
     not visible otherwise -->
     <string name="quotation_format">&#x201C;%s&#x201D;&#x2003;</string>
     <string name="error_permission">Brak wymaganych uprawnień</string>
-    <string name="error_permission_storage">Nova Video Player wymaga uprawnień do odczytu z pamięci lokalnej plików wideo, proszę, udzielić tego uprawnienia.</string>
-    <string name="error_permission_all_file_access">Nova Video Player potrzebuje wszystkich uprawnień do zarządzania zewnętrznym magazynem. Aby prawidłowo zarządzać lokalnymi plikami wideo/NFO prosimy o przyznanie tych uprawnień.</string>
+    <string name="error_permission_storage">Nova Video Player wymaga uprawnień do odczytu z pamięci lokalnej plików wideo, proszę, udzielić tego uprawnienia</string>
+    <string name="error_permission_all_file_access">Nova Video Player potrzebuje wszystkich uprawnień do zarządzania zewnętrznym magazynem. Aby prawidłowo zarządzać lokalnymi plikami wideo/NFO prosimy o przyznanie tych uprawnień</string>
     <string name="allow">Zezwól</string>
     <string name="exit">Zakończ</string>
     <!-- torrent -->
@@ -481,11 +481,11 @@
     <string name="shortcut_added">Utworzono skrót %s</string>
     <string name="shortcut_removed">Skrót %s usunięty</string>
     <string name="server_not_available">Serwer jest obecnie niedostępny</string>
-    <string name="cannot_open_shortcut">Zawartość tego skrótu jest obecnie niedostępna.\nSprawdź czy masz wymagane uprawnienia.</string>
+    <string name="cannot_open_shortcut">Zawartość tego skrótu jest obecnie niedostępna.\nSprawdź czy masz wymagane uprawnienia</string>
     <string name="network_shortcuts">Skróty sieciowe</string>
     <string name="media_servers">Serwery mediów</string>
-    <string name="shortcut_list_empty">Nie utworzono skrótów sieciowych.\n\nAby utworzyć skróty do ulubionych folderów udostępnionych, przytrzymaj na folderze docelowym i wybierz \"%s\" na górnym pasku akcji.</string>
-    <string name="ftp_shortcut_list_empty">Aby utworzyć skróty do ulubionych folderów zdalnych, wybierz \"%s\" na górnym pasku akcji podczas przeglądania serwera.</string>
+    <string name="shortcut_list_empty">Nie utworzono skrótów sieciowych.\n\nAby utworzyć skróty do ulubionych folderów udostępnionych, przytrzymaj na folderze docelowym i wybierz \"%s\" na górnym pasku akcji</string>
+    <string name="ftp_shortcut_list_empty">Aby utworzyć skróty do ulubionych folderów zdalnych, wybierz \"%s\" na górnym pasku akcji podczas przeglądania serwera</string>
     <string name="indexed_folders">Foldery zindeksowane</string>
     <string name="ftp_shortcuts">FTP skróty</string>
     <string name="add_to_indexed_folders">Indeks folderu</string>
@@ -498,14 +498,14 @@
     <string name="indexed_folder_added">Folder %s dodany do biblioteki</string>
     <string name="remove_from_indexed_folders">Usuń z biblioteki</string>
     <string name="indexed_folder_removed">Folder %s usunięty z biblioteki</string>
-    <string name="indexed_folders_list_empty">Brak obecnie indeksowanych folderów sieciowych.\n\nMożesz dodać zawartość folderu sieciowego do biblioteki przeglądając ten folder i wybierając \"%s\" na górnym pasku akcji.</string>
-    <string name="indexed_folders_list_empty_ftp">Brak aktualnie zindeksowanych folderów FTP.</string>
-    <string name="indexed_folders_list_empty_network">Brak folderów sieciowych obecnie indeksowanych.</string>
+    <string name="indexed_folders_list_empty">Brak obecnie indeksowanych folderów sieciowych.\n\nMożesz dodać zawartość folderu sieciowego do biblioteki przeglądając ten folder i wybierając \"%s\" na górnym pasku akcji</string>
+    <string name="indexed_folders_list_empty_ftp">Brak aktualnie zindeksowanych folderów FTP</string>
+    <string name="indexed_folders_list_empty_network">Brak folderów sieciowych obecnie indeksowanych</string>
     <string name="open_indexed_folder">"Otwórz"</string>
     <string name="rescan_indexed_folders">Ponowne skanowanie wszystkich indeksowanych folderów</string>
     <string name="last_rescan_never">Nigdy</string>
     <string name="upnp_indexing_warning_title">Indeksowania UPnP</string>
-    <string name="upnp_indexing_warning_message">Indeksowanie UPnP nie pozwala na tak wiele funkcji jak indeksowanie SMB.\nZaleca się indeksowanie folderu SMB, jeśli Twój serwer lub komputer go obsługuje.\n</string>
+    <string name="upnp_indexing_warning_message">Indeksowanie UPnP nie pozwala na tak wiele funkcji jak indeksowanie SMB.\nZaleca się indeksowanie folderu SMB, jeśli Twój serwer lub komputer go obsługuje\n</string>
     <string name="ssh_error">Nie można połączyć: Proszę sprawdzić połączenie i poświadczenia</string>
     <string name="ssh_remote_address">Adres zdalny</string>
     <string name="ssh_port">Port</string>
@@ -522,16 +522,16 @@
     <string name="preferences_category_complete">Pełna wersja</string>
     <string name="preferences_category_video">Wideo</string>
     <string name="preferences_force_software_decoding">Wymuś dekoder programowy</string>
-    <string name="preferences_force_software_decoding_summary">Jeśli niektóre filmy nie są odtwarzane poprawnie, może spróbować tej opcji</string>
+    <string name="preferences_force_software_decoding_summary">Jeśli jakieś filmy nie są odtwarzane poprawnie, spróbuj włączyć tę opcję</string>
     <string name="preferences_force_audio_passthrough">Przekazywanie audio</string>
     <string name="preferences_force_audio_passthrough_disabled">Wyłączone (zalecane)</string>
     <string name="preferences_force_audio_passthrough_enable">Hermetyzacja Nova audio (eksperymentalna)</string>
     <string name="preferences_force_audio_passthrough_enable2">Hermetyzacja systemu audio</string>
-    <string name="preferences_force_audio_passthrough_summary">Wysyłaj skompresowany dźwięk przez HDMI lub S/PDIF. ⚠ Opcja eksperymentalna, może powodować utratę synchronizacji dźwięku z obrazem</string>
+    <string name="preferences_force_audio_passthrough_summary">Wysyłaj skompresowany dźwięk przez HDMI lub S/PDIF. ⚠️ Funkcja eksperymentalna, może powodować utratę synchronizacji dźwięku z obrazem</string>
     <string name="preferences_parser_sync_mode">Tryb synchronizacji parsera</string>
     <string name="preferences_parser_sync_mode_cdata">Oparte na PTS (zalecane)</string>
     <string name="preferences_parser_sync_mode_sample">oparte na próbce</string>
-    <string name="preferences_parser_sync_mode_summary">Tryb synchronizacji w parserze lavc. ⚠️ Eksperymentalne może skutkować skumulowanym opóźnieniem A/V</string>
+    <string name="preferences_parser_sync_mode_summary">Tryb synchronizacji w parserze lavc. ⚠️ Funkcja eksperymentalna, może skutkować skumulowanym opóźnieniem A/V</string>
     <string name="preferences_stream_buffer_size_title">Rozmiar buforu strumienia</string>
     <string name="preferences_stream_buffer_size_summary">Ilość pamięci podręcznej przed analizatorem do rozwiązywania problemów buforowania w MB</string>
     <string name="preferences_stream_max_iframe_size_title">Maksymalny rozmiar i-frame</string>
@@ -539,7 +539,7 @@
     <string name="preferences_force_passthrough">Wymuś przekazywanie dźwięku wprost</string>
     <string name="preferences_force_passthrough_summary">Jeśli włączona jest funkcja przekazywania dźwięku, wymuś ją, nawet jeśli kodek audio nie jest obsługiwany przez odbiornik AV</string>
     <string name="preferences_playback_speed">Prędkość odtwarzania</string>
-    <string name="preferences_playback_speed_summary">Włącz możliwość zmiany prędkości odtwarzania. ⚠️ Eksperymentalne może powodować choppy wideo</string>
+    <string name="preferences_playback_speed_summary">Włącz możliwość zmiany prędkości odtwarzania. ⚠️ Funkcja eksperymentalna, może powodować brak płynności odtwarzania wideo</string>
     <string name="preferences_disable_downmix_title">Wyłącz downmix dźwięku</string>
     <string name="preferences_disable_downmix_summary">Zawsze dekoduj wszystkie kanały i niech Android decyduje o sposobie miksowania (możliwa utrata kanałów dialogowych)</string>
     <string name="preferences_enable_downmix_androidtv_title">Wymuś downmix dźwięku</string>
@@ -561,7 +561,7 @@
     <string name="preference_cutout_short_edges_summary">Zezwalaj na pełny ekran na wyświetlaczu z wycięciami</string>
     <string name="category_languages">Napisy</string>
     <string name="subtitles_hide_default">Domyślnie ukryj napisy</string>
-    <string name="subtitles_hide_default_summary">Zaznacz jeżeli chcesz domyślnie ukryć napisy</string>
+    <string name="subtitles_hide_default_summary">Zaznacz, jeżeli chcesz domyślnie ukryć napisy</string>
     <string name="subtitles_credentials_title">Dane logowania OpenSubtitles</string>
     <string name="subtitles_credentials_summary">Podaj w ustawieniach dane logowania do OpenSubtitles, aby pobierać napisy</string>
     <string name="preferences_languages">Język pobieranych napisów</string>
@@ -583,12 +583,12 @@
     <string name="preferences_video_licenses">Licencje</string>
     <string name="preferences_network_mobile_vpn_summary">Użyj tylko z konfiguracją VPN. Miej na uwadze limit przesyłu danych.</string>
     <string name="preferences_network_mobile_vpn_title">Włącz udostępnianie zasobów w połączeniu mobilnym</string>
-    <string name="preferences_network_prefer_vpn_summary">Użyj VPN w sieci lokalnej.</string>
+    <string name="preferences_network_prefer_vpn_summary">Użyj VPN w sieci lokalnej</string>
     <string name="preferences_network_prefer_vpn_title">Preferuj sieć VPN</string>
     <string name="preferences_video_advanced">Zaawansowane</string>
     <string name="preferences_video_advanced_quit_title">Ustawienia zwykłe</string>
     <string name="preferences_video_advanced_quit_summary">Wróć do zwykłych ustawień</string>
-    <string name="trakt_change">Modyfikacji Trakt API wymaga ponownego połączenia.</string>
+    <string name="trakt_change">Modyfikacji Trakt API wymaga ponownego połączenia</string>
     <string name="tv_scraper">Seriale</string>
     <string name="movie_scraper">Filmy</string>
     <string name="enable_auto_scrap">Automatycznie pobierz opis dla nowych plików wideo</string>
@@ -644,37 +644,37 @@
     <string name="share_folders_sshj">Użyj nowszej implementacji SFTP</string>
     <string name="share_folders_sshj_summary">Włącz nową implementację SFTP dla linków SFTP</string>
     <string name="share_folders_smbv2">Włącz obsługę SMB v2</string>
-    <string name="share_folders_smbv2_summary">Włącz obsługę protokołu udostępniania sieci SMB w wersji 2.</string>
+    <string name="share_folders_smbv2_summary">Włącz obsługę protokołu udostępniania sieci SMB w wersji 2</string>
     <string name="share_folders_smb_resolv">Porządek wyszukiwania SMB</string>
-    <string name="share_folders_smb_resolv_summary">Włącz BCAST, DNS (domyślnie: DNS, BCAST). Zmień, jeśli serwer nie odpowiada lub SMB działa wolno.</string>
+    <string name="share_folders_smb_resolv_summary">Włącz BCAST, DNS (domyślnie: DNS, BCAST). Zmień, jeśli serwer nie odpowiada lub SMB działa wolno</string>
     <string name="share_folders_smb_disable_tcp_discovery">Wyłącz wyszukiwanie SMB TCP</string>
-    <string name="share_folders_smb_disable_tcp_discovery_summary">Wyłącz wykrywanie TCP, jeśli na niektórych urządzeniach występują niestabilne WiFi.</string>
+    <string name="share_folders_smb_disable_tcp_discovery_summary">Wyłącz wykrywanie TCP, jeśli na niektórych urządzeniach występują niestabilne WiFi</string>
     <string name="share_folders_smb_disable_udp_discovery">Wyłącz wyszukiwanie SMB UTP</string>
-    <string name="share_folders_smb_disable_udp_discovery_summary">Wyłącz wyszukiwanie UDP, jeśli na niektórych urządzeniach występują niestabilne Wi-Fi (np. Amazon Fire 10 HD).</string>
+    <string name="share_folders_smb_disable_udp_discovery_summary">Wyłącz wyszukiwanie UDP, jeśli na niektórych urządzeniach występują niestabilne Wi-Fi (np. Amazon Fire 10 HD)</string>
     <string name="share_folders_smb_disable_mdns_discovery">Wyłącz wyszukiwanie SMB TCP</string>
-    <string name="share_folders_smb_disable_mdns_discovery_summary">Wyłącz odkrywanie mDNS, jeśli na niektórych urządzeniach występują niestabilne WiFi.</string>
+    <string name="share_folders_smb_disable_mdns_discovery_summary">Wyłącz odkrywanie mDNS, jeśli na niektórych urządzeniach występują niestabilne WiFi</string>
     <string name="share_folders_smb_discovery_limited_to_mdsn">Ogranicz odkrycie SMB do mDNS</string>
-    <string name="share_folders_smb_discovery_limited_to_mdsn_summary">Wyłącz odkrywanie UDP/TCP, jeśli na niektórych urządzeniach występują niestabilne Wi-Fi (np. Amazon Fire 10 HD). ⚠️ Zapobiegnie prawidłowemu odkrywaniu w ChromeOS.</string>
+    <string name="share_folders_smb_discovery_limited_to_mdsn_summary">Wyłącz odkrywanie UDP/TCP, jeśli na niektórych urządzeniach występują niestabilne Wi-Fi (np. Amazon Fire 10 HD). ⚠️ Zapobiegnie prawidłowemu odkrywaniu w ChromeOS</string>
     <string name="connection_abnormally_long">Nawiązywanie połączenia trwa zbyt długo. Zresetować?</string>
     <string name="connection_reset">Resetowanie</string>
     <!-- Info dialog, not indexed file -->
     <string name="video_info_unindexed_message">Ten plik nie jest obecnie indeksowany w bibliotece wideo.\nWyszukiwanie plakatów i informacji jest dostępne tylko dla zindeksowanych plików.\nCzy chcesz zaindeksować je teraz?</string>
-    <string name="video_info_unindexed_message2">Plik jest przetwarzany. To może chwilę potrwać.</string>
+    <string name="video_info_unindexed_message2">Plik jest przetwarzany. To może chwilę potrwać</string>
     <string name="video_browser_index_file">Dodaj do biblioteki</string>
     <string name="video_browser_unindex_file">Usuń z biblioteki</string>
     <!-- Brightness -->
-    <string name="auto_brightness_message">Jasność nie może zostać zmieniona, ponieważ tryb automatycznej jasności jest obecnie włączony.</string>
+    <string name="auto_brightness_message">Jasność nie może zostać zmieniona, ponieważ tryb automatycznej jasności jest obecnie włączony</string>
     <!--  Nfo File parsing -->
     <string name="network_nfo_parse">Przetwórz pliki \'nfo\'</string>
-    <string name="network_nfo_parse_summary">Czytaj pliki Kodi \'.nfo\' podczas (ponownego) skanowania w celu zebrania informacji o mediach i plakatów.</string>
-    <string name="ask_to_mail_media_DB">Czy chcesz wysłać swoją bazę danych wideo do zespołu programistów Nova, aby pomóc im sprawdzić błąd?\n\nPliki wideo nie są (kurs) obsługiwane, ale pełna lista nazw plików.</string>
+    <string name="network_nfo_parse_summary">Czytaj pliki Kodi \'.nfo\' podczas (ponownego) skanowania w celu zebrania informacji o mediach i plakatów</string>
+    <string name="ask_to_mail_media_DB">Czy chcesz wysłać swoją bazę danych wideo do zespołu programistów Nova, aby pomóc im sprawdzić błąd?\n\nPliki wideo nie są (kurs) obsługiwane, ale pełna lista nazw plików</string>
     <string name="no_email_installed">Nie odnaleziono klienta poczty e-mail</string>
     <string name="zipping_library_before_mailing">Zainicjowanie kopii biblioteki przed wysłaniem jej…</string>
     <string name="zipped_library_mail_subject">Zrzut Nova Video Database</string>
     <string name="zipped_library_mail_text">Proszę opisać problem, którego doświadczasz\n\n</string>
     <string name="sort_mode">Tryb sortowania</string>
-    <string name="sort_by_name_asc">Sortuj po nazwie (a &gt; z)</string>
-    <string name="sort_by_name_desc">Sortuj po nazwie (a &gt; z)</string>
+    <string name="sort_by_name_asc">Sortuj po nazwie (a - z)</string>
+    <string name="sort_by_name_desc">Sortuj po nazwie (z - a)</string>
     <string name="sort_by_year_asc">Sortuj po roku (najpierw najstarsze)</string>
     <string name="sort_by_year_desc">Sortuj po roku (najpierw najmłodsze)</string>
     <string name="sort_by_date_asc">Sortuj po dacie (najpierw najstarsze)</string>
@@ -694,7 +694,7 @@
     <string name="sort_by_size_asc">Sortuj po dacie (najpierw najstarsze)</string>
     <string name="sort_by_size_desc">Sortuj po dacie (najpierw najstarsze)</string>
     <string name="dec_choice_title">Wybierz dekoder</string>
-    <string name="dec_choice_summary">Zaawansowane ustawienia, mogą uszkodzić dekodowanie wideo.</string>
+    <string name="dec_choice_summary">Zaawansowane ustawienia, mogą uszkodzić dekodowanie wideo</string>
     <string name="dec_hw_omx">Dekoder sprzętowy (IOMX w/ swbuf)</string>
     <string name="dec_hw_omxplus">Dekoder sprzętowy (IOMX w/ hwbuf)</string>
     <string name="dec_hw_omxcodec">Dekoder sprzętowy (OMXCodec)</string>
@@ -745,14 +745,14 @@
     <string name="codepage_950">Tradycyjny Chiński (Big5)</string>
     <string name="codepage_1250">Europa wschodnia (CP1250)</string>
     <string name="codepage_1251">Cyrylica (CP1251)</string>
-    <string name="codepage_1252">Zachodnia Europa (CP1252)</string>
-    <string name="codepage_28606">Europa wschodnia (CP1250)</string>
-    <string name="codepage_1253">Grecki(CP1253)</string>
-    <string name="codepage_1254">Turecki (CP1254)</string>
-    <string name="codepage_1255">Hebrajski(CP1255)</string>
-    <string name="codepage_1256">Arabski (CP1256)</string>
+    <string name="codepage_1252">Europa Zachodnia (CP1252)</string>
+    <string name="codepage_28606">Europa Wschodnia (CP1250)</string>
+    <string name="codepage_1253">grecki (CP1253)</string>
+    <string name="codepage_1254">turecki (CP1254)</string>
+    <string name="codepage_1255">hebrajski (CP1255)</string>
+    <string name="codepage_1256">arabski (CP1256)</string>
     <string name="codepage_1257">Kraje bałtyckie (CP1257)</string>
-    <string name="codepage_1258">Vietnamski (CP1258)</string>
+    <string name="codepage_1258">wietnamski (CP1258)</string>
     <string name="codepage_extra_874">(CP874)</string>
     <string name="codepage_extra_932">(Shift-JIS, EUC-JP)</string>
     <string name="codepage_extra_936">(CP936, GB231)</string>
@@ -791,7 +791,7 @@
     <string name="trakt_signin_summary_logged">Zalogowano</string>
     <string name="trakt_signin_summary_logged_error">Błąd uwierzytelniania</string>
     <string name="trakt_signin_summary">Nie zalogowano</string>
-    <string name="trakt_relog_description">Wykryto problem z Trakt i dane logowania muszą zostać zresetowane. Zaloguj się ponownie.</string>
+    <string name="trakt_relog_description">Wykryto problem z Trakt i dane logowania muszą zostać zresetowane. Zaloguj się ponownie</string>
     <string name="trakt_signin_dialog_title">Zaloguj się</string>
     <string name="trakt_signin_title">Zaloguj się</string>
     <string name="trakt_wipe_dialog_title">Wylogować z Trakt.tv\?</string>
@@ -903,15 +903,15 @@
     <string name="cast_info">Informacje</string>
     <string name="troubleshoot_streammode_msg">Odtwarzacz Nova jest obecnie w trybie przesyłania strumieniowego.
         \nTryb daje dobrą jakość wideo, ale może powodować problemy z dźwiękiem i napisami.
-        Spróbuj przełączyć w tryb zdalnego ekranu.</string>
+        Spróbuj przełączyć w tryb zdalnego ekranu</string>
     <string name="troubleshoot_remotemode_msg">Odtwarzacz wideo Nova jest obecnie w trybie ekranu zdalnego.
-        \nW zależności od urządzenia i połączenia sieciowego, może wystąpić obniżenie jakości i problem z wydajnością. </string>
+        \nW zależności od urządzenia i połączenia sieciowego, może wystąpić obniżenie jakości i problem z wydajnością</string>
     <string name="picture_in_picture">Obraz w obrazie</string>
     <string name="cast">Przesyłaj</string>
-    <string name="cast_warning">Obsługa przesyłania strumieniowego jest ograniczona ze względu na ograniczenia kodeka Chromecast. Aby złagodzić te ograniczenia, wdrożono 2 tryby przesyłania strumieniowego: Chromecast i Screencast (z automatycznym powrotem). Należy pamiętać, że problemy z wydajnością i jakością mogą również wynikać z ograniczeń sieci lub urządzenia.</string>
+    <string name="cast_warning">Obsługa przesyłania strumieniowego jest ograniczona ze względu na ograniczenia kodeka Chromecast. Aby złagodzić te ograniczenia, wdrożono 2 tryby przesyłania strumieniowego: Chromecast i Screencast (z automatycznym powrotem). Należy pamiętać, że problemy z wydajnością i jakością mogą również wynikać z ograniczeń sieci lub urządzenia</string>
     <string name="cast_warning_title">Funkcje eksperymentalne</string>
     <string name="cast_fallback_message">Błąd: powrót do przesyłania ekranu</string>
-    <string name="cast_introduction">Nowa funkcja eksperymentalna: \nGoogle cast</string>
+    <string name="cast_introduction">⚠️Nowa funkcja eksperymentalna: \nGoogle cast</string>
     <string name="cast_select_for_full_control">Dotknij, aby rozwinąć panel pilota</string>
     <string name="cast_audio_background">Gdy odtwarzacz Nova działa w tle, nie ma dźwięku</string>
     <string name="help_faq">Pomoc i FAQ</string>
@@ -936,7 +936,7 @@
     <string name="enable_sponsor_summary">Włącz link sponsora dla darowizn: każda pomoc jest ważna.</string>
     <string name="upgrade_info">Informacje o aktualizacji</string>
     <string name="v5_v6_upgrade_info">OSTRZEŻENIE: ta główna aktualizacja oprogramowania Nova wymaga ponownego przeskanowania całej kolekcji wideo w celu ponownego uzyskania informacji multimedialnych.
-         Aby uniknąć problemów, zdecydowanie zaleca się ponowne uruchomienie systemu od czystej instalacji. Aby poznać szczegóły, sprawdź FAQ.</string>
+         Aby uniknąć problemów, zdecydowanie zaleca się ponowne uruchomienie systemu po czystej instalacji. Aby poznać szczegóły, sprawdź FAQ</string>
     <string name="networks">Sieć:</string>
     <string name="premiered">Premiera:</string>
 </resources>

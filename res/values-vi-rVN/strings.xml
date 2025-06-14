@@ -533,6 +533,7 @@
     <string name="preference_tv_3d_automatic_switch">Bật chuyển TV 3D tự động</string>
     <string name="preference_tv_3d_automatic_switch_summary">Chỉ sử dụng tính năng này nếu TV 3D của bạn hỗ trợ nó</string>
     <string name="enable_android_frame_timing">Bật thời gian khung hình Android</string>
+    <string name="enable_android_frame_timing_summary">Ủy quyền cho Android thời gian phát lại khung hình để phát lại mượt mà hơn (thử nghiệm)</string>
     <string name="preference_tv_refreshrate_switch">Kích hoạt chuyển đổi tốc độ làm mới tự động</string>
     <string name="preference_tv_refreshrate_switch_summary">Loại bỏ hiệu ứng judder bằng cách điều chỉnh tốc độ làm mới màn hình tốt nhất sang tốc độ khung hình băng hình (hỗ trợ thiết bị có thể khác nhau)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Đã tắt</string>
