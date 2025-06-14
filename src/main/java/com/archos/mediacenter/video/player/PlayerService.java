@@ -837,6 +837,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
      * @return player progress in percentage
      */
     private int getPlayerProgress() {
+        log.debug("getPlayerProgress");
         if (Player.sPlayer == null || mVideoInfo == null)
             return 0;
         if (mLastPosition == LAST_POSITION_END)
@@ -861,6 +862,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
     private final Runnable mTraktWatchingRunnable = new Runnable() {
         @Override
         public void run() {
+            log.debug("mTraktWatchingRunnable");
             if (Player.sPlayer != null) {
                 mTraktClient.watching(mVideoInfo, getPlayerProgress());
                 mHandler.postDelayed(mTraktWatchingRunnable, Trakt.WATCHING_DELAY_MS);
@@ -875,7 +877,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
             mTraktLiveScrobblingEnabled = Trakt.isLiveScrobblingEnabled(mPreferences);
             if (mTraktLiveScrobblingEnabled) {
                 int progress = getPlayerProgress();
-                mVideoInfo.traktResume = -progress;
+                mVideoInfo.traktResume = -progress; // traktResume is set to -resume unless synced with trakt
                 mVideoInfo.duration = Player.sPlayer.getDuration();
                 log.debug("startTrakt: trakt watching progress=" + progress);
                 mTraktClient.watching(mVideoInfo, progress);
@@ -893,7 +895,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
                 mHandler.removeCallbacks(mTraktWatchingRunnable);
                 int progress = getPlayerProgress();
                 if (progress >= 0){
-                    mVideoInfo.traktResume = - progress;
+                    mVideoInfo.traktResume = - progress; // traktResume is set to -resume unless synced with trakt
                     log.debug("stopTrakt: watchingStop progress=" + progress);
                     mTraktClient.watchingStop(mVideoInfo, progress);
                 }
@@ -932,7 +934,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
             if (mTraktWatching) {
                 int progress = getPlayerProgress();
                 if (progress > 0) {
-                    mVideoInfo.traktResume = - progress;
+                    mVideoInfo.traktResume = - progress; // traktResume is set to -resume unless synced with trakt
                     log.debug("pauseTrakt: watchingPause progress=" + progress);
                     mTraktClient.watchingPause(mVideoInfo, progress);
                 }
