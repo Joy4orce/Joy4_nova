@@ -15,13 +15,14 @@
 
 package com.archos.mediacenter.video.utils;
 
+import static com.archos.mediacenter.utils.trakt.Trakt.getAuthorizationRequest;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.Preference;
@@ -77,7 +78,9 @@ public class TraktSigninDialogPreference extends Preference {
             }
         }
         try {
-            OAuthClientRequest t = Trakt.getAuthorizationRequest(getSharedPreferences());
+            log.debug("onClick: TraktSigninDialogPreference");
+            OAuthClientRequest t = getAuthorizationRequest(getSharedPreferences());
+            log.debug("onClick: t=" + t.getLocationUri());
             final OAuthData oa = new OAuthData();
             OAuthCallback codeCallBack = data -> {
                 // TODO Auto-generated method stub
@@ -121,6 +124,7 @@ public class TraktSigninDialogPreference extends Preference {
                             if (result != null && result instanceof Trakt.accessToken) {
                                 Trakt.accessToken res = (Trakt.accessToken) result;
                                 if (res.access_token != null) {
+                                    log.debug("onClick: trakt access token is {}", res.access_token);
                                     Trakt.setAccessToken(getSharedPreferences(), res.access_token);
                                     Trakt.setRefreshToken(getSharedPreferences(), res.refresh_token);
                                     TraktSigninDialogPreference.this.notifyChanged();
