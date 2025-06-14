@@ -687,10 +687,15 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
     public void setPlayer(){
         if(mPlayer!=null)
             mPlayer.setListener(null);
-        if(Player.sPlayer==null)
-            Player.sPlayer = new Player(this, null, null,false);
-        Player.sPlayer.setListener(this);
+        else log.debug("setPlayer: mPlayer is null");
+        if(Player.sPlayer==null) {
+            log.debug("setPlayer: Player.sPlayer is null allocating a new one");
+            Player.sPlayer = new Player(this, null, null, false);
+        } else {
+            log.debug("setPlayer: Player.sPlayer is not null");
+        }
         mPlayer = Player.sPlayer;
+        mPlayer.setListener(this);
     }
 
     /*
