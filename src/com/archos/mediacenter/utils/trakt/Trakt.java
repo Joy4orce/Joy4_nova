@@ -74,13 +74,12 @@ public class Trakt {
     public static final long ASK_RELOG_FREQUENCY = 1000 * 60 * 60 * 6; // every 6 hours
     public static long sLastTraktRefreshToken = 0; //will be set by activities, representing last time a user has been asked to log again in trakt;
     public static final String TRAKT_ISSUE_REFRESH_TOKEN = "TRAKT_ISSUE_REFRESH_TOKEN";
-    private static final String API_URL = "https://api.trakt.tv";
     private static String API_KEY;
     private static String API_SECRET;
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZZZZ", Locale.US);
     public static final int SCROBBLE_THRESHOLD = 90;
     // playback history size to synchronize: 50 is enough (it is anyway capped at 1k and incurs a huge processing delay)
-    public static final int PLAYBACK_HISTORY_SIZE = 200;
+    public static final int PLAYBACK_HISTORY_SIZE = 100;
 
     private static final String XML_PREFIX = ".trakt_";
     private static final String XML_SUFFIX = "_db.xml";
