@@ -13,7 +13,7 @@ buildscript {
 
 plugins {
     id "com.github.triplet.play" version "3.12.1"
-    id "io.sentry.android.gradle" version "5.5.0" apply false
+    id "io.sentry.android.gradle" version "5.6.0" apply false
     //id "app.brant.amazonappstorepublisher" version "0.1.0"
 }
 
@@ -323,7 +323,7 @@ android {
 dependencies {
     implementation project(':FileCoreLibrary')
     implementation project(':MediaLib')
-    implementation 'androidx.lifecycle:lifecycle-process:2.9.0'
+    implementation 'androidx.lifecycle:lifecycle-process:2.9.1'
     // needed for old Android versions when using java 17
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
     implementation 'com.jakewharton.threetenabp:threetenabp:1.4.9'
@@ -333,11 +333,11 @@ dependencies {
     implementation 'androidx.core:core:1.16.0'
     implementation 'androidx.legacy:legacy-support-core-utils:1.0.0'
     implementation 'androidx.legacy:legacy-support-core-ui:1.0.0'
-    implementation 'androidx.fragment:fragment:1.8.7'
+    implementation 'androidx.fragment:fragment:1.8.8'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.palette:palette:1.0.0'
-    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.preference:preference:1.2.1'
     implementation ('com.github.ksoichiro:android-observablescrollview:1.6.0') {
         exclude group: 'com.android.support', module: 'recyclerview-v7'
@@ -349,8 +349,8 @@ dependencies {
     implementation 'androidx.tvprovider:tvprovider:1.1.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
     implementation 'com.github.tony19:logback-android:3.0.0'
-    implementation 'io.sentry:sentry-android:8.11.1'
-    implementation 'io.sentry:sentry:8.11.1'
+    implementation 'io.sentry:sentry-android:8.12.0'
+    implementation 'io.sentry:sentry:8.12.0'
 }
 
 configurations { // try to exclude device specific libraries interfering
