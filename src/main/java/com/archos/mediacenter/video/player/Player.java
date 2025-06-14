@@ -437,6 +437,7 @@ public class Player implements IPlayerControl,
     }
 
     synchronized public void stopPlayback() {
+        // TODO used to have if (PlayerService.sPlayerService != null) PlayerService.sPlayerService.saveVideoStateIfReady();
         log.debug("stopPlayback");
         mHandler.removeCallbacks(mPreparedAsync);
         stayAwake(false);
@@ -683,6 +684,7 @@ public class Player implements IPlayerControl,
     }
     
     private void restoreUri(boolean restartVideo) {
+        log.debug("restoreUri");
         mUri = mSaveUri;
         mStopPosition = mSaveStopPosition;
         if (restartVideo) openVideo();
@@ -717,13 +719,17 @@ public class Player implements IPlayerControl,
         mTargetState = STATE_PLAYING;
         if (mPlayerListener != null) {
             mPlayerListener.onPlay(state);
+        } else {
+            log.debug("start: no listener");
         }
+
         if (mEffectRenderer != null) {
             mEffectRenderer.onPlay();
         }
     }
 
     public void pause(int state) {
+        // TODO used to have if (PlayerService.sPlayerService != null) PlayerService.sPlayerService.saveVideoStateIfReady();
         log.debug("pause");
         if (isInPlaybackState()) {
             if (mMediaPlayer.isPlaying()) {
@@ -734,6 +740,8 @@ public class Player implements IPlayerControl,
         mTargetState = STATE_PAUSED;
         if (mPlayerListener != null) {
             mPlayerListener.onPause(state);
+        } else {
+            log.debug("pause: no listener");
         }
         /* on pause, Don't suspend when video is non local or can't seek */
         //if (!isTorrent() && isLocalVideo() && canSeekBackward() && canSeekForward()) {
