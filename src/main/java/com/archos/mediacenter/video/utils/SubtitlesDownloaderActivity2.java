@@ -519,7 +519,7 @@ public class SubtitlesDownloaderActivity2 extends AppCompatActivity {
                         log.error("downloadSubtitles: caught Exception", e);
                     }
                 }
-                log.debug("downloadSubtitles: we are not on slow remote try to write to " + fileUrl + " and canWrite=" + canWrite);
+                log.debug("downloadSubtitles: we are not on slow remote try to write to " + parentUri + " and canWrite=" + canWrite);
             } else {
                 log.debug("downloadSubtitles: we are on slow remote or not implemented by filecore, do not try to write sub on remote");
             }
@@ -534,11 +534,22 @@ public class SubtitlesDownloaderActivity2 extends AppCompatActivity {
                     log.debug("downloadSubtitles: test we can write to " + sb);
                     FileEditor editor = FileEditorFactory.getFileEditorForUrl(Uri.parse(sb.toString()), SubtitlesDownloaderActivity2.this);
                     OutputStream tmp = editor.getOutputStream();
+                    // on the nvidia shield canWrite is reported to be false on exfat/ntfs external HDD USB storage /storage/XXX/serie but true on deeper directory levels e.g. /storage/XXX/serie/season1
+                    // thus sadly to know if we can write we need to test writing on the file
+                    tmp.write(0);
+                    tmp.flush();
                     tmp.close();
+                    // test if file is present otherwise set canWrite to false
+                    if (!editor.exists()) {
+                        log.debug("downloadSubtitles: file does not exist after real write test, canWrite=false");
+                        canWrite = false;
+                    }
                 } catch (FileNotFoundException e) {
                     /* Fallback to subsDir */
+                    log.debug("downloadSubtitles: caught FileNotFoundException, fallback to subsDir");
                     canWrite = false;
                 } catch (Exception e) {
+                    log.debug("downloadSubtitles: caught Exception, fallback to subsDir");
                     canWrite = false;
                 }
             }
