@@ -13,7 +13,7 @@ buildscript {
 
 plugins {
     id "com.github.triplet.play" version "3.12.1"
-    id "io.sentry.android.gradle" version "5.6.0" apply false
+    id "io.sentry.android.gradle" version "5.8.0" apply false
     //id "app.brant.amazonappstorepublisher" version "0.1.0"
 }
 
@@ -349,8 +349,8 @@ dependencies {
     implementation 'androidx.tvprovider:tvprovider:1.1.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
     implementation 'com.github.tony19:logback-android:3.0.0'
-    implementation 'io.sentry:sentry-android:8.12.0'
-    implementation 'io.sentry:sentry:8.12.0'
+    implementation 'io.sentry:sentry-android:8.15.0'
+    implementation 'io.sentry:sentry:8.15.0'
 }
 
 configurations { // try to exclude device specific libraries interfering
