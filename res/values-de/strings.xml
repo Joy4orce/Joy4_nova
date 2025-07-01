@@ -21,7 +21,7 @@
     <string name="goto_start">Bibliothek</string>
     <!-- Menu item that takes the user to the "now playing" screen of the music player -->
     <!-- Menu item to refresh servers list -->
-    <string name="refresh_servers_list">Liste der Server aktualisieren</string>
+    <string name="refresh_servers_list">Serverliste aktualisieren</string>
     <!-- Menu item to enable network shares -->
     <string name="enable_network_shares">Netzwerkfreigaben aktivieren</string>
     <string name="initial_scan">Initialer Scan</string>
@@ -111,8 +111,8 @@
     <string name="movie_collections">Sammlungen</string>
     <string name="anime_collections">Anime-Sammlungen</string>
     <string name="movies_by_year">Filme nach Jahr</string>
-    <string name="all_tv_shows">TV-Sendungen</string>
-    <string name="all_tvshows">Alle TV-Sendungen</string>
+    <string name="all_tv_shows">Serien</string>
+    <string name="all_tvshows">Alle Serien</string>
     <string name="all_animes">Alle Animationsfilme</string>
     <string name="all_animes_row">Alle Animationen</string>
     <string name="all_animeshows">Alle Animations-TV-Sendungen</string>
@@ -120,14 +120,14 @@
     <string name="animes_by_genre">Animationsfilme nach Genre</string>
     <string name="animes_by_rating">Animationsfilme nach Bewertung</string>
     <string name="animes_by_year">Animationsfilme nach Jahr</string>
-    <string name="all_tvshows_format">Alle TV-Sendungen  -  %d</string>
+    <string name="all_tvshows_format">Alle Serien  -  %d</string>
     <string name="not_watched_tvshows_format">Nicht angeschaut  -  %d</string>
     <string name="all_animeshows_format">Animations-TV-Sendungen -  %d</string>
     <string name="not_watched_animeshows_format">Nicht angeschaut  -  %d</string>
     <string name="all_seasons">Alle Staffeln</string>
-    <string name="tvshows_by_alpha">TV-Sendungen alphabetisch</string>
-    <string name="tvshows_by_genre">TV-Sendungen nach Genre</string>
-    <string name="tvshows_by_rating">TV-Sendungen nach Bewertung</string>
+    <string name="tvshows_by_alpha">Serien alphabetisch</string>
+    <string name="tvshows_by_genre">Serien nach Genre</string>
+    <string name="tvshows_by_rating">TV-Serien nach Bewertung</string>
     <string name="animation_shows_by_alpha">Animationssendungen alphabetisch</string>
     <string name="episodes_by_date">Episoden nach Datum</string>
     <string name="date_view_week">Woche</string>
@@ -135,10 +135,10 @@
     <string name="date_view_year">Jahr</string>
     <string name="all_movies_and_tv_shows">Filme und Serien</string>
     <string name="non_scraped_videos">Nicht gescrapte Videos</string>
-    <string name="no_server">Kein Medienserver gefunden</string>
+    <string name="no_server">Keinen Medienserver gefunden</string>
     <string name="cannot_open_video">Dieses Video kann nicht geöffnet werden</string>
-    <string name="confirm_delete">Wollen Sie wirklich löschen?</string>
-    <string name="deleting">Bitte warten Sie während der Löschung ...</string>
+    <string name="confirm_delete">Möchten Sie dies wirklich löschen?</string>
+    <string name="deleting">Wird gelöscht, bitte warten…</string>
     <string name="cannot_delete_directory">Der Ordner kann nicht gelöscht werden</string>
     <string name="cannot_delete_file">Die Datei kann nicht gelöscht werden</string>
     <string name="directory_deleted">Der Ordner wurde gelöscht</string>
@@ -148,22 +148,22 @@
     <string name="bookmark">Lesezeichen</string>
     <string name="delete">Löschen</string>
     <string name="confirm_delete_short">Löschung bestätigen</string>
-    <string name="delete_resume">Fortsetzen löschen</string>
+    <string name="delete_resume">Fortsetzungspunkt löschen</string>
     <string name="delete_bookmark">Lesezeichen löschen</string>
     <string name="mark_as_watched">Als gesehen markieren</string>
     <string name="mark_as_not_watched">Als ungesehen markieren</string>
     <string name="upnp_not_allowed">Sie sind nicht berechtigt, auf diesen UPnP Server zuzugreifen. Bitte ändern Sie die Zugangskonfiguration.</string>
-    <string name="scrap_no_info">Sie haben keine Film- oder TV-Sendungsbeschreibung für dieses Video.</string>
+    <string name="scrap_no_info">Es sind keine Medieninformationen für dieses Video vorhanden.</string>
     <string name="scrap_remove">Info entfernen</string>
     <string name="scrap_remove_short">Löschen</string>
     <!-- for small screens -->
     <string name="scrap_change">Info aller Episoden ändern</string>
     <string name="scrap_series_change">Serien-Info ändern</string>
-    <string name="scrap_change_confirmation">Alle Episoden von\n\t\"%1$s\"\nin\n\t\"%2$s\" ändern?</string>
-    <string name="scrap_change_title">Modifizieren aller Episoden</string>
+    <string name="scrap_change_confirmation">Alle Episoden von\n\t\"%1$s\"\nzu\n\t\"%2$s\" ändern?</string>
+    <string name="scrap_change_title">Alle Episoden ändern</string>
     <string name="scrap_change_initializing">Initialisierung …</string>
     <string name="scrap_change_finalizing">Fertigstellung …</string>
-    <string name="scrap_get_title">Erhalten der Info</string>
+    <string name="scrap_get_title">Rufe Info ab</string>
     <!-- Generic strings for Movies or TV shows -->
     <string name="scrap_director">Regisseur</string>
     <string name="scrap_writer">Autor</string>
@@ -174,7 +174,7 @@
     <string name="scrap_year">Jahr</string>
     <string name="scrap_year_format">Jahr: %d</string>
     <string name="scrap_studio">Studio</string>
-    <string name="scrap_plot">Plot</string>
+    <string name="scrap_plot">Handlung</string>
     <string name="scrap_trailer">Trailer</string>
     <string name="scrap_cast">Darsteller</string>
     <string name="scrap_cast_format">Darsteller: %s</string>
@@ -207,13 +207,13 @@
         <item quantity="other">%d Episoden angeschaut</item>
     </plurals>
     <string name="scrap_processing">Zusatzinformation werden geladen…</string>
-    <string name="scrap_no_network">Nicht mit einem Netzwerk verbunden.</string>
+    <string name="scrap_no_network">Nicht mit Netzwerk verbunden.</string>
     <string name="scrap_enable_network_first">"Bitte stellen Sie zunächst eine Verbindung zu einem Netzwerk her, um diese Applikation ausführen zu können."</string>
     <string name="scrap_failed">Film nicht in Online-Datenbank gefunden.</string>
     <string name="start_auto_scraper_activity">Info online suchen</string>
-    <string name="scraper_settigns">Posters &amp; Info</string>
+    <string name="scraper_settigns">Poster &amp; Info</string>
     <string name="scrap_status_initial">In Bearbeitung</string>
-    <string name="scrap_status_busy">Abrufen von Metadaten …</string>
+    <string name="scrap_status_busy">Suche…</string>
     <string name="scrap_status_success">Aktualisiert</string>
     <string name="scrap_status_failed">Info nicht gefunden</string>
     <string name="scrap_status_rejected">Info entfernt</string>
@@ -231,14 +231,14 @@
     <string name="scraper_suggest_message">Über das Menü „Info online suchen“ können Sie online nach Postern und Informationen zu Ihren Videos suchen.</string>
     <string name="scraper_no_movie_text">Sie haben derzeit kein Poster und keine Beschreibung für Ihre Filme</string>
     <string name="scraper_no_movie_button_label">Film-Info online suchen</string>
-    <string name="scraper_no_tv_show_text">Sie haben derzeit kein Poster und keine Beschreibung für Ihre TV-Sendungen</string>
-    <string name="scraper_no_tv_show_button_label">Online-Suche starten</string>
+    <string name="scraper_no_tv_show_text">Sie haben derzeit kein Poster und keine Beschreibung für Ihre Serien</string>
+    <string name="scraper_no_tv_show_button_label">Serien-Info online suchen</string>
     <string name="imdb_title_url">https://www.imdb.com/title/</string>
     <!-- To be translated only in case there is a localized IMDB -->
     <string name="storage">Speicher</string>
     <string name="rescan_storage">Speicher erneut scannen</string>
     <string name="rescanning">Erneutes Scannen von Speichergeräten</string>
-    <string name="rescan_storage_summary">Intern erneut scannen, SD-Karten- und USB-Speichergeräte</string>
+    <string name="rescan_storage_summary">Internen Speicher, SD-Karte und USB-Speicher erneut durchsuchen</string>
     <string name="preference_display_all_files">Alle Dateien im Browser anzeigen</string>
     <string name="preference_display_all_files_summary">Auch nicht-Video-Dateien anzeigen</string>
     <string name="info_processing">Überprüfung der Medieneigenschaften …</string>
