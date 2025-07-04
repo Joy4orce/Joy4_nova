@@ -1,7 +1,3 @@
-- target SDK 35, raise min SDK to 23 (Android 6.0)
-- blacklist recycle bins on popular NAS
-- fix audio delay picker focus on Android TV
-- new subtitle title format
-- upgrade ffmpeg to 7.1.1 and dav1d to 1.5.1
-- fix external player stopping after a while
+- fix AV1 playback/seek on pixel9 g5 and mediatek devices
+- fix nvidia shield external USB storage subtitle download
 - stability enhancements
