@@ -40,6 +40,7 @@ import android.os.Process;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.Lifecycle;
@@ -51,6 +52,7 @@ import com.archos.medialib.R;
 import com.archos.mediaprovider.ArchosMediaIntent;
 import com.archos.mediaprovider.DeleteFileCallback;
 import com.archos.mediaprovider.ImportState;
+import com.archos.mediaprovider.MediaRetrieverService;
 import com.archos.mediaprovider.VideoDb;
 import com.archos.mediaprovider.VolumeState;
 import com.archos.mediaprovider.ImportState.State;
@@ -319,6 +321,12 @@ public class VideoStoreImportService extends Service implements Handler.Callback
         // this one is called only by VideoProvider at start or when app turns background->foreground
         log.debug("startService");
         if (! ProcessLifecycleOwner.get().getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) return;
+        
+        // Ensure MediaRetrieverService is running before starting VideoStoreImportService
+        Intent mediaRetrieverIntent = new Intent(context, MediaRetrieverService.class);
+        context.startService(mediaRetrieverIntent);
+        log.debug("startService: MediaRetrieverService start requested");
+        
         mContext = context;
         Intent intent = new Intent(context, VideoStoreImportService.class);
         ArchosUtils.addBreadcrumb(SentryLevel.INFO, "VideoStoreImportService.startService", "app in foreground calling startService");
@@ -636,6 +644,12 @@ public class VideoStoreImportService extends Service implements Handler.Callback
 
     private void cleanup() {
         log.debug("cleanup");
+        
+        // Stop MediaRetrieverService when VideoStoreImportService is being cleaned up
+        Intent mediaRetrieverIntent = new Intent(this, MediaRetrieverService.class);
+        stopService(mediaRetrieverIntent);
+        log.debug("cleanup: MediaRetrieverService stop requested");
+        
         // Stop the handler thread
         if (mHandlerThread != null) {
             mHandlerThread.quit();
@@ -663,10 +677,16 @@ public class VideoStoreImportService extends Service implements Handler.Callback
     }
 
     @Override
-    public void onStart(LifecycleOwner owner) {
-        // App in foreground
+    public void onStart(@NonNull LifecycleOwner owner) {
+        // App in foreground - restart MediaRetrieverService
         isForeground = true;
-        log.debug("onStart: LifecycleOwner app in foreground, start startService");
+        log.debug("onStart: LifecycleOwner app in foreground, restarting MediaRetrieverService");
+        
+        // Restart MediaRetrieverService for foreground operation
+        Intent mediaRetrieverIntent = new Intent(this, MediaRetrieverService.class);
+        startService(mediaRetrieverIntent);
+        log.debug("onStart: MediaRetrieverService restart requested");
+        
         // when switching to foreground state and db
         // has potentially changed: trigger db import
         if (mVolumeState != null) {
@@ -682,4 +702,5 @@ public class VideoStoreImportService extends Service implements Handler.Callback
             mHandler.obtainMessage(MESSAGE_IMPORT_FULL, DONT_KILL_SELF, 0).sendToTarget();
         }
     }
+
 }
