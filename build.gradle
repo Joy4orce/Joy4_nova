@@ -2,7 +2,7 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://jitpack.io' }
+        maven { url = 'https://jitpack.io' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.11.0'
@@ -46,7 +46,7 @@ allprojects {
         google()
         mavenCentral()
         mavenLocal()
-        maven { url 'https://jitpack.io' }
+        maven { url = 'https://jitpack.io' }
     }
     gradle.projectsEvaluated {
         tasks.withType(JavaCompile).tap {
@@ -78,8 +78,8 @@ play {
     serviceAccountCredentials.set(file("nova.json"))
     track.set("internal")  // rollout, beta, alpha, release, internal
     //userFraction.set(0.1) // rollout rate in %/100
-    //releaseStatus.set(ReleaseStatus.IN_PROGRESS)
-    releaseStatus.set(ReleaseStatus.COMPLETED)
+    //releaseStatus = ReleaseStatus.IN_PROGRESS
+    releaseStatus = ReleaseStatus.COMPLETED
 }
 
 //amazon {
@@ -91,24 +91,24 @@ play {
 //}
 
 android {
-    namespace 'com.archos.mediacenter.video'
+    namespace = 'com.archos.mediacenter.video'
     signingConfigs {
         release {
             if (keystorePropertiesFile.exists()) {
-                storeFile file(keystoreProperties['storeFile'])
-                storePassword keystoreProperties['storePassword']
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
+                storeFile = file(keystoreProperties['storeFile'])
+                storePassword = keystoreProperties['storePassword']
+                keyAlias = keystoreProperties['keyAlias']
+                keyPassword = keystoreProperties['keyPassword']
             }
             enableV3Signing = true
             enableV4Signing = true
         }
         debug {
             if (keystorePropertiesFile.exists()) {
-                storeFile file(keystoreProperties['storeFile'])
-                storePassword keystoreProperties['storePassword']
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
+                storeFile = file(keystoreProperties['storeFile'])
+                storePassword = keystoreProperties['storePassword']
+                keyAlias = keystoreProperties['keyAlias']
+                keyPassword = keystoreProperties['keyPassword']
             }
             enableV3Signing = true
             enableV4Signing = true
@@ -121,16 +121,16 @@ android {
     }
     compileOptions {
         // needed for old Android versions when using java 17
-        coreLibraryDesugaringEnabled true
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
-        aidl true
-        buildConfig true
-        renderScript false
+        aidl = true
+        buildConfig = true
+        renderScript = false
     }
-    compileSdk 35
+    compileSdk = 35
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -143,9 +143,9 @@ android {
     defaultConfig {
         applicationId = "org.courville.nova"
         generatedDensities = []
-        minSdkVersion 23
-        targetSdkVersion 35
-        multiDexEnabled true
+        minSdkVersion = 23
+        targetSdkVersion = 35
+        multiDexEnabled = true
         // below version tracks the one from F-Droid or universal package when generated with ./gradlew -Puniversal
         // this is overridden when using split apk and normal split apk generation or oneapk amazon generation
         // amazon apk is generated with ./gradlew -Poneapk
@@ -164,7 +164,7 @@ android {
         println("defaultConfig archivesBaseName : " + archivesNameValue)
         println("defaultConfig versionName : " + versionName)
         println("defaultConfig versionCode : " + versionCode)
-        if (keystorePropertiesFile.exists()) signingConfig signingConfigs.release
+        if (keystorePropertiesFile.exists()) signingConfig = signingConfigs.release
         if (project.hasProperty("sponsor")) {
             buildConfigField "boolean", "ENABLE_SPONSOR", "true"
         } else {
@@ -178,14 +178,14 @@ android {
         if (sentryPropertiesFile.exists()) {
             if (project.hasProperty("bugReport")) {
                 buildConfigField "boolean", "ENABLE_BUG_REPORT", "true"
-                buildConfigField "String", "SENTRY_DSN", "\"${sentryProperties['dsn']}\""
+                buildConfigField "String", "SENTRY_DSN", "\"${sentryProperties['dsn']}\"";
             } else {
                 buildConfigField "boolean", "ENABLE_BUG_REPORT", "false"
-                buildConfigField "String", "SENTRY_DSN", "\"\""
+                buildConfigField "String", "SENTRY_DSN", "\"\"";
             }
         } else {
             buildConfigField "boolean", "ENABLE_BUG_REPORT", "false"
-            buildConfigField "String", "SENTRY_DSN", "\"\""
+            buildConfigField "String", "SENTRY_DSN", "\"\"";
         }
         resValue "string", "VERSION_NAME", versionName
         resValue "string", "APPLICATION_ID", applicationId
@@ -205,21 +205,21 @@ android {
     }
     splits {
         abi {
-            enable true
+            enable = true
             reset()
             include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
             if (project.hasProperty("universal")) {
                 // universal if for fdroid now with specific version(Name|Code) and oneapk for amazon
-                enable false
-                universalApk true
+                enable = false
+                universalApk = true
             } else if (project.hasProperty("oneapk")) {
                 // universal if for fdroid now with specific version(Name|Code) and oneapk for amazon
-                enable true
-                universalApk true
+                enable = true
+                universalApk = true
             } else {
                 // disable splits for bundle builds, enable for APK builds
                 enable = !gradle.startParameter.taskNames.any { it.contains("bundle") }
-                universalApk false
+                universalApk = false
             }
         }
     }
@@ -241,8 +241,8 @@ android {
     buildTypes {
         println("buildTypes archivesBaseName : " + archivesNameValue)
         release {
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled = true
+            shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-project.txt'
         }
     }
@@ -290,8 +290,8 @@ android {
         }
     }
     lint {
-        abortOnError false
-        checkReleaseBuilds false
+        abortOnError = false
+        checkReleaseBuilds = false
         disable 'MissingTranslation'
     }
 
