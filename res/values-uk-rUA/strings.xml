@@ -428,7 +428,7 @@
     <string name="dialog_subloader_nonetwork_title">Немає підключення до Інтернету</string>
     <string name="dialog_subloader_nonetwork_message">Для завантаження субтитрів необхідне підключення до Інтернету</string>
     <string name="dialog_subloader_connecting">Підключення до OpenSubtitles…</string>
-    <string name="opensubtitles_quota_download_remaining">Обмеження на завантаження OpenSubtitles: %d/%d залишилося</string>
+    <string name="opensubtitles_quota_download_remaining">Обмеження на завантаження OpenSubtitles: %1$d/%2$d залишилося</string>
     <string name="dialog_subloader_credentials">Облікові дані OpenSubtitles</string>
     <string name="dialog_subloader_credentials_empty">Введіть дійсний логін і пароль!</string>
     <string name="toast_subloader_credentials_empty">Надайте облікові дані OpenSubtitles у налаштуваннях, щоб мати можливість завантажувати субтитри</string>

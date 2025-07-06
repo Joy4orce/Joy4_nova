@@ -418,7 +418,7 @@
     <string name="dialog_subloader_nonetwork_title">بدون اتصال اینترنت</string>
     <string name="dialog_subloader_nonetwork_message">برای دانلود زیرنویس ها نیاز به اتصال به اینترنت است</string>
     <string name="dialog_subloader_connecting">اتصال به سرویس opensubtitle...</string>
-    <string name="opensubtitles_quota_download_remaining">صف دانلود OpenSubtitles: %d/%d باقی مانده</string>
+    <string name="opensubtitles_quota_download_remaining">صف دانلود OpenSubtitles: %1$d/%2$d باقی مانده</string>
     <string name="dialog_subloader_credentials">اعتبارنامه OpenSubtitles</string>
     <string name="dialog_subloader_credentials_empty">شما باید یک نام کاربری و رمز عبور معتبر مشخص کنید!</string>
     <string name="toast_subloader_credentials_empty">اعتبارنامه OpenSubtitles خود را در تنظیمات ارائه دهید تا بتوانید زیرنویس های بیشتری دانلود کنید</string>

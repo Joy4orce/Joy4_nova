@@ -387,7 +387,7 @@
     <string name="dialog_subloader_nonetwork_title">Δεν υπάρχει σύνδεση στο διαδίκτυο</string>
     <string name="dialog_subloader_nonetwork_message">Απαιτείται σύνδεση στο διαδίκτυο για τη λήψη υποτίτλων</string>
     <string name="dialog_subloader_connecting">Σύνδεση στο www.opensubtitles.com…</string>
-    <string name="opensubtitles_quota_download_remaining">Όριο λήψης OpenSubtitles: %d/%d απομένει</string>
+    <string name="opensubtitles_quota_download_remaining">Όριο λήψης OpenSubtitles: %1$d/%2$d απομένει</string>
     <string name="dialog_subloader_credentials">Πιστοποιητικά Opensubtitles</string>
     <string name="dialog_subloader_credentials_empty">Πρέπει να εισαγάγετε έγκυρο όνομα χρήστη και κωδικό πρόσβασης!</string>
     <string name="toast_subloader_credentials_empty">Παρέχετε τα διαπιστευτήρια opensubtitles σας στις ρυθμίσεις για να μπορείτε να κατεβάσετε υπότιτλους</string>

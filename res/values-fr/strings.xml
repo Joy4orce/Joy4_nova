@@ -418,7 +418,7 @@
     <string name="dialog_subloader_nonetwork_title">Aucune connection à Internet</string>
     <string name="dialog_subloader_nonetwork_message">Une connection Internet est requise pour le téléchargement de sous-titres</string>
     <string name="dialog_subloader_connecting">Connexion au site opensubtitles…</string>
-    <string name="opensubtitles_quota_download_remaining">Quota de téléchargement OpenSubtitles: %d/%d restant</string>
+    <string name="opensubtitles_quota_download_remaining">Quota de téléchargement OpenSubtitles: %1$d/%2$d restant</string>
     <string name="dialog_subloader_credentials">Identifiants opensubtitles</string>
     <string name="dialog_subloader_credentials_empty">Vous devrez entrer un mot de passe et un nom d\'utilisateur valide!</string>
     <string name="toast_subloader_credentials_empty">Fournissez vos identifiants opensubtitles dans les paramètres pour pouvoir télécharger plus de sous-titres</string>

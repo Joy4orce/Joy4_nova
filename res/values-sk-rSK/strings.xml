@@ -428,7 +428,7 @@
     <string name="dialog_subloader_nonetwork_title">Žiadne internetové pripojenie</string>
     <string name="dialog_subloader_nonetwork_message">Na stiahnutie titulkov je potrebné internetové pripojenie</string>
     <string name="dialog_subloader_connecting">Pripojenie na www.opensubtitles.com...</string>
-    <string name="opensubtitles_quota_download_remaining">Kvóta na stiahnutie z OpenSubtitles: Zostávajúce %d/%d</string>
+    <string name="opensubtitles_quota_download_remaining">Kvóta na stiahnutie z OpenSubtitles: Zostávajúce %1$d/%2$d</string>
     <string name="dialog_subloader_credentials">Prihlasovacie údaje k titulkom Opensubtitles</string>
     <string name="dialog_subloader_credentials_empty">Musíte zadať platné meno používateľa a heslo!</string>
     <string name="toast_subloader_credentials_empty">Zadajte svoje poverenia Opensubtitles v nastaveniach, aby ste mohli sťahovať titulky</string>

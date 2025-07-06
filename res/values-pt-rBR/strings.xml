@@ -415,7 +415,7 @@
     <string name="dialog_subloader_nonetwork_title">Sem conexão com a Internet</string>
     <string name="dialog_subloader_nonetwork_message">Uma conexão com a internet é necessária para baixar legendas</string>
     <string name="dialog_subloader_connecting">Conectando-se a www.opensubtitle.org…</string>
-    <string name="opensubtitles_quota_download_remaining">OpenSubtitles cota de download: %d/%d restante</string>
+    <string name="opensubtitles_quota_download_remaining">OpenSubtitles cota de download: %1$d/%2$d restante</string>
     <string name="dialog_subloader_credentials">Credenciais do Opensubtitles</string>
     <string name="dialog_subloader_credentials_empty">Você deve especificar um nome de usuário e senha válidos!</string>
     <string name="toast_subloader_credentials_empty">Forneça suas credenciais do opensubtitles nas configurações para poder baixar legendas</string>

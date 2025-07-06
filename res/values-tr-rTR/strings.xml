@@ -270,21 +270,21 @@ izlenen bölümler %d</item>
     <string name="you_have_no_non_scraped_videos">Alıntı yapılmayan video yok</string>
     <plurals name="Nmovies">
         <item quantity="one">1 filim
-&lt;xliff: g id="count"&gt;%d&lt;/xliff: g&gt; filimler</item>
+&lt;xliff: g id=\"count\"&gt;%d&lt;/xliff: g&gt; filimler</item>
         <item quantity="other">1 filim
 &lt;xliff: g id="count"&gt;%d&lt;/xliff: g&gt; filimler</item>
     </plurals>
     <plurals name="Nepisodes">
         <!-- number of episodes is one -->
         <item quantity="one">1 bölüm
-&lt;xliff: g id="count"&gt;%d&lt;/xliff: g&gt; bölüm</item>
+&lt;xliff: g id=\"count\"&gt;%d&lt;/xliff: g&gt; bölüm</item>
         <!-- number of episodes is not equal to one -->
         <item quantity="other">1 bölüm
 &lt;xliff: g id="count"&gt;%d&lt;/xliff: g&gt; bölüm</item>
     </plurals>
     <plurals name="Nseasons">
         <item quantity="one">1 sezon
-&lt;xliff: g id="count"&gt;%d&lt;/xliff: g&gt; sezonlar</item>
+&lt;xliff: g id=\"count\"&gt;%d&lt;/xliff: g&gt; sezonlar</item>
         <item quantity="other">1 sezon
 &lt;xliff: g id="count"&gt;%d&lt;/xliff: g&gt; sezonlar</item>
     </plurals>
@@ -431,7 +431,7 @@ desteklenmiyor.</string>
     <string name="dialog_subloader_nonetwork_title">İnternet bağlantısı yok</string>
     <string name="dialog_subloader_nonetwork_message">Altyazıları indirmek için internet bağlantısı gereklidir</string>
     <string name="dialog_subloader_connecting">Www.opensubtitles.com sitesine bağlanıyor…</string>
-    <string name="opensubtitles_quota_download_remaining">OpenSubtitles indirme kotası: %d/%d kaldı</string>
+    <string name="opensubtitles_quota_download_remaining">OpenSubtitles indirme kotası: %1$d/%2$d kaldı</string>
     <string name="dialog_subloader_credentials">Altyazı kimlik bilgilerini açar</string>
     <string name="dialog_subloader_credentials_empty">Geçerli bir kullanıcı adı ve şifre belirlemelisiniz!</string>
     <string name="toast_subloader_credentials_empty">Altyazıları indirebilmek için ayarlarda açılan altyazı kimlik bilgilerinizi sağlayın</string>

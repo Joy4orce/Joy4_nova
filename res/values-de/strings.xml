@@ -418,7 +418,7 @@
     <string name="dialog_subloader_nonetwork_title">Keine Internetverbindung</string>
     <string name="dialog_subloader_nonetwork_message">Für das Herunterladen von Untertiteln ist eine Internetverbindung erforderlich</string>
     <string name="dialog_subloader_connecting">Verbindung zum opensubtitles-Dienst herstellen …</string>
-    <string name="opensubtitles_quota_download_remaining">OpenSubtitles-Download-Quote: %d/%d verbleibend</string>
+    <string name="opensubtitles_quota_download_remaining">OpenSubtitles-Download-Quote: %1$d/%2$d verbleibend</string>
     <string name="dialog_subloader_credentials">Opensubtitles-Anmeldedaten</string>
     <string name="dialog_subloader_credentials_empty">Sie müssen einen gültigen Benutzernamen und Passwort angeben!</string>
     <string name="toast_subloader_credentials_empty">Geben Sie Ihre opensubtitles-Anmeldedaten in den Einstellungen an, um weitere Untertitel herunterladen zu können</string>

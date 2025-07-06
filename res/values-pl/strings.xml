@@ -428,7 +428,7 @@
     <string name="dialog_subloader_nonetwork_title">Brak połączenia z Internetem</string>
     <string name="dialog_subloader_nonetwork_message">Do pobrania napisów wymagane jest połączenie z internetem</string>
     <string name="dialog_subloader_connecting">Łączenie z www.opensubtitles.com…</string>
-    <string name="opensubtitles_quota_download_remaining">Limit pobierania OpenSubtitles: %d/%d pozostało</string>
+    <string name="opensubtitles_quota_download_remaining">Limit pobierania OpenSubtitles: %1$d/%2$d pozostało</string>
     <string name="dialog_subloader_credentials">Dane logowania do Opensubtitles</string>
     <string name="dialog_subloader_credentials_empty">Podaj poprawne nazwę uzytkownika i hasło!</string>
     <string name="toast_subloader_credentials_empty">Podaj w ustawieniach dane logowania do OpenSubtitles, aby pobierać napisy</string>

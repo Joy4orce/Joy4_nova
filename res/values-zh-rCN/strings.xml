@@ -413,7 +413,7 @@
     <string name="dialog_subloader_nonetwork_title">没有网络连接</string>
     <string name="dialog_subloader_nonetwork_message">下载字幕需要互联网连接</string>
     <string name="dialog_subloader_connecting">正在连接到 www.opensubtitles.org…</string>
-    <string name="opensubtitles_quota_download_remaining">OpenSubtitles下载配额: %d/%d剩余</string>
+    <string name="opensubtitles_quota_download_remaining">OpenSubtitles下载配额: %1$d/%2$d剩余</string>
     <string name="dialog_subloader_credentials">Opensubtitles 用户凭据</string>
     <string name="dialog_subloader_credentials_empty">你必须指定一个有效的用户名和密码！</string>
     <string name="toast_subloader_credentials_empty">在设置中提供你的 opensubtitles 用户凭据以下载字幕</string>

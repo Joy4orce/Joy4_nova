@@ -412,7 +412,7 @@
     <string name="dialog_subloader_nonetwork_title">Không có internet</string>
     <string name="dialog_subloader_nonetwork_message">Cần có kết nối internet để tải xuống phụ đề</string>
     <string name="dialog_subloader_connecting">Đang kết nối đến www.opensubtitles.com…</string>
-    <string name="opensubtitles_quota_download_remaining">Hạn ngạch tải xuống OpenSubtitles: %d/%d còn lại</string>
+    <string name="opensubtitles_quota_download_remaining">Hạn ngạch tải xuống OpenSubtitles: %1$d/%2$d còn lại</string>
     <string name="dialog_subloader_credentials">Thông tin đăng nhập OpenSubtitles</string>
     <string name="dialog_subloader_credentials_empty">Bạn phải chỉ định tên người dùng và mật khẩu hợp lệ!</string>
     <string name="toast_subloader_credentials_empty">Cung cấp thông tin đăng nhập opensubtitles của bạn trong cài đặt để có thể tải xuống thêm phụ đề</string>
