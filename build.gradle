@@ -218,7 +218,7 @@ android {
                 universalApk = true
             } else {
                 // disable splits for bundle builds, enable for APK builds
-                enable = !gradle.startParameter.taskNames.any { it.contains("bundle") }
+                enable = !gradle.startParameter.taskNames.any { it.toLowerCase(Locale.ROOT).contains("bundle") }
                 universalApk = false
             }
         }
