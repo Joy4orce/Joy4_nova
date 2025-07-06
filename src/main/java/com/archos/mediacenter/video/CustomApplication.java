@@ -214,7 +214,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                 options.setDsn(BuildConfig.SENTRY_DSN);
                 options.setSampleRate(null);
                 options.setDebug(false);
-                options.removeIntegration(io.sentry.android.core.SystemEventsBreadcrumbsIntegration.class);
+                options.setEnableSystemEventBreadcrumbs(false);
                 });
         }
     }
