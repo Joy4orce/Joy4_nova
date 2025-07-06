@@ -1289,7 +1289,9 @@
             android:process=":scanner"/>
         <service
             android:name="com.archos.mediaprovider.MediaRetrieverService"
-            android:process=":scanner"/>
+            android:process=":scanner"
+            android:exported="true"
+            android:enabled="true"/>
 
         <!-- Service doing the import -->
         <service android:name="com.archos.mediaprovider.video.VideoStoreImportService"/>
