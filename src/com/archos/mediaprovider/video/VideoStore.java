@@ -131,27 +131,9 @@ public final class VideoStore {
                     if (DBG) Log.d(TAG, "requestIndexing: video not present in MediaStore, need to populate MediaStore");
                     doPopulate = true;
                 } else if (cursor.getCount()>0) {
-                    if (DBG) Log.d(TAG, "requestIndexing: video present in MediaStore");
-                    // video present in MediaStore
-                    long newId = 0;
-
-                    cursor.close();
-                    cursor = context.getContentResolver().query(MediaStore.Files.getContentUri("external"),
-                            new String[] { "MAX(" + MediaStore.Files.FileColumns._ID + ")" }, null, null, null);
-
-                    if (DBG) Log.d(TAG, "requestIndexing: max MediaStore.Files.FileColumns._ID cursor dump " + DatabaseUtils.dumpCursorToString(cursor));
-
-                    if (cursor.getCount() > 0) {
-                        cursor.moveToFirst();
-
-                        long id = cursor.getLong(0);
-                        newId = id + 1;
-                    }
-
-                    String col = MediaStore.Files.FileColumns._ID;
-                    cvR.put(col, newId);
-                    if (DBG) Log.d(TAG, "requestIndexing: inserting new content in MediaStore.Files");
-                    context.getContentResolver().update(MediaStore.Files.getContentUri("external"), cvR, whereR, whereRArgs);
+                    // _id column is an auto-generated primary key managed by the system. it should never be updated manually
+                    if (DBG) Log.d(TAG, "requestIndexing: video present in MediaStore, do nothing");
+                    // video present in MediaStore -> do nothing
                 } else doPopulate = true;
                 if (doPopulate) { // video not present in MediaStore nor in VideoStore, if local file insert it in MediaStore
                     if (DBG) Log.d(TAG, "requestIndexing: video not present in MediaStore nor in VideoStore");
