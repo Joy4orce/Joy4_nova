@@ -97,24 +97,32 @@ public class NetworkAutoRefresh extends BroadcastReceiver implements DefaultLife
             pref.edit().putLong(AUTO_RESCAN_LAST_SCAN, System.currentTimeMillis()).commit();
             log.debug("onReceive: received rescan intent");
             //updating
-            Cursor cursor = ShortcutDbAdapter.VIDEO.queryAllShortcuts(context);
+            Cursor cursor = null;
             List<Uri> toUpdate = new ArrayList<>();
-            if (cursor.getCount() > 0) {
-                int pathKey = cursor.getColumnIndex(ShortcutDbAdapter.KEY_PATH);
-                int rescanKey = cursor.getColumnIndex(ShortcutDbAdapter.KEY_RESCAN);
-                cursor.moveToFirst();
-                do {
-                    Uri uri = Uri.parse(cursor.getString(pathKey));
-                    int rescan = cursor.getInt(rescanKey);
-                    // if this uri is to be rescan automatically, add it to the list
-                    if (rescan == 1) {
-                        log.debug("onReceive: add to scan list " + uri);
-                        toUpdate.add(uri);
+            try {
+                cursor = ShortcutDbAdapter.VIDEO.queryAllShortcuts(context);
+                if (cursor != null && cursor.moveToFirst()) {
+                    int pathKey = cursor.getColumnIndex(ShortcutDbAdapter.KEY_PATH);
+                    int rescanKey = cursor.getColumnIndex(ShortcutDbAdapter.KEY_RESCAN);
+                    do {
+                        Uri uri = Uri.parse(cursor.getString(pathKey));
+                        int rescan = cursor.getInt(rescanKey);
+                        // if this uri is to be rescan automatically, add it to the list
+                        if (rescan == 1) {
+                            log.debug("onReceive: add to scan list " + uri);
+                            toUpdate.add(uri);
+                        }
                     }
+                    while (cursor.moveToNext());
                 }
-                while (cursor.moveToNext());
+            } catch (Exception e) {
+                log.error("onReceive: Error accessing shortcuts database", e);
+                // Continue without shortcuts to prevent crash
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
             }
-            cursor.close();
             ShortcutDbAdapter.VIDEO.close();
             if(NetworkState.isLocalNetworkConnected(context)) {
                 PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(AUTO_RESCAN_ERROR, 0).commit();//reset error

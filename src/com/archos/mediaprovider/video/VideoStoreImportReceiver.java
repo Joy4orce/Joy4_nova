@@ -35,6 +35,10 @@ public class VideoStoreImportReceiver extends BroadcastReceiver {
 
     private static final String TAG =  VideoStoreImportReceiver.class.getSimpleName();
     private static final boolean DBG = false;
+    
+    // Throttling to prevent broadcast loops - minimum 500ms between executions
+    private static final long MIN_INTERVAL_MS = 500;
+    private static long sLastExecutionTime = 0;
 
     public VideoStoreImportReceiver() {
     }
@@ -42,6 +46,17 @@ public class VideoStoreImportReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (DBG) Log.d(TAG, "onReceive:" + intent);
+        
+        // Throttling to prevent broadcast storms
+        long currentTime = System.currentTimeMillis();
+        synchronized (VideoStoreImportReceiver.class) {
+            if (currentTime - sLastExecutionTime < MIN_INTERVAL_MS) {
+                if (DBG) Log.d(TAG, "onReceive: throttled - too soon after last execution");
+                return;
+            }
+            sLastExecutionTime = currentTime;
+        }
+        
         ArchosUtils.addBreadcrumb(SentryLevel.INFO, "VideoStoreImportReceiver.onReceive", "start NetworkScannerServiceVideo and VideoStoreImportService via intent if intent supported");
         // start network scan / removal service
         if (! ProcessLifecycleOwner.get().getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
