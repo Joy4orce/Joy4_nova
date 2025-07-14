@@ -324,8 +324,12 @@ public class VideoStoreImportService extends Service implements Handler.Callback
         
         // Ensure MediaRetrieverService is running before starting VideoStoreImportService
         Intent mediaRetrieverIntent = new Intent(context, MediaRetrieverService.class);
-        context.startService(mediaRetrieverIntent);
-        log.debug("startService: MediaRetrieverService start requested");
+        try {
+            context.startService(mediaRetrieverIntent);
+            log.debug("startService: MediaRetrieverService start requested");
+        } catch (IllegalStateException e) {
+            log.warn("startService: Failed to start MediaRetrieverService despite lifecycle check - timing issue", e);
+        }
         
         mContext = context;
         Intent intent = new Intent(context, VideoStoreImportService.class);
