@@ -126,6 +126,9 @@ public class PlaceholderCursorObjectAdapter extends ObjectAdapter {
         if (mCursor == null || index == 0) {
             return null;
         }
+        if (mCursor.isClosed()) {
+            return null;
+        }
         if (!mCursor.moveToPosition(index - 1)) {
             throw new ArrayIndexOutOfBoundsException();
         }
