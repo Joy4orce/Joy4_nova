@@ -26,6 +26,7 @@ import android.util.Log;
 import androidx.core.content.ContextCompat;
 import androidx.leanback.app.BackgroundManager;
 import androidx.leanback.app.SearchSupportFragment;
+import com.archos.mediacenter.video.leanback.scrapping.SafeSearchSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.ClassPresenterSelector;
 import androidx.leanback.widget.CursorObjectAdapter;
@@ -49,7 +50,7 @@ import com.archos.mediacenter.video.leanback.presenter.EmptyViewPresenter;
 import com.archos.mediacenter.video.leanback.presenter.PosterImageCardPresenter;
 import androidx.leanback.widget.ShadowLessRowPresenter;
 
-public class VideoSearchFragment extends SearchSupportFragment implements SearchSupportFragment.SearchResultProvider {
+public class VideoSearchFragment extends SafeSearchSupportFragment implements SearchSupportFragment.SearchResultProvider {
 
     static final String TAG = "VideoSearchFragment";
     public static final int ROW_ID = 2000;

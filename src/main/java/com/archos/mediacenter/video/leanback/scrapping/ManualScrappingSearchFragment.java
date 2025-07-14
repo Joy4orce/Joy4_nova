@@ -56,7 +56,7 @@ import java.util.concurrent.Executor;
 /**
  * Created by vapillon on 11/06/15.
  */
-public abstract class ManualScrappingSearchFragment extends SearchSupportFragment implements SearchSupportFragment.SearchResultProvider {
+public abstract class ManualScrappingSearchFragment extends SafeSearchSupportFragment implements SearchSupportFragment.SearchResultProvider {
 
     private static final Logger log = LoggerFactory.getLogger(ManualScrappingSearchFragment.class);
 
