@@ -223,7 +223,47 @@ public class MovieTags extends VideoTags {
                 cop.withValue(ScraperStore.MovieCollections.BACKDROP_THUMB_FILE, mCollectionBackdropThumbFile);
                 allOperations.add(cop.build());
             } else {
-                log.debug("save: collection " + mCollectionId + " already exists, skipping insert");
+                log.debug("save: collection " + mCollectionId + " already exists, updating only non-null fields");
+                cop = ContentProviderOperation.newUpdate(ScraperStore.MovieCollections.URI.BASE)
+                        .withSelection(ScraperStore.MovieCollections.ID + "=?", new String[]{String.valueOf(mCollectionId)});
+                
+                // Always update name and description if available
+                if (mCollectionName != null) {
+                    cop.withValue(ScraperStore.MovieCollections.NAME, mCollectionName);
+                }
+                if (mCollectionDescription != null) {
+                    cop.withValue(ScraperStore.MovieCollections.DESCRIPTION, mCollectionDescription);
+                }
+                
+                // Only update poster fields if this movie has poster data
+                if (mCollectionPosterLargeUrl != null) {
+                    cop.withValue(ScraperStore.MovieCollections.POSTER_LARGE_URL, mCollectionPosterLargeUrl);
+                }
+                if (mCollectionPosterLargeFile != null) {
+                    cop.withValue(ScraperStore.MovieCollections.POSTER_LARGE_FILE, mCollectionPosterLargeFile);
+                }
+                if (mCollectionPosterThumbUrl != null) {
+                    cop.withValue(ScraperStore.MovieCollections.POSTER_THUMB_URL, mCollectionPosterThumbUrl);
+                }
+                if (mCollectionPosterThumbFile != null) {
+                    cop.withValue(ScraperStore.MovieCollections.POSTER_THUMB_FILE, mCollectionPosterThumbFile);
+                }
+                
+                // Only update backdrop fields if this movie has backdrop data
+                if (mCollectionBackdropLargeUrl != null) {
+                    cop.withValue(ScraperStore.MovieCollections.BACKDROP_LARGE_URL, mCollectionBackdropLargeUrl);
+                }
+                if (mCollectionBackdropLargeFile != null) {
+                    cop.withValue(ScraperStore.MovieCollections.BACKDROP_LARGE_FILE, mCollectionBackdropLargeFile);
+                }
+                if (mCollectionBackdropThumbUrl != null) {
+                    cop.withValue(ScraperStore.MovieCollections.BACKDROP_THUMB_URL, mCollectionBackdropThumbUrl);
+                }
+                if (mCollectionBackdropThumbFile != null) {
+                    cop.withValue(ScraperStore.MovieCollections.BACKDROP_THUMB_FILE, mCollectionBackdropThumbFile);
+                }
+                
+                allOperations.add(cop.build());
             }
         }
 
