@@ -224,13 +224,6 @@
             android:summary="@string/preferences_separate_animation_from_movies_summary"
             android:title="@string/preferences_separate_animation_from_movies"
             app:iconSpaceReserved="false"/>
-
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="show_watching_up_next_row"
-            android:summary="@string/preferences_show_watching_up_next_row_summary"
-            android:title="@string/preferences_show_watching_up_next_row"
-            app:iconSpaceReserved="false"/>
         
         <CheckBoxPreference
             android:defaultValue="true"
@@ -244,6 +237,13 @@
             android:key="show_last_played_row"
             android:summary="@string/preferences_show_last_played_row_summary"
             android:title="@string/preferences_show_last_played_row"
+            app:iconSpaceReserved="false"/>
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="show_watching_up_next_row"
+            android:summary="@string/preferences_show_watching_up_next_row_summary"
+            android:title="@string/preferences_show_watching_up_next_row"
             app:iconSpaceReserved="false"/>
 
         <Preference

@@ -7,13 +7,6 @@ import com.archos.mediaprovider.video.VideoStore;
 
 public class WatchingUpNextLoader extends VideoLoader {
 
-    // /!\ FIXME this query requires optimization and cannot be used for now
-    // Problem: on large collection of videos viewed, loader takes forever to complete
-    // this causes VideoLoader that has only a poolsize of one to not process any other loaders
-
-    // TODO redesign so that LastPlayed = only completed videos and
-    // UpNext = following episodes of completed videos + CurrentlyPlayed (ongoing videos not completed)
-
     public WatchingUpNextLoader(Context context) {
         super(context);
         init();
@@ -30,86 +23,66 @@ public class WatchingUpNextLoader extends VideoLoader {
         if (builder.length() > 0)
             builder.append(" AND ");
 
-        // former code which is not scalable because when there is a large number of video that are seen the join takes forever on the whole video table
-        // solution: do it on the last 100 last played videos
-        /*
+        // Index-optimized query: Restructured to leverage new performance indexes
         builder.append(
-            "(bookmark > 0 OR e_id in (" + // display bookmarked videos and
-                "SELECT n.e_id " +
-                "FROM video as n " +
-                "INNER JOIN (SELECT * FROM video WHERE Archos_lastTimePlayed!=0 AND s_id NOT NULL ORDER BY Archos_lastTimePlayed DESC LIMIT 100) AS w " +
-                "ON n.s_id = w.s_id AND (" +
-                    "CASE " +
-                        "WHEN w.e_episode = (" + // if there is no more episodes in the season
-                            "SELECT MAX(e_episode) FROM video WHERE e_id IS NOT NULL AND s_id = w.s_id AND e_season = w.e_season" +
+                "(" +
+                // Part 1: Next episodes in TV series (optimized for idx_video_series_episode)
+                "(s_id IS NOT NULL AND " + VideoStore.Video.VideoColumns.ARCHOS_TRAKT_SEEN + " = 0 AND archos_hiddenbyuser = 0 AND " +
+                "EXISTS (" +
+                    // Find the highest completed episode in the series (by season/episode number)
+                    "SELECT 1 FROM video lw " +
+                    "WHERE lw.s_id = video.s_id " +
+                        "AND lw.archos_hiddenbyuser = 0 " +
+                        "AND lw." + VideoStore.Video.VideoColumns.ARCHOS_TRAKT_SEEN + " = 1 " +
+                        // Ensure this is the highest completed episode by ordering and taking the first
+                        "AND NOT EXISTS (" +
+                            "SELECT 1 FROM video lwhigher " +
+                            "WHERE lwhigher.s_id = video.s_id " +
+                                "AND lwhigher.archos_hiddenbyuser = 0 " +
+                                "AND lwhigher." + VideoStore.Video.VideoColumns.ARCHOS_TRAKT_SEEN + " = 1 " +
+                                "AND (" +
+                                    "(lwhigher.e_season > lw.e_season) " +
+                                    "OR (lwhigher.e_season = lw.e_season AND lwhigher.e_episode > lw.e_episode)" +
+                                ")" +
                         ") " +
-                        "THEN n.e_season = w.e_season + 1 AND n.e_episode = (" + // jump to next season as result
-                            "SELECT MIN(e_episode) FROM video WHERE e_id IS NOT NULL AND s_id = n.s_id AND e_season = n.e_season" +
-                        ") " + // and take the min of the episodes present
-                        "ELSE n.e_season = w.e_season AND n.e_episode = w.e_episode + 1 " + // otherwise take simply the next episode
-                    "END" +
-                ") " +
-                "WHERE n.e_id IS NOT NULL AND n.Archos_lastTimePlayed = 0 AND w.e_id IS NOT NULL AND w.Archos_lastTimePlayed != 0" +
-            "))"
-        );
-         */
-        /* optimized query using having:
-        WITH v AS
-(
-  SELECT video_online_id, scraper_name, m_coll_id, m_year, s_id, e_season, e_episode
-  FROM video
-  WHERE (m_coll_id IS NOT NULL OR s_id IS NOT NULL)
-        AND Archos_lastTimePlayed = 0
-        AND archos_hiddenbyuser = 0
-  GROUP BY video_online_id
-),
-l AS
-(
-  SELECT m_coll_id, s_id, MAX(e_season) AS e_season, MAX(e_episode) AS e_episode, MAX(archos_lasttimeplayed) AS archos_lasttimeplayed, MAX(m_year) AS m_year
-  FROM video
-  WHERE Archos_lastTimePlayed > 1
-        AND (m_coll_id IS NOT NULL OR s_id IS NOT NULL)
-        AND archos_hiddenbyuser = 0
-  GROUP BY m_coll_id, s_id
-  HAVING MAX(e_episode) = (SELECT MAX(e_episode) FROM v WHERE v.s_id = l.s_id AND v.e_season = l.e_season)
-     OR MAX(m_year) = (SELECT MIN(m_year) FROM v WHERE v.m_coll_id = l.m_coll_id AND v.m_year > l.m_year)
-  LIMIT 100
-)
-SELECT v.video_online_id, v.scraper_name, v.e_season, v.e_episode, l.archos_lasttimeplayed
-FROM v
-INNER JOIN l ON
-  (v.s_id = l.s_id AND
-    (v.e_season = l.e_season + 1 AND v.e_episode = (SELECT MIN(e_episode) FROM v WHERE s_id = v.s_id AND e_season = l.e_season + 1))
-    OR (v.e_season = l.e_season AND v.e_episode = (SELECT MIN(e_episode) FROM v WHERE s_id = l.s_id AND e_season = l.e_season AND e_episode > l.e_episode)))
-UNION
-SELECT v.video_online_id, v.scraper_name, v.e_season, v.e_episode, l.archos_lasttimeplayed
-FROM v
-INNER JOIN l ON v.m_coll_id = l.m_coll_id
-           AND v.m_year = (SELECT MIN(m_year) FROM v WHERE m_coll_id = l.m_coll_id AND m_year > l.m_year)
-ORDER BY l.archos_lasttimeplayed DESC;
-
-         */
-
-        builder.append(
-                "(video_online_id IN\n" +
-                        "  (SELECT video_online_id FROM\n" +
-                        "    (WITH v AS \n" +
-                        "      (SELECT video_online_id, scraper_name, m_coll_id, m_year, s_id, e_season, e_episode\n" +
-                        "        FROM video WHERE (m_coll_id NOT NULL OR s_id NOT NULL) AND Archos_lastTimePlayed=0 AND archos_hiddenbyuser = 0 GROUP BY video_online_id),\n" +
-                        "    l AS \n" +
-                        "      (SELECT m_coll_id, s_id, MAX(e_season) AS e_season, max(e_episode) AS e_episode, archos_lasttimeplayed, MAX(m_year) AS m_year \n" +
-                        "        FROM video WHERE Archos_lastTimePlayed > 1 AND (m_coll_id NOT NULL OR s_id NOT NULL) AND archos_hiddenbyuser = 0 GROUP BY m_coll_id, s_id LIMIT 100)\n" +
-                        "    SELECT v.video_online_id, v.scraper_name, v.e_season, v.e_episode, l.archos_lasttimeplayed \n" +
-                        "      FROM v INNER JOIN l ON v.s_id = l.s_id AND\n" +
-                        "        (CASE WHEN l.e_episode = (SELECT MAX(e_episode) FROM v WHERE s_id = l.s_id AND e_season = l.e_season)\n" +
-                        "          THEN v.e_season = l.e_season + 1 AND v.e_episode = (SELECT MIN(e_episode) FROM v WHERE s_id = v.s_id AND e_season = l.e_season + 1)\n" +
-                        "          ELSE v.e_season = l.e_season AND v.e_episode  = (SELECT MIN(e_episode) FROM v WHERE s_id = l.s_id  AND e_season = l.e_season  AND e_episode > l.e_episode)\n" +
-                        "        END)\n" +
-                        "    UNION\n" +
-                        "    SELECT v.video_online_id, v.scraper_name, v.e_season, v.e_episode, l.archos_lasttimeplayed \n" +
-                        "      FROM v INNER JOIN l ON v.m_coll_id = l.m_coll_id\n" +
-                        "        AND v.m_year = (SELECT Min(m_year) FROM v WHERE m_coll_id = l.m_coll_id AND m_year > l.m_year) \n" +
-                        "    ORDER BY l.archos_lasttimeplayed DESC)))"
+                        "AND (" +
+                            // Same season, next episode (uses series_episode index)
+                            "(lw.e_season = video.e_season AND lw.e_episode = video.e_episode - 1) " +
+                            "OR " +
+                            // Previous season, last episode (uses series_episode index)
+                            "(lw.e_season = video.e_season - 1 AND video.e_episode = 1 " +
+                                "AND NOT EXISTS (SELECT 1 FROM video v3 WHERE v3.s_id = lw.s_id " +
+                                    "AND v3.e_season = video.e_season AND v3.e_episode < video.e_episode))" +
+                        ") " +
+                        "LIMIT 1" +
+                "))" +
+                " OR " +
+                // Part 2: Next movies in collections (optimized for idx_video_collection_year)
+                "(m_coll_id IS NOT NULL AND " + VideoStore.Video.VideoColumns.ARCHOS_TRAKT_SEEN + " = 0 AND archos_hiddenbyuser = 0 AND " +
+                "EXISTS (" +
+                    // Find the highest completed movie in the collection (by year)
+                    "SELECT 1 FROM video lw " +
+                    "WHERE lw.m_coll_id = video.m_coll_id " +
+                        "AND lw.archos_hiddenbyuser = 0 " +
+                        "AND lw." + VideoStore.Video.VideoColumns.ARCHOS_TRAKT_SEEN + " = 1 " +
+                        // Ensure this is the highest completed movie by year
+                        "AND lw.m_year = (" +
+                            "SELECT MAX(m_year) FROM video lwmax " +
+                            "WHERE lwmax.m_coll_id = video.m_coll_id " +
+                                "AND lwmax.archos_hiddenbyuser = 0 " +
+                                "AND lwmax." + VideoStore.Video.VideoColumns.ARCHOS_TRAKT_SEEN + " = 1" +
+                        ") " +
+                        "AND lw.m_year < video.m_year " +
+                        // Ensure this is the next movie chronologically
+                        "AND NOT EXISTS (SELECT 1 FROM video v4 WHERE v4.m_coll_id = lw.m_coll_id " +
+                            "AND v4.m_year > lw.m_year AND v4.m_year < video.m_year " +
+                            "AND v4." + VideoStore.Video.VideoColumns.ARCHOS_TRAKT_SEEN + " = 0 AND v4.archos_hiddenbyuser = 0) " +
+                        "LIMIT 1" +
+                "))" +
+                " OR " +
+                // Part 3: Currently watching videos (partially watched, not completed)
+                "(bookmark > 0 AND " + VideoStore.Video.VideoColumns.ARCHOS_TRAKT_SEEN + " = 0 AND archos_hiddenbyuser = 0)" +
+                ")"
         );
 
         return builder.toString();
@@ -123,6 +96,20 @@ ORDER BY l.archos_lasttimeplayed DESC;
      */
     @Override
     public String getSortOrder() {
-        return "";
+        // Optimized sort that prioritizes currently watching videos, then up next videos
+        return "CASE " +
+            // Priority 1: Currently watching videos (have bookmarks but not completed) - sort by most recent play time
+            "WHEN bookmark > 0 AND " + VideoStore.Video.VideoColumns.ARCHOS_TRAKT_SEEN + " = 0 THEN 1000000 + Archos_lastTimePlayed " +
+            // Priority 2: Next episodes/movies - sort by most recent related play time
+            "ELSE COALESCE(" +
+                // For series: get most recent episode play time (uses idx_video_last_played_desc)
+                "(SELECT MAX(lw.Archos_lastTimePlayed) FROM video lw " +
+                    "WHERE lw.s_id = video.s_id AND lw.Archos_lastTimePlayed > 1), " +
+                // For collections: get most recent movie play time (uses idx_video_last_played_desc)
+                "(SELECT MAX(lw.Archos_lastTimePlayed) FROM video lw " +
+                    "WHERE lw.m_coll_id = video.m_coll_id AND lw.Archos_lastTimePlayed > 1), " +
+                "0" +
+            ") " +
+        "END DESC LIMIT 100";
     }
 }
