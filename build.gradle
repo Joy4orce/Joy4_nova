@@ -116,7 +116,7 @@ if (useSan)
 
 dependencies {
     implementation project(':FileCoreLibrary')
-    implementation 'androidx.lifecycle:lifecycle-process:2.9.1'
+    implementation 'androidx.lifecycle:lifecycle-process:2.9.2'
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
     implementation 'androidx.core:core:1.16.0'
     implementation 'androidx.legacy:legacy-support-core-utils:1.0.0'
@@ -124,8 +124,8 @@ dependencies {
     implementation 'androidx.fragment:fragment:1.8.8'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.preference:preference:1.2.1'
-    implementation 'org.apache.httpcomponents.client5:httpclient5:5.4.1'
-    implementation 'org.json:json:20240303'
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.5'
+    implementation 'org.json:json:20250517'
     // see https://github.com/UweTrottmann/trakt-java?tab=readme-ov-file for threetenabp instead of threetenbp
     implementation ('com.uwetrottmann.trakt5:trakt-java:6.16.0') {
         exclude group: 'org.threeten', module: 'threetenbp'
@@ -134,10 +134,10 @@ dependencies {
     api ('org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:1.0.2') {
         exclude group:'org.apache.oltu.oauth2' , module: 'org.apache.oltu.oauth2.common'
     }
-    implementation 'commons-codec:commons-codec:1.17.1'
-    implementation 'org.apache.commons:commons-text:1.12.0'
+    implementation 'commons-codec:commons-codec:1.18.0'
+    implementation 'org.apache.commons:commons-text:1.13.1'
     // version aligned with external dependencies trakt-java tmdb-java (check pom.xml)
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:5.1.0'
     // stick with 2.10.0 since errors are showing up in sentry when using 2.11.0
     implementation 'com.uwetrottmann.tmdb2:tmdb-java:2.11.0'
     // all below is linked to cling, jetty version locked to latest 8.1
@@ -158,5 +158,5 @@ dependencies {
     implementation ('org.eclipse.jetty:jetty-client:8.1.22.v20160922') {
         exclude group: 'org.eclipse.jetty.orbit', module: 'javax.servlet'
     }
-    implementation 'io.sentry:sentry:8.15.0'
+    implementation 'io.sentry:sentry:8.17.0'
 }
