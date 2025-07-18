@@ -46,7 +46,7 @@ public class VideoOpenHelper extends DeleteOnDowngradeSQLiteOpenHelper {
     // that is what onCreate creates
     private static final int DATABASE_CREATE_VERSION = 36; // initial version for v1.0 of nova (archos was 10)
     // that is the current version
-    private static final int DATABASE_VERSION = 44;
+    private static final int DATABASE_VERSION = 46;
     private static final String DATABASE_NAME = "media.db";
 
     // (Integer.MAX_VALUE / 2) rounded to human readable form
@@ -1130,6 +1130,41 @@ public class VideoOpenHelper extends DeleteOnDowngradeSQLiteOpenHelper {
     private static final String CREATE_VIDEOTHUMBNAIL_IDX_VIDEO_ID =
             "CREATE INDEX video_id_index on videothumbnails(video_id)";
 
+    // Performance indexes for core video functionality
+    private static final String CREATE_VIDEO_IDX_LAST_PLAYED =
+            "CREATE INDEX IF NOT EXISTS idx_video_last_played_desc ON " + FILES_TABLE_NAME + 
+            "(Archos_lastTimePlayed DESC) WHERE Archos_lastTimePlayed > 0";
+    private static final String CREATE_VIDEO_IDX_DATE_ADDED =
+            "CREATE INDEX IF NOT EXISTS idx_video_date_added ON " + FILES_TABLE_NAME + 
+            "(date_added DESC) WHERE date_added IS NOT NULL";
+    
+    // Core filtering indexes - CRITICAL for all loader performance
+    private static final String CREATE_FILES_HIDDEN_BY_USER_IDX =
+            "CREATE INDEX IF NOT EXISTS idx_files_hidden_by_user ON " + FILES_TABLE_NAME + 
+            "(Archos_hiddenByUser) WHERE Archos_hiddenByUser = 0";
+    private static final String CREATE_FILES_BOOKMARK_IDX =
+            "CREATE INDEX IF NOT EXISTS idx_files_bookmark ON " + FILES_TABLE_NAME + 
+            "(bookmark) WHERE bookmark IS NOT NULL";
+    private static final String CREATE_FILES_TRAKT_SEEN_IDX =
+            "CREATE INDEX IF NOT EXISTS idx_files_trakt_seen ON " + FILES_TABLE_NAME + 
+            "(Archos_traktSeen)";
+    
+    // Composite indexes for common query patterns - HIGH PRIORITY
+    private static final String CREATE_FILES_HIDDEN_BOOKMARK_IDX =
+            "CREATE INDEX IF NOT EXISTS idx_files_hidden_bookmark ON " + FILES_TABLE_NAME + 
+            "(Archos_hiddenByUser, bookmark, Archos_traktSeen)";
+    private static final String CREATE_FILES_DATE_ADDED_FILTERED_IDX =
+            "CREATE INDEX IF NOT EXISTS idx_files_date_added_filtered ON " + FILES_TABLE_NAME + 
+            "(date_added DESC, Archos_hiddenByUser, bookmark) WHERE date_added IS NOT NULL";
+    private static final String CREATE_FILES_LAST_PLAYED_FILTERED_IDX =
+            "CREATE INDEX IF NOT EXISTS idx_files_last_played_filtered ON " + FILES_TABLE_NAME + 
+            "(Archos_lastTimePlayed DESC, Archos_hiddenByUser, bookmark) WHERE Archos_lastTimePlayed > 0";
+    
+    // Search performance indexes
+    private static final String CREATE_FILES_TITLE_SEARCH_IDX =
+            "CREATE INDEX IF NOT EXISTS idx_files_title_search ON " + FILES_TABLE_NAME + 
+            "(title COLLATE NOCASE)";
+
     public static final String SUBTITLES_TABLE_NAME = "subtitles";
     private static final String CREATE_SUBTITLES_TABLE_V17 =
             "CREATE TABLE " + SUBTITLES_TABLE_NAME + " (\n" +
@@ -1397,6 +1432,29 @@ public class VideoOpenHelper extends DeleteOnDowngradeSQLiteOpenHelper {
         }
         if (oldVersion < 44) { // assign correct storage_id for /storage/AAAA-BBBB instead of 1
             processStorageIdInDB(db);
+        }
+        if (oldVersion < 45) { // add performance indexes for core video functionality
+            db.execSQL(CREATE_VIDEO_IDX_LAST_PLAYED);
+            db.execSQL(CREATE_VIDEO_IDX_DATE_ADDED);
+            // Scraper-related indexes are handled by ScraperTables.upgradeTo()
+            ScraperTables.upgradeTo(db, 45);
+        }
+        if (oldVersion < 46) { // add critical filtering and search indexes
+            // Core filtering indexes - CRITICAL for all loader performance
+            db.execSQL(CREATE_FILES_HIDDEN_BY_USER_IDX);
+            db.execSQL(CREATE_FILES_BOOKMARK_IDX);
+            db.execSQL(CREATE_FILES_TRAKT_SEEN_IDX);
+            
+            // Composite indexes for common query patterns
+            db.execSQL(CREATE_FILES_HIDDEN_BOOKMARK_IDX);
+            db.execSQL(CREATE_FILES_DATE_ADDED_FILTERED_IDX);
+            db.execSQL(CREATE_FILES_LAST_PLAYED_FILTERED_IDX);
+            
+            // Search performance indexes
+            db.execSQL(CREATE_FILES_TITLE_SEARCH_IDX);
+            
+            // Scraper-related indexes are handled by ScraperTables.upgradeTo()
+            ScraperTables.upgradeTo(db, 46);
         }
     }
 

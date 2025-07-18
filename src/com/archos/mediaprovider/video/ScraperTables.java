@@ -76,6 +76,35 @@ public final class ScraperTables {
     public static final String WRITER_DELETABLE_VIEW_NAME = "v_writer_deletable";
     public static final String GENRE_DELETABLE_VIEW_NAME = "v_genre_deletable";
     public static final String STUDIO_DELETABLE_VIEW_NAME = "v_studio_deletable";
+    
+    // Performance indexes for scraper tables to optimize joins in video view
+    private static final String CREATE_EPISODE_SEASON_EPISODE_IDX =
+            "CREATE INDEX IF NOT EXISTS idx_episode_season_episode ON " + EPISODE_TABLE_NAME + 
+            "(show_episode, season_episode, number_episode)";
+    private static final String CREATE_MOVIE_YEAR_IDX =
+            "CREATE INDEX IF NOT EXISTS idx_movie_year ON " + MOVIE_TABLE_NAME + 
+            "(" + ScraperStore.Movie.YEAR + ")";
+    private static final String CREATE_MOVIE_RATING_IDX =
+            "CREATE INDEX IF NOT EXISTS idx_movie_rating ON " + MOVIE_TABLE_NAME + 
+            "(" + ScraperStore.Movie.RATING + ")";
+    private static final String CREATE_EPISODE_VIDEO_ID_IDX =
+            "CREATE INDEX IF NOT EXISTS idx_episode_video_id ON " + EPISODE_TABLE_NAME + 
+            "(" + ScraperStore.Episode.VIDEO_ID + ")";
+    private static final String CREATE_MOVIE_VIDEO_ID_IDX =
+            "CREATE INDEX IF NOT EXISTS idx_movie_video_id ON " + MOVIE_TABLE_NAME + 
+            "(" + ScraperStore.Movie.VIDEO_ID + ")";
+    
+    // Additional performance indexes for ScraperTables
+    private static final String CREATE_SHOW_RATING_IDX =
+            "CREATE INDEX IF NOT EXISTS idx_show_rating ON " + SHOW_TABLE_NAME + 
+            "(" + ScraperStore.Show.RATING + ")";
+    private static final String CREATE_EPISODE_AIRED_IDX =
+            "CREATE INDEX IF NOT EXISTS idx_episode_aired ON " + EPISODE_TABLE_NAME + 
+            "(" + ScraperStore.Episode.AIRED + ") WHERE " + ScraperStore.Episode.AIRED + " > 0";
+    private static final String CREATE_MOVIE_COLLECTION_IDX =
+            "CREATE INDEX IF NOT EXISTS idx_movie_collection ON " + MOVIE_TABLE_NAME + 
+            "(m_coll_id) WHERE m_coll_id > 0";
+
     /*
      * Columns names that we need and are not to be exposed.
      * Public ones are in the ScraperStore class.
@@ -521,10 +550,6 @@ public final class ScraperTables {
         " FROM " + DIRECTORS_TABLE_NAME +
         " WHERE " + ScraperStore.Director.NAME + " = NEW." + ScraperStore.Episode.Director.NAME + "; " +
         "END";
-
-
-
-
 
     private static final String WRITERS_SHOW_VIEW_CREATE =
             "CREATE VIEW " + WRITERS_SHOW_VIEW_NAME + " AS SELECT " +
@@ -1308,6 +1333,20 @@ public final class ScraperTables {
             db.execSQL("CREATE INDEX WRITERS_MOVIE_idx ON WRITERS_MOVIE(writer_writers)");
             db.execSQL("CREATE INDEX WRITERS_EPISODE_idx ON WRITERS_EPISODE(writer_writers)");
             db.execSQL("CREATE INDEX WRITERS_SHOW_idx ON WRITERS_SHOW(writer_writers)");
+        }
+        if (toVersion == 45) {
+            log.debug("upgradeTo: " + toVersion + " - adding performance indexes for scraper data");
+            db.execSQL(CREATE_EPISODE_SEASON_EPISODE_IDX);
+            db.execSQL(CREATE_MOVIE_YEAR_IDX);
+            db.execSQL(CREATE_MOVIE_RATING_IDX);
+            db.execSQL(CREATE_EPISODE_VIDEO_ID_IDX);
+            db.execSQL(CREATE_MOVIE_VIDEO_ID_IDX);
+        }
+        if (toVersion == 46) {
+            log.debug("upgradeTo: " + toVersion + " - adding additional performance indexes for scraper data");
+            db.execSQL(CREATE_SHOW_RATING_IDX);
+            db.execSQL(CREATE_EPISODE_AIRED_IDX);
+            db.execSQL(CREATE_MOVIE_COLLECTION_IDX);
         }
     }
 }
