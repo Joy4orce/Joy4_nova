@@ -45,7 +45,9 @@ public class NextEpisodeLoader extends VideoLoader {
 
     @Override
     public String getSortOrder() {
-        return VideoStore.Video.VideoColumns.SCRAPER_E_SEASON;
+        // Optimized sort order using series_episode index
+        return VideoStore.Video.VideoColumns.SCRAPER_E_SEASON + ", " + 
+               VideoStore.Video.VideoColumns.SCRAPER_E_EPISODE + " LIMIT 1";
     }
 
     @Override
