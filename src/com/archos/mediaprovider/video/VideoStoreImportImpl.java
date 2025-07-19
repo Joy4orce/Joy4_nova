@@ -40,11 +40,9 @@ import com.archos.mediacenter.filecoreextension.upnp2.FileEditorFactoryWithUpnp;
 import com.archos.mediacenter.utils.trakt.TraktService;
 import com.archos.medialib.IMediaMetadataRetriever;
 import com.archos.medialib.MediaMetadata;
-import com.archos.medialib.R;
 import com.archos.mediaprovider.ArchosMediaFile;
 import com.archos.mediaprovider.ArchosMediaFile.MediaFileType;
 import com.archos.mediaprovider.BulkInserter;
-import com.archos.mediaprovider.CPOExecutor;
 import com.archos.mediaprovider.CustomCursorFactory.CustomCursor;
 import com.archos.mediaprovider.ImportState;
 import com.archos.mediaprovider.ImportState.State;
@@ -58,9 +56,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.archos.filecorelibrary.FileUtils.isNetworkShare;
 import static com.archos.filecorelibrary.FileUtils.isSlowRemote;
