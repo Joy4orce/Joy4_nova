@@ -151,6 +151,7 @@ public abstract  class ListingActivity extends SingleFragmentActivity {
      */
     protected String getRootName() {
         String name = getIntent().getStringExtra(EXTRA_ROOT_NAME);
+        if (name != null &&  name.equalsIgnoreCase("null")) name = "/";
         if (name==null) {
             throw new IllegalStateException("EXTRA_ROOT_NAME String is mandatory in the fragment arguments!");
         }
