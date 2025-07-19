@@ -29,7 +29,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
@@ -37,6 +36,7 @@ import android.os.Bundle;
 import androidx.annotation.RequiresApi;
 
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
@@ -108,7 +108,12 @@ public class OAuthDialog extends Dialog {
 		mProgress.setCancelable(true);
 		mProgress.setCanceledOnTouchOutside(false);
 
-		setContentView(R.layout.oauth_dialog);
+				setContentView(R.layout.oauth_dialog);
+
+		// Make window transparent until webview is loaded
+		WindowManager.LayoutParams lp = getWindow().getAttributes();
+		lp.alpha = 0.0f;
+		getWindow().setAttributes(lp);
 
 		getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
 
@@ -120,7 +125,7 @@ public class OAuthDialog extends Dialog {
 		mWebView.getSettings().setUseWideViewPort(true);
 		mWebView.getSettings().setLoadWithOverviewMode(true);
 
-		mWebView.setWebViewClient(new OAuthWebViewClient());
+		        mWebView.setWebViewClient(new OAuthWebViewClient());
 		mWebView.setWebChromeClient(new WebChromeClient());
 		mWebView.loadUrl(mReq.getLocationUri());
 
@@ -248,12 +253,23 @@ public class OAuthDialog extends Dialog {
 		**
 		*/
 		@Override
-		public void onPageFinished(WebView view, String url)
+				public void onPageFinished(WebView view, String url)
 		{
 			log.debug("onPageFinished for url " + url);
 			super.onPageFinished(view, url);
 			mWebView.resetDoItOnce();
-			mProgress.dismiss();
+			mWebView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+				@Override
+				public boolean onPreDraw() {
+					mWebView.getViewTreeObserver().removeOnPreDrawListener(this);
+					mProgress.dismiss();
+					// Make window opaque since webview is loaded
+					WindowManager.LayoutParams lp = getWindow().getAttributes();
+					lp.alpha = 1.0f;
+					getWindow().setAttributes(lp);
+					return true;
+				}
+			});
 			injectCSS();
 		}
 	}
