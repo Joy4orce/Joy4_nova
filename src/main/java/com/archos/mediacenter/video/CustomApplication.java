@@ -857,7 +857,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                     .putBoolean(PlayerActivity.KEY_ENABLE_ANDROID_FRAME_TIMING, false)
                     .commit();
         }
-        if (novaPreviousVersionArray[0] == 6 && novaPreviousVersionArray[1] == 4 && novaPreviousVersionArray[2] < 6) {
+        if (novaPreviousVersionArray[0] == 6 && novaPreviousVersionArray[1] == 4 && novaPreviousVersionArray[2] < 7) {
             // now watch up next row is the next last played
             PreferenceManager.getDefaultSharedPreferences(context)
                     .edit()
@@ -865,7 +865,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                     .commit();
             PreferenceManager.getDefaultSharedPreferences(context)
                     .edit()
-                    .putBoolean(VideoPreferencesCommon.KEY_SHOW_LAST_ADDED_ROW, false)
+                    .putBoolean(VideoPreferencesCommon.KEY_SHOW_LAST_PLAYED_ROW, false)
                     .commit();
         }
     }
