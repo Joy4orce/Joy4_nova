@@ -1,6 +1,6 @@
 - fix AV1 playback/seek on pixel9 g5 and mediatek devices
 - fix nvidia shield external USB storage subtitle download
-- watch up next row finally back instead of last played row on android TV
+- watch up next row finally back and optimized but takes several seconds to update for Android TV
 - loaders speed improvements via database indexing
 - fix collections getting only one movie or being empty
 - stability enhancements
