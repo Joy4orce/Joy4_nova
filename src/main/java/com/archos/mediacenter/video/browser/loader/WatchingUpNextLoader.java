@@ -16,6 +16,8 @@ package com.archos.mediacenter.video.browser.loader;
 
 import android.content.Context;
 
+import com.archos.mediaprovider.video.VideoStore;
+
 public class WatchingUpNextLoader extends VideoLoader {
 
     public WatchingUpNextLoader(Context context) {
@@ -42,11 +44,11 @@ public class WatchingUpNextLoader extends VideoLoader {
         builder.append(
                 "(" +
                 // Part 1: Next episodes in TV series
-                "(s_id IS NOT NULL AND Archos_traktSeen = 0 AND archos_hiddenbyuser = 0 AND " +
+                "(s_id IS NOT NULL AND Archos_traktSeen = 0 AND archos_hiddenbyuser = 0 AND (bookmark IS NULL OR bookmark <= 0) AND " +
                 "_id IN (SELECT _id FROM (SELECT v._id, ROW_NUMBER() OVER(PARTITION BY v.s_id ORDER BY v.e_season, v.e_episode) as rn FROM video v JOIN ( SELECT s_id, MAX(e_season * 1000 + e_episode) AS max_watched_episode FROM video WHERE Archos_traktSeen = 1 AND archos_hiddenbyuser = 0 GROUP BY s_id ) AS lw ON v.s_id = lw.s_id WHERE v.Archos_traktSeen = 0 AND v.archos_hiddenbyuser = 0 AND (v.e_season * 1000 + v.e_episode) > lw.max_watched_episode ) WHERE rn = 1))" +
                 " OR " +
                 // Part 2: Next movies in collections
-                "(m_coll_id IS NOT NULL AND Archos_traktSeen = 0 AND archos_hiddenbyuser = 0 AND " +
+                "(m_coll_id IS NOT NULL AND Archos_traktSeen = 0 AND archos_hiddenbyuser = 0 AND (bookmark IS NULL OR bookmark <= 0) AND " +
                 "_id IN (SELECT _id FROM (SELECT v._id, ROW_NUMBER() OVER(PARTITION BY v.m_coll_id ORDER BY v.m_year) as rn FROM video v JOIN ( SELECT m_coll_id, MAX(m_year) AS max_watched_year FROM video WHERE Archos_traktSeen = 1 AND archos_hiddenbyuser = 0 GROUP BY m_coll_id ) AS lw ON v.m_coll_id = lw.m_coll_id WHERE v.Archos_traktSeen = 0 AND v.archos_hiddenbyuser = 0 AND v.m_year > lw.max_watched_year ) WHERE rn = 1))" +
                 " OR " +
                 // Part 3: Currently watching videos (partially watched, not completed)
