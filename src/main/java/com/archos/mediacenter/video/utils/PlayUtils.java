@@ -302,7 +302,7 @@ public class PlayUtils implements IndexHelper.Listener {
                     try {
                         log.debug("onResumeReady: 3rd party player, non local file, file uri:" + video.getFileUri());
                         StreamOverHttp stream = new StreamOverHttp(video.getFileUri(), mimeType);
-                        dataUri = stream.getUri(FileUtils.getName(video.getFileUri()));
+                        dataUri = stream.getEncodedUri(FileUtils.getName(video.getFileUri()));
                     } catch (IOException e) {
                         log.error("onResumeReady: failed to start " + video.getFileUri() + e);
                     }
@@ -347,7 +347,7 @@ public class PlayUtils implements IndexHelper.Listener {
                         subUri = Uri.parse(subPath); // these files are in local nova cache not accessible from 3rd party players
                         try {
                             StreamOverHttp stream = new StreamOverHttp(subUri, mimeType);
-                            dataUri = stream.getUri(FileUtils.getName(subUri));
+                            dataUri = stream.getEncodedUri(FileUtils.getName(subUri));
                             // vlc
                             if (!subFound) intent.putExtra("subtitles_location", dataUri);
                             subFound = true;
