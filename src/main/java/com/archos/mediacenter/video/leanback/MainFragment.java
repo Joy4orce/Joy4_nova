@@ -125,7 +125,7 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
 
     // /!\ FIXME cannot be enabled since on large collection of videos viewed, loader takes forever to complete
     // this causes VideoLoader that has only a poolsize of one to not process any other loaders
-    public final static boolean FEATURE_WATCH_UP_NEXT = true;
+    public final static boolean FEATURE_WATCH_UP_NEXT = false;
 
     private static final String PREF_PRIVATE_MODE = "PREF_PRIVATE_MODE";
 
