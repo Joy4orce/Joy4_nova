@@ -259,8 +259,7 @@ public class TorrentLoaderActivity extends AppCompatActivity implements TorrentT
                     log.error("caught IOException");
                 }
             } catch (ZipException z) {
-                log.error("caught ZipException: reverting to filestream");
-                this.finish();
+                log.debug("Torrent file is not compressed (normal), continuing with uncompressed file");
             } catch (FileNotFoundException e) {
                 log.error("caught FileNotFoundException", e);
                 Toast.makeText(this,  getString(R.string.blocklist_file_not_found) + " " + mTorrentURL, Toast.LENGTH_SHORT).show();
