@@ -5,20 +5,26 @@ buildscript {
         maven { url = 'https://jitpack.io' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.11.0'
+        classpath 'com.android.tools.build:gradle:8.11.1'
         //classpath 'app.brant:amazonappstorepublisher:0.1.0'
         //classpath 'com.github.BrantApps.gradle-amazon-app-store-publisher:amazonappstorepublisher:master-SNAPSHOT'
     }
 }
 
 plugins {
-    id "com.github.triplet.play" version "3.12.1"
-    id "io.sentry.android.gradle" version "5.8.0" apply false
+    id "com.github.triplet.play" version "3.12.1" apply false
+    id "io.sentry.android.gradle" version "5.9.0" apply false
     //id "app.brant.amazonappstorepublisher" version "0.1.0"
 }
 
 apply {
     plugin("com.android.application")
+}
+
+// Only apply play plugin when publish tasks are requested
+def shouldApplyPlayPlugin = gradle.startParameter.taskNames.any { it.toLowerCase().contains("publish") }
+if (shouldApplyPlayPlugin) {
+    apply plugin: 'com.github.triplet.play'
 }
 
 import io.sentry.android.gradle.extensions.InstrumentationFeature
@@ -72,14 +78,14 @@ static def getFormattedDate() {
     return formattedDate
 }
 
-import com.github.triplet.gradle.androidpublisher.ReleaseStatus
-
-play {
-    serviceAccountCredentials.set(file("nova.json"))
-    track.set("internal")  // rollout, beta, alpha, release, internal
-    //userFraction.set(0.1) // rollout rate in %/100
-    //releaseStatus = ReleaseStatus.IN_PROGRESS
-    releaseStatus = ReleaseStatus.COMPLETED
+if (shouldApplyPlayPlugin) {
+    play {
+        serviceAccountCredentials.set(file("nova.json"))
+        track.set("internal")  // rollout, beta, alpha, release, internal
+        //userFraction.set(0.1) // rollout rate in %/100
+        //releaseStatus = ReleaseStatus.IN_PROGRESS
+        releaseStatus = 'completed'
+    }
 }
 
 //amazon {
@@ -130,7 +136,7 @@ android {
         buildConfig = true
         renderScript = false
     }
-    compileSdk = 35
+    compileSdk = 36
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -318,7 +324,6 @@ android {
             includeInBundle = false
         }
     }
-
 }
 
 dependencies {
@@ -330,11 +335,11 @@ dependencies {
     implementation 'com.jakewharton.threetenabp:threetenabp:1.4.9'
     implementation 'com.squareup.picasso:picasso:2.8'
     implementation 'androidx.tvprovider:tvprovider:1.1.0'
-    implementation 'androidx.media:media:1.7.0'
-    implementation 'androidx.core:core:1.16.0'
+    implementation 'androidx.media:media:1.7.1'
+    implementation 'androidx.core:core:1.17.0'
     implementation 'androidx.legacy:legacy-support-core-utils:1.0.0'
     implementation 'androidx.legacy:legacy-support-core-ui:1.0.0'
-    implementation 'androidx.fragment:fragment:1.8.8'
+    implementation 'androidx.fragment:fragment:1.8.9'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.palette:palette:1.0.0'
@@ -350,8 +355,8 @@ dependencies {
     implementation 'androidx.tvprovider:tvprovider:1.1.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:5.1.0'
     implementation 'com.github.tony19:logback-android:3.0.0'
-    implementation 'io.sentry:sentry-android:8.17.0'
-    implementation 'io.sentry:sentry:8.17.0'
+    implementation 'io.sentry:sentry-android:8.19.1'
+    implementation 'io.sentry:sentry:8.19.1'
 }
 
 configurations { // try to exclude device specific libraries interfering
