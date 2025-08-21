@@ -1055,9 +1055,10 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     }
 
     private void updateSubtitleInfo(VideoMetadata videoMetadata, List<SubtitleManager.SubtitleFile> externalSubs){
-        log.debug("updateSubtitleInfo");
+        log.debug("updateSubtitleInfo: metadata=" + (videoMetadata != null) + ", externalSubs=" + (externalSubs != null ? externalSubs.size() : "null"));
         // Subtitles tracks info
         int subtitleTrackNb = videoMetadata!=null?videoMetadata.getSubtitleTrackNb():0;
+        log.debug("updateSubtitleInfo: subtitleTrackNb=" + subtitleTrackNb);
 
         if (subtitleTrackNb > 0 || externalSubs!=null&&externalSubs.size()>0) {
             log.debug("updateAudioVideoInfo: subtitle");
@@ -1080,9 +1081,11 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                     totSubs++;
                 }
             }
+            log.debug("updateSubtitleInfo: showing subtitle track with " + lines.size() + " lines");
             mSubtitleTrack.setVisibility(View.VISIBLE);
             mSubtitleTrack.setText(TextUtils.join("\n", lines));
         } else {
+            log.debug("updateSubtitleInfo: hiding subtitle track (no subtitles found)");
             mSubtitleTrack.setVisibility(View.GONE);
         }
     }
@@ -1342,9 +1345,11 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
         }
         else{
             log.debug("startAsyncTasks torrent and not mIsLaunchFromPlayer removing views " + mCurrentVideo.getFilePath());
+            log.debug("startAsyncTasks: hiding file info views for torrent file");
             mFileInfoAudioVideoContainer.setVisibility(View.GONE);
             mFileError.setVisibility(View.GONE);
             mFileInfoContainerLoading.setVisibility(View.GONE);
+            log.debug("startAsyncTasks: file info loading container visibility set to GONE");
         }
         if (mSubtitleFilesListerTask != null)
             mSubtitleFilesListerTask.cancel(true);

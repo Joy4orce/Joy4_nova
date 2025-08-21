@@ -190,17 +190,35 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
                         mHasSetFiles = false;
                         killProcess();
                         files = new ArrayList<String>();
-                        String [] cmdArray = new String[3];
-                        cmdArray[0] = mContext.getApplicationInfo().nativeLibraryDir +"/libtorrentd.so";
-                        cmdArray[1] =  mTorrent.replace("%20", " ");  
-                        cmdArray[2] = mBlockList;
 
-                        log.debug("starting url "+mTorrent);
-                        //path to save torrent
-                        
+                        //Use app's internal files directory as working directory (Android 11+ compatibility)
+                        //This allows native library execution while keeping video files in user's preferred location
+                        File torrentWorkingDir = new File(mContext.getFilesDir(), "torrents");
+                        if (!torrentWorkingDir.exists()) {
+                            torrentWorkingDir.mkdirs();
+                        }
+
                         String torrentDownloadPath = TorrentPathDialogPreference.getDefaultDirectory(
                                 PreferenceManager.getDefaultSharedPreferences(mContext)).getAbsolutePath();
-                        sProcess = Runtime.getRuntime().exec(cmdArray,null, new File(torrentDownloadPath));
+
+                        // Use native library directory (now that extractNativeLibs="true")
+                        String nativeLibDir = mContext.getApplicationInfo().nativeLibraryDir;
+                        String torrentBinary = nativeLibDir + "/libtorrentd.so";
+
+                        log.debug("Using torrent binary: " + torrentBinary);
+                        log.debug("Native library dir: " + nativeLibDir);
+                        log.debug("Binary exists: " + new File(torrentBinary).exists());
+                        log.debug("Binary executable: " + new File(torrentBinary).canExecute());
+
+                        String [] cmdArray = new String[4];
+                        cmdArray[0] = torrentBinary;
+                        cmdArray[1] =  mTorrent.replace("%20", " ");
+                        cmdArray[2] = mBlockList;
+                        cmdArray[3] = torrentDownloadPath; //Pass download path as argument to torrent daemon
+
+                        log.debug("starting url "+mTorrent+" with download path "+torrentDownloadPath+" working dir "+torrentWorkingDir.getAbsolutePath());
+
+                        sProcess = Runtime.getRuntime().exec(cmdArray,null, torrentWorkingDir);
                         isDaemonRunning = true;
                         String line;
                         mReader = new BufferedReader (new InputStreamReader(sProcess.getInputStream()));
@@ -261,12 +279,20 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
         String line;
 
         try {
+            log.debug("observeStdout: Starting to read stdout");
             while ((line = mReader.readLine ()) != null&&!hasToStop) {
+                log.debug("observeStdout: Read line: '" + line + "'");
                 if(line.isEmpty()) {
+                    log.debug("observeStdout: Empty line received, setting files list (count: " + files.size() + ")");
                     mObserver.setFilesList(files);
                     break;
                 }
                 files.add(line);
+                log.debug("observeStdout: Added file: " + line + " (total files: " + files.size() + ")");
+            }
+
+            if(line == null) {
+                log.debug("observeStdout: Reached end of stdout (line == null)");
             }
             if(mSelectedFile >= 0)
                 selectFile(mSelectedFile);
@@ -297,7 +323,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
                 log.debug("Stdout: " + line+String.valueOf(mHasSetFiles));
             }
         } catch (InterruptedIOException e) {
-            log.warn("observeStdout: read interrupted by close() on another thread", e);
+            log.debug("observeStdout: read interrupted by close() on another thread (normal cleanup)");
             Thread.currentThread().interrupt(); // Restore the interrupted status
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -463,5 +489,4 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
         // Remove any pending messages from the handler
         mHandler.removeCallbacksAndMessages(null);
     }
-
 }

@@ -1588,19 +1588,31 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
         @Override
         protected List<SubtitleManager.SubtitleFile> doInBackground(Video... videos) {
             Video video = videos[0];
-            SubtitleManager lister = new SubtitleManager(getActivity(),null );
-            log.debug("SubtitleFilesListerTask:doInBackground listLocalAndRemotesSubtitles");
-            List<SubtitleManager.SubtitleFile> list = lister.listLocalAndRemotesSubtitles(video.getFileUri(), true);
-            mSubtitleListCache.put(video.getFileUri(), list);
-            return list;
+            log.debug("SubtitleFilesListerTask:doInBackground starting for: " + video.getFileUri());
+            log.debug("SubtitleFilesListerTask:doInBackground file name: " + FileUtils.getName(video.getFileUri()));
+
+            try {
+                SubtitleManager lister = new SubtitleManager(getActivity(),null );
+                log.debug("SubtitleFilesListerTask:doInBackground calling listLocalAndRemotesSubtitles");
+                List<SubtitleManager.SubtitleFile> list = lister.listLocalAndRemotesSubtitles(video.getFileUri(), true);
+                log.debug("SubtitleFilesListerTask:doInBackground completed, found " + (list != null ? list.size() : 0) + " subtitles");
+                mSubtitleListCache.put(video.getFileUri(), list);
+                return list;
+            } catch (Exception e) {
+                log.error("SubtitleFilesListerTask:doInBackground exception", e);
+                return new ArrayList<>();
+            }
         }
 
         @Override
         protected void onPostExecute(List<SubtitleManager.SubtitleFile> subtitleFiles) {
-            if(isCancelled())
+            if(isCancelled()) {
+                log.debug("SubtitleFilesListerTask: onPostExecute cancelled");
                 return;
-            log.debug("SubtitleFilesListerTask: onPostExecute update subtitle row when ready");
+            }
+            log.debug("SubtitleFilesListerTask: onPostExecute with " + (subtitleFiles != null ? subtitleFiles.size() : 0) + " subtitles");
             mExternalSubtitles = subtitleFiles;
+            log.debug("SubtitleFilesListerTask: onPostExecute calling updateSubtitleRowWhenReady");
             updateSubtitleRowWhenReady();
         }
     }
@@ -1609,12 +1621,21 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
      * Update subtitles details when both metadata (for integrated subs) and external sub checking is done
      */
     private void updateSubtitleRowWhenReady() {
+        log.debug("updateSubtitleRowWhenReady: called");
+        log.debug("updateSubtitleRowWhenReady: metadata=" + (mVideo.getMetadata() != null));
+        log.debug("updateSubtitleRowWhenReady: cache entry=" + (mSubtitleListCache.get(mVideo.getFileUri()) != null));
+
         if ((mVideo.getMetadata()!=null) && (mSubtitleListCache.get(mVideo.getFileUri())!=null)) {
             log.debug("updateSubtitleRowWhenReady: updating row");
-            mSubtitlesDetailsRow = new SubtitlesDetailsRow(getActivity(), mVideo, mSubtitleListCache.get(mVideo.getFileUri()));
-            mAdapter.replace(INDEX_SUBTITLES, mSubtitlesDetailsRow);
+            try {
+                mSubtitlesDetailsRow = new SubtitlesDetailsRow(getActivity(), mVideo, mSubtitleListCache.get(mVideo.getFileUri()));
+                mAdapter.replace(INDEX_SUBTITLES, mSubtitlesDetailsRow);
+                log.debug("updateSubtitleRowWhenReady: row updated successfully");
+            } catch (Exception e) {
+                log.error("updateSubtitleRowWhenReady: error updating row", e);
+            }
         } else {
-            log.debug("updateSubtitleRowWhenReady: not updating row");
+            log.debug("updateSubtitleRowWhenReady: not ready - metadata=" + (mVideo.getMetadata() != null) + ", cache=" + (mSubtitleListCache.get(mVideo.getFileUri()) != null));
         }
     }
 

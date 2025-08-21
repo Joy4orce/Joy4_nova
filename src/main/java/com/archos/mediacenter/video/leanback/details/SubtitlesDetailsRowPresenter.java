@@ -136,12 +136,17 @@ public class SubtitlesDetailsRowPresenter extends FullWidthRowPresenter implemen
             }
         });
 
-        if (videoMetadata!=null) {
+        // Check if this is a torrent file - they never have metadata but should not show spinner
+        boolean isTorrentFile = false;
+        Uri uri = videoObject.getFileUri();
+        if (uri != null && uri.getLastPathSegment() != null) {
+            isTorrentFile = uri.getLastPathSegment().endsWith(".torrent");
+        }
+
+        if (videoMetadata!=null || isTorrentFile) {
             vh.mDownloadSubsButton.setVisibility(View.VISIBLE);
 
-            Uri uri = videoObject.getFileUri();
-
-            if (uri.getScheme().equals("file") || uri.getScheme().equals("smb"))
+            if (uri != null && (uri.getScheme().equals("file") || uri.getScheme().equals("smb")))
                 vh.mChooseSubsButton.setVisibility(View.VISIBLE);
             else
                 vh.mChooseSubsButton.setVisibility(View.GONE);

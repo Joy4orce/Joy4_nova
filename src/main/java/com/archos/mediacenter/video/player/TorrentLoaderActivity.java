@@ -45,6 +45,7 @@ import com.archos.mediacenter.video.browser.TorrentObserverService.TorrentServic
 import com.archos.mediacenter.video.browser.TorrentObserverService.TorrentThreadObserver;
 import com.archos.mediacenter.video.ui.NovaProgressDialog;
 import com.archos.mediacenter.video.utils.TorrentPathDialogPreference;
+import com.archos.mediacenter.utils.MediaUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,11 +189,11 @@ public class TorrentLoaderActivity extends AppCompatActivity implements TorrentT
 
     private void preloadTorrent(){
         if(!FileUtils.isLocal(Uri.parse(mTorrentURL))&& UriUtils.isImplementedByFileCore(Uri.parse(mTorrentURL))){
-            //first we download the torrent file
+            //first we download the torrent file to cache directory (Android 11+ compatibility)
             Uri mTorrentUri = Uri.parse(mTorrentURL);
             ArrayList<Uri> source = new ArrayList<Uri>();
             source.add(mTorrentUri);
-            File targetFile = TorrentPathDialogPreference.getDefaultDirectory(PreferenceManager.getDefaultSharedPreferences(this));
+            File targetFile = MediaUtils.getTorrentsDir(this);
             Uri target = Uri.parse("file://" + targetFile.getAbsolutePath());
             //mtorrenttolaunch shouldn't have "file://"
             mTorrentToLaunch = Uri.withAppendedPath( Uri.parse(targetFile.getAbsolutePath()), FileUtils.getName(mTorrentUri));
