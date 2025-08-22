@@ -83,8 +83,7 @@ if (shouldApplyPlayPlugin) {
         serviceAccountCredentials.set(file("nova.json"))
         track.set("internal")  // rollout, beta, alpha, release, internal
         //userFraction.set(0.1) // rollout rate in %/100
-        //releaseStatus = ReleaseStatus.IN_PROGRESS
-        releaseStatus = 'completed'
+        releaseStatus.set(com.github.triplet.gradle.androidpublisher.ReleaseStatus.COMPLETED)
     }
 }
 
