@@ -122,6 +122,7 @@ import org.slf4j.LoggerFactory;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -2984,9 +2985,11 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     }
 
     private boolean fileExists() {
-        if (mPlayer.getVideoMetadata() == null || mPlayer.getVideoMetadata().getFile() == null)
-            return false;
-        return mPlayer.getVideoMetadata().getFile().exists();
+        VideoMetadata metadata = mPlayer.getVideoMetadata();
+        if (metadata == null) return false;
+
+        File file = metadata.getFile();
+        return file != null && file.exists();
     }
 
     private int getBookmarkPosition() {
