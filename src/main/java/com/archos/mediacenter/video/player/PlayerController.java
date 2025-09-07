@@ -1951,6 +1951,18 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         hideOsdHandler.postDelayed(hideOsdRunnable, 300);
     }
 
+    public void showAudioSpeedOSD(float audioSpeed) {
+        String speedText = String.format("%.2fx", audioSpeed);
+        if (mOsdRightTextView != null) {
+            mOsdRightTextView.setText(speedText);
+            mOsdRightTextView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+            mOsdRightTextView.setVisibility(View.VISIBLE);
+            hideOsdHandler.removeCallbacks(hideOsdRunnable);
+            hideOsdHandler.postDelayed(hideOsdRunnable, 300);
+        }
+        log.debug("showAudioSpeedOSD: audioSpeed=" + audioSpeed);
+    }
+
     public boolean hasFocus() {
         // TODO Auto-generated method stub
         return mControlBar.isFocused() || mVolumeBar.isFocused();
@@ -2181,18 +2193,18 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
                             return true;
                         case KeyEvent.KEYCODE_CHANNEL_DOWN:
                         case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                        case KeyEvent.KEYCODE_G:
                             if (PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean(KEY_PLAYBACK_SPEED,false)) {
                                 PlayerService.sPlayerService.decrementAudioSpeed();
-                                Toast mAudioSpeedDown = Toast.makeText(mContext, mContext.getString(R.string.set_audio_speed_to, String.format("%.2f", PlayerService.sPlayerService.getAudioSpeed())), Toast.LENGTH_SHORT);
-                                mAudioSpeedDown.show();
+                                showAudioSpeedOSD(PlayerService.sPlayerService.getAudioSpeed());
                             }
                             return true;
                         case KeyEvent.KEYCODE_CHANNEL_UP:
                         case KeyEvent.KEYCODE_MEDIA_NEXT:
+                        case KeyEvent.KEYCODE_H:
                             if (PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean(KEY_PLAYBACK_SPEED,false)) {
                                 PlayerService.sPlayerService.incrementAudioSpeed();
-                                Toast mAudioSpeedUp = Toast.makeText(mContext, mContext.getString(R.string.set_audio_speed_to, String.format("%.2f", PlayerService.sPlayerService.getAudioSpeed())), Toast.LENGTH_SHORT);
-                                mAudioSpeedUp.show();
+                                showAudioSpeedOSD(PlayerService.sPlayerService.getAudioSpeed());
                             }
                             return true;
                     }
