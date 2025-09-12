@@ -209,10 +209,16 @@ public class VideoStoreImportService extends Service implements Handler.Callback
         if (isForeground) mVolumeState.registerReceiver();
 
         // register contentobserver for files and videos, on change we import them
-        getContentResolver().registerContentObserver(MediaStore.Files.getContentUri("external"),
-                true, mContentObserver);
-        getContentResolver().registerContentObserver(MediaStore.Video.Media.getContentUri("external"),
-                true, mContentObserver);
+        try {
+            getContentResolver().registerContentObserver(MediaStore.Files.getContentUri("external"),
+                    true, mContentObserver);
+            getContentResolver().registerContentObserver(MediaStore.Video.Media.getContentUri("external"),
+                    true, mContentObserver);
+        } catch (SecurityException e) {
+            log.warn("Failed to register MediaStore ContentObserver - MediaProvider may not be available on this device", e);
+            // Continue without MediaStore observation - the service will still function
+            // but won't automatically detect external changes to the MediaStore database
+        }
     }
 
     @Override
@@ -355,7 +361,13 @@ public class VideoStoreImportService extends Service implements Handler.Callback
     public boolean onUnbind(Intent intent) {
         log.debug("onUnbind:" + intent);
         // unregister content observer
-        getContentResolver().unregisterContentObserver(mContentObserver);
+        if (mContentObserver != null) {
+            try {
+                getContentResolver().unregisterContentObserver(mContentObserver);
+            } catch (Exception e) {
+                log.warn("Failed to unregister ContentObserver", e);
+            }
+        }
         return super.onUnbind(intent);
     }
 
