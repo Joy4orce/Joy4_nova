@@ -822,6 +822,29 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             getIntent().putExtra(RESUME, mResume);
         } else {
             mResume = getIntent().getIntExtra(RESUME, RESUME_NO);
+            // Check for external resume position if no other resume mode is set
+            if (mResume == RESUME_NO) {
+                log.debug("postOnPlayerServiceBind: resume from extra");
+                if (getIntent().hasExtra("position")) {
+                    Object positionExtra = getIntent().getExtras().get("position");
+                    if (positionExtra instanceof Integer) {
+                        mRemotePosition = (Integer) positionExtra;
+                    } else if (positionExtra instanceof Long) {
+                        mRemotePosition = ((Long) positionExtra).intValue();
+                    }
+                } else if (getIntent().hasExtra("resume_position")) {
+                    Object positionExtra = getIntent().getExtras().get("resume_position");
+                    if (positionExtra instanceof Integer) {
+                        mRemotePosition = (Integer) positionExtra;
+                    } else if (positionExtra instanceof Long) {
+                        mRemotePosition = ((Long) positionExtra).intValue();
+                    }
+                }
+                if (mRemotePosition > 0) {
+                    log.debug("postOnPlayerServiceBind: mRemotePosition=" + mRemotePosition);
+                    mResume = RESUME_FROM_REMOTE_POS;
+                }
+            }
         }
 
         mIsReadytoStart = false;
