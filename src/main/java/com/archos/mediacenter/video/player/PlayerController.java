@@ -1747,19 +1747,69 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
             return false;
         }
 
-        int flags = FLAG_SIDE_ALL_EXCEPT_UNLOCK_INSTRUCTIONS;
+        // Check if touch is in central screen zone (middle third both horizontally and vertically)
+        if (isTouchInCentralZone(event)) {
+            log.debug("onSingleTapConfirmed: central zone touch");
+            handleCentralZoneTouch();
+        } else {
+            // Original behavior for touches outside central zone
+            int flags = FLAG_SIDE_ALL_EXCEPT_UNLOCK_INSTRUCTIONS;
 
-        if (!mVolumeBarEnabled) {
-            flags &= ~FLAG_SIDE_VOLUME_BAR;
-        }
-        if (mIsStopped || !Player.sPlayer.isInPlaybackState()) {
-            flags &= ~(FLAG_SIDE_CONTROL_BAR);
-        }
+            if (!mVolumeBarEnabled) {
+                flags &= ~FLAG_SIDE_VOLUME_BAR;
+            }
+            if (mIsStopped || !Player.sPlayer.isInPlaybackState()) {
+                flags &= ~(FLAG_SIDE_CONTROL_BAR);
+            }
 
-        toggleMediaControlsVisiblity(flags);
+            toggleMediaControlsVisiblity(flags);
+        }
         
         switchMode(false);
         return true;
+    }
+
+    private boolean isTouchInCentralZone(MotionEvent event) {
+        if (mControllerView == null) return false;
+        
+        int viewWidth = mControllerView.getWidth();
+        
+        // Define central zone as middle third horizontally (full height)
+        float centralZoneLeft = viewWidth / 3.0f;
+        float centralZoneRight = viewWidth * 2.0f / 3.0f;
+        
+        float touchX = event.getX();
+        
+        return touchX >= centralZoneLeft && touchX <= centralZoneRight;
+    }
+
+    private void handleCentralZoneTouch() {
+        if (mIsStopped || !Player.sPlayer.isInPlaybackState()) {
+            // If not in playback state, just toggle OSD visibility
+            int flags = FLAG_SIDE_ALL_EXCEPT_UNLOCK_INSTRUCTIONS;
+            if (!mVolumeBarEnabled) {
+                flags &= ~FLAG_SIDE_VOLUME_BAR;
+            }
+            toggleMediaControlsVisiblity(flags);
+            return;
+        }
+
+        // Central zone behavior: always toggle play/pause, show OSD when pausing, hide when resuming
+        if (Player.sPlayer.isPlaying()) {
+            // If playing, pause and show controls (keep them visible)
+            Player.sPlayer.pause(PlayerController.STATE_NORMAL);
+            updatePausePlay();
+            int flags = FLAG_SIDE_ALL_EXCEPT_UNLOCK_INSTRUCTIONS;
+            if (!mVolumeBarEnabled) {
+                flags &= ~FLAG_SIDE_VOLUME_BAR;
+            }
+            show(flags, 0); // Show indefinitely when paused
+        } else {
+            // If paused, resume and hide controls
+            Player.sPlayer.start(PlayerController.STATE_NORMAL);
+            updatePausePlay();
+            hide();
+        }
     }
 
     @Override
@@ -1843,31 +1893,55 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         if (e.getAction() == MotionEvent.ACTION_UP) {
             log.debug("onDoubleTapEvent");
             float x = e.getX();
+            float y = e.getY();
             if (mControllerView == null) return false;
             float viewWidth = (float) mControllerView.getWidth();
-            if (x < viewWidth / 2) { // left region fast rewind
-                if (Player.sPlayer.canSeekBackward() && mSeekKeyDirection != -1) {
-                    if (mOsdLeftTextView != null) {
-                        mOsdLeftTextView.setText("");
-                        Drawable osdIcon = getDrawable(mContext, R.drawable.media_fast_rewind);
-                        mOsdLeftTextView.setCompoundDrawablesWithIntrinsicBounds(osdIcon, null, null, null);
-                        mOsdLeftTextView.setVisibility(View.VISIBLE);
-                        hideOsdHandler.removeCallbacks(hideOsdRunnable);
-                        hideOsdHandler.postDelayed(hideOsdRunnable, 300);
+            float viewHeight = (float) mControllerView.getHeight();
+            
+            // Determine if we're in top 75% (seek) or bottom 25% (audio speed) zone
+            boolean isTopZone = y < (viewHeight * 0.75f);
+            
+            if (x < viewWidth / 2) { // left region
+                if (isTopZone) {
+                    // Top 75% left: fast rewind
+                    if (Player.sPlayer.canSeekBackward() && mSeekKeyDirection != -1) {
+                        if (mOsdLeftTextView != null) {
+                            mOsdLeftTextView.setText("");
+                            Drawable osdIcon = getDrawable(mContext, R.drawable.media_fast_rewind);
+                            mOsdLeftTextView.setCompoundDrawablesWithIntrinsicBounds(osdIcon, null, null, null);
+                            mOsdLeftTextView.setVisibility(View.VISIBLE);
+                            hideOsdHandler.removeCallbacks(hideOsdRunnable);
+                            hideOsdHandler.postDelayed(hideOsdRunnable, 300);
+                        }
+                        Player.sPlayer.seekTo(Player.sPlayer.getCurrentPosition() - 10000);
                     }
-                    Player.sPlayer.seekTo(Player.sPlayer.getCurrentPosition() - 10000);
+                } else {
+                    // Bottom 25% left: decrease audio speed
+                    if (PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean(KEY_PLAYBACK_SPEED, false)) {
+                        PlayerService.sPlayerService.decrementAudioSpeed();
+                        showAudioSpeedOSD(PlayerService.sPlayerService.getAudioSpeed());
+                    }
                 }
-            } else { // right region fast forward
-                if (Player.sPlayer.canSeekBackward() && mSeekKeyDirection != 1) {
-                    if (mOsdRightTextView != null) {
-                        mOsdRightTextView.setText("");
-                        Drawable osdIcon = getDrawable(mContext, R.drawable.media_fast_forward);
-                        mOsdRightTextView.setCompoundDrawablesWithIntrinsicBounds(osdIcon, null, null, null);
-                        mOsdRightTextView.setVisibility(View.VISIBLE);
-                        hideOsdHandler.removeCallbacks(hideOsdRunnable);
-                        hideOsdHandler.postDelayed(hideOsdRunnable, 300);
+            } else { // right region
+                if (isTopZone) {
+                    // Top 75% right: fast forward
+                    if (Player.sPlayer.canSeekBackward() && mSeekKeyDirection != 1) {
+                        if (mOsdRightTextView != null) {
+                            mOsdRightTextView.setText("");
+                            Drawable osdIcon = getDrawable(mContext, R.drawable.media_fast_forward);
+                            mOsdRightTextView.setCompoundDrawablesWithIntrinsicBounds(osdIcon, null, null, null);
+                            mOsdRightTextView.setVisibility(View.VISIBLE);
+                            hideOsdHandler.removeCallbacks(hideOsdRunnable);
+                            hideOsdHandler.postDelayed(hideOsdRunnable, 300);
+                        }
+                        Player.sPlayer.seekTo(Player.sPlayer.getCurrentPosition() + 10000);
                     }
-                    Player.sPlayer.seekTo(Player.sPlayer.getCurrentPosition() + 10000);
+                } else {
+                    // Bottom 25% right: increase audio speed
+                    if (PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean(KEY_PLAYBACK_SPEED, false)) {
+                        PlayerService.sPlayerService.incrementAudioSpeed();
+                        showAudioSpeedOSD(PlayerService.sPlayerService.getAudioSpeed());
+                    }
                 }
             }
         }
