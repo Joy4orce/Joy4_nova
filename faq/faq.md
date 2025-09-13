@@ -304,6 +304,42 @@ Nova Video Player supports multiple touch gestures and zones for different contr
 - The central zone spans the middle third of the screen horizontally (full height)
 - Central zone behavior is based on playback state, not OSD visibility
 
+## What keyboard shortcuts are available?
+
+Nova Video Player supports various keyboard shortcuts for different input devices:
+
+**Playback Controls:**
+
+- **Space/P/Enter**: Toggle play/pause
+- **D-Pad Right/Left**: Seek forward/backward 
+- **0-9**: Jump to 0-90% of video timeline
+
+**Volume Controls:**
+
+- **Volume Up/U, Volume Down/D**: Adjust volume
+- **\* (Star)**: Increase volume
+- **/ (Slash)**: Decrease volume
+
+**Video/Audio/Subtitle Controls:**
+
+- **F**: Switch video format
+- **O**: Toggle overlays
+- **A/#**: Switch audio track
+- **S/J**: Switch subtitle track
+- **Z/X**: Adjust subtitle delay
+
+**Navigation:**
+
+- **Menu/D-Pad Up**: Show/hide TV menu
+- **Escape/Back**: Close TV menu
+
+**Playback Speed** (requires speed setting enabled):
+
+- **Channel Up/H**: Increase speed (+0.05×)
+- **Channel Down/G**: Decrease speed (-0.05×)
+
+For the complete list of shortcuts including TV remote controls, see the [keyboard shortcuts wiki](https://github.com/nova-video-player/aos-AVP/wiki/Keyboard-shortcuts).
+
 ## I'd like to request a new feature.
 
 Feel free to join our [Reddit community](https://www.reddit.com/r/NovaVideoPlayer) or open a feature request on [github project issue](https://github.com/nova-video-player/aos-AVP/issues).
