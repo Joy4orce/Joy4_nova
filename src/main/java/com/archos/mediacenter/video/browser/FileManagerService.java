@@ -23,15 +23,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 
-import androidx.lifecycle.DefaultLifecycleObserver;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ProcessLifecycleOwner;
+import androidx.core.app.ServiceCompat;
+import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 import androidx.core.app.NotificationCompat;
 import android.text.format.Formatter;
@@ -51,7 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class FileManagerService extends Service implements OperationEngineListener, DefaultLifecycleObserver {
+public class FileManagerService extends Service implements OperationEngineListener {
 
     private static final Logger log = LoggerFactory.getLogger(FileManagerService.class);
 
@@ -102,7 +102,6 @@ public class FileManagerService extends Service implements OperationEngineListen
         void onProgressUpdate();
     }
 
-
     public FileManagerService() {
         super();
         log.debug("FileManagerService: setting fileManagerService not to null");
@@ -127,6 +126,8 @@ public class FileManagerService extends Service implements OperationEngineListen
                 .setSmallIcon(R.drawable.nova_notification)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setTicker(null).setOnlyAlertOnce(true).setOngoing(true).setAutoCancel(true);
+        ServiceCompat.startForeground(this, PASTE_NOTIFICATION_ID, nb.build(),
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
         mLastStatus = ActionStatusEnum.NONE;
         localBinder = new FileManagerServiceBinder();
         mOpenAtTheEnd = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(OPEN_AT_THE_END_KEY, true);
@@ -152,13 +153,13 @@ public class FileManagerService extends Service implements OperationEngineListen
         if (Build.VERSION.SDK_INT >= 33) registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
         else registerReceiver(receiver, filter);
         isReceiverRegistered = true;
-        // Register as a lifecycle observer
-        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         log.debug("onStartCommand");
+        ServiceCompat.startForeground(this, PASTE_NOTIFICATION_ID, nb.build(),
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
         return START_NOT_STICKY;
     }
 
@@ -345,8 +346,14 @@ public class FileManagerService extends Service implements OperationEngineListen
         }
     }
 
+    public void stopService() {
+        log.debug("stopService");
+        stopForeground(true);
+    }
+
     public static void startService(Context context) {
-        context.startService(new Intent(context, FileManagerService.class));
+        //context.startService(new Intent(context, FileManagerService.class));
+        ContextCompat.startForegroundService(context, new Intent(context, FileManagerService.class));
     }
 
     public void deleteObserver(ServiceListener listener) {
@@ -492,7 +499,10 @@ public class FileManagerService extends Service implements OperationEngineListen
         log.debug("displayOpenFileNotification");
         nb.setContentTitle(getText(R.string.open_file))
                 .setContentText(mProcessedFiles.get(0).getName())
-                .setWhen(System.currentTimeMillis());
+                .setWhen(System.currentTimeMillis())
+                .setContentIntent(PendingIntent.getBroadcast(this, 0, getOpenIntent(),
+                    ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) ? PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT: PendingIntent.FLAG_UPDATE_CURRENT)));
+                //.setWhen(System.currentTimeMillis());
         nm.notify(OPEN_NOTIFICATION_ID, nb.build());
     }
 
@@ -535,23 +545,12 @@ public class FileManagerService extends Service implements OperationEngineListen
         releaseWakeLock();
         Toast.makeText(this, com.archos.filecorelibrary.R.string.copy_file_failed_one, Toast.LENGTH_LONG).show();
         setCanceledStatus();
+        stopService();
     }
 
     @Override
     public void onSuccess(Uri target) {}
 
-    @Override
-    public void onStop(LifecycleOwner owner) {
-        // App in background
-        log.debug("onStop: LifecycleOwner app in background, stopSelf");
-        cleanup();
-        stopSelf();
-    }
-
-    @Override
-    public void onStart(LifecycleOwner owner) {
-        log.debug("onStart: app in foreground");
-    }
 
     public void cleanup() {
         log.debug("cleanup");
@@ -579,5 +578,6 @@ public class FileManagerService extends Service implements OperationEngineListen
             unregisterReceiver(receiver);
             isReceiverRegistered = false; // Reset the flag after unregistering the receiver
         }
+        stopService();
     }
 }
