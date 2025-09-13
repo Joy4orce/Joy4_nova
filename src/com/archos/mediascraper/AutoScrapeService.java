@@ -20,6 +20,7 @@ import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
@@ -31,10 +32,8 @@ import android.os.Handler;
 import android.os.IBinder;
 
 import androidx.core.app.NotificationCompat;
-import androidx.lifecycle.DefaultLifecycleObserver;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.ProcessLifecycleOwner;
+import androidx.core.app.ServiceCompat;
+import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
 import android.os.Looper;
@@ -60,7 +59,7 @@ import java.io.IOException;
 /**
  * Created by alexandre on 20/05/15.
  */
-public class AutoScrapeService extends Service implements DefaultLifecycleObserver {
+public class AutoScrapeService extends Service {
     public static final String EXPORT_EVERYTHING = "export_everything";
     public static final String RESCAN_EVERYTHING = "rescan_everything";
     public static final String RESCAN_MOVIES = "rescan_movies";
@@ -132,7 +131,7 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
     public static void startService(Context context) {
         log.debug("startService in foreground");
         mContext = context;
-        context.startService(new Intent(context, AutoScrapeService.class));
+        ContextCompat.startForegroundService(context, new Intent(context, AutoScrapeService.class));
     }
 
     public void cleanup() {
@@ -154,6 +153,7 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
         }
         // Cancel the notification
         nm.cancel(NOTIFICATION_ID);
+        stopService();
     }
 
     // Used by system. Don't call
@@ -180,43 +180,64 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                 .setContentTitle(getString(R.string.scraping_in_progress))
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setTicker(null).setOnlyAlertOnce(true).setOngoing(true).setAutoCancel(true);
-        log.debug("onCreate: register lifecycle observer");
-        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
+        ServiceCompat.startForeground(this, NOTIFICATION_ID, nb.build(),
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
         mBinder = new AutoScraperBinder();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if(! ProcessLifecycleOwner.get().getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
-            log.debug("onStartCommand: app is in background, do not start services");
-            return START_NOT_STICKY;
-        }
         super.onStartCommand(intent, flags, startId);
         log.debug("onStartCommand");
+        ServiceCompat.startForeground(this, NOTIFICATION_ID, nb.build(),
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
+        
+        // Check for dirty state and restart scraping if needed
+        isForeground = true;
+        if (isDirtyState()) {
+            log.debug("onStartCommand: Rescanning everything due to dirty state");
+            // Reset the dirty flag in SharedPreferences
+            saveDirtyState(false);
+            startScraping(false, false);
+            // START_STICKY: Persistent service that monitors ContentObserver for new videos
+            // If killed by system, it will restart and check dirty state to resume interrupted operations
+            return START_STICKY;
+        }
+        
         if (log.isDebugEnabled() && intent.getAction()==null) log.debug("onStartCommand: action is nul!!!");
         if (log.isDebugEnabled() && intent.getAction()!=null) log.debug("onStartCommand: action " + intent.getAction());
-        if(intent!=null) {
-            if(intent.getAction()!=null&&intent.getAction().equals(EXPORT_EVERYTHING)) {
-                log.debug("onStartCommand: EXPORT_EVERYTHING");
-                startExporting();
-            } else if (intent.getAction()!=null&&intent.getAction().equals(RESCAN_MOVIES)) {
-                scrapeOnlyMovies = true;
-                log.debug("onStartCommand: RESCAN_MOVIES, scrapeOnlyMovies=" + scrapeOnlyMovies);
-                startScraping(true, intent.getBooleanExtra(RESCAN_ONLY_DESC_NOT_FOUND, false));
+        try {
+            if(intent!=null) {
+                if(intent.getAction()!=null&&intent.getAction().equals(EXPORT_EVERYTHING)) {
+                    log.debug("onStartCommand: EXPORT_EVERYTHING");
+                    startExporting();
+                } else if (intent.getAction()!=null&&intent.getAction().equals(RESCAN_MOVIES)) {
+                    scrapeOnlyMovies = true;
+                    log.debug("onStartCommand: RESCAN_MOVIES, scrapeOnlyMovies=" + scrapeOnlyMovies);
+                    startScraping(true, intent.getBooleanExtra(RESCAN_ONLY_DESC_NOT_FOUND, false));
+                } else {
+                    log.debug("onStartCommand: RESCAN_EVERYTHING");
+                    startScraping(intent.getBooleanExtra(RESCAN_EVERYTHING, false), intent.getBooleanExtra(RESCAN_ONLY_DESC_NOT_FOUND, false));
+                }
             } else {
-                log.debug("onStartCommand: RESCAN_EVERYTHING");
-                startScraping(intent.getBooleanExtra(RESCAN_EVERYTHING, false), intent.getBooleanExtra(RESCAN_ONLY_DESC_NOT_FOUND, false));
+                log.debug("onStartCommand: rescan incremental");
+                startScraping(false, false);
             }
-        } else {
-            log.debug("onStartCommand: rescan incremental");
-            startScraping(false, false);
+        } catch (Exception e) {
+            log.error("onStartCommand: Exception in service operation", e);
+            // Save dirty state if operation was interrupted
+            if (sIsScraping) {
+                saveDirtyState(true);
+            }
         }
-        return START_NOT_STICKY;
+        // START_STICKY: Persistent service that monitors ContentObserver for new videos
+        // If killed by system, it will restart and check dirty state to resume interrupted operations
+        return START_STICKY;
     }
 
     protected void startExporting() {
         log.debug("startExporting " + String.valueOf(mExportingThread == null || !mExportingThread.isAlive()));
-        nb.setContentTitle(getString(R.string.nfo_export_in_progress));
+        nb.setContentTitle(getString(R.string.nfo_export_in_progress)).setWhen(System.currentTimeMillis());
         if (mExportingThread == null || !mExportingThread.isAlive()) {
             mExportingThread = new Thread() {
 
@@ -272,6 +293,8 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                         cursor.close();
                     } while (index < numberOfRows && isForeground && !Thread.currentThread().isInterrupted());
                     sIsScraping = false;
+                    // Exit foreground mode and remove notification since export is complete
+                    stopForeground(true);
                     cursor.close();
                 }
             };
@@ -338,7 +361,7 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
 
     protected void startScraping(final boolean rescrapAlreadySearched, final boolean onlyNotFound) {
         log.debug("startScraping: {}", String.valueOf(mThread == null || !mThread.isAlive()));
-        nb.setContentTitle(getString(R.string.scraping_in_progress));
+        nb.setContentTitle(getString(R.string.scraping_in_progress)).setWhen(System.currentTimeMillis());
 
         if(mThread==null || !mThread.isAlive()) {
             mThread = new Thread() {
@@ -614,6 +637,8 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                     } while(restartOnNextRound && isForeground && !Thread.currentThread().isInterrupted()
                             &&PreferenceManager.getDefaultSharedPreferences(AutoScrapeService.this).getBoolean(AutoScrapeService.KEY_ENABLE_AUTO_SCRAP, true)); //if we had something to do, we look for new videos
                     sIsScraping = false;
+                    // Exit foreground mode and remove notification since scraping is complete
+                    stopForeground(true);
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -621,7 +646,6 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                         }
                     });
                     if (totalNumberOfFilesScraped > 0) TraktService.onNewVideo(AutoScrapeService.this); // should be done only at the end to not resync in loop
-                    nm.cancel(NOTIFICATION_ID);
                 }
             };
             mThread.start();
@@ -680,24 +704,9 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
         }
     }
 
-    @Override
-    public void onStop(LifecycleOwner owner) {
-        // App in background
-        log.debug("onStop: LifecycleOwner app in background, stopSelf");
-        cleanup();
-        stopSelf();
-    }
-
-    @Override
-    public void onStart(LifecycleOwner owner) {
-        log.debug("onStart: LifecycleOwner app in foreground");
-        isForeground = true;
-        if (isDirtyState()) {
-            log.debug("onStart: Rescanning everything due to dirty state");
-            // Reset the dirty flag in SharedPreferences
-            saveDirtyState(false);
-            startScraping(false, false);
-        }
+    public void stopService() {
+        log.debug("stopService");
+        stopForeground(true);
     }
 
     private void saveDirtyState(boolean dirtyState) {

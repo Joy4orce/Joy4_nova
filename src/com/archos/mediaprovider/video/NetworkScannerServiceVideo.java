@@ -25,6 +25,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -38,6 +39,8 @@ import android.os.Message;
 import android.os.Process;
 
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.ServiceCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
@@ -139,7 +142,7 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
                 serviceIntent.putExtras(broadcast.getExtras()); //in case we have an extra... such as "recordLogExtra"
             if (isForeground) {
                 log.debug("startIfHandles: apps is foreground startService and pass intent to self");
-                context.startService(serviceIntent);
+                ContextCompat.startForegroundService(context, serviceIntent);
             }
             return true;
         }
@@ -211,6 +214,8 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
                 .setPriority(Notification.PRIORITY_LOW)
                 .setTicker(null).setOnlyAlertOnce(true).setOngoing(true).setAutoCancel(true);
         n = nb.build();
+        ServiceCompat.startForeground(this, NOTIFICATION_ID, n,
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
 
         log.debug("onCreate: created notification + startService " + NOTIFICATION_ID + " notification null? " + (n == null));
 
@@ -245,8 +250,11 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
     public int onStartCommand(Intent intent, int flags, int startId) {
         // intents delivered here
         log.debug("onStartCommand:" + intent + " flags:" + flags + " startId:" + startId + ((intent != null) ? ", getAction " + intent.getAction() : " getAction null"));
+        ServiceCompat.startForeground(this, NOTIFICATION_ID, n,
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
 
         if (intent == null || intent.getAction() == null)
+            // START_NOT_STICKY: Invalid intent, don't restart if killed
             return START_NOT_STICKY;
         if(intent.getExtras()!=null) {
             log.debug("extra not null");
@@ -277,6 +285,8 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
                 mHandler.sendMessage(m);
             } else log.debug("skip unscanning " + key + ", already in queue");
         }
+        // START_REDELIVER_INTENT: Scan operations are important - if killed by system,
+        // restart and redeliver the intent to ensure scan completes
         return Service.START_REDELIVER_INTENT;
     }
 
@@ -297,7 +307,8 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
             case MESSAGE_KILL:
                 log.debug("handleMessage: MESSAGE_KILL");
                 if (msg.arg1 != -1) {
-                    nm.cancel(NOTIFICATION_ID);
+                    // Exit foreground mode and terminate service when explicitly requested
+                    stopForeground(true);
                     sIsScannerAlive = false;
                     notifyListeners();
                     stopSelf(msg.arg1);
@@ -309,10 +320,15 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
                 log.debug("handleMessage: MESSAGE_DO_SCAN " + uri);
                 if (isForeground) {
                     mScanThread = new Thread(() -> {
-                        doScan(uri);
-                        // *** Send MESSAGE_KILL after doScan() completes ***
-                        if (isHandlerThreadAlive()) {
-                            mHandler.post(() -> mHandler.obtainMessage(MESSAGE_KILL, msg.arg1, msg.arg2).sendToTarget());
+                        try {
+                            doScan(uri);
+                        } catch (Exception e) {
+                            log.error("handleMessage: Exception in doScan", e);
+                        } finally {
+                            // *** Send MESSAGE_KILL after doScan() completes ***
+                            if (isHandlerThreadAlive()) {
+                                mHandler.post(() -> mHandler.obtainMessage(MESSAGE_KILL, msg.arg1, msg.arg2).sendToTarget());
+                            }
                         }
                     });
                     mScanThread.start();
@@ -325,10 +341,15 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
                 log.debug("handleMessage: MESSAGE_DO_UNSCAN " + uri);
                 if (isForeground) {
                     mRemoveFilesThread = new Thread(() -> {
-                        doRemoveFiles(uri);
-                        // *** Send MESSAGE_KILL after doRemoveFiles() completes ***
-                        if (isHandlerThreadAlive()) {
-                            mHandler.post(() -> mHandler.obtainMessage(MESSAGE_KILL, msg.arg1, msg.arg2).sendToTarget());
+                        try {
+                            doRemoveFiles(uri);
+                        } catch (Exception e) {
+                            log.error("handleMessage: Exception in doRemoveFiles", e);
+                        } finally {
+                            // *** Send MESSAGE_KILL after doRemoveFiles() completes ***
+                            if (isHandlerThreadAlive()) {
+                                mHandler.post(() -> mHandler.obtainMessage(MESSAGE_KILL, msg.arg1, msg.arg2).sendToTarget());
+                            }
                         }
                     });
                     mRemoveFilesThread.start();
@@ -359,7 +380,7 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
         scannerIntent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
         sendBroadcast(scannerIntent);
         // also show a notification.
-        nm.notify(NOTIFICATION_ID, nb.setContentTitle(getString(R.string.network_unscan_msg)).setContentText(path).build());
+        nm.notify(NOTIFICATION_ID, nb.setContentTitle(getString(R.string.network_unscan_msg)).setContentText(path).setWhen(System.currentTimeMillis()).build());
 
         int deleted = cr.delete(VideoStoreInternal.FILES_SCANNED, IN_FOLDER_SELECT, selectionArgs);
         log.debug("removed: " + deleted);
@@ -368,8 +389,8 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
         Intent intent = new Intent(ArchosMediaIntent.ACTION_VIDEO_SCANNER_SCAN_FINISHED, data);
         intent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
         sendBroadcast(intent);
-        // and cancel the Notification
-        nm.cancel(NOTIFICATION_ID);
+        // Exit foreground mode and remove notification since scan is complete
+        stopForeground(true);
     }
 
     /** Utility class to build a comma separated string of ids */
@@ -429,7 +450,7 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
                 scannerIntent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
                 sendBroadcast(scannerIntent);
                 // also show a notification.
-                nm.notify(NOTIFICATION_ID, nb.setContentTitle(getString(R.string.network_scan_msg)).setContentText(f.getUri().toString()).build());
+                nm.notify(NOTIFICATION_ID, nb.setContentTitle(getString(R.string.network_scan_msg)).setContentText(f.getUri().toString()).setWhen(System.currentTimeMillis()).build());
 
                 String path;
                 String upnpUri = null;
@@ -505,8 +526,8 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
                 Intent intent = new Intent(ArchosMediaIntent.ACTION_VIDEO_SCANNER_SCAN_FINISHED, what);
                 intent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
                 sendBroadcast(intent);
-                // and cancel the Notification
-                nm.cancel(NOTIFICATION_ID);
+                // Exit foreground mode and remove notification since scan is complete
+                stopForeground(true);
                 log.trace("doScan: added:" + insertCount + " modified:" + updateCount + " deleted:" + deleteCount + " listed files " + mFoundFiles);
             } finally {
                 if (wifiLock != null && wifiLock.isHeld()) {
@@ -1186,6 +1207,12 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
         notifyListeners();
         // Handle any necessary cleanup or state management here
         nm.cancel(NOTIFICATION_ID);
+        stopService();
+    }
+
+    public void stopService() {
+        log.debug("stopService");
+        stopForeground(true);
     }
 
     @Override
