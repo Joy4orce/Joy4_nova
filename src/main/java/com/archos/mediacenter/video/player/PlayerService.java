@@ -430,8 +430,9 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
     }
 
     public void onStart(Intent intent) {
-        if (intent == null || intent.getData() == null)
+        if (intent == null || intent.getData() == null) {
             return;
+        }
         firstTimeAudioCalled = true;
         firstTimeSubCalled = true;
         log.debug("onStart() ");
@@ -448,6 +449,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         mHideSubtitles = mPreferences.getBoolean(KEY_HIDE_SUBTITLES, false);
         mPlayMode = mPreferences.getInt(KEY_PLAY_MODE, PLAYMODE_SINGLE);
         mResume = intent.getIntExtra(RESUME, RESUME_NO);
+        log.debug("PlayerService.onStart: read mResume=" + mResume + " from intent");
         mUri = intent.getData();
         mTorrentURL = mIntent.getStringExtra(PlayerActivity.KEY_TORRENT_URL);
         if(mIntent.hasExtra(KEY_ORIGINAL_TORRENT_URL)){
@@ -464,7 +466,11 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
 
         // when mVideoInfo uri is the same as intent uri -> info has already been retrieved !
         if(mVideoInfo!=null&&mVideoInfo.uri.equals(mUri)){
-            mResume = RESUME_FROM_LAST_POS;
+            // Only override to RESUME_FROM_LAST_POS if not already set to RESUME_FROM_REMOTE_POS
+            if (mResume != RESUME_FROM_REMOTE_POS) {
+                mResume = RESUME_FROM_LAST_POS;
+            }
+            log.debug("PlayerService.onStart: URI matches existing mVideoInfo, mResume=" + mResume);
             mDatabaseInfoHasBeenRetrieved = true;
         }
         else {
@@ -595,13 +601,16 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
 
     private int getLastPosition(VideoDbInfo videoInfo, int resume) {
         int lastPosition = 0;
-        if (resume != RESUME_NO && videoInfo.lastTimePlayed > 0) {
-            if (mResume == RESUME_FROM_LAST_POS || mResume == RESUME_FROM_REMOTE_POS || mResume ==  RESUME_FROM_LOCAL_POS)
+        if (resume != RESUME_NO && (videoInfo.lastTimePlayed > 0 || resume == RESUME_FROM_REMOTE_POS)) {
+            if (mResume == RESUME_FROM_LAST_POS || mResume == RESUME_FROM_REMOTE_POS || mResume ==  RESUME_FROM_LOCAL_POS) {
                 lastPosition = videoInfo.resume;
-            else if (mResume == RESUME_FROM_BOOKMARK)
+            } else if (mResume == RESUME_FROM_BOOKMARK) {
                 lastPosition = videoInfo.bookmark;
-            if (lastPosition <= 0)
+            }
+            if (lastPosition <= 0) {
                 return 0;
+            }
+        } else {
         }
         return lastPosition;
     }
@@ -1114,8 +1123,8 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         if(mVideoInfo!=null&&mPlayerState==PlayerState.PREPARED) {
             if (mLastPosition == mPlayer.getDuration())
                 mLastPosition = 0;
+            log.debug("postPreparedAndVideoDb: seeking to position " + mLastPosition);
             Player.sPlayer.seekTo(mLastPosition); //mLastPosition = mVideoInfo.resume when first start of service OR position on stop when switching player
-            log.debug("seek to "+mLastPosition);
             setAudioDelay(mAudioDelay, true);
             // no audio_speed if in passthrough
             log.debug("postPreparedAndVideoDb: setAudioSpeed force " + mAudioSpeed);
