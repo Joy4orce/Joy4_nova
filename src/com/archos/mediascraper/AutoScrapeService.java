@@ -322,7 +322,7 @@ public class AutoScrapeService extends Service {
                 if (PreferenceManager.getDefaultSharedPreferences(appContext).getBoolean(KEY_ENABLE_AUTO_SCRAP, true) && isForeground) {
                     // Check if a scraping operation is already in progress
                     if (isScraping()) {
-                        log.debug("registerObserver.onChange: already scraping, not launching service!");
+                        log.trace("registerObserver.onChange: already scraping, not launching service!");
                         return;
                     }
                     
