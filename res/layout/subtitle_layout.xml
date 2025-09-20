@@ -27,7 +27,6 @@
         android:padding="4dip"
         android:fontFamily="sans-serif-medium"
         android:textSize="14sp"
-        android:maxLines="4"
         android:textColor="#ffffffff"
         android:gravity="center"
         android:visibility="gone" />

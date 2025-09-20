@@ -294,10 +294,20 @@ public class SubtitleManager {
     private static String cleanText(final String input) {
         // remove space/new lines at end and beginning
         String displayText = input.trim();
+
         // convert \n or literal "\n" to <br>
         displayText = displayText.replaceAll("(?i)\\n|\\\\n", "<br />");
-        // condense whitespace to 1 space
+
+        // Fix concatenated lines that lost newlines during SRT parsing
+        // Pattern: any character + sentence ending + capital letter = missing line break
+        displayText = displayText.replaceAll("([^\\n\\r][.!?])([A-Z])", "$1<br />$2");
+
+        // Protect <br /> tags during whitespace condensing
+        displayText = displayText.replaceAll("<br\\s*/>", "§NEWLINE§");
+        // condense whitespace to 1 space (but preserve our protected newlines)
         displayText = displayText.replaceAll("\\s+", " ");
+        // Restore <br /> tags
+        displayText = displayText.replaceAll("§NEWLINE§", "<br />");
 
         // check for .SSA subtitle tags {\ ... }
         Matcher ssaTagMatch = SSA_ANY_TAG.matcher(displayText);
