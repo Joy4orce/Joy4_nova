@@ -240,43 +240,41 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
          */
         if (mUri != null) {
             log.debug("UpdateNextTask.Result: trying to find next for mUri " + mUri);
-            String[] projection1 = new String[]{VideoStore.MediaColumns.DATA, VideoStore.Files.FileColumns._ID, VideoStore.Video.VideoColumns.SCRAPER_E_EPISODE, VideoStore.Video.VideoColumns.SCRAPER_SHOW_ID, VideoStore.Video.VideoColumns.SCRAPER_E_SEASON};
-            String[] args1 = new String[]{mUri.toString()};
-            String selection1 = VideoStore.MediaColumns.DATA + "=?";
-            //retrieve episode number
-            Cursor cursor1 = mResolver.query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, projection1, selection1, args1, VideoStore.Video.VideoColumns.SCRAPER_E_EPISODE);
-            if (cursor1 != null && cursor1.getCount() > 0) {
-                log.debug("UpdateNextTask.Result: found next episodes");
 
-                int episodeColumn = cursor1.getColumnIndex(VideoStore.Video.VideoColumns.SCRAPER_E_EPISODE);
-                int seasonColumn = cursor1.getColumnIndex(VideoStore.Video.VideoColumns.SCRAPER_E_SEASON);
-                int showColumn = cursor1.getColumnIndex(VideoStore.Video.VideoColumns.SCRAPER_SHOW_ID);
+            // Only use episode logic for binge mode, not for folder modes
+            if (binge) {
+                String[] projection1 = new String[]{VideoStore.MediaColumns.DATA, VideoStore.Files.FileColumns._ID, VideoStore.Video.VideoColumns.SCRAPER_E_EPISODE, VideoStore.Video.VideoColumns.SCRAPER_SHOW_ID, VideoStore.Video.VideoColumns.SCRAPER_E_SEASON};
+                String[] args1 = new String[]{mUri.toString()};
+                String selection1 = VideoStore.MediaColumns.DATA + "=?";
+                //retrieve episode number
+                Cursor cursor1 = mResolver.query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, projection1, selection1, args1, VideoStore.Video.VideoColumns.SCRAPER_E_EPISODE);
+                if (cursor1 != null && cursor1.getCount() > 0) {
+                    log.debug("UpdateNextTask.Result: found next episodes");
 
-                cursor1.moveToFirst();
-                int episode = cursor1.getInt(episodeColumn);
-                int season = cursor1.getInt(seasonColumn);
-                long show = cursor1.getLong(showColumn);
-                if (cursor1 != null) cursor1.close();
-                if (show > 0 && season >= 0 && episode >= 0) {
-                    log.debug("current episode : " + episode + " " + mUri);
-                    Result result = findEpisode(episode + 1, season, show);
-                    if (result != null)
-                        return result;
-                    else {
-                        if (binge) {
+                    int episodeColumn = cursor1.getColumnIndex(VideoStore.Video.VideoColumns.SCRAPER_E_EPISODE);
+                    int seasonColumn = cursor1.getColumnIndex(VideoStore.Video.VideoColumns.SCRAPER_E_SEASON);
+                    int showColumn = cursor1.getColumnIndex(VideoStore.Video.VideoColumns.SCRAPER_SHOW_ID);
+
+                    cursor1.moveToFirst();
+                    int episode = cursor1.getInt(episodeColumn);
+                    int season = cursor1.getInt(seasonColumn);
+                    long show = cursor1.getLong(showColumn);
+                    if (cursor1 != null) cursor1.close();
+                    if (show > 0 && season >= 0 && episode >= 0) {
+                        log.debug("current episode : " + episode + " " + mUri);
+                        Result result = findEpisode(episode + 1, season, show);
+                        if (result != null)
+                            return result;
+                        else {
                             result = findEpisode(-1, season + 1, show);
                             if (result != null)
                                 return result;
-                        } else if (repeatFolder) { //when no next episode, look for the first one
-                            result = findEpisode(-1, season, show);
-                            if (result != null)
-                                return result;
                         }
-                    }
 
+                    }
                 }
+                if (cursor1 != null) cursor1.close();
             }
-            if (cursor1 != null) cursor1.close();
             if (! binge) {
                 int bucketId = FileUtils.getBucketId(mUri);
                 log.debug("UpdateNextTask.Result: trying to find for bucketId " + bucketId);
@@ -290,11 +288,15 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
                             nextId = cursor.getInt(cursor.getColumnIndex(VideoStore.Files.FileColumns._ID));
                             log.debug("updateNextVideo(" + repeatFolder + ") - next via getNextInBucket(DB):" + nextUri);
                             return new Result(nextUri, nextId);
-                        } else log.debug("updateNextVideo(" + repeatFolder + ") - getNextInBucket empty cursor!?");
+                        } else {
+                            log.debug("updateNextVideo(" + repeatFolder + ") - getNextInBucket empty cursor, will try filesystem");
+                        }
                     } finally {
                         cursor.close();
                     }
-                } else log.debug("updateNextVideo(" + repeatFolder + ") - getNextInBucket null cursor!?");
+                } else {
+                    log.debug("updateNextVideo(" + repeatFolder + ") - getNextInBucket null cursor, will try filesystem");
+                }
 
                 if (repeatFolder) {
                     // 2. Try to find the first video in that folder in the database
@@ -384,11 +386,17 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
 
     @Override
     protected void onPostExecute(Result result) {
+        log.debug("onPostExecute: result=" + (result != null ? result.uri : "null") + ", mListener=" + (mListener != null ? "set" : "null"));
         if (mListener != null) {
-            if (result != null)
+            if (result != null) {
+                log.debug("onPostExecute: calling mListener.onResult with uri=" + result.uri + ", id=" + result.id);
                 mListener.onResult(result.uri, result.id);
-            else
+            } else {
+                log.debug("onPostExecute: calling mListener.onResult with null uri");
                 mListener.onResult(null, -1);
+            }
+        } else {
+            log.debug("onPostExecute: mListener is null, cannot call onResult");
         }
     }
 }
