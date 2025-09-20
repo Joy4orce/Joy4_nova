@@ -1,3 +1,4 @@
+- fix automatic rescan folders regression
 - fix various A/V desync
 - improved subtitle rendering (justification/multilines)
 - new seek based audio speed
