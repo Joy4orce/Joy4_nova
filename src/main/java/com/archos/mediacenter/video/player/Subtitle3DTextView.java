@@ -66,14 +66,30 @@ public class Subtitle3DTextView extends LinearLayout {
     }
 
     public void setGravity3D(int gravity) {
-        log.debug("setGravity3D: gravity={}", gravity);
+        setGravity3D(gravity, gravity & Gravity.HORIZONTAL_GRAVITY_MASK);
+    }
+
+    public void setGravity3D(int positionGravity, int textJustification) {
+        log.debug("setGravity3D: positionGravity={}, textJustification={}", positionGravity, textJustification);
+
         // Get FrameLayout.LayoutParams since the parent is a FrameLayout
         FrameLayout.LayoutParams primaryParams = (FrameLayout.LayoutParams) mPrimaryTV.getLayoutParams();
         FrameLayout.LayoutParams secondaryParams = (FrameLayout.LayoutParams) mSecondaryTV.getLayoutParams();
-        primaryParams.gravity = gravity;
-        secondaryParams.gravity = gravity;
+
+        // Set positioning gravity for the TextView within its parent container
+        primaryParams.gravity = positionGravity;
+        secondaryParams.gravity = positionGravity;
         mPrimaryTV.setLayoutParams(primaryParams);
         mSecondaryTV.setLayoutParams(secondaryParams);
+
+        // Set text justification within the TextView for proper multi-line alignment
+        // Combine vertical positioning from positionGravity with horizontal justification
+        int textGravity = (positionGravity & Gravity.VERTICAL_GRAVITY_MASK) | textJustification;
+        mPrimaryTV.setGravity(textGravity);
+        mSecondaryTV.setGravity(textGravity);
+
+        log.debug("setGravity3D: final textGravity={}", textGravity);
+
         // Request layout updates
         mPrimaryTV.requestLayout();
         mSecondaryTV.requestLayout();

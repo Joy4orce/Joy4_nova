@@ -234,7 +234,7 @@ public class SubtitleManager {
     }
 
     private void adjustSubtitlePosition(SubtitleAlignment alignment) {
-        // Set the gravity based on the alignment
+        // Set the gravity based on the alignment for positioning
         int gravity = switch (alignment) {
             case BOTTOM_LEFT -> Gravity.BOTTOM | Gravity.START;
             case BOTTOM_MID -> Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
@@ -247,8 +247,27 @@ public class SubtitleManager {
             case TOP_RIGHT -> Gravity.TOP | Gravity.END;
         }; // Default to bottom center
 
-        // Set the gravity to the Subtitle3DTextView
-        mSubtitleTxtView.setGravity3D(gravity);
+        // Get text justification based on horizontal alignment
+        int textJustification = getTextJustification(alignment);
+
+        // Set both positioning gravity and text justification
+        mSubtitleTxtView.setGravity3D(gravity, textJustification);
+    }
+
+    /**
+     * Get text justification based on subtitle alignment according to SRT standards
+     * @param alignment The subtitle alignment
+     * @return Gravity constant for text justification
+     */
+    private int getTextJustification(SubtitleAlignment alignment) {
+        return switch (alignment) {
+            // Left positions (1, 4, 7) - left justify
+            case BOTTOM_LEFT, MID_LEFT, TOP_LEFT -> Gravity.START;
+            // Right positions (3, 6, 9) - right justify
+            case BOTTOM_RIGHT, MID_RIGHT, TOP_RIGHT -> Gravity.END;
+            // Center positions (2, 5, 8) - center justify
+            case BOTTOM_MID, MID_MID, TOP_MID -> Gravity.CENTER_HORIZONTAL;
+        };
     }
 
     private int mColor;
