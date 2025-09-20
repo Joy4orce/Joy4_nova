@@ -1,10 +1,11 @@
-- new seek based audio speed implementation
-- gestures for audio speed (check FAQ)
-- upsteps: boost 1.89, libtorrent 2.0.11, torrentd is 16K aligned
-- process resume position when using nova as external player
-- fix A/V desync with flac audio tracks
-- fix AV1 playback/seek on pixel9 g5 and mediatek devices
-- fix nvidia shield external USB storage subtitle download
-- loaders speed improvements via database indexing
-- fix collections getting only one movie or being empty
-- stability enhancements
+- fix various A/V desync
+- improved subtitle rendering (justification/multilines)
+- new seek based audio speed
+- new gestures (check FAQ)
+- fix folder play mode
+- resume position with nova as external player
+- fix AV1 playback/seek
+- fix nvidia shield USB storage subtitle download
+- loaders speed improvements
+- fix empty or single movie collections
+- ffmpeg 8.0 update
