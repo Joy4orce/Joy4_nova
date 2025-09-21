@@ -41,6 +41,8 @@
 
     </FrameLayout>
 
+
+
     <LinearLayout
         android:id="@+id/control_bar"
         android:layout_width="match_parent"
@@ -204,5 +206,14 @@
         android:paddingTop="6sp"
         android:paddingBottom="6sp"/>
 
+
+    <ImageView
+        android:id="@+id/central_play_icon"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/central_play_button"
+        android:visibility="gone"
+        android:elevation="10dp" />
 
 </com.archos.mediacenter.video.player.PlayerControlsRelativeLayout>

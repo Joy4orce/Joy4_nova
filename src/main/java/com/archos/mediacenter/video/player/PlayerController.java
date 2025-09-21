@@ -180,6 +180,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     private ImageButton         mFormatButton2;
     private TextView            mOsdLeftTextView;
     private TextView            mOsdRightTextView;
+    private ImageView           mCentralPlayIcon;
     private float               scrollGestureVertical = 0f;
     private float               scrollGestureHorizontal = 0f;
     private final float         BORDER_WIDTH = MiscUtils.dp2Px(24);
@@ -344,6 +345,12 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         if (mVolumeBar2 != null) {
             mVolumeBar2.setVisibility(View.GONE);
         }
+        if (mCentralPlayIcon != null) {
+            mCentralPlayIcon.setVisibility(View.GONE);
+        }
+        if (mPlayPauseTouchZone != null) {
+            mPlayPauseTouchZone.setVisibility(View.INVISIBLE);
+        }
     }
 
     public void addToMenuContainer(View v){
@@ -414,6 +421,10 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         View playPauseTouchZone = v.findViewById(R.id.play_touch_zone);
         if(playPauseTouchZone != null &&mPlayPauseOnTouchActivated)
             playPauseTouchZone.setOnClickListener(mPauseListener);
+
+        // Find central play icon
+        ImageView centralPlayIcon = (ImageView) v.findViewById(R.id.central_play_icon);
+        log.debug("initControllerView: looking for central_play_icon in v, found = " + (centralPlayIcon != null));
 
         ImageButton mForwardButton = (ImageButton) v.findViewById(R.id.forward);
         if (mForwardButton != null) {
@@ -505,6 +516,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
             this.mUnlockInstructions = unlockInstructions;
             this.mVolumeBar = volumeBar;
             this.mPlayPauseTouchZone = playPauseTouchZone;
+            this.mCentralPlayIcon = centralPlayIcon;
             this.mControlBar=mControlBar;
             this.mPauseButton=mPauseButton;
             this.mFormatButton=mFormatButton ;
@@ -1229,13 +1241,29 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
             return;
 
         if (mSeekWasPlaying || Player.sPlayer.isPlaying()) {
+            log.debug("updatePausePlay: video is playing, hiding central play icon");
             mPauseButton.setImageResource(R.drawable.video_pause_selector);
             if(mPauseButton2!=null)
                 mPauseButton2.setImageResource(R.drawable.video_pause_selector);
+            // Hide central play icon when playing
+            if (mCentralPlayIcon != null) {
+                mCentralPlayIcon.setVisibility(View.GONE);
+                if (mPlayPauseTouchZone != null)
+                    mPlayPauseTouchZone.setVisibility(View.INVISIBLE);
+            }
         } else {
+            log.debug("updatePausePlay: video is paused, showing central play icon (locked=" + mIsLocked + ")");
             mPauseButton.setImageResource(R.drawable.video_play_selector);
             if(mPauseButton2!=null)
                 mPauseButton2.setImageResource(R.drawable.video_play_selector);
+            // Show central play icon when paused, but only if not locked
+            if (mCentralPlayIcon != null && !mIsLocked && !isTVMode) {
+                log.debug("updatePausePlay: making play touch zone and central icon visible");
+                mPlayPauseTouchZone.setVisibility(View.VISIBLE);
+                mCentralPlayIcon.setVisibility(View.VISIBLE);
+            } else {
+                log.debug("updatePausePlay: central play icon is null or device is locked");
+            }
         }
     }
 
@@ -2573,6 +2601,12 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
 
     public void lock(){
         mIsLocked = true;
+        // Hide central play icon when locked
+        if (mCentralPlayIcon != null) {
+            mCentralPlayIcon.setVisibility(View.GONE);
+            if (mPlayPauseTouchZone != null)
+                mPlayPauseTouchZone.setVisibility(View.INVISIBLE);
+        }
         hide();
         showUnlockInstructions(true);
     }
@@ -2584,6 +2618,8 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
                 public boolean onLongClick(View view) {
                     mUnlockInstructions.setVisibility(View.GONE);
                     mIsLocked = false;
+                    // Restore central play icon if video is paused
+                    updatePausePlay();
                     show();
                     return false;
                 }

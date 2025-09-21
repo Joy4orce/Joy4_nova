@@ -40,6 +40,8 @@
 
     </FrameLayout>
 
+
+
     <!-- Padding is programmatically for chromebook -->
     <LinearLayout
         android:id="@+id/control_bar"
@@ -198,4 +200,13 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/unlock_instructions"
         layout="@layout/unlock_instructions" />
+    <ImageView
+        android:id="@+id/central_play_icon"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/central_play_button"
+        android:visibility="gone"
+        android:elevation="10dp" />
+
 </com.archos.mediacenter.video.player.PlayerControlsRelativeLayout>
