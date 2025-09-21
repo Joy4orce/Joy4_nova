@@ -31,6 +31,16 @@ public class LastAddedLoader extends VideoLoader {
         // only updates the CursorLoader on data change every 10s since used only in MainFragment as nonScraped box presence
         if (VideoLoader.ALLVIDEO_THROTTLE) setUpdateThrottle(VideoLoader.ALLVIDEO_THROTTLE_DELAY);
     }
+    
+    @Override
+    public String getSelection() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(super.getSelection()); // get common selection from the parent
+
+        sb.append(") GROUP BY (");
+        sb.append(VideoStore.Video.VideoColumns.SCRAPER_M_IMDB_ID);
+        return sb.toString();
+    }
 
     @Override
     public String getSortOrder() {
