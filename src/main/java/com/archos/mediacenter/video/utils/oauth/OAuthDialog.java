@@ -36,7 +36,6 @@ import android.os.Bundle;
 import androidx.annotation.RequiresApi;
 
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
@@ -115,7 +114,7 @@ public class OAuthDialog extends Dialog {
 		lp.alpha = 0.0f;
 		getWindow().setAttributes(lp);
 
-		getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT);
+		getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
 
 		mWebView = (NovaWebView) findViewById(R.id.webview);
 		mWebView.getSettings().setJavaScriptEnabled(true);
@@ -257,20 +256,13 @@ public class OAuthDialog extends Dialog {
 		{
 			log.debug("onPageFinished for url " + url);
 			super.onPageFinished(view, url);
-			mWebView.resetDoItOnce();
-			mWebView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-				@Override
-				public boolean onPreDraw() {
-					mWebView.getViewTreeObserver().removeOnPreDrawListener(this);
-					mProgress.dismiss();
-					// Make window opaque since webview is loaded
-					WindowManager.LayoutParams lp = getWindow().getAttributes();
-					lp.alpha = 1.0f;
-					getWindow().setAttributes(lp);
-					return true;
-				}
-			});
-			injectCSS();
+				mWebView.resetDoItOnce();
+				mProgress.dismiss();
+				// Make window opaque since webview is loaded
+				WindowManager.LayoutParams lp = getWindow().getAttributes();
+				lp.alpha = 1.0f;
+				getWindow().setAttributes(lp);
+				injectCSS();
 		}
 	}
 
