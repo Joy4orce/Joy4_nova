@@ -44,6 +44,11 @@ public class FileVisitor {
         void onOtherType(MetaFile2 file);
         /** called when visiting finished */
         void onStop(MetaFile2 root);
+
+        /** called when directory listing fails; default no-op */
+        default void onListingError(MetaFile2 directory, Exception exception) {
+            /* optional override */
+        }
     }
 
     private FileVisitor() {
@@ -79,15 +84,19 @@ public class FileVisitor {
                     } catch (IOException e) {
                         if (log.isTraceEnabled()) log.error("recurse: IOException for " + file.getName(), e);
                         else log.error("recurse: IOException for " + file.getName());
+                        listener.onListingError(file, e);
                     } catch (AuthenticationException e) {
                         if (log.isTraceEnabled()) log.error("recurse: AuthenticationException for " + file.getName(), e);
                         else log.error("recurse: AuthenticationException for " + file.getName());
+                        listener.onListingError(file, e);
                     } catch (SftpException e) {
                         if (log.isTraceEnabled()) log.error("recurse: SftpException for " + file.getName(), e);
                         else log.error("recurse: SftpException for " + file.getName());
+                        listener.onListingError(file, e);
                     } catch (JSchException e) {
                         if (log.isTraceEnabled()) log.error("recurse: JSchException for " + file.getName(), e);
                         else log.error("recurse: JSchException for " + file.getName());
+                        listener.onListingError(file, e);
                     }
                 }
             } else if (file.isFile()) {

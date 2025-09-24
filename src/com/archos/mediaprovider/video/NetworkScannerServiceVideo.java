@@ -510,6 +510,7 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
                         mBlacklist, prescanItemsMap, nfoScanEnabled, bulkHandler, serverId);
 
                 FileVisitor.visit(f, RECURSION_LIMIT, fileVisitListener);
+                boolean traversalHadError = fileVisitListener.hadListingError();
                 // once all files where visited we have inserted, updated or deleted files in the db.
                 // Nfo has also been processed
                 List<MetaFile2> lastPlayedDbs = fileVisitListener.getLastPlayedDbs();
@@ -529,6 +530,9 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
                 // Exit foreground mode and remove notification since scan is complete
                 stopForeground(true);
                 log.trace("doScan: added:" + insertCount + " modified:" + updateCount + " deleted:" + deleteCount + " listed files " + mFoundFiles);
+                if (traversalHadError && mRecordOnFailPreference != null) {
+                    PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(mRecordOnFailPreference, -1).commit();
+                }
             } finally {
                 if (wifiLock != null && wifiLock.isHeld()) {
                     wifiLock.release();
@@ -569,8 +573,14 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
             mAlreadyAddedUpnpFiles = new ArrayList<>();
         }
 
+        private boolean mHadListingError;
+
         public List<MetaFile2> getLastPlayedDbs() {
             return mLastPlayedDbs;
+        }
+
+        public boolean hadListingError() {
+            return mHadListingError;
         }
 
         @Override
@@ -673,6 +683,28 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
 
             // force execution of all pending operations
             mBulkHandler.executePending();
+        }
+
+        @Override
+        public void onListingError(MetaFile2 directory, Exception exception) {
+            mHadListingError = true;
+            if (directory == null) {
+                return;
+            }
+            String directoryPath = directory.getUri().toString();
+            String prefix = directoryPath;
+            if (!prefix.endsWith("/")) {
+                prefix = prefix + "/";
+            }
+            log.warn("onListingError: skip deletions under {} due to traversal error", prefix);
+            for (PrescanItem item : mPrescanItemsMap.values()) {
+                if (item._data == null) {
+                    continue;
+                }
+                if (item._data.equals(directoryPath) || item._data.startsWith(prefix)) {
+                    item.needsDelete = false;
+                }
+            }
         }
 
         /** checks if the file should be scanned */

@@ -16,6 +16,7 @@ package com.archos.mediaprovider.video;
 
 import android.app.Application;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -29,11 +30,14 @@ import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.preference.PreferenceManager;
 
 import com.archos.environment.ArchosUtils;
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.filecorelibrary.ftp.Session;
 import com.archos.filecorelibrary.sftp.SFTPSession;
 import com.archos.mediacenter.filecoreextension.upnp2.UpnpServiceManager;
 import com.archos.mediacenter.utils.ShortcutDbAdapter;
 import com.archos.mediaprovider.ArchosMediaIntent;
+import com.archos.mediaprovider.video.VideoStore;
+import com.archos.mediaprovider.video.VideoStore.MediaColumns;
 import com.archos.mediascraper.AutoScrapeService;
 import com.archos.environment.NetworkState;
 
@@ -127,8 +131,13 @@ public class NetworkAutoRefresh extends BroadcastReceiver implements DefaultLife
             ShortcutDbAdapter.VIDEO.close();
             if(NetworkState.isLocalNetworkConnected(context)) {
                 PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(AUTO_RESCAN_ERROR, 0).commit();//reset error
+                boolean triggeredScan = false;
                 for (Uri uri : toUpdate) {
                     log.debug("onReceive: scanning "+uri);
+                    if (shouldSkipScanForInactiveServer(context, uri)) {
+                        log.debug("onReceive: skip scan for inactive server {}", uri);
+                        continue;
+                    }
                     if("upnp".equals(uri.getScheme())){ //start upnp service
                         UpnpServiceManager.startServiceIfNeeded(context);
                     }
@@ -141,10 +150,11 @@ public class NetworkAutoRefresh extends BroadcastReceiver implements DefaultLife
                     refreshIntent.putExtra(NetworkScannerServiceVideo.RECORD_END_OF_SCAN_PREFERENCE, AUTO_RESCAN_LAST_SCAN);
                     refreshIntent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
                     context.sendBroadcast(refreshIntent);
+                    triggeredScan = true;
                 }
 
                 // Start AutoScrapeService after network scanning to scrape newly found videos
-                if (!toUpdate.isEmpty() && AutoScrapeService.isEnable(context)) {
+                if (triggeredScan && AutoScrapeService.isEnable(context)) {
                     log.debug("onReceive: starting AutoScrapeService after network scan");
                     AutoScrapeService.startService(context);
                 }
@@ -155,6 +165,52 @@ public class NetworkAutoRefresh extends BroadcastReceiver implements DefaultLife
             }
             log.debug("onReceive: received rescan intent end");
         }
+    }
+
+    private static boolean shouldSkipScanForInactiveServer(Context context, Uri uri) {
+        if (uri == null) {
+            return false;
+        }
+        if (!FileUtils.isNetworkShare(uri)) {
+            return false;
+        }
+        String scheme = uri.getScheme();
+        String host = uri.getHost();
+        if (host == null || host.isEmpty()) {
+            return false;
+        }
+        int port = uri.getPort();
+        StringBuilder whereBuilder = new StringBuilder();
+        whereBuilder.append(MediaColumns.DATA).append(" LIKE '").append(scheme).append("://").append(host);
+        if (port != -1) {
+            whereBuilder.append(":").append(port);
+        }
+        whereBuilder.append("/%'");
+        String selection = whereBuilder.toString();
+
+        ContentResolver cr = context.getContentResolver();
+        Cursor c = null;
+        boolean hasRow = false;
+        boolean active = false;
+        try {
+            c = cr.query(VideoStore.SmbServer.getContentUri(), new String[]{"_id", VideoStore.SmbServer.SmbServerColumns.ACTIVE}, selection, null, null);
+            if (c != null) {
+                while (c.moveToNext()) {
+                    hasRow = true;
+                    if (c.getInt(1) == 1) {
+                        active = true;
+                        break;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("shouldSkipScanForInactiveServer: query failed for {}", uri, e);
+            return false;
+        } finally {
+            if (c != null) c.close();
+        }
+        // If we have no row we cannot decide, so allow scan.
+        return hasRow && !active;
     }
 
     public static void init(Application application) {
