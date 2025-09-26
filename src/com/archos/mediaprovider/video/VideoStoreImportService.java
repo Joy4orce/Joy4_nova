@@ -77,6 +77,7 @@ public class VideoStoreImportService extends Service implements Handler.Callback
     private static final int MESSAGE_UPDATE_METADATA = 4;
     private static final int MESSAGE_REMOVE_FILE = 5;
     private static final int MESSAGE_HIDE_VOLUME = 6;
+    private static final int MESSAGE_VOLUME_MOUNTED = 7;
 
     // handler.arg1 contains startId or this
     private static final int DONT_KILL_SELF = -1;
@@ -202,7 +203,9 @@ public class VideoStoreImportService extends Service implements Handler.Callback
                         .obtainMessage(MESSAGE_HIDE_VOLUME, DONT_KILL_SELF, volume.getStorageId())
                         .sendToTarget();
                 } else {
-                    // unhide????
+                    mHandler
+                        .obtainMessage(MESSAGE_VOLUME_MOUNTED, DONT_KILL_SELF, volume.getStorageId())
+                        .sendToTarget();
                 }
             }
         };
@@ -434,6 +437,13 @@ public class VideoStoreImportService extends Service implements Handler.Callback
                 VideoStoreImportService.this.getContentResolver().insert(VideoStoreInternal.HIDE_VOLUME, cv);
                 mHandler.obtainMessage(MESSAGE_KILL, DONT_KILL_SELF, msg.arg2).sendToTarget();
                 break;
+            case MESSAGE_VOLUME_MOUNTED:
+                log.debug("handleMessage: MESSAGE_VOLUME_MOUNTED storageId={}", msg.arg2);
+                handleVolumeMounted(msg.arg2);
+                // After restoring visibility trigger a new import to refresh metadata
+                Message importMsg = mHandler.obtainMessage(MESSAGE_IMPORT_FULL, DONT_KILL_SELF, msg.arg2);
+                mHandler.sendMessageDelayed(importMsg, 1000);
+                break;
             default:
                 log.warn("ImportBgHandler - unknown msg.what: " + msg.what + " stopSelf");
                 stopSelf();
@@ -618,6 +628,22 @@ public class VideoStoreImportService extends Service implements Handler.Callback
             }
         }
         // don't db.close() - shared connection
+    }
+
+    private void handleVolumeMounted(int storageId) {
+        log.debug("handleVolumeMounted: storageId={}", storageId);
+        ContentValues cv = new ContentValues();
+        cv.put("volume_hidden", 0);
+        int updated = getContentResolver().update(
+                VideoStoreInternal.FILES_IMPORT,
+                cv,
+                "storage_id=? AND volume_hidden != 0",
+                new String[]{String.valueOf(storageId)});
+        log.debug("handleVolumeMounted: cleared volume_hidden for {} rows", updated);
+        ServiceCompat.startForeground(this, NOTIFICATION_ID, n,
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
+        // Mark database dirty so a fresh import will run and refresh metadata
+        ImportState.VIDEO.setDirty(true);
     }
 
     /** removes all messages from handler */
