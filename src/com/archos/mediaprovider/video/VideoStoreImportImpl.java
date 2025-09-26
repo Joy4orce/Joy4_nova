@@ -47,6 +47,7 @@ import com.archos.mediaprovider.CustomCursorFactory.CustomCursor;
 import com.archos.mediaprovider.ImportState;
 import com.archos.mediaprovider.ImportState.State;
 import com.archos.mediaprovider.MediaRetrieverServiceClient;
+import com.archos.mediaprovider.VolumeState;
 import com.archos.mediaprovider.video.VideoStore.Video.VideoColumns;
 import com.archos.mediascraper.BaseTags;
 import com.archos.mediascraper.NfoParser;
@@ -56,7 +57,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.archos.filecorelibrary.FileUtils.isNetworkShare;
 import static com.archos.filecorelibrary.FileUtils.isSlowRemote;
@@ -126,15 +129,7 @@ public class VideoStoreImportImpl {
             // delete everything that was not replaced, ! only if it is on primary local storage !
             String existingFiles = getRemoteIdList(mCr);
             int del = 0;
-            // set files not seen to hidden state. They might be deleted but we don't know for sure.
-            ContentValues cvHidden = new ContentValues();
-            cvHidden.put("volume_hidden", Long.valueOf(System.currentTimeMillis() / 1000));
-            ContentValues cvPresent = new ContentValues();
-            cvPresent.put("volume_hidden", 0);
-            // mark not present videos as hidden
-            mCr.update(VideoStoreInternal.FILES_IMPORT, cvHidden, "_id NOT IN (" + existingFiles + ") AND volume_hidden = 0", null);
-            // mark videos present but hidden as present (solves a bug on shield with external USB storage indexed files hidden)
-            mCr.update(VideoStoreInternal.FILES_IMPORT, cvPresent, "_id IN (" + existingFiles + ") AND volume_hidden != 0", null);
+            updateVolumeHiddenStates(existingFiles);
             int countEnd = getLocalCount(mCr);
             log.info("full import +:" + copy + " -:" + del + " " + countStart + "=>" + countEnd);
             // then trigger scan of new data
@@ -158,11 +153,7 @@ public class VideoStoreImportImpl {
         if (Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
             String existingFiles = getRemoteIdList(mCr);
             int del = 0;
-
-            // 1. Hide files that are currently not visible, they might be removed at that point but we don't know for sure.
-            ContentValues cv = new ContentValues();
-            cv.put("volume_hidden", Long.valueOf(System.currentTimeMillis() / 1000));
-            mCr.update(VideoStoreInternal.FILES_IMPORT, cv, "_id NOT IN (" + existingFiles + ") AND volume_hidden = 0", null);
+            updateVolumeHiddenStates(existingFiles);
 
             // 2. copy all remote files with higher id than our max id
             String maxLocal = getMaxId(mCr);
@@ -584,6 +575,24 @@ public class VideoStoreImportImpl {
     };
 
     /** copies data from Android's media db to ours */
+    // Tracks which storage ids were seen in the latest MediaStore query so we can
+    // distinguish "volume missing" from "file removed" later in the process.
+    private static final Set<Integer> sLastVisibleStorageIds = new HashSet<>();
+
+    private static synchronized void resetVisibleStorageIds() {
+        sLastVisibleStorageIds.clear();
+    }
+
+    private static synchronized void recordVisibleStorageId(Integer storageId) {
+        if (storageId != null) {
+            sLastVisibleStorageIds.add(storageId);
+        }
+    }
+
+    private static synchronized Set<Integer> getVisibleStorageIdsSnapshot() {
+        return new HashSet<>(sLastVisibleStorageIds);
+    }
+
     private static int copyData(ContentResolver cr, String minId) {
         int imported = 0;
         String where = null;
@@ -592,6 +601,7 @@ public class VideoStoreImportImpl {
         ContentValues cv = null;
         ExtStorageManager extStorageManager = ExtStorageManager.getExtStorageManager();
         String[] projection;
+        resetVisibleStorageIds(); // keep storage list in sync with this pass
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
             where = WHERE_ALL_AP + BLACKLIST;
             projection = FILES_PROJECTION_AP;
@@ -694,9 +704,14 @@ public class VideoStoreImportImpl {
                                     }
                                     log.trace("copyData: _data=" + data + " -> storageId=" + storageId);
                                     cv.put("storage_id", storageId);
+                                    recordVisibleStorageId(storageId);
                                 } else {
                                     cv = new ContentValues(ccount);
                                     DatabaseUtils.cursorRowToContentValues(allFiles, cv);
+                                    int storageIdx = allFiles.getColumnIndex("storage_id");
+                                    if (storageIdx >= 0) {
+                                        recordVisibleStorageId(allFiles.getInt(storageIdx));
+                                    }
                                 }
                                 if (!ids.contains(cv.getAsLong("_id")))
                                     inserter.add(cv);
@@ -815,8 +830,99 @@ public class VideoStoreImportImpl {
         return Integer.toString(highestMaxId);
     }
 
+    /**
+     * Update hidden/visible flags based on the media ids returned by the last MediaStore query.
+     * We only touch storage ids that are currently mounted to avoid hiding content while a USB
+     * drive is still reconnecting.
+     */
+    private void updateVolumeHiddenStates(String existingFiles) {
+        Set<Integer> mountedStorageIds = getMountedReadableStorageIds();
+        if (mountedStorageIds.isEmpty()) {
+            log.debug("updateVolumeHiddenStates: no mounted storage, skip hide/unhide");
+            return;
+        }
+
+        String mountedClause = buildStorageIdSelection(mountedStorageIds);
+        if (!TextUtils.isEmpty(mountedClause)) {
+            ContentValues cvHidden = new ContentValues();
+            cvHidden.put("volume_hidden", Long.valueOf(System.currentTimeMillis() / 1000));
+            StringBuilder whereHidden = new StringBuilder("volume_hidden = 0 AND ").append(mountedClause);
+            if (!TextUtils.isEmpty(existingFiles)) {
+                whereHidden.append(" AND _id NOT IN (").append(existingFiles).append(")");
+            }
+            int hiddenCount = mCr.update(VideoStoreInternal.FILES_IMPORT, cvHidden, whereHidden.toString(), null);
+            log.debug("updateVolumeHiddenStates: hidden {} rows", hiddenCount);
+        }
+
+        if (!TextUtils.isEmpty(existingFiles)) {
+            Set<Integer> visibleIds = getVisibleStorageIdsSnapshot();
+            visibleIds.retainAll(mountedStorageIds);
+            String visibleClause = buildStorageIdSelection(visibleIds);
+            if (!TextUtils.isEmpty(visibleClause)) {
+                ContentValues cvPresent = new ContentValues();
+                cvPresent.put("volume_hidden", 0);
+                String wherePresent = "_id IN (" + existingFiles + ") AND volume_hidden != 0 AND " + visibleClause;
+                int presentCount = mCr.update(VideoStoreInternal.FILES_IMPORT, cvPresent, wherePresent, null);
+                log.debug("updateVolumeHiddenStates: unhidden {} rows", presentCount);
+            }
+        }
+    }
+
+    private Set<Integer> getMountedReadableStorageIds() {
+        Set<Integer> mountedIds = new HashSet<>();
+
+        String primaryState = Environment.getExternalStorageState();
+        if (isMountedReadable(primaryState)) {
+            mountedIds.add(VolumeState.Volume.getStorageId(0));
+        }
+
+        ExtStorageManager storageManager = ExtStorageManager.getExtStorageManager();
+        collectMountedStorageIds(storageManager.getExtSdcards(), mountedIds, storageManager);
+        collectMountedStorageIds(storageManager.getExtUsbStorages(), mountedIds, storageManager);
+        collectMountedStorageIds(storageManager.getExtOtherStorages(), mountedIds, storageManager);
+
+        return mountedIds;
+    }
+
+    private void collectMountedStorageIds(List<String> paths, Set<Integer> target, ExtStorageManager storageManager) {
+        if (paths == null) return;
+        for (String path : paths) {
+            if (TextUtils.isEmpty(path)) continue;
+            String state = ExtStorageManager.getVolumeState(path);
+            if (!isMountedReadable(state)) continue;
+            Integer storageId = storageManager.getStorageId(path);
+            if (storageId != null) {
+                target.add(storageId);
+            }
+        }
+    }
+
+    private boolean isMountedReadable(String state) {
+        return Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
+    }
+
+    private String buildStorageIdSelection(Set<Integer> storageIds) {
+        if (storageIds == null || storageIds.isEmpty()) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder("storage_id IN (");
+        boolean first = true;
+        for (Integer id : storageIds) {
+            if (id == null) continue;
+            if (!first) sb.append(',');
+            sb.append(id);
+            first = false;
+        }
+        if (first) {
+            return null;
+        }
+        sb.append(')');
+        return sb.toString();
+    }
+
     private final static String[] REMOTE_LIST_PROJECTION = new String[] {
-        BaseColumns._ID
+        BaseColumns._ID,
+        "storage_id"
     };
     /** helper to get a comma separated list of all ids */
     private static String getRemoteIdList(ContentResolver cr) {
@@ -824,6 +930,7 @@ public class VideoStoreImportImpl {
         String prefix = "";
         int offset = 0;
         Cursor c = null;
+        resetVisibleStorageIds(); // new fetch, flush previous storage ids
         try {
             while (!mIsImportInterrupted) {
                 try {
@@ -845,10 +952,14 @@ public class VideoStoreImportImpl {
                     int count = 0;
 
                     if (c != null) {
+                        int storageIdx = c.getColumnIndex("storage_id");
                         while (c.moveToNext() && count < WINDOW_SIZE && !mIsImportInterrupted) {
                             count++;
                             sb.append(prefix).append(c.getString(0));
                             prefix = ",";
+                            if (storageIdx >= 0) {
+                                recordVisibleStorageId(c.getInt(storageIdx));
+                            }
                         }
                         log.debug("getRemoteIdList: count=" + count + " WINDOW_SIZE=" + WINDOW_SIZE + " offset=" + offset);
                         if (count < WINDOW_SIZE) {
