@@ -1,4 +1,5 @@
 - avoid USB/SMB rescans and medialib loss
+- dynamic audio channel mapping
 - fix trakt login window and automatic folder rescan regressions
 - fix various A/V desync
 - improved subtitle rendering (justification/multilines)
@@ -10,4 +11,3 @@
 - fix nvidia shield USB storage subtitle download
 - loaders speed improvements
 - fix empty or single movie collections
-- ffmpeg 8.0 update
