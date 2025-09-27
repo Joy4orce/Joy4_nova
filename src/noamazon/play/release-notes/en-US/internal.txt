@@ -1,4 +1,5 @@
-- fix automatic rescan folders regression
+- avoid USB/SMB rescans and medialib loss
+- fix trakt login window and automatic folder rescan regressions
 - fix various A/V desync
 - improved subtitle rendering (justification/multilines)
 - new seek based audio speed
