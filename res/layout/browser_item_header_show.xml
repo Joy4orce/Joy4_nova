@@ -25,8 +25,9 @@
         android:layout_marginLeft="@dimen/video_details_poster_margin_left"
         android:layout_marginRight="@dimen/content_list_space_between_thumbnail_and_name"
         android:layout_marginTop="@dimen/video_details_poster_margin_top"
-        android:background="@color/default_icon_background"
-        android:scaleType="center" />
+        android:background="@drawable/rounded_rectangle"
+        android:clipToOutline="true"
+        android:scaleType="centerCrop" />
 
     <ImageView
         android:id="@+id/flag_3d"

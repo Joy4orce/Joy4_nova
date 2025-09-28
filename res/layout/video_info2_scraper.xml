@@ -13,7 +13,7 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_marginTop="@dimen/video_info_cardview_top_margin"
-        card_view:cardCornerRadius="4dp"
+        card_view:cardCornerRadius="12dp"
         android:id="@+id/scrap_trailer_container"
         android:layout_height="wrap_content"
         >
@@ -47,7 +47,7 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_marginTop="@dimen/video_info_cardview_top_margin"
-        card_view:cardCornerRadius="4dp"
+        card_view:cardCornerRadius="12dp"
         android:id="@+id/scrap_details_container"
         android:layout_height="wrap_content"
         >

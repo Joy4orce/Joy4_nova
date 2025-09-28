@@ -61,7 +61,7 @@
     <dimen name="info_activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="video_info_cardview_elevation">5dp</dimen>
-    <dimen name="video_info_cardview_corner">4dp</dimen>
+    <dimen name="video_info_cardview_corner">12dp</dimen>
     <dimen name="categories_list_width">300dip</dimen>
     <dimen name="half_fab_button">28dip</dimen>
 

@@ -13,7 +13,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_gravity="left"
     card_view:cardBackgroundColor="@color/grid_item_background"
-    card_view:cardCornerRadius="4dp"
+    card_view:cardCornerRadius="12dp"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     >
@@ -35,10 +35,9 @@
             android:id="@+id/thumbnail"
             android:layout_width="@dimen/video_grid_poster_width"
             android:layout_height="@dimen/video_grid_poster_height"
-
-            android:background="@color/default_icon_background"
-            android:scaleType="center" />
-
+            android:background="@drawable/rounded_rectangle"
+            android:clipToOutline="true"
+            android:scaleType="centerCrop" />
         <ImageView
             android:id="@+id/flag_3d"
             android:layout_width="wrap_content"
