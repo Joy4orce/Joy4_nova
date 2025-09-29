@@ -156,7 +156,7 @@ public class NetworkAutoRefresh extends BroadcastReceiver implements DefaultLife
                 // Start AutoScrapeService after network scanning to scrape newly found videos
                 if (triggeredScan && AutoScrapeService.isEnable(context)) {
                     log.debug("onReceive: starting AutoScrapeService after network scan");
-                    AutoScrapeService.startService(context);
+                    AutoScrapeService.startServiceAfterNetworkScan(context);
                 }
             }
             else{

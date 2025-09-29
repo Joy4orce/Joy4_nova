@@ -110,6 +110,7 @@ public class AutoScrapeService extends Service {
     private static Boolean scrapeOnlyMovies = false;
 
     private volatile static boolean isForeground = true;
+    private static boolean isForceAfterNetworkScan = false;
     private static final String PREF_IS_SCRAPE_DIRTY = "is_scrape_dirty";
 
     /**
@@ -134,6 +135,14 @@ public class AutoScrapeService extends Service {
         ContextCompat.startForegroundService(context, new Intent(context, AutoScrapeService.class));
     }
 
+    public static void startServiceAfterNetworkScan(Context context) {
+        log.debug("startServiceAfterNetworkScan - forced start after network scan");
+        mContext = context;
+        Intent intent = new Intent(context, AutoScrapeService.class);
+        intent.putExtra("FORCE_AFTER_NETWORK_SCAN", true);
+        ContextCompat.startForegroundService(context, intent);
+    }
+
     public void cleanup() {
         log.debug("cleanup");
         if (mThread != null && mThread.isAlive()) {
@@ -141,6 +150,7 @@ public class AutoScrapeService extends Service {
         }
         sIsScraping = false;
         isForeground = false;
+        isForceAfterNetworkScan = false; // Reset force flag on cleanup
         // Stop the scraping thread if it's running
         if (mThread != null) {
             mThread.interrupt();
@@ -194,6 +204,11 @@ public class AutoScrapeService extends Service {
         
         // Check for dirty state and restart scraping if needed
         isForeground = true;
+        isForceAfterNetworkScan = intent != null && intent.getBooleanExtra("FORCE_AFTER_NETWORK_SCAN", false);
+        if (isForceAfterNetworkScan) {
+            log.debug("onStartCommand: Force start after network scan - ensuring isForeground = true");
+            isForeground = true;
+        }
         if (isDirtyState()) {
             log.debug("onStartCommand: Rescanning everything due to dirty state");
             // Reset the dirty flag in SharedPreferences
@@ -262,7 +277,7 @@ public class AutoScrapeService extends Service {
 
                         sNumberOfFilesRemainingToProcess = window;
 
-                        while (cursor.moveToNext() && isForeground && !Thread.currentThread().isInterrupted()
+                        while (cursor.moveToNext() && (isForeground || isForceAfterNetworkScan) && !Thread.currentThread().isInterrupted()
                                 && PreferenceManager.getDefaultSharedPreferences(AutoScrapeService.this).getBoolean(AutoScrapeService.KEY_ENABLE_AUTO_SCRAP, true)) {
                             if (sTotalNumberOfFilesRemainingToProcess > 0)
                                 nm.notify(NOTIFICATION_ID, nb.setContentText(getString(R.string.remaining_videos_to_process) + " " + sTotalNumberOfFilesRemainingToProcess).build());
@@ -291,8 +306,9 @@ public class AutoScrapeService extends Service {
                         }
                         index += window;
                         cursor.close();
-                    } while (index < numberOfRows && isForeground && !Thread.currentThread().isInterrupted());
+                    } while (index < numberOfRows && (isForeground || isForceAfterNetworkScan) && !Thread.currentThread().isInterrupted());
                     sIsScraping = false;
+                    isForceAfterNetworkScan = false; // Reset force flag after completion
                     // Exit foreground mode and remove notification since export is complete
                     stopForeground(true);
                     cursor.close();
@@ -318,8 +334,8 @@ public class AutoScrapeService extends Service {
         appContext.getContentResolver().registerContentObserver(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, false, new ContentObserver(null) {
             @Override
             public void onChange(boolean selfChange) {
-                // Check if auto scraping is enabled and the app is in the foreground
-                if (PreferenceManager.getDefaultSharedPreferences(appContext).getBoolean(KEY_ENABLE_AUTO_SCRAP, true) && isForeground) {
+                // Check if auto scraping is enabled and the app is in the foreground (or forced after network scan)
+                if (PreferenceManager.getDefaultSharedPreferences(appContext).getBoolean(KEY_ENABLE_AUTO_SCRAP, true) && (isForeground || isForceAfterNetworkScan)) {
                     // Check if a scraping operation is already in progress
                     if (isScraping()) {
                         log.trace("registerObserver.onChange: already scraping, not launching service!");
@@ -423,7 +439,7 @@ public class AutoScrapeService extends Service {
 
                             sNumberOfFilesRemainingToProcess = window;
                             restartOnNextRound = true;
-                            while (cursor.moveToNext() && isEnable(AutoScrapeService.this) && isForeground && !Thread.currentThread().isInterrupted()) {
+                            while (cursor.moveToNext() && isEnable(AutoScrapeService.this) && (isForeground || isForceAfterNetworkScan) && !Thread.currentThread().isInterrupted()) {
                                 // stop if disconnected while scraping
                                 if (!NetworkState.isLocalNetworkConnected(AutoScrapeService.this) && !NetworkState.isNetworkConnected(AutoScrapeService.this)) {
                                     cursor.close();
@@ -616,7 +632,7 @@ public class AutoScrapeService extends Service {
                             cursor.close();
                             numberOfRowsRemaining -= window;
                             totalNumberOfFilesScraped+= totalNumberOfFilesScraped;
-                        } while (numberOfRowsRemaining > 0 && isForeground && !Thread.currentThread().isInterrupted());
+                        } while (numberOfRowsRemaining > 0 && (isForeground || isForceAfterNetworkScan) && !Thread.currentThread().isInterrupted());
                         if (numberOfRows == mNetworkOrScrapErrors) { //when as many errors, we assume we don't have the internet or that the scraper returns an error, do not loop
                             restartOnNextRound = false;
                             log.debug("startScraping: no internet or scraper errors, stop iterating");
@@ -634,9 +650,10 @@ public class AutoScrapeService extends Service {
                             log.debug("startScraping: new entries to scrape found most likely added during scrape process, restartOnNextRound");
                         }
                         cursor.close();
-                    } while(restartOnNextRound && isForeground && !Thread.currentThread().isInterrupted()
+                    } while(restartOnNextRound && (isForeground || isForceAfterNetworkScan) && !Thread.currentThread().isInterrupted()
                             &&PreferenceManager.getDefaultSharedPreferences(AutoScrapeService.this).getBoolean(AutoScrapeService.KEY_ENABLE_AUTO_SCRAP, true)); //if we had something to do, we look for new videos
                     sIsScraping = false;
+                    isForceAfterNetworkScan = false; // Reset force flag after completion
                     // Exit foreground mode and remove notification since scraping is complete
                     stopForeground(true);
                     mHandler.post(new Runnable() {
