@@ -35,9 +35,10 @@ import retrofit2.Response;
 public class ShowIdTvSearch {
     private static final Logger log = LoggerFactory.getLogger(ShowIdTvSearch.class);
 
-    // In theory this is to buffer two consecutive requests in ShowScraper (or 4 if there is english)
-    // TODO MARC THIS IS THE CACHE MESSING UP!!!!!!! --> no there is only one id!!!
-    private final static LruCache<String, ShowIdTvSearchResult> sShowCache = new LruCache<>(10);
+    // Cache API responses to reduce redundant TMDb calls for show metadata
+    // Complements ShowScraper4.sShowMetadataCache by caching at the API response level
+    // Key format: showId|language
+    private final static LruCache<String, ShowIdTvSearchResult> sShowCache = new LruCache<>(100);
 
 
     public static ShowIdTvSearchResult getTvShowResponse(int showId, String language, final boolean adultScrape, MyTmdb tmdb) {

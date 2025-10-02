@@ -36,7 +36,8 @@ import retrofit2.Response;
 public class ShowIdSeasonSearch {
     private static final Logger log = LoggerFactory.getLogger(ShowIdSeasonSearch.class);
 
-    // In theory this is to buffer two consecutive requests in ShowScraper (or 4 if there is english)
+    // Cache season API responses to reduce redundant TMDb calls
+    // Key format: showId|season|language
     private final static LruCache<String, ShowIdSeasonSearchResult> sShowCache = new LruCache<>(50);
 
     public static ShowIdSeasonSearchResult getSeasonShowResponse(int showId, int season, String language, final boolean adultScrape, MyTmdb tmdb) {
