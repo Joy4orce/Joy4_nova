@@ -300,8 +300,9 @@ public class ShowScraper4 extends BaseScraper2 {
 
             if (getAllEpisodes) {
                 // get all episodes: fetch seasons in parallel for better performance
+                // Use 2 threads to balance performance with database contention
                 log.debug("getDetailsInternal: fetching " + number_of_seasons + " seasons in parallel for show " + showId);
-                ExecutorService executor = Executors.newFixedThreadPool(Math.min(4, number_of_seasons));
+                ExecutorService executor = Executors.newFixedThreadPool(Math.min(2, number_of_seasons));
                 List<Future<ShowIdSeasonSearchResult>> seasonFutures = new ArrayList<>();
 
                 // Make variables effectively final for use in Callable
