@@ -180,6 +180,11 @@ public class ShowScraper4 extends BaseScraper2 {
         int showId = result.getId();
         String key = (getAllEpisodes ? "all" : (season != -1 ? "s" + season : "") + (episode != -1 ? "e" + episode : ""));
         String showKey = showId + "|" + key + "|" + resultLanguage;
+
+        // Parse season and episode numbers once to avoid repeated Integer.parseInt() calls
+        int requestedSeason = Integer.parseInt(result.getExtra().getString(ShowUtils.SEASON, "0"));
+        int requestedEpisode = Integer.parseInt(result.getExtra().getString(ShowUtils.EPNUM, "0"));
+
         log.debug("getDetailsInternal: " + result.getTitle() + "(" + showId + ") " + key + " in " + resultLanguage +
                 " (basicShow=" + basicShow + "/basicEpisode=" + basicEpisode + ")");
 
@@ -351,8 +356,8 @@ public class ShowScraper4 extends BaseScraper2 {
                         EpisodeTags episodeTag = new EpisodeTags();
                         episodeTag.setShowTags(showTags);
                         // even if this is nok record season and episode not to end up with s00e00
-                        episodeTag.setSeason(Integer.parseInt(result.getExtra().getString(ShowUtils.SEASON, "0")));
-                        episodeTag.setEpisode(Integer.parseInt(result.getExtra().getString(ShowUtils.EPNUM, "0")));
+                        episodeTag.setSeason(requestedSeason);
+                        episodeTag.setEpisode(requestedEpisode);
                         return new ScrapeDetailResult(episodeTag, true, null, showIdEpisode.status, showIdEpisode.reason);
                     }
                 } else {
@@ -375,8 +380,8 @@ public class ShowScraper4 extends BaseScraper2 {
                         EpisodeTags episodeTag = new EpisodeTags();
                         episodeTag.setShowTags(showTags);
                         // even if this is nok record season and episode not to end up with s00e00
-                        episodeTag.setSeason(Integer.parseInt(result.getExtra().getString(ShowUtils.SEASON, "0")));
-                        episodeTag.setEpisode(Integer.parseInt(result.getExtra().getString(ShowUtils.EPNUM, "0")));
+                        episodeTag.setSeason(requestedSeason);
+                        episodeTag.setEpisode(requestedEpisode);
                         log.warn("getDetailsInternal: scrapeStatus for season " + season + " is NOK!");
                         return new ScrapeDetailResult(episodeTag, true, null, showIdSeason.status, showIdSeason.reason);
                     }
@@ -420,10 +425,7 @@ public class ShowScraper4 extends BaseScraper2 {
             log.debug("getDetailsInternal: ScrapeStatus.ERROR_PARSER");
             return new ScrapeDetailResult(null, false, null, ScrapeStatus.ERROR_PARSER, null);
         }
-        EpisodeTags returnValue = buildTag(allEpisodes,
-                Integer.parseInt(result.getExtra().getString(ShowUtils.EPNUM, "0")),
-                Integer.parseInt(result.getExtra().getString(ShowUtils.SEASON, "0")),
-                showTags);
+        EpisodeTags returnValue = buildTag(allEpisodes, requestedEpisode, requestedSeason, showTags);
         log.debug("getDetailsInternal : ScrapeStatus.OKAY " + returnValue.getShowTitle() + " " + returnValue.getShowId() + " " + returnValue.getTitle());
         Bundle extraOut = buildBundle(allEpisodes, options);
         return new ScrapeDetailResult(returnValue, false, extraOut, ScrapeStatus.OKAY, null);
