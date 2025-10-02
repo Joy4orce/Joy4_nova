@@ -63,6 +63,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
 
@@ -289,19 +294,50 @@ public class ShowScraper4 extends BaseScraper2 {
             Map<Integer, TvSeason> tvSeasons = new HashMap<Integer, TvSeason>();
 
             if (getAllEpisodes) {
-                // get all episodes: loop over seasons and concatenate
+                // get all episodes: fetch seasons in parallel for better performance
+                log.debug("getDetailsInternal: fetching " + number_of_seasons + " seasons in parallel for show " + showId);
+                ExecutorService executor = Executors.newFixedThreadPool(Math.min(4, number_of_seasons));
+                List<Future<ShowIdSeasonSearchResult>> seasonFutures = new ArrayList<>();
+
+                // Submit all season fetch tasks
                 for (int s = 1; s <= number_of_seasons; s++) {
-                    log.debug("getDetailsInternal: get episodes for show " + showId + " s" + s);
-                    ShowIdSeasonSearchResult showIdSeason = ShowIdSeasonSearch.getSeasonShowResponse(showId, s, resultLanguage, adultScrape, tmdb);
-                    if (showIdSeason.status == ScrapeStatus.OKAY) {
-                        tvEpisodes.addAll(showIdSeason.tvSeason.episodes);
-                        if (! tvSeasons.containsKey(showIdSeason.tvSeason.season_number))
-                            tvSeasons.put(showIdSeason.tvSeason.season_number, showIdSeason.tvSeason);
-                    } else {
-                        log.warn("getDetailsInternal: scrapeStatus for s" + s + " is NOK!");
-                        return new ScrapeDetailResult(new EpisodeTags(), true, null, showIdSeason.status, showIdSeason.reason);
+                    final int seasonNum = s;
+                    seasonFutures.add(executor.submit(new Callable<ShowIdSeasonSearchResult>() {
+                        @Override
+                        public ShowIdSeasonSearchResult call() {
+                            log.debug("getDetailsInternal: parallel fetch for show " + showId + " s" + seasonNum);
+                            return ShowIdSeasonSearch.getSeasonShowResponse(showId, seasonNum, resultLanguage, adultScrape, tmdb);
+                        }
+                    }));
+                }
+
+                // Collect results in order
+                try {
+                    for (int i = 0; i < seasonFutures.size(); i++) {
+                        ShowIdSeasonSearchResult showIdSeason = seasonFutures.get(i).get();
+                        if (showIdSeason.status == ScrapeStatus.OKAY) {
+                            tvEpisodes.addAll(showIdSeason.tvSeason.episodes);
+                            tvSeasons.putIfAbsent(showIdSeason.tvSeason.season_number, showIdSeason.tvSeason);
+                        } else {
+                            log.warn("getDetailsInternal: scrapeStatus for s" + (i + 1) + " is NOK!");
+                            return new ScrapeDetailResult(new EpisodeTags(), true, null, showIdSeason.status, showIdSeason.reason);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("getDetailsInternal: parallel season fetch failed", e);
+                    return new ScrapeDetailResult(new EpisodeTags(), true, null, ScrapeStatus.ERROR_PARSER, e);
+                } finally {
+                    executor.shutdown();
+                    try {
+                        if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
+                            executor.shutdownNow();
+                        }
+                    } catch (InterruptedException e) {
+                        executor.shutdownNow();
+                        Thread.currentThread().interrupt();
                     }
                 }
+                log.debug("getDetailsInternal: parallel fetch completed for show " + showId + ", got " + tvEpisodes.size() + " episodes");
             } else {
                 if (episode != -1) {
                     // get a single episode: should never get there since it means that we cannot infer poster/backdrop from single episode (need season)
