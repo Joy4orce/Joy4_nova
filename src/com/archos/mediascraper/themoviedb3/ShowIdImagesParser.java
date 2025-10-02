@@ -58,7 +58,8 @@ public class ShowIdImagesParser {
             i += 1;
             if (season != null) {
                 log.debug("getResult: " + showTitle + " s" + i + " poster " + season.poster_path);
-                if (season.poster_path != "null") posters.add(genPoster(showTitle, tvShow.poster_path, language, false, context));
+                if (season.poster_path != null && !"null".equals(season.poster_path))
+                    posters.add(genPoster(showTitle, season.poster_path, language, false, context));
             }
         }
 
@@ -90,8 +91,8 @@ public class ShowIdImagesParser {
         }
 
         for(Pair<Image, String> backdrop : tempBackdrops) {
-            log.debug("getResult: generating ScraperImage for backdrop for " + showTitle + ", large=" + ScraperImage.TMPL + backdrop.first.file_path);
-            posters.add(genBackdrop(showTitle, backdrop.first.file_path, backdrop.second, context));
+            log.debug("getResult: generating ScraperImage for backdrop for " + showTitle + ", large=" + ScraperImage.TMBL + backdrop.first.file_path);
+            backdrops.add(genBackdrop(showTitle, backdrop.first.file_path, backdrop.second, context));
         }
 
         result.posters = posters;
