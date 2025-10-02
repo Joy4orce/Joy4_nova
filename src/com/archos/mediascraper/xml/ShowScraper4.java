@@ -373,8 +373,7 @@ public class ShowScraper4 extends BaseScraper2 {
                     ShowIdSeasonSearchResult showIdSeason = ShowIdSeasonSearch.getSeasonShowResponse(showId, season, resultLanguage, adultScrape, tmdb);
                     if (showIdSeason.status == ScrapeStatus.OKAY) {
                         tvEpisodes.addAll(showIdSeason.tvSeason.episodes);
-                        if (! tvSeasons.containsKey(showIdSeason.tvSeason.season_number))
-                            tvSeasons.put(showIdSeason.tvSeason.season_number, showIdSeason.tvSeason);
+                        tvSeasons.putIfAbsent(showIdSeason.tvSeason.season_number, showIdSeason.tvSeason);
                     } else {
                         // save showtag even if episodetag is empty
                         EpisodeTags episodeTag = new EpisodeTags();
