@@ -75,14 +75,25 @@ public class ShowScraper4 extends BaseScraper2 {
 
     private static final Logger log = LoggerFactory.getLogger(ShowScraper4.class);
 
+    // Wrapper class to cache show metadata including number of seasons
+    private static class ShowMetadata {
+        ShowTags showTags;
+        int numberOfSeasons;
+
+        ShowMetadata(ShowTags showTags, int numberOfSeasons) {
+            this.showTags = showTags;
+            this.numberOfSeasons = numberOfSeasons;
+        }
+    }
+
     // Benchmarks tells that with tv shows sorted in folders, size of 100 or 10 or even provides the same cacheHits on fake collection of 30k episodes, 250 shows
     private final static LruCache<String, Map<String, EpisodeTags>> sEpisodeCache = new LruCache<>(100);
 
     // Cache season poster mappings to avoid repeated DB queries when scraping multiple episodes from same show
     private final static LruCache<String, SparseArray<ScraperImage>> sSeasonPosterCache = new LruCache<>(50);
 
-    // Cache show metadata (ShowTags) to avoid redundant API calls when scraping multiple episodes/seasons from same show
-    private final static LruCache<String, ShowTags> sShowMetadataCache = new LruCache<>(200);
+    // Cache show metadata (ShowTags + number_of_seasons) to avoid redundant API calls when scraping multiple episodes/seasons from same show
+    private final static LruCache<String, ShowMetadata> sShowMetadataCache = new LruCache<>(200);
 
     // Add caching for OkHttpClient so that queries for episodes from a same tvshow will get a boost in resolution
     static Cache cache;
@@ -199,10 +210,10 @@ public class ShowScraper4 extends BaseScraper2 {
 
                 // Check metadata cache first
                 String metadataCacheKey = showId + "|" + resultLanguage;
-                showTags = sShowMetadataCache.get(metadataCacheKey);
+                ShowMetadata cachedMetadata = sShowMetadataCache.get(metadataCacheKey);
                 ShowIdTvSearchResult showIdTvSearchResult = null;
 
-                if (showTags == null) {
+                if (cachedMetadata == null) {
                     log.debug("getDetailsInternal: show metadata cache miss, fetching from API");
                     // query first tmdb
                     showIdTvSearchResult = ShowIdTvSearch.getTvShowResponse(showId, resultLanguage, adultScrape, tmdb);
@@ -249,17 +260,15 @@ public class ShowScraper4 extends BaseScraper2 {
                         doRebuildShowTag = true;
                     }
 
-                    // Cache the show metadata for future scrapes
-                    sShowMetadataCache.put(metadataCacheKey, showTags);
-                    log.debug("getDetailsInternal: cached show metadata for show " + showId);
+                    // Cache the show metadata (including number_of_seasons) for future scrapes
+                    sShowMetadataCache.put(metadataCacheKey, new ShowMetadata(showTags, number_of_seasons));
+                    log.debug("getDetailsInternal: cached show metadata for show " + showId + " with " + number_of_seasons + " seasons");
                 } else {
                     log.debug("getDetailsInternal: show metadata cache hit for show " + showId);
-                    // Still need number_of_seasons for getAllEpisodes case
-                    if (getAllEpisodes) {
-                        showIdTvSearchResult = ShowIdTvSearch.getTvShowResponse(showId, resultLanguage, adultScrape, tmdb);
-                        if (showIdTvSearchResult.status == ScrapeStatus.OKAY)
-                            number_of_seasons = showIdTvSearchResult.tvShow.number_of_seasons;
-                    }
+                    // Extract cached data
+                    showTags = cachedMetadata.showTags;
+                    number_of_seasons = cachedMetadata.numberOfSeasons;
+                    log.debug("getDetailsInternal: using cached number_of_seasons=" + number_of_seasons);
                 }
             } else {
                 doRebuildShowTag = true;
