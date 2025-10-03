@@ -33,6 +33,10 @@ public class LibAvos {
     private static int sInitState = 0;
     private static final String NO_NEON_SUFFIX = "_no_neon";
 
+    public interface AudioTransformer {
+	    float[] transformAudio(float[] samples);
+    }
+
     static void installExtLibs(Context ctx, boolean armHasNeon) {
         File extFilesDir = ctx.getExternalFilesDir(null);
         if (extFilesDir == null)
@@ -316,6 +320,10 @@ public class LibAvos {
         nativeSetDownmix(downmix);
     }
 
+    public static void setAudioTransformer(AudioTransformer transformer) {
+        nativeSetAudioTransformer(transformer);
+    }
+
     private static native void nativeInit(String pkgName, boolean isPluginAvailable);
 
     private static native void nativeDebugInit();
@@ -351,6 +359,8 @@ public class LibAvos {
     private static native void nativeSetStreamMaxIframeSize(int size);
 
     private static native void nativeSetDownmix(int downmix);
+
+    private static native void nativeSetAudioTransformer(AudioTransformer transformer);
 
     // mp decoder
     public static final int MP_DECODER_ANY = 0;
