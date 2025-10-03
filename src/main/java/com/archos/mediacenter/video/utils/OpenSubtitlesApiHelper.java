@@ -138,6 +138,22 @@ public class OpenSubtitlesApiHelper {
         return remainingDownloads;
     }
 
+    public static String getApiKey() {
+        return apiKey;
+    }
+
+    public static String getAuthToken() {
+        return authToken;
+    }
+
+    public static boolean isAuthenticated() {
+        return authenticated;
+    }
+
+    public static String getUserAgent() {
+        return USER_AGENT_VALUE;
+    }
+
     private static void invalidToken() {
         authenticated = false;
         authTokenValid = false;

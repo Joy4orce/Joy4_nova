@@ -568,7 +568,41 @@ public class SubtitlesDownloaderActivity2 extends AppCompatActivity {
             HttpURLConnection urlConnection = null;
             try {
                 url  = new URL(subUrl);
+                log.debug("downloadSubtitles: created URL, opening connection");
                 urlConnection = (HttpURLConnection) url.openConnection();
+                log.debug("downloadSubtitles: connection opened, getting headers");
+                // Set required OpenSubtitles headers
+                String userAgent = OpenSubtitlesApiHelper.getUserAgent();
+                log.debug("downloadSubtitles: userAgent=" + userAgent);
+                String apiKey = OpenSubtitlesApiHelper.getApiKey();
+                log.debug("downloadSubtitles: apiKey=" + apiKey);
+                if (userAgent != null) {
+                    urlConnection.setRequestProperty("User-Agent", userAgent);
+                    log.debug("downloadSubtitles: set User-Agent header");
+                }
+                if (apiKey != null) {
+                    urlConnection.setRequestProperty("Api-Key", apiKey);
+                    log.debug("downloadSubtitles: set Api-Key header");
+                }
+                if (OpenSubtitlesApiHelper.isAuthenticated()) {
+                    String authToken = OpenSubtitlesApiHelper.getAuthToken();
+                    if (authToken != null) {
+                        urlConnection.setRequestProperty("Authorization", "Bearer " + authToken);
+                        log.debug("downloadSubtitles: set Authorization header");
+                    }
+                }
+                log.debug("downloadSubtitles: headers set, getting response code");
+                int responseCode = urlConnection.getResponseCode();
+                log.debug("downloadSubtitles: HTTP response code=" + responseCode + " for URL=" + subUrl);
+                if (responseCode != HttpURLConnection.HTTP_OK) {
+                    log.error("downloadSubtitles: HTTP error " + responseCode + " - " + urlConnection.getResponseMessage());
+                    throw new IOException("HTTP error code: " + responseCode);
+                }
+
+                // Only get the input stream and create the file if response was OK
+                in = urlConnection.getInputStream();
+                log.debug("downloadSubtitles: successfully got input stream, will now create/write subtitle file");
+
                 // We get the first matching subtitle
                 FileEditor editor = FileEditorFactory.getFileEditorForUrl(Uri.parse(srtURl), SubtitlesDownloaderActivity2.this);
                 if(editor.exists()) {
@@ -576,15 +610,16 @@ public class SubtitlesDownloaderActivity2 extends AppCompatActivity {
                     editor.delete();//delete first
                 }
                 f = editor.getOutputStream();
-
-                in = urlConnection.getInputStream();
                 int l = 0;
+                int totalBytesWritten = 0;
                 byte[] buffer = new byte[1024];
                 while ((l = in.read(buffer)) != -1) {
                     f.write(buffer, 0, l);
+                    totalBytesWritten += l;
                 }
                 // f needs to be closed before the copy otherwise STATUS_SHARING_VIOLATION with smbj
                 f.close();
+                log.debug("downloadSubtitles: successfully wrote " + totalBytesWritten + " bytes to " + srtURl);
                 if(fileUrl != null) {
                     ContentResolver resolver = getContentResolver();
                     VideoDbInfo videoDbInfo = VideoDbInfo.fromUri(resolver, Uri.parse(fileUrl));
@@ -614,10 +649,13 @@ public class SubtitlesDownloaderActivity2 extends AppCompatActivity {
                 }
             } catch (FileNotFoundException e) {
                 log.error("downloadSubtitles: caught FileNotFoundException", e);
+                displayToast(getString(R.string.dialog_subloader_fails) + ": " + e.getMessage());
             } catch (IOException e) {
                 log.error("downloadSubtitles: caught IOException", e);
+                displayToast(getString(R.string.dialog_subloader_fails) + ": " + e.getMessage());
             } catch (Throwable e){ //for various service outages
                 log.error("downloadSubtitles: caught Throwable", e);
+                displayToast(getString(R.string.dialog_subloader_fails) + ": " + e.getMessage());
             }finally{
                 MediaUtils.closeSilently(f);
                 MediaUtils.closeSilently(in);
