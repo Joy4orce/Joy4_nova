@@ -57,12 +57,15 @@ public abstract class VideoLoader extends CursorLoader implements CompatAndSDKCu
     // for all All*GridFragment and BrowserAll* and *Fragment
     public static final boolean GRIDVIDEO_THROTTLE = true;
     public static final int GRIDVIDEO_THROTTLE_DELAY = 60000; // 1m
-    // for MainFragment line
-    public static final boolean ALLVIDEO_THROTTLE = false;
-    public static final int ALLVIDEO_THROTTLE_DELAY = 5000; // 5s
+    // for MainFragment line - enabled to prevent SQLite contention during scanning
+    public static final boolean ALLVIDEO_THROTTLE = true;
+    public static final int ALLVIDEO_THROTTLE_DELAY = 1000; // 1s - reduces database queries during scanning
     // for channels
     public static final boolean CHANNEL_THROTTLE = false;
     public static final int CHANNEL_THROTTLE_DELAY = 60000; // 1m
+    // for the non scraped video count in MainFragment
+    public static final boolean NONSCRAPECOUNT_THROTTLE = true;
+    public static final int NONSCRAPECOUNT_THROTTLE_DELAY = 1000; // 1s
 
     // cf. https://github.com/nova-video-player/aos-AVP/issues/141
     // For ref sake currently ModernAsyncTask default cursorLoader executor is ThreadPoolExecutor(5, 128, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(10), tocheck)
@@ -76,8 +79,12 @@ public abstract class VideoLoader extends CursorLoader implements CompatAndSDKCu
     //private final static Executor videoLoaderExecutor = new ThreadPoolExecutor(1, 1, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(5200));
     //private final static Executor videoLoaderExecutor = new ThreadPoolExecutor(1, 100, 20, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(256));
 
-    // 4 threads (not to overload SQLExecutor) but to speed things up
+    // 4 threads (not to overload SQLExecutor) but to speed things up                                                                                                                                    ╎│
     private final static Executor videoLoaderExecutor = new ThreadPoolExecutor(4, 4, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(256));
+    // 1 thread to avoid database contention during scraping (SQLite error code 9)
+    // Reduced from 4 to 1 to prevent parallel loaders from conflicting with AutoScrapeService writes
+    //
+    // private final static Executor videoLoaderExecutor = new ThreadPoolExecutor(1, 1, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(256));
     // 1 thread to linearly display each line per category in VideoBy
     protected final static Executor videoSelectionLoaderExecutor = new ThreadPoolExecutor(1, 1, 10, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(5200));
 

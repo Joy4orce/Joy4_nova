@@ -198,6 +198,15 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
 
     private boolean restartLastAddedLoader, restartLastPlayedLoader, restartMoviesLoader, restartTvshowsLoader, restartAnimesLoader, restartWatchingUpNextLoader;
 
+    // Track initial load completion for each loader to allow UI population before blocking during scanning
+    private boolean mWatchingUpNextInitialLoadComplete = false;
+    private boolean mLastAddedInitialLoadComplete = false;
+    private boolean mLastPlayedInitialLoadComplete = false;
+    private boolean mMoviesInitialLoadComplete = false;
+    private boolean mAnimesInitialLoadComplete = false;
+    private boolean mTvshowsInitialLoadComplete = false;
+    private boolean mNonScrapedVideosInitialLoadComplete = false;
+
     private Box mNonScrapedVideosItem;
 
     private SharedPreferences mPrefs;
@@ -1256,7 +1265,7 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
                     else
                         return new AnimesNShowsLoader(mActivity, args.getString("sort"), true, VideoLoader.ALLVIDEO_THROTTLE, VideoLoader.ALLVIDEO_THROTTLE_DELAY);
                 } else {
-                    if (args == null) return new AnimesLoader(mActivity, true);
+                    if (args == null) return new AnimesLoader(mActivity, true, VideoLoader.ALLVIDEO_THROTTLE, VideoLoader.ALLVIDEO_THROTTLE_DELAY);
                     else
                         return new AnimesLoader(mActivity, args.getString("sort"), true, true, VideoLoader.ALLVIDEO_THROTTLE, VideoLoader.ALLVIDEO_THROTTLE_DELAY);
                 }
@@ -1276,45 +1285,104 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
         if (updateActivity("onLoadFinished") == null) return;
         boolean scanningOnGoing = NetworkScannerReceiver.isScannerWorking() || AutoScrapeService.isScraping() || ImportState.VIDEO.isInitialImport();
         log.debug("onLoadFinished: cursor id=" + cursorLoader.getId() + ", scanningOnGoing=" + scanningOnGoing);
+
+        // Check if this loader has completed its initial load
+        boolean isInitialLoadComplete = false;
+        switch (cursorLoader.getId()) {
+            case LOADER_ID_WATCHING_UP_NEXT -> isInitialLoadComplete = mWatchingUpNextInitialLoadComplete;
+            case LOADER_ID_LAST_ADDED -> isInitialLoadComplete = mLastAddedInitialLoadComplete;
+            case LOADER_ID_LAST_PLAYED -> isInitialLoadComplete = mLastPlayedInitialLoadComplete;
+            case LOADER_ID_ALL_MOVIES -> isInitialLoadComplete = mMoviesInitialLoadComplete;
+            case LOADER_ID_ALL_ANIMES -> isInitialLoadComplete = mAnimesInitialLoadComplete;
+            case LOADER_ID_ALL_TV_SHOWS -> isInitialLoadComplete = mTvshowsInitialLoadComplete;
+            case LOADER_ID_NON_SCRAPED_VIDEOS_COUNT -> isInitialLoadComplete = mNonScrapedVideosInitialLoadComplete;
+        }
+
         if (cursor != null && ! cursor.isClosed()) { // seen on sentry sometimes cursor is already closed
+            // Skip UI updates during scanning/scraping ONLY after initial load to prevent SQLite contention
+            // But still swap cursors to prevent closed cursor errors
+            boolean skipUIUpdate = scanningOnGoing && isInitialLoadComplete;
+
             switch (cursorLoader.getId()) {
                 case LOADER_ID_WATCHING_UP_NEXT -> {
-                    if (mShowWatchingUpNextRow && mWatchingUpNextInitFocus == InitFocus.NOT_FOCUSED)
-                        mWatchingUpNextInitFocus = cursor.getCount() > 0 ? InitFocus.NEED_FOCUS : InitFocus.NO_NEED_FOCUS;
-                    log.debug("onLoadFinished: WatchingUpNext cursor ready with " + cursor.getCount() + " entries and " + mWatchingUpNextInitFocus + ", updating row");
-                    if (mShowWatchingUpNextRow) updateWatchingUpNextRow(cursor);
+                    if (!skipUIUpdate) {
+                        if (mShowWatchingUpNextRow && mWatchingUpNextInitFocus == InitFocus.NOT_FOCUSED)
+                            mWatchingUpNextInitFocus = cursor.getCount() > 0 ? InitFocus.NEED_FOCUS : InitFocus.NO_NEED_FOCUS;
+                        log.debug("onLoadFinished: WatchingUpNext cursor ready with " + cursor.getCount() + " entries and " + mWatchingUpNextInitFocus + ", updating row");
+                        if (mShowWatchingUpNextRow) updateWatchingUpNextRow(cursor);
+                    } else {
+                        log.debug("onLoadFinished: WatchingUpNext skipping UI update during scanning, but swapping cursor");
+                        if (mWatchingUpNextAdapter != null) mWatchingUpNextAdapter.changeCursor(cursor);
+                    }
+                    mWatchingUpNextInitialLoadComplete = true;
                 }
                 case LOADER_ID_LAST_ADDED -> {
-                    if (mShowLastAddedRow && mLastAddedInitFocus == InitFocus.NOT_FOCUSED)
-                        mLastAddedInitFocus = cursor.getCount() > 0 ? InitFocus.NEED_FOCUS : InitFocus.NO_NEED_FOCUS;
-                    log.debug("onLoadFinished: LastAdded cursor ready with " + cursor.getCount() + " entries and " + mLastAddedInitFocus + ", updating row");
-                    if (mShowLastAddedRow) updateLastAddedRow(cursor);
+                    if (!skipUIUpdate) {
+                        if (mShowLastAddedRow && mLastAddedInitFocus == InitFocus.NOT_FOCUSED)
+                            mLastAddedInitFocus = cursor.getCount() > 0 ? InitFocus.NEED_FOCUS : InitFocus.NO_NEED_FOCUS;
+                        log.debug("onLoadFinished: LastAdded cursor ready with " + cursor.getCount() + " entries and " + mLastAddedInitFocus + ", updating row");
+                        if (mShowLastAddedRow) updateLastAddedRow(cursor);
+                    } else {
+                        log.debug("onLoadFinished: LastAdded skipping UI update during scanning, but swapping cursor");
+                        if (mLastAddedAdapter != null) mLastAddedAdapter.changeCursor(cursor);
+                    }
+                    mLastAddedInitialLoadComplete = true;
                 }
                 case LOADER_ID_LAST_PLAYED -> {
-                    if (mShowLastPlayedRow && mLastPlayedInitFocus == InitFocus.NOT_FOCUSED)
-                        mLastPlayedInitFocus = cursor.getCount() > 0 ? InitFocus.NEED_FOCUS : InitFocus.NO_NEED_FOCUS;
-                    log.debug("onLoadFinished: LastPlayed cursor ready with " + cursor.getCount() + " entries and " + mLastAddedInitFocus + ", updating row");
-                    if (mShowLastPlayedRow) updateLastPlayedRow(cursor);
+                    if (!skipUIUpdate) {
+                        if (mShowLastPlayedRow && mLastPlayedInitFocus == InitFocus.NOT_FOCUSED)
+                            mLastPlayedInitFocus = cursor.getCount() > 0 ? InitFocus.NEED_FOCUS : InitFocus.NO_NEED_FOCUS;
+                        log.debug("onLoadFinished: LastPlayed cursor ready with " + cursor.getCount() + " entries and " + mLastAddedInitFocus + ", updating row");
+                        if (mShowLastPlayedRow) updateLastPlayedRow(cursor);
+                    } else {
+                        log.debug("onLoadFinished: LastPlayed skipping UI update during scanning, but swapping cursor");
+                        if (mLastPlayedAdapter != null) mLastPlayedAdapter.changeCursor(cursor);
+                    }
+                    mLastPlayedInitialLoadComplete = true;
                 }
                 case LOADER_ID_ALL_MOVIES -> {
-                    log.debug("onLoadFinished: AllMovies cursor ready with " + cursor.getCount() + " entries, updating row/box");
-                    // cannot use if (isCursorCountChanged(mLastAddedAdapter.getCursor(), cursor)) because when row is full it is 100 always
-                    if (mShowMoviesRow) updateMoviesRow(cursor, false);
+                    if (!skipUIUpdate) {
+                        log.debug("onLoadFinished: AllMovies cursor ready with " + cursor.getCount() + " entries, updating row/box");
+                        // cannot use if (isCursorCountChanged(mLastAddedAdapter.getCursor(), cursor)) because when row is full it is 100 always
+                        if (mShowMoviesRow) updateMoviesRow(cursor, false);
+                    } else {
+                        log.debug("onLoadFinished: AllMovies skipping UI update during scanning, but swapping cursor");
+                        if (mMoviesAdapter != null) mMoviesAdapter.changeCursor(cursor);
+                    }
+                    mMoviesInitialLoadComplete = true;
                 }
                 case LOADER_ID_ALL_TV_SHOWS -> {
-                    log.debug("onLoadFinished: AllTvShows cursor ready with " + cursor.getCount() + " entries, updating row/box");
-                    if (mShowTvshowsRow) updateTvShowsRow(cursor, false);
+                    if (!skipUIUpdate) {
+                        log.debug("onLoadFinished: AllTvShows cursor ready with " + cursor.getCount() + " entries, updating row/box");
+                        if (mShowTvshowsRow) updateTvShowsRow(cursor, false);
+                    } else {
+                        log.debug("onLoadFinished: AllTvShows skipping UI update during scanning, but swapping cursor");
+                        if (mTvshowsAdapter != null) mTvshowsAdapter.changeCursor(cursor);
+                    }
+                    mTvshowsInitialLoadComplete = true;
                 }
                 case LOADER_ID_ALL_ANIMES -> {
-                    log.debug("onLoadFinished: AllAnimes cursor ready with " + cursor.getCount() + " entries, updating row/box");
-                    if (mShowAnimesRow && mSeparateAnimeFromShowMovie)
-                        updateAnimesRow(cursor, false);
+                    if (!skipUIUpdate) {
+                        log.debug("onLoadFinished: AllAnimes cursor ready with " + cursor.getCount() + " entries, updating row/box");
+                        if (mShowAnimesRow && mSeparateAnimeFromShowMovie)
+                            updateAnimesRow(cursor, false);
+                    } else {
+                        log.debug("onLoadFinished: AllAnimes skipping UI update during scanning, but swapping cursor");
+                        if (mAnimesAdapter != null) mAnimesAdapter.changeCursor(cursor);
+                    }
+                    mAnimesInitialLoadComplete = true;
                 }
                 case LOADER_ID_NON_SCRAPED_VIDEOS_COUNT -> {
-                    log.debug("onLoadFinished: NonScrapedVideos cursor ready with " + cursor.getCount());
-                    // count works here because it lists all
-                    if (isCursorCountChanged(mLastAddedAdapter.getCursor(), cursor))
-                        updateNonScrapedVideosVisibility(cursor);
+                    if (!skipUIUpdate) {
+                        log.debug("onLoadFinished: NonScrapedVideos cursor ready with " + cursor.getCount());
+                        // count works here because it lists all
+                        if (isCursorCountChanged(mLastAddedAdapter.getCursor(), cursor))
+                            updateNonScrapedVideosVisibility(cursor);
+                    } else {
+                        log.debug("onLoadFinished: NonScrapedVideos skipping UI update during scanning");
+                        // This loader doesn't use a cursor adapter, just skip entirely
+                    }
+                    mNonScrapedVideosInitialLoadComplete = true;
                 }
             }
             checkInitFocus();
