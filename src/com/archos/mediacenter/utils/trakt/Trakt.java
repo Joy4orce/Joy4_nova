@@ -78,7 +78,6 @@ public class Trakt {
     public static final String TRAKT_ISSUE_REFRESH_TOKEN = "TRAKT_ISSUE_REFRESH_TOKEN";
     private static String API_KEY;
     private static String API_SECRET;
-    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZZZZ", Locale.US);
     public static final int SCROBBLE_THRESHOLD = 90;
     // playback history size to synchronize: 50 is enough (it is anyway capped at 1k and incurs a huge processing delay)
     public static final int PLAYBACK_HISTORY_SIZE = 100;
@@ -327,13 +326,16 @@ public class Trakt {
         return result;
     }
 
-    public static String getDateFormat(long currentTimeSecond) { // return GMT time based on local time TZ epoch
-        // all currentTimeSecond are computed as since January 1, 1970, 00:00:00 GMT, reminder UTC=GMT
-        // need to align on current timeZone i.e. adjust by the difference with current timezone and GMT
-        int millisecondsGmtRawOffset = TimeZone.getTimeZone("GMT").getRawOffset(); // compared to UTC
-        int millisecondsLocaleRawOffset = TimeZone.getDefault().getRawOffset(); // compared to UTC
-        long millisecondsOffset = millisecondsGmtRawOffset - millisecondsLocaleRawOffset; // realign local TZ to GMT
-        return currentTimeSecond > 0 ? DATE_FORMAT.format(new Date(currentTimeSecond * 1000L + millisecondsOffset)) : null;
+    public static String getDateFormat(long currentTimeSecond) { // return UTC/GMT time from epoch seconds
+        // currentTimeSecond is UTC epoch (seconds since January 1, 1970, 00:00:00 GMT)
+        // Trakt API expects ISO 8601 format in UTC timezone
+        if (currentTimeSecond <= 0) {
+            return null;
+        }
+        // Convert epoch seconds directly to UTC OffsetDateTime and format as ISO 8601
+        return Instant.ofEpochSecond(currentTimeSecond)
+                .atOffset(ZoneOffset.UTC)
+                .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
     public Result markAs(final String action, final SyncItems param, final boolean isShow, final int trial){
