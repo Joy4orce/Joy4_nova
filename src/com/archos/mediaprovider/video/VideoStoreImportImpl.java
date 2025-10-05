@@ -1047,13 +1047,23 @@ public class VideoStoreImportImpl {
             unmountedVolumePaths.add(primaryPath);
         }
 
+        // Build list of all currently mounted external volumes once
+        List<String> allMountedExternal = new ArrayList<>();
+        allMountedExternal.addAll(storageManager.getExtSdcards());
+        allMountedExternal.addAll(storageManager.getExtUsbStorages());
+        allMountedExternal.addAll(storageManager.getExtOtherStorages());
+
         // Check all external volumes and detect recently mounted ones
-        checkVolumeStatesWithRecentMount(storageManager.getExtSdcards(), mountedVolumePaths, unmountedVolumePaths, recentlyMountedVolumePaths);
-        checkVolumeStatesWithRecentMount(storageManager.getExtUsbStorages(), mountedVolumePaths, unmountedVolumePaths, recentlyMountedVolumePaths);
-        checkVolumeStatesWithRecentMount(storageManager.getExtOtherStorages(), mountedVolumePaths, unmountedVolumePaths, recentlyMountedVolumePaths);
+        checkVolumeStatesWithRecentMount(storageManager.getExtSdcards(), allMountedExternal, mountedVolumePaths, unmountedVolumePaths, recentlyMountedVolumePaths);
+        checkVolumeStatesWithRecentMount(storageManager.getExtUsbStorages(), allMountedExternal, mountedVolumePaths, unmountedVolumePaths, recentlyMountedVolumePaths);
+        checkVolumeStatesWithRecentMount(storageManager.getExtOtherStorages(), allMountedExternal, mountedVolumePaths, unmountedVolumePaths, recentlyMountedVolumePaths);
+
+        // Also check for volumes in database that are no longer mounted (e.g., USB removed while app was in background)
+        checkDatabaseForUnmountedVolumes(mountedVolumePaths, unmountedVolumePaths);
 
         log.debug("updateVolumeHiddenStatesByPath: mounted={}, unmounted={}, recentlyMounted={}",
                   mountedVolumePaths, unmountedVolumePaths, recentlyMountedVolumePaths);
+        log.debug("updateVolumeHiddenStatesByPath: ExtStorageManager USB storages: {}", storageManager.getExtUsbStorages());
 
         long now = System.currentTimeMillis() / 1000;
 
@@ -1082,15 +1092,6 @@ public class VideoStoreImportImpl {
         }
     }
 
-    private void checkVolumeStates(List<String> volumePaths, List<String> mounted, List<String> unmounted) {
-        for (String path : volumePaths) {
-            if (isMountedReadable(ExtStorageManager.getVolumeState(path))) {
-                mounted.add(path);
-            } else {
-                unmounted.add(path);
-            }
-        }
-    }
 
     private void hideFilesFromVolumes(List<String> volumePaths, long timestamp) {
         if (volumePaths.isEmpty()) return;
@@ -1192,6 +1193,75 @@ public class VideoStoreImportImpl {
             offset += WINDOW_SIZE;
         }
         log.debug("unhideFilesFromVolumes: unhidden {} files from mounted volumes", totalUnhidden);
+    }
+
+    private void checkDatabaseForUnmountedVolumes(List<String> mountedVolumePaths, List<String> unmountedVolumePaths) {
+        // Query database for distinct volume paths from file paths
+        // Only check files that are currently visible (volume_hidden = 0)
+        log.debug("checkDatabaseForUnmountedVolumes: checking database for unmounted volumes");
+        log.debug("checkDatabaseForUnmountedVolumes: currently mounted: {}", mountedVolumePaths);
+        Cursor c = null;
+        try {
+            // Get all distinct file paths and extract volume paths in Java (safer than complex SQL)
+            c = mCr.query(VideoStoreInternal.FILES_IMPORT,
+                    new String[]{"DISTINCT _data"},
+                    "volume_hidden = 0 AND _data LIKE '/storage/%'",
+                    null,
+                    null);
+
+            java.util.Set<String> volumePaths = new java.util.HashSet<>();
+            if (c != null) {
+                log.debug("checkDatabaseForUnmountedVolumes: found {} distinct file paths in database", c.getCount());
+                while (c.moveToNext()) {
+                    String filePath = c.getString(0);
+                    if (filePath != null && filePath.startsWith("/storage/")) {
+                        // Extract volume path: /storage/XXXXX or /storage/emulated/0
+                        String[] parts = filePath.split("/");
+                        if (parts.length >= 3) {
+                            String volumePath;
+                            if (parts[2].equals("emulated") && parts.length >= 4) {
+                                // Handle /storage/emulated/0
+                                volumePath = "/storage/emulated/" + parts[3];
+                            } else {
+                                // Handle /storage/39F3-140A
+                                volumePath = "/storage/" + parts[2];
+                            }
+                            volumePaths.add(volumePath);
+                        }
+                    }
+                }
+            }
+
+            // Build list of all currently mounted volumes from ExtStorageManager
+            ExtStorageManager storageManager = ExtStorageManager.getExtStorageManager();
+            List<String> allCurrentlyMounted = new ArrayList<>();
+            allCurrentlyMounted.addAll(storageManager.getExtSdcards());
+            allCurrentlyMounted.addAll(storageManager.getExtUsbStorages());
+            allCurrentlyMounted.addAll(storageManager.getExtOtherStorages());
+            allCurrentlyMounted.add(Environment.getExternalStorageDirectory().getPath()); // Primary storage
+
+            // Check each volume path to see if it's unmounted
+            log.debug("checkDatabaseForUnmountedVolumes: extracted {} distinct volume paths from database", volumePaths.size());
+            for (String volumePath : volumePaths) {
+                log.debug("checkDatabaseForUnmountedVolumes: checking volume {}", volumePath);
+                // If this volume is not in mounted list and not already in unmounted list, check if it's really unmounted
+                if (!mountedVolumePaths.contains(volumePath) && !unmountedVolumePaths.contains(volumePath)) {
+                    // Check if volume is in ExtStorageManager's current mounted list
+                    boolean isMounted = allCurrentlyMounted.contains(volumePath);
+                    log.debug("checkDatabaseForUnmountedVolumes: volume {} isMounted={}", volumePath, isMounted);
+                    if (!isMounted) {
+                        log.debug("checkDatabaseForUnmountedVolumes: found unmounted volume in database: {}", volumePath);
+                        unmountedVolumePaths.add(volumePath);
+                    }
+                } else {
+                    log.debug("checkDatabaseForUnmountedVolumes: volume {} is in mounted list or already in unmounted list", volumePath);
+                }
+            }
+        } catch (Exception e) {
+            log.error("checkDatabaseForUnmountedVolumes: error querying database", e);
+        } finally {
+            if (c != null) c.close();
+        }
     }
 
     private void hideDeletedFilesFromMountedVolumes(List<String> volumePaths, String existingFiles, long timestamp) {
@@ -1300,11 +1370,20 @@ public class VideoStoreImportImpl {
 
     /**
      * Enhanced volume state checking that detects recently mounted volumes
+     * @param volumePaths List of volume paths to check
+     * @param allMountedVolumes Pre-built list of all currently mounted volumes (for efficiency)
+     * @param mounted Output list for mounted volumes
+     * @param unmounted Output list for unmounted volumes
+     * @param recentlyMounted Output list for volumes that were recently hidden and are now mounted
      */
-    private void checkVolumeStatesWithRecentMount(List<String> volumePaths, List<String> mounted,
-                                                List<String> unmounted, List<String> recentlyMounted) {
+    private void checkVolumeStatesWithRecentMount(List<String> volumePaths, List<String> allMountedVolumes,
+                                                List<String> mounted, List<String> unmounted,
+                                                List<String> recentlyMounted) {
         for (String path : volumePaths) {
-            if (isMountedReadable(ExtStorageManager.getVolumeState(path))) {
+            // Check if volume is in ExtStorageManager's mounted lists
+            boolean isMounted = allMountedVolumes.contains(path);
+            log.debug("checkVolumeStatesWithRecentMount: path={}, isMounted={}", path, isMounted);
+            if (isMounted) {
                 mounted.add(path);
                 // Check if this volume was recently hidden (within last 5 minutes)
                 if (wasVolumeRecentlyHidden(path)) {

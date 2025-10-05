@@ -179,8 +179,6 @@ public class VideoStoreImportService extends Service implements Handler.Callback
         ArchosUtils.addBreadcrumb(SentryLevel.INFO, "VideoStoreImportService.onCreate", "created notification + startService " + NOTIFICATION_ID + " notification null? " + (n == null));
         ServiceCompat.startForeground(this, NOTIFICATION_ID, n,
                 (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
-        // Register as a lifecycle observer
-        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
         // importer logic
         mImporter = new VideoStoreImportImpl(this);
         // setup background worker thread
@@ -227,6 +225,10 @@ public class VideoStoreImportService extends Service implements Handler.Callback
             // Continue without MediaStore observation - the service will still function
             // but won't automatically detect external changes to the MediaStore database
         }
+
+        // Register as a lifecycle observer AFTER all initialization is complete
+        // This prevents onStart() from being called before mHandler is created
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
     }
 
     @Override
@@ -436,12 +438,11 @@ public class VideoStoreImportService extends Service implements Handler.Callback
                 mHandler.obtainMessage(MESSAGE_KILL, DONT_KILL_SELF, msg.arg2).sendToTarget();
                 break;
             case MESSAGE_HIDE_VOLUME:
-                log.debug("handleMessage: MESSAGE_HIDE_VOLUME");
-                // insert the storage_id that's to be hidden into the special trigger view thingy
-                ContentValues cv = new ContentValues();
-                cv.put(VideoStore.Files.FileColumns.STORAGE_ID, String.valueOf(msg.arg2));
-                VideoStoreImportService.this.getContentResolver().insert(VideoStoreInternal.HIDE_VOLUME, cv);
-                mHandler.obtainMessage(MESSAGE_KILL, DONT_KILL_SELF, msg.arg2).sendToTarget();
+                log.debug("handleMessage: MESSAGE_HIDE_VOLUME storageId={}", msg.arg2);
+                // Trigger import to hide files using path-based volume checking
+                // This ensures volume state is properly checked and files are hidden
+                // while other mounted volumes remain visible
+                mHandler.obtainMessage(MESSAGE_IMPORT_INCR, DONT_KILL_SELF, msg.arg2).sendToTarget();
                 break;
             case MESSAGE_VOLUME_MOUNTED:
                 log.debug("handleMessage: MESSAGE_VOLUME_MOUNTED storageId={}", msg.arg2);
@@ -490,7 +491,14 @@ public class VideoStoreImportService extends Service implements Handler.Callback
         Intent intent = new Intent(ArchosMediaIntent.ACTION_VIDEO_SCANNER_SCAN_FINISHED, null);
         intent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
         sendBroadcast(intent);
-        
+
+        // Explicitly start AutoScrapeService after scan completes to ensure scraping happens
+        // This is needed because the ContentObserver may not reliably trigger during batch inserts
+        if (com.archos.mediascraper.AutoScrapeService.isEnable(this)) {
+            log.debug("doImport: starting AutoScrapeService after scan completion");
+            com.archos.mediascraper.AutoScrapeService.startService(this);
+        }
+
         // Exit foreground mode now that import is complete
         log.debug("doImport: CALLING stopForeground(true) to exit foreground mode and remove notification");
         stopForeground(true);
@@ -746,12 +754,15 @@ public class VideoStoreImportService extends Service implements Handler.Callback
 
     private void cleanup() {
         log.debug("cleanup");
-        
+
+        // Remove lifecycle observer to prevent callbacks to destroyed service
+        ProcessLifecycleOwner.get().getLifecycle().removeObserver(this);
+
         // Stop MediaRetrieverService when VideoStoreImportService is being cleaned up
         Intent mediaRetrieverIntent = new Intent(this, MediaRetrieverService.class);
         stopService(mediaRetrieverIntent);
         log.debug("cleanup: MediaRetrieverService stop requested");
-        
+
         // Stop the handler thread
         if (mHandlerThread != null) {
             mHandlerThread.quit();
@@ -786,6 +797,12 @@ public class VideoStoreImportService extends Service implements Handler.Callback
 
     @Override
     public void onStart(@NonNull LifecycleOwner owner) {
+        // Safety check: ensure handler is initialized before proceeding
+        if (mHandler == null) {
+            log.warn("onStart: mHandler is null, initialization not complete yet, ignoring");
+            return;
+        }
+
         // App in foreground - restart MediaRetrieverService
         isForeground = true;
         log.debug("onStart: LifecycleOwner app moved to FOREGROUND restarting MediaRetrieverService");
@@ -797,13 +814,32 @@ public class VideoStoreImportService extends Service implements Handler.Callback
         
         // when switching to foreground state and db
         // has potentially changed: trigger db import
-        if (mVolumeState != null) {
-            log.debug("onStart: onForeGround && mVolumeState != null register observer");
-            mVolumeState.registerReceiver();
-            mVolumeState.updateState();
-        } else {
-            log.debug("onStart: onForeGround && mVolumeState == null do not register observer");
+        if (mVolumeState == null) {
+            log.debug("onStart: onForeGround && mVolumeState == null, recreating VolumeState");
+            // Recreate VolumeState if it was cleaned up (e.g., after background)
+            mVolumeState = new VolumeState(this);
+            mVolumeStateObserver = volumes -> {
+                for (Volume volume : volumes) {
+                    log.debug("Change:" + volume.getMountPoint() + " to " + volume.getMountState());
+                    if (!volume.getMountState()) {
+                        mHandler
+                            .obtainMessage(MESSAGE_HIDE_VOLUME, DONT_KILL_SELF, volume.getStorageId())
+                            .sendToTarget();
+                    } else {
+                        mHandler
+                            .obtainMessage(MESSAGE_VOLUME_MOUNTED, DONT_KILL_SELF, volume.getStorageId())
+                            .sendToTarget();
+                    }
+                }
+            };
+            mVolumeState.addObserver(mVolumeStateObserver);
         }
+        log.debug("onStart: onForeGround, registering VolumeState receiver and updating state");
+        mVolumeState.registerReceiver();
+        mVolumeState.updateState();
+
+        // Always trigger an import when returning to foreground to check volume states
+        // (checkDatabaseForUnmountedVolumes() is called during import via updateVolumeHiddenStatesByPath())
         if (ImportState.VIDEO.isDirty()) {
             log.debug("onStart: onForeGround && ImportState.isDirty MESSAGE_IMPORT_FULL");
             // First ensure we're in foreground mode for the new import
@@ -812,7 +848,9 @@ public class VideoStoreImportService extends Service implements Handler.Callback
             ArchosUtils.addBreadcrumb(SentryLevel.INFO, "VideoStoreImportService.onStart", "app is foreground ImportState.isDirty MESSAGE_IMPORT_FULL");
             mHandler.obtainMessage(MESSAGE_IMPORT_FULL, DONT_KILL_SELF, 0).sendToTarget();
         } else {
-            log.debug("onStart: ImportState.isDirty=false, no import needed");
+            // Even if not dirty, do incremental import to check volume states
+            log.debug("onStart: onForeGround but not dirty, triggering MESSAGE_IMPORT_INCR to check volumes");
+            mHandler.obtainMessage(MESSAGE_IMPORT_INCR, DONT_KILL_SELF, 0).sendToTarget();
         }
     }
 

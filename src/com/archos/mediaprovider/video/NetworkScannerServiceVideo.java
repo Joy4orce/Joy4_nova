@@ -389,6 +389,14 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
         Intent intent = new Intent(ArchosMediaIntent.ACTION_VIDEO_SCANNER_SCAN_FINISHED, data);
         intent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
         sendBroadcast(intent);
+
+        // Explicitly start AutoScrapeService after scan completes to ensure scraping happens
+        // This is needed because the ContentObserver may not reliably trigger during batch inserts
+        if (com.archos.mediascraper.AutoScrapeService.isEnable(this)) {
+            log.debug("scanMediaForProvider: starting AutoScrapeService after network scan completion");
+            com.archos.mediascraper.AutoScrapeService.startServiceAfterNetworkScan(this);
+        }
+
         // Exit foreground mode and remove notification since scan is complete
         stopForeground(true);
     }
@@ -527,6 +535,14 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
                 Intent intent = new Intent(ArchosMediaIntent.ACTION_VIDEO_SCANNER_SCAN_FINISHED, what);
                 intent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
                 sendBroadcast(intent);
+
+                // Explicitly start AutoScrapeService after scan completes to ensure scraping happens
+                // This is needed because the ContentObserver may not reliably trigger during batch inserts
+                if (com.archos.mediascraper.AutoScrapeService.isEnable(this)) {
+                    log.debug("scanMediaForProvider: starting AutoScrapeService after network scan completion");
+                    com.archos.mediascraper.AutoScrapeService.startServiceAfterNetworkScan(this);
+                }
+
                 // Exit foreground mode and remove notification since scan is complete
                 stopForeground(true);
                 log.trace("doScan: added:" + insertCount + " modified:" + updateCount + " deleted:" + deleteCount + " listed files " + mFoundFiles);

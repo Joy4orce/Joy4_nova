@@ -126,9 +126,15 @@ public class VolumeState {
     }
 
     protected synchronized void handleChange(Volume... volumes) {
+        log.debug("handleChange: notifying {} observers about {} volumes", mObservers.size(), volumes.length);
+        for (Volume v : volumes) {
+            log.debug("handleChange: volume {} mounted={}", v.getMountPoint(), v.getMountState());
+        }
         for(Observer observer : mObservers.keySet()) {
-            if (observer != null)
+            if (observer != null) {
+                log.debug("handleChange: notifying observer");
                 observer.onMountStateChanged(volumes);
+            }
         }
     }
 
@@ -159,10 +165,23 @@ public class VolumeState {
             String path = intent.getData().getPath();
             ensureVolumes();
             log.debug("mUnMountReceiver: path=" + path);
+            boolean found = false;
             for (Volume volume : mVolumes) {
                 if (volume.getMountPoint().equals(path)
-                        && volume.setMountState(false))
+                        && volume.setMountState(false)) {
                     handleChange(volume);
+                    found = true;
+                }
+            }
+
+            // If volume not in our tracked list (e.g., USB unmounted after app restart),
+            // create a temporary Volume object and notify observers
+            if (!found) {
+                log.debug("mUnMountReceiver: volume not in tracked list, creating temporary volume for: " + path);
+                // Use a high index for temporary volumes to avoid conflicts
+                Volume tempVolume = new Volume(path, 1000);
+                tempVolume.setMountState(false);
+                handleChange(tempVolume);
             }
         }
     };
@@ -172,10 +191,23 @@ public class VolumeState {
             String path = intent.getData().getPath();
             log.debug("mMountReceiver: path=" + path);
             ensureVolumes();
+            boolean found = false;
             for (Volume volume : mVolumes) {
                 if (volume.getMountPoint().equals(path)
-                        && volume.setMountState(true))
+                        && volume.setMountState(true)) {
                     handleChange(volume);
+                    found = true;
+                }
+            }
+
+            // If volume not in our tracked list (e.g., new USB mounted after app restart),
+            // create a temporary Volume object and notify observers
+            if (!found) {
+                log.debug("mMountReceiver: volume not in tracked list, creating temporary volume for: " + path);
+                // Use a high index for temporary volumes to avoid conflicts
+                Volume tempVolume = new Volume(path, 1000);
+                tempVolume.setMountState(true);
+                handleChange(tempVolume);
             }
         }
     };
