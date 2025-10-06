@@ -350,16 +350,8 @@ public class VideoStoreImportService extends Service implements Handler.Callback
             log.debug("startService: app not in foreground, returning");
             return;
         }
-        
-        // Ensure MediaRetrieverService is running before starting VideoStoreImportService
-        Intent mediaRetrieverIntent = new Intent(context, MediaRetrieverService.class);
-        try {
-            context.startService(mediaRetrieverIntent);
-            log.debug("startService: MediaRetrieverService start requested");
-        } catch (IllegalStateException e) {
-            log.warn("startService: Failed to start MediaRetrieverService despite lifecycle check - timing issue", e);
-        }
-        
+
+        // MediaRetrieverService will be auto-created when VideoStoreImportImpl binds to it (via BIND_AUTO_CREATE)
         mContext = context;
         Intent intent = new Intent(context, VideoStoreImportService.class);
         ArchosUtils.addBreadcrumb(SentryLevel.INFO, "VideoStoreImportService.startService", "app in foreground calling startService");
