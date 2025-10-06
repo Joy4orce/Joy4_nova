@@ -110,6 +110,7 @@ import com.archos.mediascraper.EpisodeTags;
 import com.archos.mediascraper.MovieTags;
 import com.archos.mediascraper.NfoWriter;
 import com.archos.mediascraper.Scraper;
+import com.archos.mediascraper.ScraperImage;
 import com.archos.mediascraper.ScraperTrailer;
 import com.archos.mediascraper.ShowTags;
 import com.archos.mediascraper.StringUtils;
@@ -235,6 +236,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     private ImageViewSetter mBackgroundSetter;
     private ImageProcessor mBackgroundLoader;
     private ImageView mApplicationBackdrop;
+    private String mCurrentBackdropUrl;
 
     //file info
     private View mFileInfoContent;
@@ -1757,8 +1759,15 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
 
                 // Plot & Genres
                 final String plot = tags.getPlot();
-                if(!mIsLaunchFromPlayer)
-                    mBackgroundSetter.set(mApplicationBackdrop, mBackgroundLoader, tags.getDefaultBackdrop());
+                if(!mIsLaunchFromPlayer) {
+                    ScraperImage backdrop = tags.getDefaultBackdrop();
+                    String newBackdropUrl = backdrop != null ? backdrop.getLargeUrl() : null;
+                    // Only reload backdrop if it's different from the current one (avoids visual glitch when navigating between episodes of the same show)
+                    if (newBackdropUrl == null || !newBackdropUrl.equals(mCurrentBackdropUrl)) {
+                        mBackgroundSetter.set(mApplicationBackdrop, mBackgroundLoader, backdrop);
+                        mCurrentBackdropUrl = newBackdropUrl;
+                    }
+                }
                 String genres = null;
                 if (tags instanceof VideoTags) {
                     mIsVideoMovie = null;
