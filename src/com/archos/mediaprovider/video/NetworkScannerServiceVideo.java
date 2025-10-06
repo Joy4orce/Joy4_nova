@@ -70,6 +70,7 @@ import com.archos.mediascraper.BaseTags;
 import com.archos.mediascraper.NfoParser;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -573,7 +574,7 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
         private final List<MetaFile2> mLastPlayedDbs = new ArrayList<MetaFile2>();
         private final boolean mNfoScanEnabled;
         private final long mServerId;
-        private final ArrayList<String> mAlreadyAddedUpnpFiles; //for files analysed DURING scan process
+        private final HashSet<String> mAlreadyAddedUpnpFiles; //for files analysed DURING scan process
         private int mStorageId;
 
         private final Blacklist mBlacklist;
@@ -586,7 +587,7 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
             mNfoScanEnabled = nfoScanEnabled;
             mBulkHandler = bulkHandler;
             mServerId = serverId;
-            mAlreadyAddedUpnpFiles = new ArrayList<>();
+            mAlreadyAddedUpnpFiles = new HashSet<>();
         }
 
         private boolean mHadListingError;
