@@ -36,9 +36,10 @@ public class VideoStoreImportReceiver extends BroadcastReceiver {
     private static final String TAG =  VideoStoreImportReceiver.class.getSimpleName();
     private static final boolean DBG = false;
     
-    // Throttling to prevent broadcast loops - minimum 500ms between executions
+    // Throttling to prevent broadcast loops - minimum 500ms between executions for the SAME URI
     private static final long MIN_INTERVAL_MS = 500;
     private static long sLastExecutionTime = 0;
+    private static String sLastUri = null;
 
     public VideoStoreImportReceiver() {
     }
@@ -46,15 +47,19 @@ public class VideoStoreImportReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (DBG) Log.d(TAG, "onReceive:" + intent);
-        
-        // Throttling to prevent broadcast storms
+
+        // Throttling to prevent broadcast storms - but only for duplicate URIs
         long currentTime = System.currentTimeMillis();
+        String currentUri = intent.getData() != null ? intent.getData().toString() : null;
         synchronized (VideoStoreImportReceiver.class) {
-            if (currentTime - sLastExecutionTime < MIN_INTERVAL_MS) {
-                if (DBG) Log.d(TAG, "onReceive: throttled - too soon after last execution");
+            // Only throttle if it's the SAME URI within 500ms
+            if (currentTime - sLastExecutionTime < MIN_INTERVAL_MS &&
+                currentUri != null && currentUri.equals(sLastUri)) {
+                if (DBG) Log.d(TAG, "onReceive: throttled - same URI too soon: " + currentUri);
                 return;
             }
             sLastExecutionTime = currentTime;
+            sLastUri = currentUri;
         }
         
         ArchosUtils.addBreadcrumb(SentryLevel.INFO, "VideoStoreImportReceiver.onReceive", "start NetworkScannerServiceVideo and VideoStoreImportService via intent if intent supported");

@@ -111,6 +111,8 @@ public class AutoScrapeService extends Service {
 
     private volatile static boolean isForeground = true;
     private static boolean isForceAfterNetworkScan = false;
+    private static int networkScanCount = 0;
+    private static final Object networkScanLock = new Object();
     private static final String PREF_IS_SCRAPE_DIRTY = "is_scrape_dirty";
 
     /**
@@ -143,6 +145,44 @@ public class AutoScrapeService extends Service {
         ContextCompat.startForegroundService(context, intent);
     }
 
+    public static void resetNetworkScanCount() {
+        synchronized (networkScanLock) {
+            if (networkScanCount > 0) {
+                log.warn("resetNetworkScanCount: resetting orphaned counter from " + networkScanCount + " to 0");
+            }
+            networkScanCount = 0;
+            isForceAfterNetworkScan = false;
+        }
+    }
+
+    public static void incrementNetworkScanCount() {
+        synchronized (networkScanLock) {
+            networkScanCount++;
+            log.debug("incrementNetworkScanCount: count is now " + networkScanCount);
+        }
+    }
+
+    public static void decrementNetworkScanCount() {
+        synchronized (networkScanLock) {
+            if (networkScanCount > 0) {
+                networkScanCount--;
+                log.debug("decrementNetworkScanCount: count is now " + networkScanCount);
+                if (networkScanCount == 0) {
+                    log.debug("decrementNetworkScanCount: all network scans complete, resetting force flag");
+                    isForceAfterNetworkScan = false;
+                }
+            } else {
+                log.debug("decrementNetworkScanCount: count is already 0, this might be a standalone scan");
+            }
+        }
+    }
+
+    public static int getNetworkScanCount() {
+        synchronized (networkScanLock) {
+            return networkScanCount;
+        }
+    }
+
     public void cleanup() {
         log.debug("cleanup");
         if (mThread != null && mThread.isAlive()) {
@@ -150,7 +190,7 @@ public class AutoScrapeService extends Service {
         }
         sIsScraping = false;
         isForeground = false;
-        isForceAfterNetworkScan = false; // Reset force flag on cleanup
+        // Note: isForceAfterNetworkScan is now managed by networkScanCount
         // Stop the scraping thread if it's running
         if (mThread != null) {
             mThread.interrupt();
@@ -308,7 +348,7 @@ public class AutoScrapeService extends Service {
                         cursor.close();
                     } while (index < numberOfRows && (isForeground || isForceAfterNetworkScan) && !Thread.currentThread().isInterrupted());
                     sIsScraping = false;
-                    isForceAfterNetworkScan = false; // Reset force flag after completion
+                    // Note: isForceAfterNetworkScan is now managed by networkScanCount
                     // Exit foreground mode and remove notification since export is complete
                     stopForeground(true);
                     cursor.close();
@@ -653,7 +693,7 @@ public class AutoScrapeService extends Service {
                     } while(restartOnNextRound && (isForeground || isForceAfterNetworkScan) && !Thread.currentThread().isInterrupted()
                             &&PreferenceManager.getDefaultSharedPreferences(AutoScrapeService.this).getBoolean(AutoScrapeService.KEY_ENABLE_AUTO_SCRAP, true)); //if we had something to do, we look for new videos
                     sIsScraping = false;
-                    isForceAfterNetworkScan = false; // Reset force flag after completion
+                    // Note: isForceAfterNetworkScan is now managed by networkScanCount
                     // Exit foreground mode and remove notification since scraping is complete
                     stopForeground(true);
                     mHandler.post(new Runnable() {

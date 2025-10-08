@@ -131,7 +131,10 @@ public class NetworkAutoRefresh extends BroadcastReceiver implements DefaultLife
             ShortcutDbAdapter.VIDEO.close();
             if(NetworkState.isLocalNetworkConnected(context)) {
                 PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(AUTO_RESCAN_ERROR, 0).commit();//reset error
+                // Reset network scan counter at the start of a new batch to prevent orphaned counts
+                AutoScrapeService.resetNetworkScanCount();
                 boolean triggeredScan = false;
+                int scanCount = 0;
                 for (Uri uri : toUpdate) {
                     log.debug("onReceive: scanning "+uri);
                     if (shouldSkipScanForInactiveServer(context, uri)) {
@@ -151,11 +154,15 @@ public class NetworkAutoRefresh extends BroadcastReceiver implements DefaultLife
                     refreshIntent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
                     context.sendBroadcast(refreshIntent);
                     triggeredScan = true;
+                    scanCount++;
+                    // Increment the network scan counter for each folder
+                    AutoScrapeService.incrementNetworkScanCount();
+                    log.debug("onReceive: incremented network scan count for " + uri);
                 }
 
                 // Start AutoScrapeService after network scanning to scrape newly found videos
                 if (triggeredScan && AutoScrapeService.isEnable(context)) {
-                    log.debug("onReceive: starting AutoScrapeService after network scan");
+                    log.debug("onReceive: starting AutoScrapeService after network scan, total folders: " + scanCount);
                     AutoScrapeService.startServiceAfterNetworkScan(context);
                 }
             }

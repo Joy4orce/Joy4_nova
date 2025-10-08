@@ -139,11 +139,18 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
             Intent serviceIntent = new Intent(context, NetworkScannerServiceVideo.class);
             serviceIntent.setAction(action);
             serviceIntent.setData(data);
+            // Set identifier to avoid StrictMode UnsafeIntentLaunchViolation
+            if (data != null) {
+                serviceIntent.setIdentifier(data.toString());
+            }
             if(broadcast.getExtras()!=null)
                 serviceIntent.putExtras(broadcast.getExtras()); //in case we have an extra... such as "recordLogExtra"
-            if (isForeground) {
-                log.debug("startIfHandles: apps is foreground startService and pass intent to self");
+            int pendingScans = com.archos.mediascraper.AutoScrapeService.getNetworkScanCount();
+            if (isForeground || pendingScans > 0) {
+                log.debug("startIfHandles: starting service (isForeground=" + isForeground + ", pendingScans=" + pendingScans + ")");
                 ContextCompat.startForegroundService(context, serviceIntent);
+            } else {
+                log.debug("startIfHandles: app in background and no pending scans, ignoring");
             }
             return true;
         }
@@ -308,18 +315,33 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
             case MESSAGE_KILL:
                 log.debug("handleMessage: MESSAGE_KILL");
                 if (msg.arg1 != -1) {
-                    // Exit foreground mode and terminate service when explicitly requested
-                    stopForeground(true);
-                    sIsScannerAlive = false;
-                    notifyListeners();
-                    stopSelf(msg.arg1);
+                    // Check if there are more pending scans
+                    int remainingScans = com.archos.mediascraper.AutoScrapeService.getNetworkScanCount();
+                    log.debug("handleMessage: MESSAGE_KILL, remainingScans=" + remainingScans + ", isForeground=" + isForeground);
+
+                    // If app is in background and no more pending scans, stop the service
+                    if (!isForeground && remainingScans == 0) {
+                        log.debug("handleMessage: MESSAGE_KILL, all scans complete and app in background, stopping service");
+                        cleanup();
+                        stopSelf();
+                    } else {
+                        // Exit foreground mode but keep service running for remaining scans
+                        stopForeground(true);
+                    }
+
+                    if (remainingScans == 0) {
+                        sIsScannerAlive = false;
+                        notifyListeners();
+                    }
                 }
                 break;
             case MESSAGE_DO_SCAN:
                 uri = (Uri) msg.obj;
                 key = uri.toString();
                 log.debug("handleMessage: MESSAGE_DO_SCAN " + uri);
-                if (isForeground) {
+                int pendingScans = com.archos.mediascraper.AutoScrapeService.getNetworkScanCount();
+                if (isForeground || pendingScans > 0) {
+                    log.debug("handleMessage: processing scan (isForeground=" + isForeground + ", pendingScans=" + pendingScans + ")");
                     mScanThread = new Thread(() -> {
                         try {
                             doScan(uri);
@@ -333,6 +355,8 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
                         }
                     });
                     mScanThread.start();
+                } else {
+                    log.debug("handleMessage: skipping scan, app in background and no pending scans");
                 }
                 mScanRequests.remove(key);
                 break;
@@ -391,14 +415,9 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
         intent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
         sendBroadcast(intent);
 
-        // Explicitly start AutoScrapeService after scan completes to ensure scraping happens
-        // This is needed because the ContentObserver may not reliably trigger during batch inserts
-        if (com.archos.mediascraper.AutoScrapeService.isEnable(this)) {
-            log.debug("scanMediaForProvider: starting AutoScrapeService after network scan completion");
-            com.archos.mediascraper.AutoScrapeService.startServiceAfterNetworkScan(this);
-        }
+        // Note: No need to start AutoScrapeService after file removal since no new files were added
 
-        // Exit foreground mode and remove notification since scan is complete
+        // Exit foreground mode and remove notification since removal is complete
         stopForeground(true);
     }
 
@@ -537,13 +556,6 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
                 intent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
                 sendBroadcast(intent);
 
-                // Explicitly start AutoScrapeService after scan completes to ensure scraping happens
-                // This is needed because the ContentObserver may not reliably trigger during batch inserts
-                if (com.archos.mediascraper.AutoScrapeService.isEnable(this)) {
-                    log.debug("scanMediaForProvider: starting AutoScrapeService after network scan completion");
-                    com.archos.mediascraper.AutoScrapeService.startServiceAfterNetworkScan(this);
-                }
-
                 // Exit foreground mode and remove notification since scan is complete
                 stopForeground(true);
                 log.trace("doScan: added:" + insertCount + " modified:" + updateCount + " deleted:" + deleteCount + " listed files " + mFoundFiles);
@@ -559,6 +571,21 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
         } else if(mRecordOnFailPreference!=null){
             PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(mRecordOnFailPreference, -1).commit();//unable to reach server
         }
+
+        // Check if this is part of a multi-folder scan BEFORE decrementing
+        int scanCountBefore = com.archos.mediascraper.AutoScrapeService.getNetworkScanCount();
+        boolean isMultiFolderScan = scanCountBefore > 0;
+
+        // Decrement network scan counter for both success and failure paths
+        com.archos.mediascraper.AutoScrapeService.decrementNetworkScanCount();
+        log.debug("doScan: decremented network scan count, was multi-folder: " + isMultiFolderScan);
+
+        // If this was a standalone scan (not part of multi-folder), start AutoScrapeService
+        if (!isMultiFolderScan && f != null && com.archos.mediascraper.AutoScrapeService.isEnable(this)) {
+            log.debug("doScan: standalone scan completed, starting AutoScrapeService");
+            com.archos.mediascraper.AutoScrapeService.startService(this);
+        }
+
         if (log.isDebugEnabled()) {
             long end = System.currentTimeMillis();
             log.debug("doScan took:" + (end - start) + "ms");
@@ -1267,10 +1294,17 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
     @Override
     public void onStop(LifecycleOwner owner) {
         // App in background
-        log.debug("onStop: LifecycleOwner app in background, stop service");
+        int pendingScans = com.archos.mediascraper.AutoScrapeService.getNetworkScanCount();
+        log.debug("onStop: LifecycleOwner app in background, pendingScans=" + pendingScans);
         isForeground = false;
-        cleanup();
-        stopSelf();
+        // Only stop service if there are no pending network scans
+        if (pendingScans == 0) {
+            log.debug("onStop: no pending scans, stopping service");
+            cleanup();
+            stopSelf();
+        } else {
+            log.debug("onStop: " + pendingScans + " pending scans, keeping service alive");
+        }
     }
 
     @Override
