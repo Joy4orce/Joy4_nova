@@ -105,6 +105,7 @@
         android:requestLegacyExternalStorage="true"
         android:localeConfig="@xml/locales_config"
         android:usesCleartextTraffic="true"
+        android:enableOnBackInvokedCallback="true"
         android:networkSecurityConfig="@xml/network_security_config">
         <meta-data
             android:name="to.dualscreen"
@@ -1165,6 +1166,8 @@
         <service android:name="com.archos.mediascraper.AllCollectionScrapeService"
             android:foregroundServiceType="dataSync"/>
         <service android:name="com.archos.mediacenter.video.browser.FileManagerService"
+            android:foregroundServiceType="dataSync"/>
+        <service android:name="com.archos.mediacenter.video.utils.MediaLibraryBackupService"
             android:foregroundServiceType="dataSync"/>
 
         <receiver
