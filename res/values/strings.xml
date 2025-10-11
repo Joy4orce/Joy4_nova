@@ -970,6 +970,23 @@
     <string name="db_export_manual_title">Export media database</string>
     <string name="db_export_manual_summary">Export media.db file to /sdcard for debug purposes</string>
     <string name="db_export_in_progress">Database export in progress</string>
+    <string name="media_library_export_title">Export media library + credentials + shortcuts</string>
+    <string name="media_library_export_summary">Export media.db, network credentials (SMB/FTP/SFTP), network shortcuts, and all cached images as a zip file</string>
+    <string name="media_library_import_title">Import media library + credentials + shortcuts</string>
+    <string name="media_library_import_summary">Import media.db, network credentials, network shortcuts, and cached images from a previously exported zip file</string>
+    <string name="media_library_export_in_progress">Exporting media library, credentials, and shortcuts</string>
+    <string name="media_library_import_in_progress">Importing media library, credentials, and shortcuts</string>
+    <string name="media_library_export_success">Media library, credentials, and shortcuts exported successfully to:\n%s</string>
+    <string name="media_library_import_success">Media library, credentials, and shortcuts imported successfully. Restarting app...</string>
+    <string name="media_library_import_error">Error importing media library</string>
+    <string name="media_library_export_error">Error exporting media library</string>
+    <string name="media_library_export_dir_not_found">Export directory not found</string>
+    <string name="media_library_no_backup_found">No backup file found. Please export first.</string>
+    <string name="media_library_backup_info">Backup file found: backup.zip\nSize: %d MB\n\n⚠️ Contains: metadata, credentials, shortcuts, images\n\nProceed to import?</string>
+    <string name="media_library_import_dialog_title">Import media library + credentials + shortcuts</string>
+    <string name="media_library_import_confirm_title">⚠️ CONFIRM FULL REPLACEMENT</string>
+    <string name="media_library_import_warning">⚠️ WARNING: FULL REPLACEMENT ⚠️\n\nThis will COMPLETELY DELETE your current media library and replace it with the backup.\n\nALL current data will be PERMANENTLY LOST:\n• All scraped movie/TV show metadata\n• All cached posters and backdrops\n• All watch progress and history\n• All network credentials (SMB/FTP/SFTP/WebDAV)\n• All network shortcuts/bookmarks\n• All custom edits and settings\n\nThis action CANNOT be undone!\n\nThe app will automatically restart after import.\n\nAre you absolutely sure you want to continue?</string>
+    <string name="media_library_import_button_confirm">YES, DELETE AND REPLACE</string>
     <string name="system">System</string>
     <string name="keep_setting">Keep this setting globally</string>
     <string name="select_sub_file"><![CDATA[Exact subtitles not found for file <font color=#29b6f6><i>%s</i></font><br />Please try among this list:]]></string>
