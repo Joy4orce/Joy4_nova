@@ -1624,18 +1624,32 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             @Override
             public void onClick(View view) {
                 saveSettingCB.toggle();
+                // Save preference immediately when toggled
+                if(saveSettingCB.isChecked()){
+                    log.debug("createTVAudioSpeedDialog: keep setting toggled ON, save current audio speed=" + PlayerService.sPlayerService.getAudioSpeed() + " in prefs");
+                    mPreferences.edit().putFloat(getString(R.string.save_audio_speed_setting_pref_key), PlayerService.sPlayerService.getAudioSpeed()).apply();
+                } else {
+                    log.debug("createTVAudioSpeedDialog: keep setting toggled OFF, save 1.0f in prefs");
+                    mPreferences.edit().putFloat(getString(R.string.save_audio_speed_setting_pref_key), 1.0f).apply();
+                }
             }
         });
         tvPicker.init(PlayerService.sPlayerService.getAudioSpeed(), new AudioSpeedPickerAbstract.OnAudioSpeedChangedListener() {
             @Override
             public void onAudioSpeedChanged(AudioSpeedPickerAbstract view, float speed) {
                 PlayerActivity.this.onAudioSpeedChange(null, speed);
+                // Save preference immediately when speed changes if keep setting is enabled
+                if(saveSettingCB.isChecked()) {
+                    log.debug("createTVAudioSpeedDialog: audio speed changed to " + speed + " with keep setting ON, save in prefs");
+                    mPreferences.edit().putFloat(getString(R.string.save_audio_speed_setting_pref_key), speed).apply();
+                }
             }
         });
         ((TVCardDialog)dialogView).addOtherView(tvmenu);
         ((TVCardDialog)dialogView).setOnDialogResultListener(new TVCardDialog.OnDialogResultListener() {
             @Override
             public void onResult(int code) {
+                log.debug("createTVAudioSpeedDialog:onResult CALLED with code=" + code);
                 mPlayerController.getTVMenuAdapter().setDiscrete(false);
                 if(saveSettingCB.isChecked()){
                     log.debug("createTVAudioSpeedDialog:onResult save audio speed=" + PlayerService.sPlayerService.getAudioSpeed() + " in prefs");
