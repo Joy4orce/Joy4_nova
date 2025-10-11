@@ -201,6 +201,9 @@ public class NetworkRootFragment extends BrowseSupportFragment {
             mSambaDiscovery.removeListener(mSambaListener);
             mSambaDiscovery = null;
         }
+
+        // Remove UpnpServiceManager listener to prevent memory leak
+        UpnpServiceManager.getSingleton(getActivity()).removeListener(mUpnpListener);
     }
 
     private void loadRows() {

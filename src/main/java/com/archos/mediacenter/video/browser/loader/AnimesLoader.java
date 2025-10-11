@@ -28,7 +28,7 @@ public class AnimesLoader extends VideoLoader {
 
     private boolean mShowWatched;
 
-    private static Context mContext;
+    private Context mContext;
 
     public AnimesLoader(Context context, boolean groupbyOnlineId) {
         this(context, DEFAULT_SORT, true, groupbyOnlineId, false, 0);

@@ -35,7 +35,7 @@ public abstract class AnimesByLoader extends CursorLoader implements CompatAndSD
 
     protected String mSortOrder;
     private boolean mForceHideVideos;
-    private static Context mContext;
+    private Context mContext;
 
     public AnimesByLoader(Context context) {
         super(context);

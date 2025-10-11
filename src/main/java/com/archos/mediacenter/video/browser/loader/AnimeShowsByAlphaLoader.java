@@ -22,7 +22,7 @@ import com.archos.mediaprovider.video.VideoStore;
 public class AnimeShowsByAlphaLoader extends AnimeShowsByLoader {
 
     public static final String DEFAULT_SORT = COLUMN_SUBSET_NAME+" COLLATE LOCALIZED ASC";
-    private static Context mContext;
+    private Context mContext;
 
     public AnimeShowsByAlphaLoader(Context context) {
         super(context);

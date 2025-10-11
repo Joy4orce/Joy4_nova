@@ -252,6 +252,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
     private NetworkState networkState = null;
     private PropertyChangeListener propertyChangeListener = null;
+    private DisplayManager mDisplayManager = null;
+    private DisplayManager.DisplayListener mDisplayListener = null;
 
     @Override
     public void setCutoutMetrics(int left, int top, int right, int bottom) {
@@ -608,7 +610,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         mPlayer = new Player(mContext, getWindow(), mSurfaceController, false);
 
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.N_MR1){ //detect any kind of rotation, even from 270 to 90°
-            DisplayManager.DisplayListener mDisplayListener = new DisplayManager.DisplayListener() {
+            mDisplayListener = new DisplayManager.DisplayListener() {
                 int orientation;
                 @Override
                 public void onDisplayAdded(int displayId) {
@@ -636,8 +638,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 public void onDisplayRemoved(int displayId) {
                 }
             };
-            DisplayManager displayManager = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
-            displayManager.registerDisplayListener(mDisplayListener, mHandler);
+            mDisplayManager = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
+            mDisplayManager.registerDisplayListener(mDisplayListener, mHandler);
 
             networkState = NetworkState.instance(getApplicationContext());
             if (propertyChangeListener == null)
@@ -1035,6 +1037,14 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
         stopDialog();
         removeNetworkListener();
+
+        // Unregister DisplayListener to prevent memory leak
+        if (mDisplayManager != null && mDisplayListener != null) {
+            mDisplayManager.unregisterDisplayListener(mDisplayListener);
+            mDisplayListener = null;
+            mDisplayManager = null;
+        }
+
         VideoEffect.resetForcedMode();
         log.debug("onDestroy: setEffect");
         setEffect(VideoEffect.getDefaultMode());

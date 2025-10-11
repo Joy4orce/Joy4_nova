@@ -34,7 +34,7 @@ public abstract class TvshowsNoAnimeByLoader extends CursorLoader implements Com
     protected String mSortOrder;
     private boolean mForceHideVideos;
 
-    private static Context mContext;
+    private Context mContext;
 
     public TvshowsNoAnimeByLoader(Context context) {
         super(context);

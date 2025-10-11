@@ -28,7 +28,7 @@ public class FilmsLoader extends VideoLoader {
 
     private boolean mShowWatched;
 
-    private static Context mContext;
+    private Context mContext;
 
     public FilmsLoader(Context context, boolean groupbyOnlineId) {
         this(context, DEFAULT_SORT, true, groupbyOnlineId, false, 0);

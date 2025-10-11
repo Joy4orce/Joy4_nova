@@ -29,7 +29,7 @@ public class AllAnimesLoader extends VideoLoader {
     static public String DEFAULT_SORT = "name COLLATE LOCALIZED ASC";
 
     private String mSortOrder;
-    private static Context mContext;
+    private Context mContext;
     private boolean mShowWatched;
     private final boolean mGroupByOnlineId;
 

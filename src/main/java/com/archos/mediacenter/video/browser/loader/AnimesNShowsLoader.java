@@ -72,7 +72,7 @@ ORDER BY uName ASC
 
     private boolean mShowWatched;
 
-    private static Context mContext;
+    private Context mContext;
 
     public AnimesNShowsLoader(Context context) {
         this(context, DEFAULT_SORT, true, false, 0);

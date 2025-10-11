@@ -71,7 +71,7 @@ public class MainActivityLeanback extends LeanbackActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        log.debug("onCreate");
+        log.warn("onCreate: MainActivityLeanback instance created: " + this.hashCode());
         ((CustomApplication) getApplication()).loadLocale();
         super.onCreate(savedInstanceState);
 
@@ -96,7 +96,7 @@ public class MainActivityLeanback extends LeanbackActivity {
 
     @Override
     protected void onDestroy(){
-        log.debug("onDestroy");
+        log.warn("onDestroy: MainActivityLeanback instance destroyed: " + this.hashCode());
         super.onDestroy();
         UnavailablePosterBroadcastReceiver.unregisterReceiver(this);
     }

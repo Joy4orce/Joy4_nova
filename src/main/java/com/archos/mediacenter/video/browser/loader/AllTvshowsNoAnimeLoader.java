@@ -33,7 +33,7 @@ public class AllTvshowsNoAnimeLoader extends VideoLoader {
     private String mSortOrder;
 
     private boolean mShowWatched;
-    private static Context mContext;
+    private Context mContext;
 
     /**
      * List all shows

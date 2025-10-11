@@ -501,6 +501,9 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
     public void onDestroy() {
         super.onDestroy();
         mHandler.removeCallbacksAndMessages(null);
+
+        // Clear the static launcher to prevent memory leak
+        FileUtilsQ.setDeleteLauncher(null);
     }
 
     @Override
