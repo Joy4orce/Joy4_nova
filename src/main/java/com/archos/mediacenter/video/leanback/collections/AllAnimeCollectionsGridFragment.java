@@ -83,7 +83,7 @@ public class AllAnimeCollectionsGridFragment extends MyVerticalGridFragment impl
 
     private boolean mCollectionWatched;
 
-    private static Context mContext;
+    private Context mContext;
 
     public static SparseArray<CollectionsSortOrderEntry> sortOrderIndexer = new SparseArray<CollectionsSortOrderEntry>();
     static {

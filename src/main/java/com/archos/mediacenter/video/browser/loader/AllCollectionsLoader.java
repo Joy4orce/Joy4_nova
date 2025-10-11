@@ -37,7 +37,7 @@ public class AllCollectionsLoader extends VideoLoader {
     public final static String COLUMN_COLLECTION_MOVIE_COUNT = "collection_movie_count";
     public final static String COLUMN_COLLECTION_MOVIE_WATCHED_COUNT = "collection_movie_watched_count";
     private String mSortOrder;
-    private static Context mContext;
+    private Context mContext;
 
     private boolean mCollectionWatched;
 

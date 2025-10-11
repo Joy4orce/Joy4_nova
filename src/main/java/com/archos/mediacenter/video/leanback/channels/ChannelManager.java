@@ -97,7 +97,7 @@ public class ChannelManager {
     }
 
     public ChannelManager(Context context) {
-        mContext = context;
+        mContext = context.getApplicationContext();
         mWatchingUpNext = mContext.getString(R.string.watching_up_next);
         mRecentlyAdded = mContext.getString(R.string.recently_added);
         mRecentlyPlayed = mContext.getString(R.string.recently_played);

@@ -21,7 +21,7 @@ import com.archos.mediaprovider.video.VideoStore;
 
 public class EpisodesByDateLoader extends MoviesByLoader {
 
-    private static Context mContext;
+    private Context mContext;
 
     public static enum DateView {
         WEEK, MONTH, YEAR

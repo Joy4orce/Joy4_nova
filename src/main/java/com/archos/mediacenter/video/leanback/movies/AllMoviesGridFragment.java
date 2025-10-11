@@ -89,7 +89,7 @@ public class AllMoviesGridFragment extends MyVerticalGridFragment implements Loa
 
     private static boolean mSeparateAnimeFromShowMovie;
 
-    private static Context mContext;
+    private Context mContext;
 
     public static SparseArray<MoviesSortOrderEntry> sortOrderIndexer = new SparseArray<MoviesSortOrderEntry>();
     static {

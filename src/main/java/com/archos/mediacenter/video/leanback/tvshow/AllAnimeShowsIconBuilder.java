@@ -48,7 +48,7 @@ public class AllAnimeShowsIconBuilder {
     static String SELECTION;
 
     private static final String TAG = "AllAnimeShowsIconBuilder";
-    private static Context mContext;
+    private Context mContext;
     final int mWidth;
     final int mHeight;
 

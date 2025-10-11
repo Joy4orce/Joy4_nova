@@ -34,7 +34,7 @@ public abstract class TvshowsByLoader extends CursorLoader implements CompatAndS
     protected String mSortOrder;
     private boolean mForceHideVideos;
 
-    private static Context mContext;
+    private Context mContext;
 
     public TvshowsByLoader(Context context) {
         super(context);

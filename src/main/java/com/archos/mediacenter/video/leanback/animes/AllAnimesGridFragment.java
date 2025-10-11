@@ -84,7 +84,7 @@ public class AllAnimesGridFragment extends MyVerticalGridFragment implements Loa
 
     private boolean mShowWatched;
 
-    private static Context mContext;
+    private Context mContext;
 
     public static SparseArray<AnimesSortOrderEntry> sortOrderIndexer = new SparseArray<AnimesSortOrderEntry>();
     static {

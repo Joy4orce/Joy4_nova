@@ -35,7 +35,7 @@ public abstract class FilmsByLoader extends CursorLoader implements CompatAndSDK
 
     protected String mSortOrder;
     private boolean mForceHideVideos;
-    private static Context mContext;
+    private Context mContext;
 
     public FilmsByLoader(Context context) {
         super(context);

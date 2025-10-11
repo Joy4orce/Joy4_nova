@@ -70,6 +70,7 @@ import com.archos.mediacenter.video.leanback.tvshow.TvshowsSortOrderEntry;
 import com.archos.mediacenter.video.tvshow.AnimeShowSortOrderEntries;
 import com.archos.mediacenter.video.tvshow.TvshowSortOrderEntries;
 import com.archos.mediacenter.video.utils.credentialsmanager.CredentialsManagerPreferenceActivity;
+import com.archos.mediacenter.video.utils.MediaLibraryBackupService;
 import com.archos.medialib.MediaFactory;
 import com.archos.mediaprovider.video.VideoProvider;
 import com.archos.mediascraper.AllCollectionScrapeService;
@@ -601,6 +602,20 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         mDbExportManualPreference.setOnPreferenceClickListener(preference -> {
             backupDatabase(getContext(),"media.db");
             Toast.makeText(getActivity(), R.string.db_export_in_progress, Toast.LENGTH_SHORT).show();
+            return true;
+        });
+
+        Preference exportLibraryPreference = findPreference(getString(R.string.media_library_export_prefkey));
+        exportLibraryPreference.setOnPreferenceClickListener(preference -> {
+            Intent intent = new Intent(MediaLibraryBackupService.ACTION_EXPORT, null, getActivity(), MediaLibraryBackupService.class);
+            ContextCompat.startForegroundService(getContext(), intent);
+            Toast.makeText(getActivity(), R.string.media_library_export_in_progress, Toast.LENGTH_SHORT).show();
+            return true;
+        });
+
+        Preference importLibraryPreference = findPreference(getString(R.string.media_library_import_prefkey));
+        importLibraryPreference.setOnPreferenceClickListener(preference -> {
+            showImportDialog();
             return true;
         });
 
@@ -1172,6 +1187,49 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             }
         }
     }
+
+    private void showImportDialog() {
+        File exportDir = getContext().getExternalFilesDir(null);
+        if (exportDir == null || !exportDir.exists()) {
+            Toast.makeText(getActivity(), R.string.media_library_export_dir_not_found, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        File backupFile = new File(exportDir, "backup.zip");
+        if (!backupFile.exists()) {
+            Toast.makeText(getActivity(), R.string.media_library_no_backup_found, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // Show backup file info and proceed to confirmation
+        long fileSizeMB = backupFile.length() / (1024 * 1024);
+        String message = getContext().getString(R.string.media_library_backup_info, fileSizeMB);
+
+        new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.media_library_import_dialog_title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    confirmImport(backupFile.getAbsolutePath());
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void confirmImport(String importFilePath) {
+        new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.media_library_import_confirm_title)
+                .setMessage(R.string.media_library_import_warning)
+                .setPositiveButton(R.string.media_library_import_button_confirm, (dialog, which) -> {
+                    Intent intent = new Intent(MediaLibraryBackupService.ACTION_IMPORT, null, getActivity(), MediaLibraryBackupService.class);
+                    intent.putExtra(MediaLibraryBackupService.EXTRA_IMPORT_FILE, importFilePath);
+                    ContextCompat.startForegroundService(getContext(), intent);
+                    Toast.makeText(getActivity(), R.string.media_library_import_in_progress, Toast.LENGTH_LONG).show();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .setCancelable(true)
+                .show();
+    }
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
                                           String key) {

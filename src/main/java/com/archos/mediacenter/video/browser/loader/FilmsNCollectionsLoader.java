@@ -60,7 +60,7 @@ ORDER BY name ASC
 
     private boolean mShowWatched;
 
-    private static Context mContext;
+    private Context mContext;
 
     public FilmsNCollectionsLoader(Context context, boolean groupbyOnlineId) {
         this(context, DEFAULT_SORT, true, groupbyOnlineId);

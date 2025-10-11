@@ -82,36 +82,63 @@ public class UnavailablePosterBroadcastReceiver extends BroadcastReceiver{
 
             String[] arg = new String[]{Long.toString(intent.getLongExtra("VIDEO_ID",-1))};
             String where = sb.toString();
-            Cursor c = context.getContentResolver().query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, new String[]{COLUMN_COVER_PATH,VideoStore.Video.VideoColumns.TITLE, VideoStore.Video.VideoColumns.SCRAPER_SHOW_ID, VideoStore.Video.VideoColumns.SCRAPER_MOVIE_ID,VideoStore.Video.VideoColumns.ARCHOS_MEDIA_SCRAPER_TYPE}, where, arg, null);
+            Cursor c = context.getContentResolver().query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, new String[]{COLUMN_COVER_PATH,VideoStore.Video.VideoColumns.TITLE, VideoStore.Video.VideoColumns.SCRAPER_EPISODE_ID, VideoStore.Video.VideoColumns.SCRAPER_MOVIE_ID,VideoStore.Video.VideoColumns.ARCHOS_MEDIA_SCRAPER_TYPE}, where, arg, null);
             if(c!=null&&c.getCount()>0){
                 c.moveToFirst();
                 int coverColumn = c.getColumnIndex(COLUMN_COVER_PATH);
                 int titleColumn = c.getColumnIndex(VideoStore.Video.VideoColumns.TITLE);
                 int idMovieColumn = c.getColumnIndex(VideoStore.Video.VideoColumns.SCRAPER_MOVIE_ID);
-                int idShowColumn= c.getColumnIndex(VideoStore.Video.VideoColumns.SCRAPER_SHOW_ID);
+                int idEpisodeColumn = c.getColumnIndex(VideoStore.Video.VideoColumns.SCRAPER_EPISODE_ID);
                 final int scraperType = c.getInt(c.getColumnIndex(VideoStore.Video.VideoColumns.ARCHOS_MEDIA_SCRAPER_TYPE));
                 if(c.getString(coverColumn)!=null){
                     String path = c.getString(coverColumn);
-                    if(!FileEditorFactory.getFileEditorForUrl(Uri.parse(path), null).exists()){
-                        //remove
-                        Log.d(TAG, path + " does not exists : removing for "+c.getString(titleColumn));
+                    Uri posterUri = Uri.parse(path);
+                    boolean shouldClear = false;
+                    String reason = "";
+
+                    try {
+                        if(!FileEditorFactory.getFileEditorForUrl(posterUri, null).exists()){
+                            shouldClear = true;
+                            reason = "file does not exist";
+                        } else {
+                            // Check if file exists but is empty (corrupted/incomplete download)
+                            long fileSize = FileEditorFactory.getFileEditorForUrl(posterUri, null).length();
+                            if (fileSize == 0) {
+                                shouldClear = true;
+                                reason = "file is empty (0 bytes)";
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.w(TAG, "Error checking poster file: " + path, e);
+                        shouldClear = true;
+                        reason = "error accessing file: " + e.getMessage();
+                    }
+
+                    if (shouldClear) {
                         ContentValues cv = new ContentValues();
                         Uri uri;
+                        long scraperId;
                         if (scraperType == BaseTags.TV_SHOW) {
-                            uri  = ContentUris.withAppendedId(ScraperStore.Episode.URI.ID, c.getLong(idShowColumn));
+                            scraperId = c.getLong(idEpisodeColumn);
+                            uri = ContentUris.withAppendedId(ScraperStore.Episode.URI.ID, scraperId);
                             cv.put(ScraperStore.Episode.POSTER_ID, -1);
-                           cv.putNull(ScraperStore.Episode.COVER);
-
+                            cv.putNull(ScraperStore.Episode.COVER);
+                            Log.w(TAG, "Cached episode poster missing or corrupted: path=" + path + ", title=" + c.getString(titleColumn) + ", videoId=" + intent.getLongExtra("VIDEO_ID",-1) + ", episodeId=" + scraperId + ", reason=" + reason + " - clearing and triggering re-scrape");
                         }
                         else {
-                            uri  = ContentUris.withAppendedId(ScraperStore.Movie.URI.ID, c.getLong(idMovieColumn));
+                            scraperId = c.getLong(idMovieColumn);
+                            uri = ContentUris.withAppendedId(ScraperStore.Movie.URI.ID, scraperId);
                             cv.put(ScraperStore.Movie.POSTER_ID, -1);
                             cv.putNull(ScraperStore.Movie.COVER);
+                            Log.w(TAG, "Cached movie poster missing or corrupted: path=" + path + ", title=" + c.getString(titleColumn) + ", videoId=" + intent.getLongExtra("VIDEO_ID",-1) + ", movieId=" + scraperId + ", reason=" + reason + " - clearing and triggering re-scrape");
                         }
                         int n = context.getContentResolver().update(uri,cv,null,null);
-                        Log.d(TAG,n+  "updated");
+                        Log.d(TAG, n + " DB records updated for " + (scraperType == BaseTags.TV_SHOW ? "episode" : "movie") + ", poster cleared to trigger re-download");
 
                     }
+                }
+                else {
+                    Log.d(TAG, "Video has no poster path in DB: title=" + c.getString(titleColumn) + ", videoId=" + intent.getLongExtra("VIDEO_ID",-1));
                 }
             }
             if (c!=null)

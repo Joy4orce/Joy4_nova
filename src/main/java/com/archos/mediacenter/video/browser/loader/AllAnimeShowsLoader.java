@@ -34,7 +34,7 @@ public class AllAnimeShowsLoader extends VideoLoader {
 
     private boolean mShowWatched;
 
-    private static Context mContext;
+    private Context mContext;
 
     /**
      * List all shows
