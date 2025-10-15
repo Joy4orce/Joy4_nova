@@ -27,6 +27,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -38,6 +39,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.adapters.object.Video;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 public class VideoInfoActivity extends AppCompatActivity {
@@ -91,7 +93,15 @@ public class VideoInfoActivity extends AppCompatActivity {
         mGlobalBackdrop = getLayoutInflater().inflate(R.layout.browser_main_video_backdrop, null);
         setContentView(R.layout.activity_video_info);
         mViewPager = (ViewPager)findViewById(R.id.pager);
-        mViewPager.setAdapter(new ScreenSlidePagerAdapter(getSupportFragmentManager()));
+        mViewPager.setAdapter(new ScreenSlidePagerAdapter(
+                getSupportFragmentManager(),
+                this, // Pass the activity instance for the WeakReference
+                mPaths,
+                mCurrentVideo,
+                mId,
+                mCurrentPosition,
+                mForceCurrentPosition
+        ));
         if(mCurrentPosition>0)
             mViewPager.setCurrentItem(mCurrentPosition);
         globalLayout.addView(mGlobalBackdrop, 0);
@@ -100,6 +110,20 @@ public class VideoInfoActivity extends AppCompatActivity {
     protected void onStop(){
         if (DBG) Log.d(TAG,"onStop");
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (DBG) Log.d(TAG, "onDestroy");
+        super.onDestroy();
+        // This is the critical fix: remove the backdrop from the window's DecorView.
+        if (mGlobalBackdrop != null) {
+            ViewGroup globalLayout = (ViewGroup) getWindow().getDecorView();
+            globalLayout.removeView(mGlobalBackdrop);
+            mGlobalBackdrop = null; // Also good practice to nullify the reference.
+        }
+        // Nullify the fragment reference to be safe
+        mCurrentFragment = null;
     }
 
     public View getGlobalBackdropView(){
@@ -179,21 +203,40 @@ public class VideoInfoActivity extends AppCompatActivity {
         startInstance(context,null,video, 0,paths,id, false, -1);
     }
 
-    private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
+    private static class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
 
+        // Fields to hold the data previously accessed from the outer class
+        private final ArrayList<Uri> mPaths;
+        private final Video mCurrentVideo;
+        private final long mId;
+        private final int mCurrentPosition;
+        private final boolean mForceCurrentPosition;
 
+        // Use a WeakReference to hold the activity to prevent leak cycles
+        private final WeakReference<VideoInfoActivity> mActivityRef;
 
-        public ScreenSlidePagerAdapter(FragmentManager fm) {
-            super(fm);
+        public ScreenSlidePagerAdapter(FragmentManager fm, VideoInfoActivity activity, ArrayList<Uri> paths,
+                                       Video currentVideo, long id, int currentPosition, boolean forceCurrentPosition) {
+            super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+            this.mActivityRef = new WeakReference<>(activity);
+            this.mPaths = paths;
+            this.mCurrentVideo = currentVideo;
+            this.mId = id;
+            this.mCurrentPosition = currentPosition;
+            this.mForceCurrentPosition = forceCurrentPosition;
         }
 
         @Override
-        public void setPrimaryItem(ViewGroup container, int position, Object object) {
-            super.setPrimaryItem(container,position, object);
-            mCurrentFragment = (Fragment) object;
-
+        public void setPrimaryItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
+            super.setPrimaryItem(container, position, object);
+            VideoInfoActivity activity = mActivityRef.get();
+            // Check if activity is still alive before using it
+            if (activity != null) {
+                activity.mCurrentFragment = (Fragment) object;
+            }
         }
 
+        @NonNull
         @Override
         public Fragment getItem(int position) {
             Video video = null;
@@ -204,12 +247,17 @@ public class VideoInfoActivity extends AppCompatActivity {
                 id = mId;
                 forceVideoSelection = mForceCurrentPosition;
             }
-            return VideoInfoActivityFragment.getInstance(video,mPaths.size()>0? mPaths.get(position):null, id, forceVideoSelection);
+            // Use the class's fields instead of the outer activity's fields
+            return org.leeroy.mediaplayer.video.info.VideoInfoActivityFragment.getInstance(video, mPaths.size() > 0 ? mPaths.get(position) : null, id, forceVideoSelection);
         }
 
         @Override
         public int getCount() {
-            return mPaths.size()>0?mPaths.size():1;
+            // Handle null mPaths gracefully
+            if (mPaths == null || mPaths.isEmpty()) {
+                return 1;
+            }
+            return mPaths.size();
         }
     }
 }

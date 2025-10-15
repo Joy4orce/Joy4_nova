@@ -165,11 +165,11 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     private static final int DELETE_GROUP = 1;
     private View mRoot;
 
-    private static Context mContext;
+    //private Context mContext;
 
     // need to be static otherwise ActivityResultLauncher find them null
-    private static Delete delete;
-    private static List<Uri> deleteUrisList;
+    private Delete delete;
+    private List<Uri> deleteUrisList;
 
     private final ActivityResultLauncher<IntentSenderRequest> deleteLauncher = registerForActivityResult(
             new ActivityResultContracts.StartIntentSenderForResult(),
@@ -350,6 +350,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     public void onCreate(Bundle save){
         log.debug("onCreate");
         super.onCreate(save);
+        deleteUrisList = new ArrayList<>();
         // pass the right deleteLauncher linked to activity
         FileUtilsQ.setDeleteLauncher(deleteLauncher);
         CustomApplication.resetLastVideoPlayed();
@@ -372,10 +373,10 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
         mIsPortraitMode = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
         mGenericPlayButton = (FloatingActionButton)mRoot.findViewById(R.id.play_toolbar);
         mGenericPlayButton.setVisibility(View.GONE);
-        mContext = getContext();
-        mFABShowAnimation = AnimationUtils.loadAnimation(mContext, R.anim.fab_show_anim);
-        mFABHideAnimation = AnimationUtils.loadAnimation(mContext, R.anim.fab_hide_anim);
-        mToolbarShowAnimation = AnimationUtils.loadAnimation(mContext, R.anim.video_info_toolbar_show);
+        //mContext = getContext();
+        mFABShowAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.fab_show_anim);
+        mFABHideAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.fab_hide_anim);
+        mToolbarShowAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.video_info_toolbar_show);
         mToolbarShowAnimation.setAnimationListener(this);
         mFABManager = new FABAnimationManager(mGenericPlayButton,mFABHideAnimation,mFABShowAnimation);
         mTitleBar = (Toolbar) mRoot.findViewById(R.id.titlebar);
@@ -508,7 +509,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                 mVideoIdFromPlayer = bundle.getLong(EXTRA_VIDEO_ID, -1);
                 if (mVideoIdFromPlayer == -1) {
                     mPath = bundle.getString(EXTRA_VIDEO_PATH);
-                    String nPath = getFileUriStringFromContentUri(mContext, mPath);
+                    String nPath = getFileUriStringFromContentUri(getContext(), mPath);
                     if (nPath != null) mPath = nPath;
                 }
 
@@ -654,7 +655,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     public void onAttach(Context context){
         log.debug("onAttach");
         super.onAttach(context);
-        mContext = context;
+        //mContext = context;
         // handles NetworkState changes
         networkState = NetworkState.instance(getContext());
         if (propertyChangeListener == null)
@@ -1072,14 +1073,14 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                     subTrack = videoMetadata.getSubtitleTrack(i);
                     if (!videoMetadata.getSubtitleTrack(i).isExternal) { //manage external subs with sub manager
                         log.debug("updateSubtitleInfo: int subtitleTrack {} {} {} {}", i, subTrack.name, subTrack.language, subTrack.format);
-                        lines.add((totSubs + 1) + ": " + StringUtils.removeHtmlTags(generateTrackName(mContext, subTrack.name, subTrack.language, getResources().getStringArray(R.array.subtitles_types)[subTrack.format], false)));
+                        lines.add((totSubs + 1) + ": " + StringUtils.removeHtmlTags(generateTrackName(getContext(), subTrack.name, subTrack.language, getResources().getStringArray(R.array.subtitles_types)[subTrack.format], false)));
                         totSubs++;
                     }
                 }
             }
             if(externalSubs!=null) {
                 for (SubtitleManager.SubtitleFile sub : externalSubs) {
-                    lines.add((totSubs + 1) + ": " + replaceLanguageCodeInString(mContext, sub.mName));
+                    lines.add((totSubs + 1) + ": " + replaceLanguageCodeInString(getContext(), sub.mName));
                     totSubs++;
                 }
             }
@@ -2033,10 +2034,28 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
 
     @Override
     public void onDestroy() {
-        log.debug("onDestroy");
-        removeNetworkListener();
-        super.onDestroy();
+        log.debug("onDestroy");removeNetworkListener(); // This line was already here and is correct.
+
+        // ======================= FIX: ADD ASYNCTASK CLEANUP =======================
+        // Cancel all running AsyncTasks to prevent them from leaking the Fragment's context.
+        // This is the crucial part to fix the leak.
+        if (mThumbnailTask != null) {
+            mThumbnailTask.cancel(true);
+        }
+        if (mVideoInfoTask != null) {
+            mVideoInfoTask.cancel(true);
+        }
+        if (mSubtitleFilesListerTask != null) {
+            mSubtitleFilesListerTask.cancel(true);
+        }
+        if (mFullScraperTagsTask != null) {
+            mFullScraperTagsTask.cancel(true);
+        }
+        // ===========================================================================
+
+        super.onDestroy(); // This must be called last.
     }
+
 
     private void addNetworkListener() {
         if (networkState == null) networkState = NetworkState.instance(getContext());
