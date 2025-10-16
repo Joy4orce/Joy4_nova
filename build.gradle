@@ -154,8 +154,8 @@ android {
         // below version tracks the one from F-Droid or universal package when generated with ./gradlew -Puniversal
         // this is overridden when using split apk and normal split apk generation or oneapk amazon generation
         // amazon apk is generated with ./gradlew -Poneapk
-        versionCode = 6040015
-        versionName = '6.4.15'
+        versionCode = 6040016
+        versionName = '6.4.16'
         def novaVersionName = versionName
         if (! project.hasProperty("universal")) {
             // override versionName and versionCode to get it dependent on the date
@@ -331,7 +331,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-process:2.9.4'
     // needed for old Android versions when using java 17
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
+    //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
     implementation 'com.jakewharton.threetenabp:threetenabp:1.4.9'
     implementation 'com.squareup.picasso:picasso:2.8'
     implementation 'androidx.tvprovider:tvprovider:1.1.0'
