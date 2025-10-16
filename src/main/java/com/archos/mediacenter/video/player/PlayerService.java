@@ -472,6 +472,10 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
             }
             log.debug("PlayerService.onStart: URI matches existing mVideoInfo, mResume=" + mResume);
             mDatabaseInfoHasBeenRetrieved = true;
+            // Always reload audio settings from preferences even when replaying same video
+            mAudioDelay = mPreferences.getInt(getString(R.string.save_delay_setting_pref_key), 0);
+            mAudioSpeed = getAudioSpeedFromPreferences();
+            log.debug("onStart: mAudioSpeed=" + mAudioSpeed);
         }
         else {
             mVideoInfo = null; //reset info
