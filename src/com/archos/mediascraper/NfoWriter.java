@@ -397,14 +397,20 @@ public class NfoWriter {
     }
 
     public static void export(Uri video, BaseTags tag, ExportContext exportContext) throws IOException {
-        if (tag instanceof MovieTags) {
-            exportInternal(video, (MovieTags)tag);
-        } else if (tag instanceof EpisodeTags) {
-            EpisodeTags etag = (EpisodeTags) tag;
-            exportInternal(video, etag);
-            // checks if this showTags was already exported within this context
-            exportInternal(video, etag.getShowTags(), exportContext);
-        }
+        new Thread(() -> {
+            try {
+                if (tag instanceof MovieTags) {
+                    exportInternal(video, (MovieTags)tag);
+                } else if (tag instanceof EpisodeTags) {
+                    EpisodeTags etag = (EpisodeTags) tag;
+                    exportInternal(video, etag);
+                    // checks if this showTags was already exported within this context
+                    exportInternal(video, etag.getShowTags(), exportContext);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     private static void exportImage(ScraperImage image, Uri folder,
