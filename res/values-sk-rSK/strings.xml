@@ -934,9 +934,16 @@
     <string name="sponsor">Podporiť aplikáciu Nova</string>
     <string name="enable_sponsor_title">Povoliť odkaz sponzorovania aplikácie Nova</string>
     <string name="enable_sponsor_summary">Povoliť sponzorský odkaz pre darovanie: každý príspevok pomáha.</string>
+    <string name="hdr_capability">Funkcie obrazovky HDR:</string>
+    <string name="hdmi_audio_capabilities">Zvukové funkcie HDMI:</string>
+    <string name="max_audio_channels">Maximálny počet zvukových kanálov:</string>
+    <string name="supported_refresh_rates">Podporované obnovovacie frekvencie:</string>
     <string name="upgrade_info">Informácie o aktualizácii</string>
     <string name="v5_v6_upgrade_info">UPOZORNENIE: táto hlavná aktualizácia Nova si vyžaduje opätovné skenovanie celej zbierky videí na opätovné získanie multimediálnych informácií.
         Dôrazne sa odporúča obnoviť program z čistej inštalácie, aby ste sa vyhli problémom. Podrobnosti nájdete v často kladených otázkach.</string>
     <string name="networks">Siete:</string>
     <string name="premiered">Premiéra:</string>
+    <string name="external_player_service_title">Prehrávanie z externého prehrávača</string>
+    <string name="external_player_service_description">Nova Video Player poskytuje obsah pre externý prehrávač</string>
+    <string name="stop">Zastaviť</string>
 </resources>

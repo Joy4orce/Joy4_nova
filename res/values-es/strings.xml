@@ -252,8 +252,8 @@
     <string name="info_file">Información del archivo</string>
     <string name="use_remote_resume">¿Usar posición de reanudación de red?</string>
     <!-- VIDEO COVER ROLL -->
-    <string name="you_have_no_recently_added_video">No hay vídeos agregados recientemente</string>
-    <string name="you_have_no_recently_played_video">No hay ningun vídeo reproducido recientemente</string>
+    <string name="you_have_no_recently_added_video">No hay vídeos recién añadidos</string>
+    <string name="you_have_no_recently_played_video">No hay vídeos recién vistos</string>
     <string name="you_have_no_video">No hay vídeos</string>
     <string name="you_have_no_video_yet">Buscando videos&#8230;</string>
     <string name="you_have_no_movies">No hay películas</string>
@@ -435,8 +435,8 @@
     <!-- Subtitle Delay Dialog -->
     <string name="subtitle_delay_speed">Ajuste de velocidad</string>
     <string name="subtitle_delay_radio_none">ninguno</string>
-    <string name="subtitle_delay_radio_ntsc2pal">Subtítulos demasiado rápidos</string>
-    <string name="subtitle_delay_radio_pal2ntsc">Subtítulos demasiado lentos</string>
+    <string name="subtitle_delay_radio_ntsc2pal">Subs. demasiado rápidos</string>
+    <string name="subtitle_delay_radio_pal2ntsc">Subs. demasiado lentos</string>
     <!-- Browser.CommonDetailsView -->
     <!-- Add a space after the right quote
     because the right part of the quote is
@@ -710,9 +710,9 @@
     <string name="preferences_show_last_added_row_summary">Marcar para mostrar una fila con tus últimos medios añadidos</string>
     <string name="preferences_show_last_added_row">Mostrar fila último añadido</string>
     <string name="preferences_show_last_played_row_summary">Marcar para mostrar fila con últimos medios reproducidos</string>
-    <string name="preferences_show_last_played_row">Mostrar fila último reproducido</string>
-    <string name="preferences_reset_last_played_row">Restablecer fila último reproducido</string>
-    <string name="reset_last_played_row_in_progress">Restableciendo fila último reproducido</string>
+    <string name="preferences_show_last_played_row">Mostrar fila último visto</string>
+    <string name="preferences_reset_last_played_row">Restablecer fila último visto</string>
+    <string name="reset_last_played_row_in_progress">Restableciendo fila último visto</string>
     <string name="preferences_show_all_movies_row_summary">Marcar para mostrar una fila con todas tus películas en lugar de la fila de categorías de la película</string>
     <string name="preferences_show_all_movies_row">Mostrar fila Todas las películas</string>
     <string name="preferences_movie_sort_order_summary">Selecciona el orden de la fila Todas las películas</string>
@@ -922,9 +922,16 @@
     <string name="sponsor">Patrocinar Nova</string>
     <string name="enable_sponsor_title">Habilitar el enlace de patrocinador de Nova</string>
     <string name="enable_sponsor_summary">Activar enlace de patrocinador para donaciones: cada contribución ayuda.</string>
+    <string name="hdr_capability">Capacidades de la pantalla HDR:</string>
+    <string name="hdmi_audio_capabilities">Capacidades del receptor de audio HDMI:</string>
+    <string name="max_audio_channels">Máximos canales de audio:</string>
+    <string name="supported_refresh_rates">Tasas de refresco soportadas:</string>
     <string name="upgrade_info">Información de la actualización</string>
     <string name="v5_v6_upgrade_info">ATENCIÓN: esta actualización importante de Nova requiere volver a escanear toda la colección de vídeo para readquisición de información multimedia.
         Se recomienda encarecidamente reiniciar desde una instalación limpia para evitar problemas. Por favor, compruebe FAQ para más detalles.</string>
     <string name="networks">Redes:</string>
     <string name="premiered">Estrenado:</string>
+    <string name="external_player_service_title">Reproducción externa</string>
+    <string name="external_player_service_description">Nova Video Player proporciona contenido para un reproductor externo</string>
+    <string name="stop">Detener</string>
 </resources>

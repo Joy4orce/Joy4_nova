@@ -924,9 +924,16 @@
     <string name="sponsor">Sponsor Nova</string>
     <string name="enable_sponsor_title">Nova Sponsor-Link aktivieren</string>
     <string name="enable_sponsor_summary">Sponsor-Link für Spenden aktivieren: Jeder Beitrag hilft.</string>
+    <string name="hdr_capability">HDR-Bildschirmfunktionen:</string>
+    <string name="hdmi_audio_capabilities">HDMI-Receiver Audio-Fähigkeiten:</string>
+    <string name="max_audio_channels">Maximale Anzahl an Audiokanälen:</string>
+    <string name="supported_refresh_rates">Unterstützte Aktualisierungsraten:</string>
     <string name="upgrade_info">Upgrade-Information</string>
     <string name="v5_v6_upgrade_info">WARNUNG: Diese Nova-Hauptaktualisierung erfordert ein erneutes Scannen der gesamten Videosammlung zur erneuten Erfassung von Multimedia-Informationen.
         Es wird dringend empfohlen, von einer sauberen Installation neu zu starten, um Probleme zu vermeiden. Bitte lesen Sie die FAQ für Details.</string>
     <string name="networks">Netzwerke:</string>
     <string name="premiered">Erstausstrahlung:</string>
+    <string name="external_player_service_title">Externe Player-Wiedergabe</string>
+    <string name="external_player_service_description">Nova Video Player bietet Inhalte für einen externen Player an</string>
+    <string name="stop">Stopp</string>
 </resources>

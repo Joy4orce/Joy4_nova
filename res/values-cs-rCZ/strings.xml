@@ -889,8 +889,11 @@
     <string name="sponsor">Podpořte aplikaci Nova</string>
     <string name="enable_sponsor_title">Aktivovat odkaz na sponzorské dary pro aplikaci Nova</string>
     <string name="enable_sponsor_summary">Aktivovat odkaz na sponzorské dary: každý příspěvek pomůže.</string>
+    <string name="max_audio_channels">Maximální počet audio kanálů:</string>
+    <string name="supported_refresh_rates">Podporované obnovovací frekvence:</string>
     <string name="upgrade_info">Informace o aktualizaci</string>
     <string name="v5_v6_upgrade_info">VAROVÁNÍ: tato významná aktualizace aplikace vyžaduje opětovné naskenování všech videí pro opětovné získání popisných informací.         Pro vyvarování se problémů doporučujeme začít znovu s čistou instalací. Prosím přečtěte si časté otázky (FAQ) pro další detaily.</string>
     <string name="networks">Sítě:</string>
     <string name="premiered">Premiéra:</string>
+    <string name="stop">Zastavit</string>
 </resources>

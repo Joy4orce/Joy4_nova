@@ -510,7 +510,7 @@
     <string name="preferences_force_software_decoding_summary">如果某些视频播放不正确，您可以尝试此选项</string>
     <string name="preferences_force_audio_passthrough">音频直通</string>
     <string name="preferences_force_audio_passthrough_disabled">已禁用 (推荐)</string>
-    <string name="preferences_force_audio_passthrough_enable">Nova 封装(实验性)</string>
+    <string name="preferences_force_audio_passthrough_enable">Nova 封装（实验性）</string>
     <string name="preferences_force_audio_passthrough_enable2">系统封装</string>
     <string name="preferences_force_audio_passthrough_summary">通过 HDMI 或 S/PDIF 传输压缩音频。⚠实验性功能，可能导致 A/V不同步</string>
     <string name="preferences_parser_sync_mode">解析器同步模式</string>
@@ -523,8 +523,8 @@
     <string name="preferences_stream_max_iframe_size_summary">最大压缩的 i-frame 大小，单位MB</string>
     <string name="preferences_force_passthrough">强制音频直通</string>
     <string name="preferences_force_passthrough_summary">如果启用了直通，即使 AV 接收器不支持音频编解码器，也强制执行它，而不检查 AV 接收器功能</string>
-    <string name="preferences_playback_speed">启用回放速度</string>
-    <string name="preferences_playback_speed_summary">允许改变回放速度。⚠ 实验性功能，可能导致视频断断续续</string>
+    <string name="preferences_playback_speed">启用播放速度</string>
+    <string name="preferences_playback_speed_summary">允许更改播放速度。⚠ 实验性功能，可能导致视频卡顿</string>
     <string name="preferences_disable_downmix_title">禁用混音至立体声</string>
     <string name="preferences_disable_downmix_summary">总是解码所有声道，并根据音频输出能力让安卓混音(可能导致声道丢失)</string>
     <string name="preferences_enable_downmix_androidtv_title">强制音频立体声降低混频</string>
@@ -534,7 +534,7 @@
     <string name="preference_tv_3d_automatic_switch">启用自动 3D 电视开关</string>
     <string name="preference_tv_3d_automatic_switch_summary">仅在您的 3D 电视支持的情况下使用此功能</string>
     <string name="enable_android_frame_timing">启用 Android 帧时间</string>
-    <string name="enable_android_frame_timing_summary">将帧缓冲绘制时间交由 Android 控制，以实现更流畅的播放(实验性)</string>
+    <string name="enable_android_frame_timing_summary">将帧缓冲绘制时间交由 Android 控制，以实现更流畅的播放（实验性）</string>
     <string name="preference_tv_refreshrate_switch">启用自动刷新率切换</string>
     <string name="preference_tv_refreshrate_switch_summary">通过匹配最佳屏幕刷新率与视频帧率去除抖动效果(可能受设备支持限制)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">禁用</string>
@@ -594,7 +594,7 @@
     <string name="video_info_backdrop_select">选择另一张图片</string>
     <string name="video_info_backdrop_remove">删除</string>
     <string name="video_info_backdrop_set_as">将图片设置为</string>
-    <string name="video_info_share_message">"我一直在Nova %2$s 上观看我的视频 \"%1$s"</string>
+    <string name="video_info_share_message">"我一直在 Nova %2$s 上观看我的视频 \"%1$s"</string>
     <string name="notification_mode">通知</string>
     <string name="notifications_all">所有通知</string>
     <string name="notifications_alerts">仅通知提醒</string>
@@ -919,9 +919,16 @@
     <string name="sponsor">赞助 Nova</string>
     <string name="enable_sponsor_title">启用 Nova 赞助链接</string>
     <string name="enable_sponsor_summary">启用捐赠赞助链接：每个捐赠都有帮助。</string>
+    <string name="hdr_capability">HDR 屏幕功能：</string>
+    <string name="hdmi_audio_capabilities">HDMI 接收器音频功能：</string>
+    <string name="max_audio_channels">最大音频声道数：</string>
+    <string name="supported_refresh_rates">支持的刷新率：</string>
     <string name="upgrade_info">升级信息</string>
     <string name="v5_v6_upgrade_info">警告：此版本 Nova 有重大更新，需要重新扫描所有视频合集库以重新获取多媒体信息。
         强烈建议重新安装后重新启动，以避免出现问题。详情请参阅“常见问题”。</string>
     <string name="networks">网络：</string>
     <string name="premiered">首映:</string>
+    <string name="external_player_service_title">外部播放器播放</string>
+    <string name="external_player_service_description">Nova 视频播放器为外部播放器提供内容</string>
+    <string name="stop">停止</string>
 </resources>

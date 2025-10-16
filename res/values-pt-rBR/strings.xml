@@ -286,6 +286,7 @@
     <string name="switch_to_list">Lista</string>
     <string name="switch_to_grid">Grade</string>
     <!-- VideoPlayer -->
+    <string name="player_track">Faixa</string>
     <string name="player_loading_video">Cargando vídeo\u2026</string>
     <string name="player_audio_track_toast">Faixa de Áudio:</string>
     <string name="player_subtitle_track_toast">Faixa de legenda:</string>
@@ -329,7 +330,9 @@
     <string name="set_audio_speed_to">Velocidade de áudio %s</string>
     <!-- Subtitles/Audio languages -->
     <!-- Subtitles in filename HI = Hearing Impaired -->
+    <string name="subs_HI">Deficientes auditivos</string>
     <!-- Subtitles in filename SDH = Subtitles for the Deaf and Hard of Hearing -->
+    <string name="subs_SDH">Legendas para os Surdos e Difícil de Ouvir</string>
     <!-- opensubtitles REST API not recognized languages ea=Spanish (LA)|ex=Extremaduran|me=Montenegrin|ma=Manipuri|pr=Dari|sp=Spanish (EU)|sx=Santali|sy=Syriac|tp=Toki Pona|ze=Chinese bilingual -->
     <string name="s_brazilian">Português Brasileiro</string>
     <string name="s_chinese">Chinês</string>
@@ -446,6 +449,7 @@
     <string name="exit">Sair</string>
     <!-- torrent -->
     <string name="error">Ocorreu um erro</string>
+    <string name="error_protocol_not_supported">Erro: protocolo não suportado</string>
     <string name="error_loading_torrent">Erro ao carregar torrent</string>
     <string name="error_downloading_not_enough_space">Erro durante o download do torrent: não há espaço suficiente</string>
     <string name="loading_torrent">Carregando Torrent…</string>
@@ -538,6 +542,9 @@
     <string name="enable_android_frame_timing_summary">Indicar ao Android o frame de tempo iluminado para uma reprodução mais suave (experimental)</string>
     <string name="preference_tv_refreshrate_switch">Habilitar mudança automática da taxa de atualização</string>
     <string name="preference_tv_refreshrate_switch_summary">Remova o efeito \"judder\" (trepidação) adaptando a melhor taxa de atualização da tela à taxa de quadros de vídeo (o suporte ao dispositivo pode variar)</string>
+    <string name="preferences_tv_refreshrate_switch_disabled">Desativado</string>
+    <string name="preferences_tv_refreshrate_switch_mode_selection">Exibir modo seleção de video fps correspondentes</string>
+    <string name="preferences_tv_refreshrate_switch_match_frame_rate">Recurso correspondente a taxa de quadros do Android 12+</string>
     <string name="preference_remove_dolby_vision">Desabilitar dolby vision</string>
     <string name="preference_remove_dolby_vision_summary">Dar preferência aos codecs de video padrão ao invés dos codecs dolby vision</string>
     <string name="preference_cutout_short_edges">Vídeo em tela cheia com cortamentos de tela</string>
@@ -551,6 +558,8 @@
     <string name="summary_list_preference_primary">Selecione seus idiomas para baixar legendas</string>
     <string name="favSubLang_title">Idiomas de leitura de legendas</string>
     <string name="favSubLang_summary">Escolha seu idioma favorito para ler legendas</string>
+    <string name="favAudioLang_title">Idioma preferencial do áudio</string>
+    <string name="favAudioLang_summary">Escolha o seu idioma de faixa de áudio favorita</string>
     <string name="ui_language_title">Escolha um idioma da interface do usuário</string>
     <string name="UiLang_title">Idioma da interface de usuário</string>
     <string name="UiLang_summary">Defina o idioma da interface do usuário e escolha o sistema para usar o padrão do sistema</string>
@@ -628,6 +637,12 @@
     <string name="share_folders_smbv2_summary">Habilitar suporte a comparilhamento via Protocolo SMB Versão 2.</string>
     <string name="share_folders_smb_resolv">Ordem de resolução SMB</string>
     <string name="share_folders_smb_resolv_summary">Habilitar BCAST, DNS (Padrão: DNS, BCAST). Modifique esta opção se tiver problemas de resolucão de nome ou experimentar lentidão com SMB.</string>
+    <string name="share_folders_smb_disable_tcp_discovery">Desativar descoberta de SMB TCP</string>
+    <string name="share_folders_smb_disable_tcp_discovery_summary">Desative a descoberta TCP se você tiver problemas com Wi-Fi instável em alguns dispositivos.</string>
+    <string name="share_folders_smb_disable_udp_discovery">Desativar a descoberta SMB UDP</string>
+    <string name="share_folders_smb_disable_udp_discovery_summary">Desative a descoberta UDP se você tiver problemas com Wi-Fi instável em alguns dispositivos(ex. Fire 10 HD).</string>
+    <string name="share_folders_smb_disable_mdns_discovery">Desativar a descoberta SMB mDNS</string>
+    <string name="share_folders_smb_disable_mdns_discovery_summary">Desative a descoberta mDNS se você tiver problemas com Wi-Fi instável em alguns dispositivos.</string>
     <string name="share_folders_smb_discovery_limited_to_mdsn">Limitar a descoberta SMB à mDNS</string>
     <string name="share_folders_smb_discovery_limited_to_mdsn_summary">Desative a descoberta UDP/TCP se você experimentar Wi-Fi instável em alguns dispositivos (por exemplo, Fire 10 HD). ⚠️ Irá impedir a descoberta de funcionar no ChromeOS.</string>
     <string name="connection_abnormally_long">A conexão parece anormalmente longa. Gostaria de redefini-la?</string>
@@ -909,8 +924,15 @@
     <string name="sponsor">Patrocinar Nova</string>
     <string name="enable_sponsor_title">Habilitar link de patrocinador Nova</string>
     <string name="enable_sponsor_summary">Habilitar link de patrocinador Nova: cada contribuição ajuda.</string>
+    <string name="hdr_capability">Capacidade de tela HDR:</string>
+    <string name="hdmi_audio_capabilities">Recursos de áudio do receptor HDMI:</string>
+    <string name="max_audio_channels">Máximo de canais de áudio:</string>
+    <string name="supported_refresh_rates">Taxas de atualização suportadas:</string>
     <string name="upgrade_info">Informações sobre atualização</string>
     <string name="v5_v6_upgrade_info">ATENÇÃO: Esta atualização do NOVA requer uma nova verificação de toda a biblioteca de mídia.        É extremamente recomendado re-começar com uma instalação limpa para evitar complicações. Por favor, consulte as perguntas frequentes (FAQ) para mais detalhes.</string>
     <string name="networks">Redes:</string>
     <string name="premiered">Estreia:</string>
+    <string name="external_player_service_title">Reprodução externa</string>
+    <string name="external_player_service_description">Nova Video Player fornece conteúdo para um reprodutor externo</string>
+    <string name="stop">Parar</string>
 </resources>

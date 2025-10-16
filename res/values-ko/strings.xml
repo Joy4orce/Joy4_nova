@@ -23,6 +23,7 @@
     <!-- Menu item to refresh servers list -->
     <string name="refresh_servers_list">서버목록 새로고침</string>
     <!-- Menu item to enable network shares -->
+    <string name="enable_network_shares"></string>
     <!-- Library screen, menu item -->
     <string name="search_title">검색</string>
     <!-- Default name of track that doesn't have a name in the metadata -->
