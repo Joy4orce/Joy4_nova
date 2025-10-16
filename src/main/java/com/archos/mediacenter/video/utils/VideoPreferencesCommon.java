@@ -477,14 +477,25 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         mEnableSponsor = (CheckBoxPreference) findPreference(KEY_ENABLE_SPONSOR);
         mWatchingUpNext = (CheckBoxPreference) findPreference(KEY_SHOW_WATCHING_UP_NEXT_ROW);
         mForceAudioPassthrough = (CheckBoxPreference) findPreference(KEY_FORCE_AUDIO_PASSTHROUGH);
-        ListPreference mForceAudioPassthroughMultiple = (ListPreference) findPreference("force_audio_passthrough_multiple");
+        mPlaybackSpeed = (CheckBoxPreference) findPreference(KEY_PLAYBACK_SPEED);
+        final ListPreference mForceAudioPassthroughMultiple = (ListPreference) findPreference("force_audio_passthrough_multiple");
         if (!CustomApplication.isPassthroughSupported()) {
             mForceAudioPassthrough.setEnabled(false);
             mForceAudioPassthroughMultiple.setEnabled(false);
+        } else {
+            String passthroughMode = mSharedPreferences.getString("force_audio_passthrough_multiple", "0");
+            boolean passthroughEnabled = !"0".equals(passthroughMode);
+            mForceAudioPassthrough.setEnabled(passthroughEnabled);
+            mPlaybackSpeed.setEnabled(!passthroughEnabled);
+            mForceAudioPassthroughMultiple.setOnPreferenceChangeListener((preference, newValue) -> {
+                boolean newPassthroughEnabled = !"0".equals(newValue.toString());
+                mForceAudioPassthrough.setEnabled(newPassthroughEnabled);
+                mPlaybackSpeed.setEnabled(!newPassthroughEnabled);
+                return true;
+            });
         }
         mStreamBufferSize = (EditTextPreference) findPreference(KEY_STREAM_BUFFER_SIZE);
         mStreamMaxIFrameSize = (EditTextPreference) findPreference(KEY_STREAM_MAX_IFRAME_SIZE);
-        mPlaybackSpeed = (CheckBoxPreference) findPreference(KEY_PLAYBACK_SPEED);
         mDisableDownmix = (CheckBoxPreference) findPreference("disable_downmix");
         mEnableDownmixATV = (CheckBoxPreference) findPreference("enable_downmix_androidtv");
         mActivate3DTVSwitch = (CheckBoxPreference) findPreference(KEY_ACTIVATE_3D_SWITCH);
@@ -590,9 +601,13 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         });
 
         // disable jcifs-ng options if smbj SMB implementation is selected
+        boolean smbjChecked = mSmbj.isChecked();
+        mSmb2.setEnabled(!smbjChecked);
+        mSmb2.setSelectable(!smbjChecked);
         mSmbj.setOnPreferenceChangeListener((preference, newValue) -> {
-            if ((boolean)newValue) mSmb2.setChecked(true);
-            mSmb2.setEnabled(!(boolean)newValue);
+            boolean newSmbjChecked = (boolean)newValue;
+            mSmb2.setEnabled(!newSmbjChecked);
+            mSmb2.setSelectable(!newSmbjChecked);
             // do not disable SMB resolver since jcifs-ng is used for address resolution even with smbj
             //mSmbResolver.setEnabled(!(boolean)newValue);
             return true;
@@ -1129,10 +1144,16 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
 
     private void setTraktPreferencesEnabled(boolean enabled) {
         mTraktWipePreference.setEnabled(enabled);
+        mTraktWipePreference.setSelectable(enabled);
         mTraktLiveScrobblingPreference.setEnabled(enabled);
+        mTraktLiveScrobblingPreference.setSelectable(enabled);
         mTraktSyncCollectionPreference.setEnabled(enabled);
-        mTraktSyncProgressPreference.setEnabled(mTraktLiveScrobblingPreference.isChecked() && mTraktLiveScrobblingPreference.isEnabled());
+        mTraktSyncCollectionPreference.setSelectable(enabled);
+        boolean syncProgressEnabled = mTraktLiveScrobblingPreference.isChecked() && enabled;
+        mTraktSyncProgressPreference.setEnabled(syncProgressEnabled);
+        mTraktSyncProgressPreference.setSelectable(syncProgressEnabled);
         mTraktSigninPreference.setEnabled(!enabled);
+        mTraktSigninPreference.setSelectable(!enabled);
     }
 
     public void onSaveInstanceState(Bundle outState) {
