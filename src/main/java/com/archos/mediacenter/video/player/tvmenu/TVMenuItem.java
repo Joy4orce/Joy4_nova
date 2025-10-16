@@ -147,7 +147,15 @@ public class TVMenuItem extends LinearLayout implements Checkable, TVSlaveView{
                     parent = parent.getParent();
                 }
                 if (parent instanceof TVMenu) {
-                    return ((TVMenu) parent).onKeyDown(event.getKeyCode(), event);
+                    if (((TVMenu) parent).onKeyDown(event.getKeyCode(), event)) {
+                        return true;
+                    }
+                    // if onKeyDown returns false, it means we are at a boundary.
+                    if (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_UP || event.getKeyCode() == KeyEvent.KEYCODE_DPAD_DOWN) {
+                        // We should not propagate to super.dispatchKeyEvent, because that will
+                        // trigger the default focus search. We should just consume the event.
+                        return true;
+                    }
                 }
             }
         }
