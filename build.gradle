@@ -147,13 +147,6 @@ dependencies {
     api 'org.jupnp:org.jupnp:3.0.3'
     api 'org.jupnp:org.jupnp.support:3.0.3'
     api 'org.jupnp:org.jupnp.android:3.0.3'
-    // all below is linked to cling, jetty version locked to latest 8.1
-    api 'com.github.nova-video-player.cling:cling-core:2.1.7'
-    implementation 'com.github.nova-video-player.cling:cling-support:2.1.7'
-    implementation 'com.github.nova-video-player.seamless:seamless-swing:1.1.4'
-    implementation 'com.github.nova-video-player.seamless:seamless-xml:1.1.4'
-    implementation 'com.github.nova-video-player.seamless:seamless-util:1.1.4'
-    implementation 'com.github.nova-video-player.seamless:seamless-http:1.1.4'
     implementation 'javax.servlet:javax.servlet-api:4.0.1'
     // jetty 9.2.x for Android API 23 compatibility (LongAdder not available until API 24)
     implementation ('org.eclipse.jetty:jetty-server:9.2.30.v20200428') {
