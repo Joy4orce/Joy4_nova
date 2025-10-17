@@ -605,10 +605,10 @@ public class SubtitlesDownloaderActivity2 extends AppCompatActivity {
 
                 // We get the first matching subtitle
                 FileEditor editor = FileEditorFactory.getFileEditorForUrl(Uri.parse(srtURl), SubtitlesDownloaderActivity2.this);
-                if(editor.exists()) {
-                    log.debug("downloadSubtitles: delete first " + srtURl);
-                    editor.delete();//delete first
-                }
+                //if(editor.exists()) {
+                //    log.debug("downloadSubtitles: delete first " + srtURl);
+                //    editor.delete();//delete first
+                //}
                 f = editor.getOutputStream();
                 int l = 0;
                 int totalBytesWritten = 0;
