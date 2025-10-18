@@ -248,7 +248,7 @@ public class VideoInfoActivity extends AppCompatActivity {
                 forceVideoSelection = mForceCurrentPosition;
             }
             // Use the class's fields instead of the outer activity's fields
-            return org.leeroy.mediaplayer.video.info.VideoInfoActivityFragment.getInstance(video, mPaths.size() > 0 ? mPaths.get(position) : null, id, forceVideoSelection);
+            return VideoInfoActivityFragment.getInstance(video, !mPaths.isEmpty() ? mPaths.get(position) : null, id, forceVideoSelection);
         }
 
         @Override
