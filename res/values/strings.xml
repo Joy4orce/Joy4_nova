@@ -569,6 +569,7 @@
     <string name="preferences_force_audio_passthrough_disabled">Disabled (recommended)</string>
     <string name="preferences_force_audio_passthrough_enable">Nova encapsulation (experimental)</string>
     <string name="preferences_force_audio_passthrough_enable2">System encapsulation</string>
+    <string name="preferences_force_audio_passthrough_ac3">Universal passthrough (AC3 recoding)</string>
     <string name="preferences_force_audio_passthrough_summary">Transmit compressed audio over HDMI or S/PDIF. ⚠ Experimental may result in A/V out of sync</string>
     <string name="preferences_parser_sync_mode">Parser synchronisation mode</string>
     <string name="preferences_parser_sync_mode_cdata">PTS based (recommended)</string>
