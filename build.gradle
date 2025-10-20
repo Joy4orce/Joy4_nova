@@ -154,8 +154,8 @@ android {
         // below version tracks the one from F-Droid or universal package when generated with ./gradlew -Puniversal
         // this is overridden when using split apk and normal split apk generation or oneapk amazon generation
         // amazon apk is generated with ./gradlew -Poneapk
-        versionCode = 6040016
-        versionName = '6.4.16'
+        versionCode = 6040017
+        versionName = '6.4.17'
         def novaVersionName = versionName
         if (! project.hasProperty("universal")) {
             // override versionName and versionCode to get it dependent on the date
@@ -322,6 +322,9 @@ android {
             includeInApk = false
             includeInBundle = false
         }
+    }
+    buildFeatures {
+	aidl = true
     }
 }
 

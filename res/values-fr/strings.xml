@@ -517,6 +517,7 @@
     <string name="preferences_force_audio_passthrough_disabled">Désactivé (recommandé)</string>
     <string name="preferences_force_audio_passthrough_enable">Encapsulation Nova (expérimental)</string>
     <string name="preferences_force_audio_passthrough_enable2">Encapsulation système</string>
+    <string name="preferences_force_audio_passthrough_ac3">Universel (ré-encodage AC3)</string>
     <string name="preferences_force_audio_passthrough_summary">Transmission du signal audio compressé via HDMI ou S/PDIF. ⚠ Expérimental, peut occasionner une désynchronisation A/V</string>
     <string name="preferences_parser_sync_mode">Mode de synchronisation du parser</string>
     <string name="preferences_parser_sync_mode_cdata">basé sur les PTS (recommandé)</string>
@@ -879,6 +880,23 @@
     <string name="db_export_manual_title">Export de la base de donnée media</string>
     <string name="db_export_manual_summary">Exporter le fichier media.db vers /sdcard à des fins de débogage</string>
     <string name="db_export_in_progress">Export de la base de donnée en cours</string>
+    <string name="media_library_export_title">Exporter la médiathèque + les identifiants + les raccourcis</string>
+    <string name="media_library_export_summary">Exporter media.db, les identifiants réseau (SMB/FTP/SFTP), les raccourcis réseau et toutes les images mises en cache en tant que fichier zip</string>
+    <string name="media_library_import_title">Importer la médiathèque + les identifiants + les raccourcis</string>
+    <string name="media_library_import_summary">Importer media.db, les identifiants réseau, les raccourcis réseau et les images mises en cache à partir d\'un fichier zip précédemment exporté</string>
+    <string name="media_library_export_in_progress">Exportation de la médiathèque, des identifiants et des raccourcis</string>
+    <string name="media_library_import_in_progress">Importation de la médiathèque, des identifiants et des raccourcis</string>
+    <string name="media_library_export_success">Médiathèque, identifiants et raccourcis exportés avec succès vers:\n%s</string>
+    <string name="media_library_import_success">La médiathèque, les identifiants et les raccourcis ont été importés avec succès. Redémarrage de l\'application...</string>
+    <string name="media_library_import_error">Erreur lors de l\'importation de la médiathèque</string>
+    <string name="media_library_export_error">Erreur lors de l\'exportation de la médiathèque</string>
+    <string name="media_library_export_dir_not_found">Répertoire d\'exportation introuvable</string>
+    <string name="media_library_no_backup_found">Aucun fichier de sauvegarde trouvé. Veuillez d\'abord l\'exporter.</string>
+    <string name="media_library_backup_info">Fichier de sauvegarde trouvé : backup.zip\nTaille: %d Mo\n\n⚠️ Contient : métadonnées, identifiants, raccourcis, images\n\nProcéder à l\'importation ?</string>
+    <string name="media_library_import_dialog_title">Importer la médiathèque + les identifiants + les raccourcis</string>
+    <string name="media_library_import_confirm_title">⚠️ CONFIRMER LE REMPLACEMENT COMPLET</string>
+    <string name="media_library_import_warning">⚠️ AVERTISSEMENT : REPLACEMENT COMPLET ⚠️\n\nCeci SUPPRIMER COMPLÈTEMENT votre médiathèque actuel et le remplacera par la sauvegarde.\n\nTOUTES les données actuelles seront PERDUES POUR TOUJOURS :\n• Toutes les métadonnées\n• Toutes les affiches et les arrière-plans\n• Toutes les traces de progression et d\'historique\n• Tous les identifiants réseau (SMB/FTP/SFTP/WebDAV)\n• Tous les raccourcis réseaux/signets\n• Toutes les modifications personnalisées\n\nCette action NE PEUT PAS être annulée !\n\nL\'application redémarrera automatiquement après l\'importation.\n\nÊtes-vous absolument sûr de vouloir continuer ?</string>
+    <string name="media_library_import_button_confirm">OUI, SUPPRIMER ET REMPLACER</string>
     <string name="system">Système</string>
     <string name="keep_setting">Conserver ce réglage globalement</string>
     <string name="select_sub_file"><![CDATA[Les sous-titres exacts n\'ont pas été trouvés pour ce fichier <font color=#29b6f6><i>%s</i></font><br />Choisissez un fichier parmi cette liste:]]></string>
@@ -924,8 +942,15 @@
     <string name="sponsor">Sponsoriser Nova</string>
     <string name="enable_sponsor_title">Activer le lien de sponsor Nova</string>
     <string name="enable_sponsor_summary">Activer le lien pour effectuer des dons: chaque contribution compte.</string>
+    <string name="hdr_capability">Capacités HDR de l\'écran :</string>
+    <string name="hdmi_audio_capabilities">Capacités audio du récepteur HDMI :</string>
+    <string name="max_audio_channels">Nombre maximum de canaux audio :</string>
+    <string name="supported_refresh_rates">Taux de rafraîchissement pris en charge :</string>
     <string name="upgrade_info">Informations sur la mise à jour</string>
     <string name="v5_v6_upgrade_info">ATTENTION : cette mise à jour majeure de Nova nécessite de re-scanner toute la bibliothèque de vidéos pour réacquérir les informations multimédia. Il est fortement conseillé de reinstaller complètement l\'application afin d\'éviter les problèmes. Veuillez consulter la FAQ pour plus de détails.</string>
     <string name="networks">Chaînes :</string>
     <string name="premiered">1ère diffusion :</string>
+    <string name="external_player_service_title">Lecture du lecteur externe</string>
+    <string name="external_player_service_description">Nova Video Player fournit du contenu pour un lecteur externe</string>
+    <string name="stop">Arrêt</string>
 </resources>
