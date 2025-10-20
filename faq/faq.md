@@ -15,22 +15,25 @@ Nova Video Player is just a video player and does not point to any streaming ser
 
 Network shares can also be added as video sources.
 
-## What is the difference between passthrough mode 1 and passthrough mode 2?
+## What are the differences between the audio passthrough modes?
 
 Audio passthrough amounts to transmit through HDMI interface compressed sound channels directly to your AV receiver that will perform the decoding and rendering. It is thus a feature targeted for Android TV or TV boxes.  
-On Nova Video Player, two experimental audio passthrough modes are supported:  
+On Nova Video Player, three audio passthrough modes are supported:  
 
-* Mode 1 targets TV boxes with early versions of Android (up to Kitkat 4.4). Note that on some devices you need to set the sound volume to maximum (so that the streams are not altered by the sound mixer).
-* Mode 2 targets latest versions of Android above 5.1 (Nvidia Shield TV and télévision Android TV).
+* Nova encapsulation (experimental): spdif/IEC61937 encapsulation is done by nova opening directly an IEC61937 audio track;
+* System encapsulation: Android performs the encapsulation;
+* Universal (AC3 recode): targets AndroidTV TVs linked to AV receiver through ARC that cannot sustain multichannel PCM payload (i.e. ARC non eARC), to recode original sound track to AC3 5.1 and use system encapsulation passthrough.
 
-You might have to try the two modes and figure out what suits you best depending on the multi-channel audio codec used in your video files.
+You might have to try the various modes and figure out what suits you best depending on the multi-channel audio codec used in your video files.
 
 Note that:
 
 * when using an Android TV box (not an Android TV TV) directly connected via HDMI to your AV multichannel receiver and thus not through ARC, multichannel support can be achieved through multichannel PCM which is natively supported by Nova without the need to activate passthrough;
 * multichannel PCM or AAC is not supported via ARC (eARC is required) resulting in stereo output
 
-More details are available [here](https://github.com/nova-video-player/aos-AVP/wiki/Audio-and-passthrough).
+Force Audio passthrough nova option disables AV receiver capability check to always use passthrough. This could result in streams not being properly decoded. This mode is enabled by default because some AV receivers were found capable of decoding more than what they were advertizing. For safer playback, consider disabling this option.
+
+Note that playback speed is not supported when using audio passthrough.
 
 ## Some videos play really slowly on my device.
 
@@ -159,6 +162,16 @@ Best is to use HDMI 2.1 compativle devices and be aware that you can deteriorate
 
 In order to get adaptive refresh rate on Amazon fire tv stick you need to enable it in fireOS settings -> display & sounds -> Display, put video resolution to auto (up to 4k ultra hd); -> match original frame rate ON; -> dynamic range settings disable HDR or set it to adaptive. If you do not do this you will only have a restrictive set of refresh rates available.
 Note that choosing adaptive for dynamic range setting, your UI will be 1080p, and disabled will enable a 4k UI.
+
+## How to use playback speed.
+
+First you need to enable it in nova settings ("Enable playback speed").
+This option is not available when using audio passthrough.
+
+This feature enables various playback speed from 0.05x to 2.00x. Though accessible through menu/tile while playing, various shortcuts (cf dedicated section) are available. Control is also mapped to next/prev track available on some remotes (e.g. Ugoos UR02 BT remote).
+
+It might not work when you are using a AV receiver (e.g. nvidia shield with samsung soundbar).
+It might cause choppy video playback on some hardware due to funky audiotrack implementation (e.g. Mediatek based Google streamer).
 
 ## Visibility of external USB drive on Nvidia Shield.
 
