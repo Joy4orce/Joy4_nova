@@ -403,7 +403,7 @@ public class SubtitleManager {
         ArrayList<MetaFile2> subs = new ArrayList<>();
         List<MetaFile2> metaFile2List = null;
         try {
-            log.debug("recursiveSubListing: " + parentUri.toString());
+            log.debug("recursiveSubListing: {}", parentUri.toString());
             metaFile2List = RawListerFactoryWithUpnp.getRawListerForUrl(parentUri).getFileList();
             List<String> subtitlesExtensions = VideoUtils.getSubtitleExtensions();
             String name;
@@ -422,7 +422,7 @@ public class SubtitleManager {
                                     nameNoCase.equals("subtitle")
                     )){
                         // add all subs in the specific subdirectory
-                        log.debug("recursiveSubListing: recursing into " + item.getUri().toString() + " for " + filenameWithoutExtension);
+                        log.debug("recursiveSubListing: recursing into {} for {}", item.getUri().toString(), filenameWithoutExtension);
                         subs.addAll(recursiveSubListing(item.getUri(), filenameWithoutExtension, true));
                         continue;
                     }
@@ -461,7 +461,7 @@ public class SubtitleManager {
     }
 
     public List<SubtitleFile> listLocalAndRemotesSubtitles(Uri video, boolean addAllSubs, boolean includeIdx, boolean addCache) {
-        log.debug("listLocalAndRemotesSubtitles: " + video + " addAllSubs=" + addAllSubs + " includeIdx=" + includeIdx + " addCache=" + addCache);
+        log.debug("listLocalAndRemotesSubtitles: {} addAllSubs={} includeIdx={} addCache={}", video, addAllSubs, includeIdx, addCache);
         List<MetaFile2> allFiles = new ArrayList<MetaFile2>();
         List<SubtitleFile> subList = new LinkedList<SubtitleFile>();
 

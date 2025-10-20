@@ -619,12 +619,12 @@ public class SubtitlesDownloaderActivity2 extends AppCompatActivity {
                 }
                 // f needs to be closed before the copy otherwise STATUS_SHARING_VIOLATION with smbj
                 f.close();
-                log.debug("downloadSubtitles: successfully wrote " + totalBytesWritten + " bytes to " + srtURl);
+                log.debug("downloadSubtitles: successfully wrote {} bytes to {}", totalBytesWritten, srtURl);
                 if(fileUrl != null) {
                     ContentResolver resolver = getContentResolver();
                     VideoDbInfo videoDbInfo = VideoDbInfo.fromUri(resolver, Uri.parse(fileUrl));
                     if (videoDbInfo != null) {
-                        log.debug("downloadSubtitles: update subtitle count videoDbInfo for " + videoDbInfo.id);
+                        log.debug("downloadSubtitles: update subtitle count videoDbInfo for {}", videoDbInfo.id);
                         final String where = VideoStore.Video.VideoColumns._ID + " = " + videoDbInfo.id;
                         videoDbInfo.nbSubtitles = videoDbInfo.nbSubtitles == -1 ? 1 : videoDbInfo.nbSubtitles + 1;
                         ContentValues values = new ContentValues(1);

@@ -83,7 +83,7 @@ public class AdditionalServiceSingleton {
             intent.setComponent(new ComponentName("org.courville.supernova", "org.courville.supernova.NovaAiService"));
             try {
                 boolean res = context.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-                log.debug("Trying to bind supernova gave " + res);
+                log.debug("Trying to bind supernova gave {}", res);
             } catch (SecurityException e) {
                 log.error("Failed binding to supernova", e);
             }
