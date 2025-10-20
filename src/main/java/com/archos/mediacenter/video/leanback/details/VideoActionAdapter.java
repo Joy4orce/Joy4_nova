@@ -184,9 +184,9 @@ public class VideoActionAdapter extends SparseArrayObjectAdapter {
     private boolean foundDifferencesRequiringDetailsUpdate(Video v1, Video v2, int oldRemoteResume) {
 
         if (v1==null || v2==null) {log.debug("foundDifferencesRequiringDetailsUpdate null"); return true;}
-        log.debug("foundDifferencesRequiringDetailsUpdate remotev1"+oldRemoteResume);
-        log.debug("foundDifferencesRequiringDetailsUpdate remotev2"+v2.getRemoteResumeMs());
-        log.debug("foundDifferencesRequiringDetailsUpdate v2"+v2.getResumeMs());
+        log.debug("foundDifferencesRequiringDetailsUpdate remotev1{}", oldRemoteResume);
+        log.debug("foundDifferencesRequiringDetailsUpdate remotev2{}", v2.getRemoteResumeMs());
+        log.debug("foundDifferencesRequiringDetailsUpdate v2{}", v2.getResumeMs());
 
         if (v1.hasScraperData() != v2.hasScraperData()) {log.debug("foundDifferencesRequiringDetailsUpdate hasScraperData"); return true;}
         if (v1.getResumeMs() != v2.getResumeMs()) {log.debug("foundDifferencesRequiringDetailsUpdate resumeMs"); return true;}

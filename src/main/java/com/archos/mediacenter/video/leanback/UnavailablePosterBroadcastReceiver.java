@@ -23,7 +23,6 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
-import android.util.Log;
 
 import com.archos.filecorelibrary.FileEditorFactory;
 import com.archos.mediaprovider.video.LoaderUtils;
@@ -31,15 +30,19 @@ import com.archos.mediaprovider.video.ScraperStore;
 import com.archos.mediaprovider.video.VideoStore;
 import com.archos.mediascraper.BaseTags;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Created by alexandre on 21/12/15.
  */
 public class UnavailablePosterBroadcastReceiver extends BroadcastReceiver{
+
+    private static final Logger log = LoggerFactory.getLogger(UnavailablePosterBroadcastReceiver.class);
+
     private static UnavailablePosterBroadcastReceiver sReceiver;
     private static String ACTION_CHECK_POSTER = "ACTION_CHECK_POSTER";
-    private static String TAG = "UnavailablePosterBroadcastReceiver";
     public static final String COLUMN_COVER_PATH = "cover";
-
 
     //delete poster from DB when can't be loaded
 
@@ -70,9 +73,9 @@ public class UnavailablePosterBroadcastReceiver extends BroadcastReceiver{
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "onReceive");
+        log.debug("onReceive");
         if(ACTION_CHECK_POSTER.equals(intent.getAction())&&intent.getLongExtra("VIDEO_ID",-1)!=-1){
-            Log.d(TAG, "onReceive2");
+            log.debug("onReceive2");
             StringBuilder sb = new StringBuilder();
             if (LoaderUtils.mustHideUserHiddenObjects()) {
                 sb.append(LoaderUtils.HIDE_USER_HIDDEN_FILTER);
@@ -109,7 +112,7 @@ public class UnavailablePosterBroadcastReceiver extends BroadcastReceiver{
                             }
                         }
                     } catch (Exception e) {
-                        Log.w(TAG, "Error checking poster file: " + path, e);
+                        log.warn("Error checking poster file: {}", path, e);
                         shouldClear = true;
                         reason = "error accessing file: " + e.getMessage();
                     }
@@ -123,31 +126,28 @@ public class UnavailablePosterBroadcastReceiver extends BroadcastReceiver{
                             uri = ContentUris.withAppendedId(ScraperStore.Episode.URI.ID, scraperId);
                             cv.put(ScraperStore.Episode.POSTER_ID, -1);
                             cv.putNull(ScraperStore.Episode.COVER);
-                            Log.w(TAG, "Cached episode poster missing or corrupted: path=" + path + ", title=" + c.getString(titleColumn) + ", videoId=" + intent.getLongExtra("VIDEO_ID",-1) + ", episodeId=" + scraperId + ", reason=" + reason + " - clearing and triggering re-scrape");
+                            log.warn("Cached episode poster missing or corrupted: path={}, title={}, videoId={}, episodeId={}, reason={} - clearing and triggering re-scrape",
+                                    path, c.getString(titleColumn), intent.getLongExtra("VIDEO_ID",-1), scraperId, reason);
                         }
                         else {
                             scraperId = c.getLong(idMovieColumn);
                             uri = ContentUris.withAppendedId(ScraperStore.Movie.URI.ID, scraperId);
                             cv.put(ScraperStore.Movie.POSTER_ID, -1);
                             cv.putNull(ScraperStore.Movie.COVER);
-                            Log.w(TAG, "Cached movie poster missing or corrupted: path=" + path + ", title=" + c.getString(titleColumn) + ", videoId=" + intent.getLongExtra("VIDEO_ID",-1) + ", movieId=" + scraperId + ", reason=" + reason + " - clearing and triggering re-scrape");
+                            log.warn("Cached movie poster missing or corrupted: path={}, title={}, videoId={}, movieId={}, reason={}  - clearing and triggering re-scrape",
+                                    path, c.getString(titleColumn), intent.getLongExtra("VIDEO_ID",-1), scraperId, reason);
                         }
                         int n = context.getContentResolver().update(uri,cv,null,null);
-                        Log.d(TAG, n + " DB records updated for " + (scraperType == BaseTags.TV_SHOW ? "episode" : "movie") + ", poster cleared to trigger re-download");
+                        log.debug("{} DB records updated for {}, poster cleared to trigger re-download", n, (scraperType == BaseTags.TV_SHOW ? "episode" : "movie"));
 
                     }
                 }
                 else {
-                    Log.d(TAG, "Video has no poster path in DB: title=" + c.getString(titleColumn) + ", videoId=" + intent.getLongExtra("VIDEO_ID",-1));
+                    log.debug("Video has no poster path in DB: title={}, videoId={}", c.getString(titleColumn), intent.getLongExtra("VIDEO_ID",-1));
                 }
             }
             if (c!=null)
                 c.close();
         }
     }
-
-
-
-
-
 }

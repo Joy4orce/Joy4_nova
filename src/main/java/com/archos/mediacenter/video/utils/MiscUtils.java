@@ -167,7 +167,7 @@ public class MiscUtils {
         // check if navigation bar is displayed because chromeos reports a navigation_bar_height of 84 but there is none displayed
         if (resourceIdNavBarHeight > 0 && hasNavigationBar(resources))
             navigationBarHeight = resources.getDimensionPixelSize(resourceIdNavBarHeight);
-        log.debug("getNavigationBarHeight: navigationBarHeight=" + navigationBarHeight);
+        log.debug("getNavigationBarHeight: navigationBarHeight={}", navigationBarHeight);
         return navigationBarHeight;
     }
 
@@ -205,7 +205,7 @@ public class MiscUtils {
 
     private static boolean hasNavigationBar(Resources resources) {
         int navBarId = resources.getIdentifier("config_showNavigationBar", "bool", "android");
-        log.debug("hasNavigationBar: navBarId=" + navBarId + ", hasNavBar=" + resources.getBoolean(navBarId));
+        log.debug("hasNavigationBar: navBarId={}, hasNavBar={}", navBarId, resources.getBoolean(navBarId));
         return navBarId > 0 && resources.getBoolean(navBarId);
     }
 
@@ -213,7 +213,7 @@ public class MiscUtils {
         // detect navigation bar orientation https://stackoverflow.com/questions/21057035/detect-android-navigation-bar-orientation
         final boolean isNavAtBottom = (context.getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE)
                 || (context.getResources().getConfiguration().smallestScreenWidthDp >= 600);
-        log.debug("isNavBarAtBottom: NavBarAtBottom=" + isNavAtBottom);
+        log.debug("isNavBarAtBottom: NavBarAtBottom={}", isNavAtBottom);
         return isNavAtBottom;
     }
 

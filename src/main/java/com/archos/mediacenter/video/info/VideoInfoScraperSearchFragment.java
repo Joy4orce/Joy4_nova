@@ -134,7 +134,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
-    	log.debug("onCreate this="+this+"  savedInstanceState="+savedInstanceState);
+    	log.debug("onCreate this={}  savedInstanceState={}", this, savedInstanceState);
         setInfo((Video) getActivity().getIntent().getExtras().get(VideoInfoScraperActivity.EXTRA_VIDEO));
         setRetainInstance(false); // keep fragment instance when rotating screen
     }
@@ -223,7 +223,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
     	// search result list click listener
     	mList.setOnItemClickListener(new OnItemClickListener() {
     		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                log.debug("onClick : select item " + position + " (items already processed=" + mSelectionItemsProcessed + ")");
+                log.debug("onClick : select item {} (items already processed={})", position, mSelectionItemsProcessed);
 
                 if (mSelectionThread != null && mSelectionThread.isAlive()) {
                     //----------------------------------------------------------------
@@ -290,7 +290,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
 
     public void setInfo(Video video) {
         mUri = Uri.parse(video.getFilePath());
-        log.debug("setInfo: video Uri"+mUri);
+        log.debug("setInfo: video Uri{}", mUri);
         mTitle = video.getName();
 
         // Check if everything is ready to setup the fragment
@@ -462,9 +462,9 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
             try {
                 mNfoTag = null;
                 if (NfoParser.isNetworkNfoParseEnabled(getActivity())) {
-                    log.debug("ScraperMatchesThread:run NFO enabled "+mUri);
+                    log.debug("ScraperMatchesThread:run NFO enabled {}", mUri);
                     mNfoTag = NfoParser.getTagForFile(mUri, getActivity());
-                    log.debug("ScraperMatchesThread:run NFO tag is null ? "+String.valueOf(mNfoTag==null));
+                    log.debug("ScraperMatchesThread:run NFO tag is null ? {}", String.valueOf(mNfoTag==null));
                 }
 
                 String search = mCustomSearchEditText.getText().toString();
@@ -481,7 +481,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
                 }
                 if (log.isDebugEnabled()) {
                     int resultsSize = (mResults != null) ? mResults.size() : 0;
-                    log.debug("ScraperMatchesThread: getBestMatches returns " + resultsSize + " results");
+                    log.debug("ScraperMatchesThread: getBestMatches returns {} results", resultsSize);
                 }
             } finally {
                 if (!isInterrupted()) {
@@ -508,7 +508,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
             mSelectionItemsProcessed = mFirstItem;
             mPaused = false;
 
-            log.debug("ScraperSelectionThread : start processing items from " + mFirstItem + " to " + (itemsCount - 1));
+            log.debug("ScraperSelectionThread : start processing items from {} to {}", mFirstItem, (itemsCount - 1));
 
             // Get the details for this match
 
@@ -559,7 +559,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
             for (position = mFirstItem; position < itemsCount; position++) {
                 BaseTags tags = null;
                 boolean searchMovies = true;
-                log.debug("ScraperSelectionThread : processing item " + position);
+                log.debug("ScraperSelectionThread : processing item {}", position);
 
                 SearchResult result = mResults.get(position);
                 // NOTE: this provides the right poster for the given season but perhaps season does not exist in getBestMatches

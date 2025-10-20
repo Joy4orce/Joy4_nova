@@ -112,7 +112,7 @@ abstract class RemoteViewsFactoryBase implements RemoteViewsService.RemoteViewsF
         // In onCreate() you setup any connections / cursors to your data source. Heavy lifting,
         // for example downloading or creating content etc, should be deferred to onDataSetChanged()
         // or getViewAt(). Taking more than 20 seconds in this call will result in an ANR.
-        log.debug("onCreate : widget id=" + mAppWidgetId);
+        log.debug("onCreate : widget id={}", mAppWidgetId);
 
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
 
@@ -122,7 +122,7 @@ abstract class RemoteViewsFactoryBase implements RemoteViewsService.RemoteViewsF
     public void onDestroy() {
         // In onDestroy() you should tear down anything that was setup for your data source,
         // eg. cursors, connections, etc.
-        log.debug("onDestroy : widget id=" + mAppWidgetId);
+        log.debug("onDestroy : widget id={}", mAppWidgetId);
         if (mCursor != null) {
         	mCursor.unregisterContentObserver(mContentObserver);
         	mCursor.close();
@@ -130,7 +130,7 @@ abstract class RemoteViewsFactoryBase implements RemoteViewsService.RemoteViewsF
     }
 
     public int getCount() {
-        log.debug("getDataSize() returns "+mCursor.getCount());
+        log.debug("getDataSize() returns {}", mCursor.getCount());
         if (mCursor==null) {
             return 0;
         } else {
@@ -140,7 +140,7 @@ abstract class RemoteViewsFactoryBase implements RemoteViewsService.RemoteViewsF
 
     @Override
     public RemoteViews getViewAt(int position) {
-        log.debug("getViewAt("+position+")");
+        log.debug("getViewAt({})", position);
         // position will always range from 0 to getCount() - 1.
 
         // We construct a remote views item based on our widget item xml file, and set the
@@ -216,7 +216,7 @@ abstract class RemoteViewsFactoryBase implements RemoteViewsService.RemoteViewsF
 
         // Next, we set a fill-intent which will be used to fill-in the pending intent template
         // which is set on the collection view in WidgetProviderVideo.
-        log.debug("getViewAt " + position + " for id=" + mAppWidgetId + " => videoId=" + videoId + " name=" + name);
+        log.debug("getViewAt {} for id={} => videoId={} name={}", position, mAppWidgetId, videoId, name);
         Bundle extras = new Bundle();
         extras.putInt(WidgetProviderVideo.EXTRA_POSITION, position);
         extras.putLong(WidgetProviderVideo.EXTRA_VIDEO_ID, videoId);
@@ -275,23 +275,23 @@ abstract class RemoteViewsFactoryBase implements RemoteViewsService.RemoteViewsF
             if (success) {
                 // Video data are available
                 int numItems = getCount();
-                log.debug("onDataSetChanged : " + numItems + " items loaded for id=" + mAppWidgetId);
+                log.debug("onDataSetChanged : {} items loaded for id={}", numItems, mAppWidgetId);
 
                 if (numItems == 0) {
                     // No data
-                    log.debug("No files found => set EMPTY_DATA_ACTION alarm at" + currentElapsedRealTime);
+                    log.debug("No files found => set EMPTY_DATA_ACTION alarm at{}", currentElapsedRealTime);
                     setDelayedAlarm(WidgetProviderVideo.EMPTY_DATA_ACTION, UPDATE_ACTION_DELAY, false);
                 }
                 else if (mCursorFailed) {
                     // Data are now loaded after one or more failed attempts => send a request to update the widget
                     mCursorFailed = false;
 
-                    log.debug("Data now available => set UPDATE_ACTION alarm at" + currentElapsedRealTime);
+                    log.debug("Data now available => set UPDATE_ACTION alarm at{}", currentElapsedRealTime);
                     setDelayedAlarm(WidgetProviderVideo.UPDATE_ACTION, UPDATE_ACTION_DELAY, true);
                 }
                 else {
                     // This case is needed to display the widget content for the first time when it is created
-                    log.debug("Data ok => set UPDATE_ACTION alarm at " + currentElapsedRealTime);
+                    log.debug("Data ok => set UPDATE_ACTION alarm at {}", currentElapsedRealTime);
                     setDelayedAlarm(WidgetProviderVideo.UPDATE_ACTION, UPDATE_ACTION_DELAY, true);
                 }
             }
@@ -305,7 +305,7 @@ abstract class RemoteViewsFactoryBase implements RemoteViewsService.RemoteViewsF
             // The video data are not available (yet) => retry loading them a bit later
             mCursorFailed = true;
 
-            log.debug("Data not available yet => set RELOAD_ACTION alarm at " + SystemClock.elapsedRealtime());
+            log.debug("Data not available yet => set RELOAD_ACTION alarm at {}", SystemClock.elapsedRealtime());
             setDelayedAlarm(WidgetProviderVideo.RELOAD_ACTION, RELOAD_ACTION_DELAY, false);
         }
     }
@@ -332,7 +332,7 @@ abstract class RemoteViewsFactoryBase implements RemoteViewsService.RemoteViewsF
         // receive one intent after the last event is triggered.
 
         long currentElapsedRealTime = SystemClock.elapsedRealtime();
-        log.debug("onContentChanged : elapsed time since the last SHOW_UPDATE_SPINBAR_ACTION was sent = " + (currentElapsedRealTime - mLastShowSpinbarTime));
+        log.debug("onContentChanged : elapsed time since the last SHOW_UPDATE_SPINBAR_ACTION was sent = {}", (currentElapsedRealTime - mLastShowSpinbarTime));
 
         if (currentElapsedRealTime - mLastShowSpinbarTime > 1000) {
             // Tell the provider to hide the RollView and show the spinbar
@@ -343,7 +343,7 @@ abstract class RemoteViewsFactoryBase implements RemoteViewsService.RemoteViewsF
             mLastShowSpinbarTime = currentElapsedRealTime;
         }
 
-        log.debug("onContentChanged : replace previous RELOAD_ACTION at " + currentElapsedRealTime);
+        log.debug("onContentChanged : replace previous RELOAD_ACTION at {}", currentElapsedRealTime);
         replacePreviousDelayedAlarm(WidgetProviderVideo.RELOAD_ACTION, RELOAD_ACTION_DELAY);
     }
 
@@ -369,7 +369,7 @@ abstract class RemoteViewsFactoryBase implements RemoteViewsService.RemoteViewsF
     }
     
     private void setDelayedAlarm(String action, int delay, boolean notifyContentChanged) {
-        log.debug("setDelayedAlarm: action " + action + ", delay " + delay);
+        log.debug("setDelayedAlarm: action {}, delay {}", action, delay);
         Intent intent = new Intent(mContext, WidgetProviderVideo.class);
         intent.setAction(action);
         intent.setData(Uri.parse(String.valueOf(SystemClock.elapsedRealtime())));    // Fill data with a dummy value to avoid the "extra beeing ignored" optimization of the PendingIntent
@@ -385,7 +385,7 @@ abstract class RemoteViewsFactoryBase implements RemoteViewsService.RemoteViewsF
     private void replacePreviousDelayedAlarm(String action, int delay) {
         PendingIntent pendingIntent;
 
-        log.debug("replacePreviousDelayedAlarm: action " + action + ", delay " + delay);
+        log.debug("replacePreviousDelayedAlarm: action {}, delay {}", action, delay);
 
         // Cancel any previous alarm set for a content changed event
         if (mLastContentChangedIntent != null) {

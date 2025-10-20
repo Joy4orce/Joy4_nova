@@ -226,7 +226,7 @@ public class AutoScraperActivity extends AppCompatActivity implements AbsListVie
             mFolderMode = true;
             // FIXME: this is broken for smb:// files
             mFolderPath = folderUri.getPath();
-            log.debug("onCreate : search in folder " + mFolderPath);
+            log.debug("onCreate : search in folder {}", mFolderPath);
         }
         else {
             mFolderMode = false;
@@ -1110,7 +1110,7 @@ public class AutoScraperActivity extends AppCompatActivity implements AbsListVie
         */
         public void onClick(View view) {
             int position = mActivity.mListView.getPositionForView(view);
-            log.debug("onClick : position=" + position);
+            log.debug("onClick : position={}", position);
             rejectScraperInfos(position);
         }
     }
@@ -1141,7 +1141,7 @@ public class AutoScraperActivity extends AppCompatActivity implements AbsListVie
             log.debug("ScraperResultTask : starting scraper automation process");
             for (fileIndex = 0; fileIndex < mFileCount; fileIndex++) {
                 String path = mFileList.get(fileIndex);
-                log.debug("processing file " + fileIndex + " = " + path);
+                log.debug("processing file {} = {}", fileIndex, path);
 
                 // Display the status of the file to process as "busy"
                 FileProperties itemProperties = mFileProperties.get(path);
@@ -1287,7 +1287,7 @@ public class AutoScraperActivity extends AppCompatActivity implements AbsListVie
         protected void onProgressUpdate(Integer... progress) {
             int fileIndex = progress[0].intValue();
             int status = progress[1].intValue();
-            log.debug("onProgressUpdate : updating item " + fileIndex);
+            log.debug("onProgressUpdate : updating item {}", fileIndex);
 
             // Update the display with the retrieved poster and infos
             mActivity.invalidateItem(fileIndex);

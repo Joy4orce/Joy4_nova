@@ -80,7 +80,7 @@ public class TraktSigninDialogPreference extends Preference {
         try {
             log.debug("onClick: TraktSigninDialogPreference");
             OAuthClientRequest t = getAuthorizationRequest(getSharedPreferences());
-            log.debug("onClick: t=" + t.getLocationUri());
+            log.debug("onClick: t={}", t.getLocationUri());
             final OAuthData oa = new OAuthData();
             OAuthCallback codeCallBack = data -> {
                 // TODO Auto-generated method stub

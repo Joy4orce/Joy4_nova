@@ -126,7 +126,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
     public int onStartCommand(Intent i, int flags, int id) {
         if(i==null)
             return START_STICKY;
-        log.debug("Got intent " + i.getAction());
+        log.debug("Got intent {}", i.getAction());
         if(i.getAction().equals(intentPaused)) {
             _paused();
         } else if(i.getAction().equals(intentResumed)) {
@@ -205,10 +205,10 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
                         String nativeLibDir = mContext.getApplicationInfo().nativeLibraryDir;
                         String torrentBinary = nativeLibDir + "/libtorrentd.so";
 
-                        log.debug("Using torrent binary: " + torrentBinary);
-                        log.debug("Native library dir: " + nativeLibDir);
-                        log.debug("Binary exists: " + new File(torrentBinary).exists());
-                        log.debug("Binary executable: " + new File(torrentBinary).canExecute());
+                        log.debug("Using torrent binary: {}", torrentBinary);
+                        log.debug("Native library dir: {}", nativeLibDir);
+                        log.debug("Binary exists: {}", new File(torrentBinary).exists());
+                        log.debug("Binary executable: {}", new File(torrentBinary).canExecute());
 
                         String [] cmdArray = new String[4];
                         cmdArray[0] = torrentBinary;
@@ -216,7 +216,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
                         cmdArray[2] = mBlockList;
                         cmdArray[3] = torrentDownloadPath; //Pass download path as argument to torrent daemon
 
-                        log.debug("starting url "+mTorrent+" with download path "+torrentDownloadPath+" working dir "+torrentWorkingDir.getAbsolutePath());
+                        log.debug("starting url {} with download path {} working dir {}", mTorrent, torrentDownloadPath, torrentWorkingDir.getAbsolutePath());
 
                         sProcess = Runtime.getRuntime().exec(cmdArray,null, torrentWorkingDir);
                         isDaemonRunning = true;
@@ -235,7 +235,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
                                 String line = "";
                                 try {
                                     while (readerError!=null&&(line = readerError.readLine ()) != null&&!hasToStop && !Thread.currentThread().isInterrupted()) {
-                                        log.debug("Stderr: " + line);
+                                        log.debug("Stderr: {}", line);
                                     }
                                 } catch (IOException e) {
                                     log.error("Error reading stderr", e);
@@ -281,14 +281,14 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
         try {
             log.debug("observeStdout: Starting to read stdout");
             while ((line = mReader.readLine ()) != null&&!hasToStop) {
-                log.debug("observeStdout: Read line: '" + line + "'");
+                log.debug("observeStdout: Read line: '{}'", line);
                 if(line.isEmpty()) {
-                    log.debug("observeStdout: Empty line received, setting files list (count: " + files.size() + ")");
+                    log.debug("observeStdout: Empty line received, setting files list (count: {})", files.size());
                     mObserver.setFilesList(files);
                     break;
                 }
                 files.add(line);
-                log.debug("observeStdout: Added file: " + line + " (total files: " + files.size() + ")");
+                log.debug("observeStdout: Added file: {} (total files: {})", line, files.size());
             }
 
             if(line == null) {
@@ -320,7 +320,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
                 }
                 if(mObserver != null)
                     mObserver.notifyObserver(line);
-                log.debug("Stdout: " + line+String.valueOf(mHasSetFiles));
+                log.debug("Stdout: {}{}", line, String.valueOf(mHasSetFiles));
             }
         } catch (InterruptedIOException e) {
             log.debug("observeStdout: read interrupted by close() on another thread (normal cleanup)");
@@ -440,7 +440,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
 
     private void _paused() {
         nPause++;
-        log.debug("_paused = " + nPause + ", nResume = " + nResume );
+        log.debug("_paused = {}, nResume = {}", nPause, nResume );
         if(nPause >= nResume) {
             //Give 2s grace period
             mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_QUIT), 2000);
@@ -449,7 +449,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
 
     private void _resumed() {
         nResume++;
-        log.debug("_resumed = " + nResume + ", nPause = " + nPause);
+        log.debug("_resumed = {}, nPause = {}", nResume, nPause);
         if(nResume > nPause) {
             mHandler.removeMessages(MSG_QUIT);
         }

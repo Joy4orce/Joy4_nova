@@ -185,15 +185,15 @@ public abstract class Browser extends Fragment implements AbsListView.OnScrollLi
             new ActivityResultContracts.StartIntentSenderForResult(),
             result -> { // result can be RESULT_OK, RESULT_CANCELED
                 Context context = getActivity();
-                log.debug("ActivityResultLauncher deleteLauncher: result " + result.toString());
+                log.debug("ActivityResultLauncher deleteLauncher: result {}", result.toString());
                 if (result.getResultCode() == Activity.RESULT_OK) {
-                    log.debug("ActivityResultLauncher deleteLauncher: OK, deleteUris " + ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
+                    log.debug("ActivityResultLauncher deleteLauncher: OK, deleteUris {}", ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
                     if (mDelete != null && deleteUrisList != null && deleteUrisList.size() >= 1) {
-                        log.debug("ActivityResultLauncher deleteLauncher: calling delete.deleteOK on " + deleteUrisList.get(0));
+                        log.debug("ActivityResultLauncher deleteLauncher: calling delete.deleteOK on {}", deleteUrisList.get(0));
                         mDelete.deleteOK(deleteUrisList.get(0));
                     }
                 } else {
-                    log.debug("ActivityResultLauncher deleteLauncher: NO, deleteUris " + ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
+                    log.debug("ActivityResultLauncher deleteLauncher: NO, deleteUris {}", ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
                     if (mDelete != null && deleteUrisList != null && deleteUrisList.size() > 1)
                         mDelete.deleteNOK(deleteUrisList.get(0));
                 }
@@ -574,7 +574,7 @@ public abstract class Browser extends Fragment implements AbsListView.OnScrollLi
             newAdapter = true;
             mCommonDefaultInvalidate = false;
         }
-        log.debug("bindAdapter: " + newAdapter);
+        log.debug("bindAdapter: {}", newAdapter);
         setupAdapter(newAdapter);
         if (mArchosGridView.getAdapter() != mBrowserAdapter)
             mArchosGridView.setAdapter(mBrowserAdapter);
@@ -991,7 +991,7 @@ public abstract class Browser extends Fragment implements AbsListView.OnScrollLi
                             startDeletingDialog(uri);
                         else {
                             mDelete = new Delete(Browser.this, getActivity());
-                            log.debug("showConfirmDeleteDialog: update deleteUrisList with " + uri);
+                            log.debug("showConfirmDeleteDialog: update deleteUrisList with {}", uri);
                             deleteUrisList = uri;
                             mDelete.deleteFolder(uri.get(0));
                         }
@@ -1156,7 +1156,7 @@ public abstract class Browser extends Fragment implements AbsListView.OnScrollLi
 
     @Override
     public void onVideoFileRemoved(Uri videoFile, boolean askForFolderRemoval, Uri folder) {
-        log.debug("onVideoFileRemoved " + videoFile + ", folderRemoval " + askForFolderRemoval + ", folder " + folder);
+        log.debug("onVideoFileRemoved {}, folderRemoval {}, folder {}", videoFile, askForFolderRemoval, folder);
         if(askForFolderRemoval) {
             List<Uri> toDelete = new ArrayList<>();
             toDelete.add(folder);
@@ -1173,7 +1173,7 @@ public abstract class Browser extends Fragment implements AbsListView.OnScrollLi
 
     @Override
     public void onDeleteVideoFailed(Uri videoFile) {
-        log.debug("onDeleteVideoFailed " + ((videoFile != null) ? videoFile.getPath() : null));
+        log.debug("onDeleteVideoFailed {}", ((videoFile != null) ? videoFile.getPath() : null));
         Toast.makeText(getActivity(), R.string.delete_error,Toast.LENGTH_LONG).show();
         mDialogDeleting.dismiss();
     }
@@ -1181,7 +1181,7 @@ public abstract class Browser extends Fragment implements AbsListView.OnScrollLi
 
     @Override
     public void onFolderRemoved(final Uri folder) {
-        log.debug("onFolderRemoved " + folder);
+        log.debug("onFolderRemoved {}", folder);
         if(isAdded()) {
             Toast.makeText(getActivity(), R.string.directory_deleted, Toast.LENGTH_SHORT).show();
         }
@@ -1195,7 +1195,7 @@ public abstract class Browser extends Fragment implements AbsListView.OnScrollLi
         mDialogDeleting = new DeleteDialog();
         mDialogDeleting.show(getParentFragmentManager(), null);
         mDelete = new Delete(this,getActivity());
-        log.debug("startDeletingDialog: update deleteUrisList with " + Arrays.toString(uriToDelete.toArray()));
+        log.debug("startDeletingDialog: update deleteUrisList with {}", Arrays.toString(uriToDelete.toArray()));
         deleteUrisList = uriToDelete;
         if(uriToDelete.size()>1) {
             mDelete.startMultipleDeleteProcess(uriToDelete);
@@ -1216,7 +1216,7 @@ public abstract class Browser extends Fragment implements AbsListView.OnScrollLi
             isFileManagerServiceBound = getContext().bindService(new Intent(getContext(), FileManagerService.class), new ServiceConnection() {
                 @Override
                 public void onServiceConnected(ComponentName name, IBinder service) {
-                    log.debug("startDownloadingVideo: FileManagerService connected, launching PasteDialog and copy of "+ uris);
+                    log.debug("startDownloadingVideo: FileManagerService connected, launching PasteDialog and copy of {}", uris);
                     FileManagerService.fileManagerService.copyUri(uris, Uri.fromFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)));
                     showPasteDialog();
                 }

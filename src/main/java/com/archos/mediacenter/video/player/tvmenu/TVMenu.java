@@ -103,7 +103,7 @@ public class TVMenu extends LinearLayout implements FocusableTVCardView, TVSlave
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        log.debug("onKeyDown keyCode: " + keyCode);
+        log.debug("onKeyDown keyCode: {}", keyCode);
         if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
             int nextIndex = current + 1;
             while (nextIndex < ti.size() && (!ti.get(nextIndex).isEnabled() || isSeparator(ti.get(nextIndex)))) {

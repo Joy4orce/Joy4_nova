@@ -310,14 +310,14 @@ public abstract class BrowserWithShowHeader extends CursorBrowserByVideo  {
             Uri posterUri = (Uri) postersUri[0];
             Bitmap bitmap = null;
             try {
-                log.debug("TvShowAsyncTask.Result show " + show.getName() + " postersUri " + posterUri);
+                log.debug("TvShowAsyncTask.Result show {} postersUri {}", show.getName(), posterUri);
                 if (posterUri != null) {
                     bitmap = Picasso.get()
                             .load(posterUri)
                             .resizeDimen(R.dimen.video_details_poster_width,R.dimen.video_details_poster_height)
                             .noFade() // no fade since we are using activity transition anyway
                             .get();
-                    log.debug("TvShowAsyncTask.Result: "+bitmap.getWidth()+"x"+bitmap.getHeight()+" ---- "+posterUri);
+                    log.debug("TvShowAsyncTask.Result: {}x{} ---- {}", bitmap.getWidth(), bitmap.getHeight(), posterUri);
                     if(bitmap!=null) {
                         Palette palette = Palette.from(bitmap).generate();
                         mColor = palette.getDarkVibrantColor(ContextCompat.getColor(getActivity(), R.color.leanback_details_background));

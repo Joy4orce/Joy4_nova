@@ -79,7 +79,7 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
     }
 
     public UpdateNextTask(ContentResolver resolver, Video video, Uri uri, ArrayList<String> remoteUrlsList, int remotePosition, long playlistId) {
-        log.debug("UpdateNextTask: what is the next video after " + uri);
+        log.debug("UpdateNextTask: what is the next video after {}", uri);
         mResolver = resolver;
         mUri = uri;
         mRemoteUrlsList = remoteUrlsList;
@@ -107,7 +107,7 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
     private final static String QUERY_ORDER_BY_DATA_LIMIT1 = VideoStore.MediaColumns.DATA + " LIMIT 1";
 
     private static Cursor getNextInBucket(ContentResolver cr, int bucketId, String fullPathOfVideo) {
-        log.debug("getNextInBucket: bucketId " + bucketId + " for video " + fullPathOfVideo);
+        log.debug("getNextInBucket: bucketId {} for video {}", bucketId, fullPathOfVideo);
         return cr.query(
                 QUERY_VIDEO_TABLE,
                 QUERY_COLUMNS_ID_DATA,
@@ -116,7 +116,7 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
                 QUERY_ORDER_BY_DATA_LIMIT1);
     }
     private static Cursor getFirstInBucket(ContentResolver cr, int bucketId) {
-        log.debug("getFirstInBucket: " + bucketId);
+        log.debug("getFirstInBucket: {}", bucketId);
         return cr.query(
                 QUERY_VIDEO_TABLE,
                 QUERY_COLUMNS_ID_DATA,
@@ -125,7 +125,7 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
                 QUERY_ORDER_BY_DATA_LIMIT1);
     }
     private Result findEpisode(int episode, int season, long show){
-        log.debug("findEpisode: look for episode " + episode);
+        log.debug("findEpisode: look for episode {}", episode);
         String [] projection2 = new String[]{VideoStore.MediaColumns.DATA,VideoStore.Files.FileColumns._ID,VideoStore.Video.VideoColumns.SCRAPER_E_EPISODE};
         String []  args2;
         if(episode>=0)
@@ -141,7 +141,7 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
                 int uri = cursor2.getColumnIndex(VideoStore.MediaColumns.DATA);
                 Uri uri2 = Uri.parse(cursor2.getString(uri));
                 int id2 = cursor2.getInt(id);
-                log.debug("findEpisode: found new episode " + (cursor2.getInt(cursor2.getColumnIndex(VideoStore.Video.VideoColumns.SCRAPER_E_EPISODE))) + " " + cursor2.getString(uri));
+                log.debug("findEpisode: found new episode {} {}", (cursor2.getInt(cursor2.getColumnIndex(VideoStore.Video.VideoColumns.SCRAPER_E_EPISODE))), cursor2.getString(uri));
                 cursor2.close();
                 return new Result(uri2, id2);
             }
@@ -151,7 +151,7 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
     }
 
     public UpdateNextTask.Result run(boolean repeatFolder, boolean binge) {
-        log.debug("UpdateNextTask.Result: repeatFolder " + repeatFolder + ", binge " + binge);
+        log.debug("UpdateNextTask.Result: repeatFolder {}, binge {}", repeatFolder, binge);
         // reset to nothing
         Uri nextUri = null;
         long nextId = -1;
@@ -160,14 +160,14 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
             log.debug("UpdateNextTask.Result: mRemoteUrlsList not null");
             int nextPos = mRemotePosition + 1;
             if ((nextPos == mRemoteUrlsList.size()) && !repeatFolder) {
-                log.debug("UpdateNextTask.Result: updateNextVideo(" + repeatFolder + ") - using remote list, no next since last in list.");
+                log.debug("UpdateNextTask.Result: updateNextVideo({}) - using remote list, no next since last in list.", repeatFolder);
                 return null;
             }
             nextUri = Uri.parse(mRemoteUrlsList.get(nextPos % mRemoteUrlsList.size()));
-            log.debug("UpdateNextTask.Result: updateNextVideo(" + repeatFolder + ") - using remote list, next is " + nextUri);
+            log.debug("UpdateNextTask.Result: updateNextVideo({}) - using remote list, next is {}", repeatFolder, nextUri);
             return new Result(nextUri, nextId);
         } else {
-            log.debug("UpdateNextTask.Result: mRemoteUrlsList null, mPlaylistId " + mPlaylistId + ", mVideo " + ((mVideo == null) ? "null" : mVideo.getFilePath()));
+            log.debug("UpdateNextTask.Result: mRemoteUrlsList null, mPlaylistId {}, mVideo {}", mPlaylistId, ((mVideo == null) ? "null" : mVideo.getFilePath()));
             if (mPlaylistId != -1 && mVideo != null) { //next in playlist
                 BaseTags tags = mVideo.getFullScraperTags(ArchosUtils.getGlobalContext());
                 long currentEpisodeId = tags instanceof EpisodeTags ? tags.getOnlineId() : -1;
@@ -182,7 +182,7 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
                         nextUri = Uri.parse(c.getString(c.getColumnIndex(VideoStore.MediaColumns.DATA)));
                     }
                     c.close();
-                    log.debug("UpdateNextTask.Result binge mode " + nextUri);
+                    log.debug("UpdateNextTask.Result binge mode {}", nextUri);
                     if (nextUri != null) return new Result(nextUri, nextId);
                     else return null;
                 }
@@ -214,7 +214,7 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
                     while (cursor.moveToNext()) {
                         long episodeId = cursor.getLong(episodeIdColumn);
                         long movieId = cursor.getLong(movieIdColumn);
-                        log.debug("UpdateNextTask.Result: episodeId " + episodeId + ", movieId " + movieId);
+                        log.debug("UpdateNextTask.Result: episodeId {}, movieId {}", episodeId, movieId);
                         if (currentEpisodeId != -1 && currentEpisodeId == episodeId) {
                             useNextVideo = true;
                         } else if (currentMovieId != -1 && currentMovieId == movieId) {
@@ -232,14 +232,14 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
             }
         }
         if (!UriUtils.isImplementedByFileCore(mUri)) {// when we can't list folder
-            log.debug("UpdateNextTask.Result: scheme for " + mUri + " not supported -> cannot list folder thus no next...");
+            log.debug("UpdateNextTask.Result: scheme for {} not supported -> cannot list folder thus no next...", mUri);
             return null;
         }
         /*
             If we don't have a list of files set by arguments, we need to create one
          */
         if (mUri != null) {
-            log.debug("UpdateNextTask.Result: trying to find next for mUri " + mUri);
+            log.debug("UpdateNextTask.Result: trying to find next for mUri {}", mUri);
 
             // Only use episode logic for binge mode, not for folder modes
             if (binge) {
@@ -261,7 +261,7 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
                     long show = cursor1.getLong(showColumn);
                     if (cursor1 != null) cursor1.close();
                     if (show > 0 && season >= 0 && episode >= 0) {
-                        log.debug("current episode : " + episode + " " + mUri);
+                        log.debug("current episode : {} {}", episode, mUri);
                         Result result = findEpisode(episode + 1, season, show);
                         if (result != null)
                             return result;
@@ -277,7 +277,7 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
             }
             if (! binge) {
                 int bucketId = FileUtils.getBucketId(mUri);
-                log.debug("UpdateNextTask.Result: trying to find for bucketId " + bucketId);
+                log.debug("UpdateNextTask.Result: trying to find for bucketId {}", bucketId);
                 Cursor cursor;
                 // 1. Try to find the next video in the database
                 cursor = getNextInBucket(mResolver, bucketId, mUri.toString());
@@ -286,16 +286,16 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
                         if (cursor.moveToFirst()) {
                             nextUri = Uri.parse(cursor.getString(cursor.getColumnIndex(VideoStore.Files.FileColumns.DATA)));
                             nextId = cursor.getInt(cursor.getColumnIndex(VideoStore.Files.FileColumns._ID));
-                            log.debug("updateNextVideo(" + repeatFolder + ") - next via getNextInBucket(DB):" + nextUri);
+                            log.debug("updateNextVideo({}) - next via getNextInBucket(DB):{}", repeatFolder, nextUri);
                             return new Result(nextUri, nextId);
                         } else {
-                            log.debug("updateNextVideo(" + repeatFolder + ") - getNextInBucket empty cursor, will try filesystem");
+                            log.debug("updateNextVideo({}) - getNextInBucket empty cursor, will try filesystem", repeatFolder);
                         }
                     } finally {
                         cursor.close();
                     }
                 } else {
-                    log.debug("updateNextVideo(" + repeatFolder + ") - getNextInBucket null cursor, will try filesystem");
+                    log.debug("updateNextVideo({}) - getNextInBucket null cursor, will try filesystem", repeatFolder);
                 }
 
                 if (repeatFolder) {
@@ -306,13 +306,13 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
                             if (cursor.moveToFirst()) {
                                 nextUri = Uri.parse(cursor.getString(cursor.getColumnIndex(VideoStore.Files.FileColumns.DATA)));
                                 nextId = cursor.getInt(cursor.getColumnIndex(VideoStore.Files.FileColumns._ID));
-                                log.debug("updateNextVideo(" + repeatFolder + ") - next via getFirstInBucket(DB):" + nextUri);
+                                log.debug("updateNextVideo({}) - next via getFirstInBucket(DB):{}", repeatFolder, nextUri);
                                 return new Result(nextUri, nextId);
-                            } else log.debug("updateNextVideo(" + repeatFolder + ") - getNextInBucket empty cursor!?");
+                            } else log.debug("updateNextVideo({}) - getNextInBucket empty cursor!?", repeatFolder);
                         } finally {
                             cursor.close();
                         }
-                    } else log.debug("updateNextVideo(" + repeatFolder + ") - getFirstInBucket null cursor!?");
+                    } else log.debug("updateNextVideo({}) - getFirstInBucket null cursor!?", repeatFolder);
                 }
                 // 3. try to find the next file within the filesystem
                 if (mUri.getScheme() == null)
@@ -350,16 +350,16 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
                                 // when repeat folder, just modulo
                                 if (repeatFolder) {
                                     nextUri = filteredList.get(next % total).getUri();
-                                    log.debug("updateNextVideo(" + repeatFolder + ") - next via filesystem:" + nextUri);
+                                    log.debug("updateNextVideo({}) - next via filesystem:{}", repeatFolder, nextUri);
                                     return new Result(nextUri, nextId);
                                 } else if (next < total) {
                                     // in no repeat more, check that next still in list
                                     nextUri = filteredList.get(next).getUri();
-                                    log.debug("updateNextVideo(" + repeatFolder + ") - next via filesystem:" + nextUri);
+                                    log.debug("updateNextVideo({}) - next via filesystem:{}", repeatFolder, nextUri);
                                     return new Result(nextUri, nextId);
-                                } else log.debug("updateNextVideo(" + repeatFolder + ") - no next in filesystem, it's the last:" + mUri);
-                            } else log.debug("updateNextVideo(" + repeatFolder + ") - could not find video in list:" + mUri);
-                        } else log.debug("updateNextVideo(" + repeatFolder + ") - could not list files / empty dir:" + mUri);
+                                } else log.debug("updateNextVideo({}) - no next in filesystem, it's the last:{}", repeatFolder, mUri);
+                            } else log.debug("updateNextVideo({}) - could not find video in list:{}", repeatFolder, mUri);
+                        } else log.debug("updateNextVideo({}) - could not list files / empty dir:{}", repeatFolder, mUri);
                     } catch (IOException e) {
                         log.error("UpdateNextTask.Result: caught IOException ", e);
                     } catch (AuthenticationException e) {
@@ -369,11 +369,11 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
                     } catch (JSchException e) {
                         log.error("UpdateNextTask.Result: caught JSchException ", e);
                     }
-                } else log.debug("updateNextVideo(" + repeatFolder + ") - no parent file:" + mUri);
+                } else log.debug("updateNextVideo({}) - no parent file:{}", repeatFolder, mUri);
             }
-        } else log.debug("updateNextVideo(" + repeatFolder + ") - not a local file:" + mUri);
+        } else log.debug("updateNextVideo({}) - not a local file:{}", repeatFolder, mUri);
 
-        log.debug("updateNextVideo(" + repeatFolder + ") - No next found");
+        log.debug("updateNextVideo({}) - No next found", repeatFolder);
         return null;
     }
 
@@ -386,10 +386,10 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
 
     @Override
     protected void onPostExecute(Result result) {
-        log.debug("onPostExecute: result=" + (result != null ? result.uri : "null") + ", mListener=" + (mListener != null ? "set" : "null"));
+        log.debug("onPostExecute: result={}, mListener={}", (result != null ? result.uri : "null"), (mListener != null ? "set" : "null"));
         if (mListener != null) {
             if (result != null) {
-                log.debug("onPostExecute: calling mListener.onResult with uri=" + result.uri + ", id=" + result.id);
+                log.debug("onPostExecute: calling mListener.onResult with uri={}, id={}", result.uri, result.id);
                 mListener.onResult(result.uri, result.id);
             } else {
                 log.debug("onPostExecute: calling mListener.onResult with null uri");

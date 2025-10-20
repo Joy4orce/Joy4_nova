@@ -55,7 +55,7 @@ public class AudioDelayPickerDialog extends AlertDialog implements OnClickListen
 
     public AudioDelayPickerDialog(Context context, OnAudioDelayChangeListener callBack, int delay) {
         super(context);
-        log.error("AudioDelayPickerDialog: delay=" + delay);
+        log.error("AudioDelayPickerDialog: delay={}", delay);
 
         getWindow().setGravity(Gravity.TOP);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
@@ -86,7 +86,7 @@ public class AudioDelayPickerDialog extends AlertDialog implements OnClickListen
         switch(msg.what) {
             case CHANGE_DELAY:
                 if (mCallBack != null) {
-                    log.debug("handleMessage: apply delay change " + mAudioDelayPicker.getDelay());
+                    log.debug("handleMessage: apply delay change {}", mAudioDelayPicker.getDelay());
                     mCallBack.onAudioDelayChange(mAudioDelayPicker, mAudioDelayPicker.getDelay());
                 }
             break;
@@ -99,17 +99,17 @@ public class AudioDelayPickerDialog extends AlertDialog implements OnClickListen
         log.error("onStop");
         mHandler.removeCallbacksAndMessages(null);
         if (mCallBack != null) {
-            log.debug("onStop: apply delay change " + mAudioDelayPicker.getDelay());
+            log.debug("onStop: apply delay change {}", mAudioDelayPicker.getDelay());
             mCallBack.onAudioDelayChange(mAudioDelayPicker, mAudioDelayPicker.getDelay());
         }
-        log.debug("onStop: apply save setting " + mSaveSettingCB.isChecked() + " delay " + (mSaveSettingCB.isChecked()?PlayerService.sPlayerService.getAudioDelay():0));
+        log.debug("onStop: apply save setting {} delay {}", mSaveSettingCB.isChecked(), (mSaveSettingCB.isChecked()?PlayerService.sPlayerService.getAudioDelay():0));
         PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putInt(getContext().getResources().getString(R.string.save_delay_setting_pref_key),
                 mSaveSettingCB.isChecked()?PlayerService.sPlayerService.getAudioDelay():0).commit();
     }
 
     @Override
     public void onAudioDelayChanged(AudioDelayPickerAbstract view, int delay) {
-        log.error("onAudioDelayChanged: delay=" + delay);
+        log.error("onAudioDelayChanged: delay={}", delay);
         mHandler.removeMessages(CHANGE_DELAY);
         Message msg = mHandler.obtainMessage(CHANGE_DELAY);
         mHandler.sendMessageDelayed(msg, CHANGE_DELAY_TIMEOUT);

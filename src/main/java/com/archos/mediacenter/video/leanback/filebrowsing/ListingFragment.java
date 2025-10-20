@@ -151,7 +151,7 @@ public abstract class ListingFragment extends MyVerticalGridFragment implements 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        log.debug("onCreate " + savedInstanceState);
+        log.debug("onCreate {}", savedInstanceState);
         super.onCreate(savedInstanceState);
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -177,7 +177,7 @@ public abstract class ListingFragment extends MyVerticalGridFragment implements 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        log.debug("onCreateView " + this + " " + savedInstanceState);
+        log.debug("onCreateView {} {}", this, savedInstanceState);
         View v = super.onCreateView(inflater, container, savedInstanceState);
 
         mSortOrderEntries = new CharSequence[]{
@@ -427,7 +427,7 @@ public abstract class ListingFragment extends MyVerticalGridFragment implements 
     }
 
     protected void startListing(Uri uri) {
-        log.debug("startListing " + uri);
+        log.debug("startListing {}", uri);
         // abort previous engine (in theory not needed)
         if (mListingEngine!=null) {
             mListingEngine.abort();
@@ -586,7 +586,7 @@ public abstract class ListingFragment extends MyVerticalGridFragment implements 
                     }
                     if (newObject!=null) {
                         if (doReplace) {
-                            log.debug("updateAdapterIfReady: replace " + positionInAdapter);
+                            log.debug("updateAdapterIfReady: replace {}", positionInAdapter);
                             mFilesAdapter.replace(positionInAdapter, newObject);
                         } else {
                             log.debug("updateAdapterIfReady: remove {} and add", positionInAdapter);
@@ -772,7 +772,7 @@ public abstract class ListingFragment extends MyVerticalGridFragment implements 
     private static String itemid2sortorder(int itemid) {
         String sortOrder = DEFAULT_SORT;
         if (itemid >= 0 && itemid < sortOrders.size()) sortOrder = sortOrders.get(itemid);
-        log.debug("itemid2sortorder: sortOrder="+sortOrder);
+        log.debug("itemid2sortorder: sortOrder={}", sortOrder);
         return sortOrder;
     }
 

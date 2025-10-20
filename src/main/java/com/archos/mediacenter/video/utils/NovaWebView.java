@@ -44,7 +44,7 @@ public class NovaWebView extends WebView {
                         event.getKeyCode() == KeyEvent.KEYCODE_DPAD_DOWN ||
                         event.getKeyCode() == KeyEvent.KEYCODE_DPAD_LEFT ||
                         event.getKeyCode() == KeyEvent.KEYCODE_DPAD_RIGHT)) {
-            log.debug("dpad hasFocus()=" + hasFocus());
+            log.debug("dpad hasFocus()={}", hasFocus());
             // TOFIX: hack to avoid "scroll focus"
             if (!doItOnce) {
                 clearFocus();

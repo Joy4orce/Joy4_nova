@@ -97,7 +97,7 @@ ORDER BY uName ASC
         setUri(getUri().buildUpon().appendQueryParameter("group",
                 "CASE WHEN s_id IS NULL THEN m_name ELSE s_name END"
         ).build());
-        log.debug("init: getProjection " + getProjection().toString() + ", getSelection " + getSelection() + ", getSelectionArgs " + getSelectionArgs());
+        log.debug("init: getProjection {}, getSelection {}, getSelectionArgs {}", getProjection().toString(), getSelection(), getSelectionArgs());
     }
     @Override
     public String[] getProjection() {

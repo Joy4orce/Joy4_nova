@@ -424,7 +424,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
 
         // Find central play icon
         ImageView centralPlayIcon = (ImageView) v.findViewById(R.id.central_play_icon);
-        log.debug("initControllerView: looking for central_play_icon in v, found = " + (centralPlayIcon != null));
+        log.debug("initControllerView: looking for central_play_icon in v, found = {}", (centralPlayIcon != null));
 
         ImageButton mForwardButton = (ImageButton) v.findViewById(R.id.forward);
         if (mForwardButton != null) {
@@ -632,7 +632,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         playerControllersContainer = (FrameLayout)mControllerView.findViewById(R.id.playerControllersContainer);
         playerControllersContainer.addView(mControllerViewLeft);
 
-        log.debug("CONFIG attachWindow: layout WxH " + mLayoutWidth + "x" + mLayoutHeight);
+        log.debug("CONFIG attachWindow: layout WxH {}x{}", mLayoutWidth, mLayoutHeight);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mLayoutWidth, mLayoutHeight);
         mPlayerView.addView(mControllerView, params);
         log.debug("CONFIG attachWindow, adjustControllerViewForInsets();");
@@ -823,7 +823,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     private void showControlBar(boolean show) {
         log.debug("showControlBar {}", show);
         if (mControlBar != null && mControlBarShowing != show) {
-            log.debug("showControlBar "+String.valueOf(show));
+            log.debug("showControlBar {}", String.valueOf(show));
             setVisibility(mControlBar, show, true);
             if(mPlayPauseTouchZone!=null){
                 setVisibility(mPlayPauseTouchZone, show, false);
@@ -870,7 +870,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     }
 
     private void setOSDVisibility(boolean visible, int flags) {
-        log.debug("setOSDVisibility, visiblity "+flags);
+        log.debug("setOSDVisibility, visiblity {}", flags);
         if ((flags & FLAG_SIDE_CONTROL_BAR) != 0) {
             showControlBar(visible);
             // On phone we don't know how to display control bar without volume bar nicely, so force volume bar
@@ -898,7 +898,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
      * the controller until hide() is called.
      */
     private void show(int flags, int timeout) {
-        log.debug("show(" +flags+ ", " +timeout+")");
+        log.debug("show({}, {})", flags, timeout);
         if (mIsStopped)
             return;
 
@@ -940,7 +940,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
      * Remove the controller from the screen.
      */
     public void hide(int flags) {
-        log.debug("hide("+flags+")");
+        log.debug("hide({})", flags);
         if (mIsStopped || DBG_ALWAYS_SHOW)
             return;
 
@@ -1068,7 +1068,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
                         }
                         if (mSeekComplete && isSeekPressed()) {
                             mSeekComplete = false;
-                            log.debug("current pos is " + Player.sPlayer.getCurrentPosition() + " seek to " + mNextSeek);
+                            log.debug("current pos is {} seek to {}", Player.sPlayer.getCurrentPosition(), mNextSeek);
                             Player.sPlayer.seekTo((int) mNextSeek);
                             updatePauseButton();
                         }
@@ -1084,7 +1084,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
                         mDragging = false;
                         if (mNextSeek > 0 && mLongSeekTime > 2 * SEEK_LONG_DELAY) {
                             mSeekComplete = false;
-                            log.debug("current pos is " + Player.sPlayer.getCurrentPosition() + " seek to " + mNextSeek);
+                            log.debug("current pos is {} seek to {}", Player.sPlayer.getCurrentPosition(), mNextSeek);
                             Player.sPlayer.seekTo((int) mNextSeek);
                             updatePauseButton();
                         }
@@ -1177,7 +1177,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
             position = 0;
         }
         int duration = Player.sPlayer.getDuration();
-        log.debug("setProgress player position/duration=" + position + "/" + duration);
+        log.debug("setProgress player position/duration={}/{}", position, duration);
         CharSequence endText = "";
         CharSequence currentText = "";
 
@@ -1189,7 +1189,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
                 if(mProgress2!=null)
                     mProgress2.setProgress((int) pos);
                 currentText = stringForTime(position);
-                log.debug("setProgress player currentText=" + currentText);
+                log.debug("setProgress player currentText={}", currentText);
 
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
                 boolean makeTimeNegative = prefs.getBoolean(VideoPreferencesCommon.KEY_MAKE_TIME_NEGATIVE, VideoPreferencesCommon.MAKE_TIME_NEGATIVE_DEFAULT);
@@ -1252,7 +1252,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
                     mPlayPauseTouchZone.setVisibility(View.INVISIBLE);
             }
         } else {
-            log.debug("updatePausePlay: video is paused, showing central play icon (locked=" + mIsLocked + ")");
+            log.debug("updatePausePlay: video is paused, showing central play icon (locked={})", mIsLocked);
             mPauseButton.setImageResource(R.drawable.video_play_selector);
             if(mPauseButton2!=null)
                 mPauseButton2.setImageResource(R.drawable.video_play_selector);
@@ -1290,7 +1290,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     private void doPauseResume() {
         if (mIsStopped)
             return;
-        log.debug("doPauseResume: " + Player.sPlayer.isPlaying() + " - " + mSeekWasPlaying);
+        log.debug("doPauseResume: {} - {}", Player.sPlayer.isPlaying(), mSeekWasPlaying);
         if (mNextSeek != -1) {
             mSeekWasPlaying = !mSeekWasPlaying;
         } else {
@@ -1354,7 +1354,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     }
 
     public void onWindowFocusChanged(boolean hasFocus) {
-        log.debug("onWindowFocusChanged: " + hasFocus);
+        log.debug("onWindowFocusChanged: {}", hasFocus);
         if (!mIsStopped) {
             /* volume can be changed by an other application: update it */
             if (hasFocus) {
@@ -1368,7 +1368,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     }
 
     private void onSeekAndDraggingComplete() {
-        log.debug("onSeekAndDraggingComplete: " + mSeekWasPlaying);
+        log.debug("onSeekAndDraggingComplete: {}", mSeekWasPlaying);
         if (mIsStopped)
             return;
         mNextSeek = -1;
@@ -1398,7 +1398,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     }
 
     public void resumePosition(int position, boolean playOnResume) {
-        log.debug("resumePositionresumePosition: " + playOnResume + " pos: " + position);
+        log.debug("resumePositionresumePosition: {} pos: {}", playOnResume, position);
         if (position > 0) {
             mSeekWasPlaying = playOnResume;
             if (Player.sPlayer.getCurrentPosition() > 0) {
@@ -1425,7 +1425,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     }
 
     private void setNextSeekPos(int way) {
-        log.debug("setNextSeekPos " + way);
+        log.debug("setNextSeekPos {}", way);
         mSeekDir = way;
         if (mLastRelativePosition == -1) {
             if (mNextSeek == -1) {
@@ -1447,7 +1447,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     }
 
     private void onSeek(int way, boolean longPress) {
-        log.debug("onSeek " + way);
+        log.debug("onSeek {}", way);
         cancelFadeOut();
         mHandler.removeMessages(MSG_SHOW_PROGRESS);
         mHandler.removeMessages(MSG_SEEK_RESUME);
@@ -1887,10 +1887,10 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
 
         if (Math.abs(scrollGestureVertical) > SCROLL_THRESHOLD) {
             if (e1.getX() < halfWidth) { // left screen part
-                log.debug("onScroll: left screen part, direction=" + (scrollGestureVertical > 0 ? "up" : "down"));
+                log.debug("onScroll: left screen part, direction={}", (scrollGestureVertical > 0 ? "up" : "down"));
                 scrollIncrementalBrightnessUpdate(scrollGestureVertical > 0);
             } else { // right screen part
-                log.debug("onScroll: left screen part, direction=" + (scrollGestureVertical > 0 ? "up" : "down"));
+                log.debug("onScroll: left screen part, direction={}", (scrollGestureVertical > 0 ? "up" : "down"));
                 scrollIncrementalVolumeUpdate(scrollGestureVertical > 0);
             }
             scrollGestureVertical = 0.0001f;
@@ -1979,7 +1979,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     @Override
     public boolean onGenericMotion(View v, MotionEvent event) {
         if(!isTVMenuDisplayed){
-            log.debug("onGenericMotion : event=" + event);
+            log.debug("onGenericMotion : event={}", event);
             if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.M&&event.getActionButton()==MotionEvent.BUTTON_PRIMARY) //
                 return false;
             int action = event.getAction();
@@ -2024,7 +2024,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         newVolume = Math.max(0, Math.min(newVolume, maxVolume)); // Constrain the value between 0 and maxVolume
         mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVolume, 0);
         if (mOsdLeftTextView != null) mOsdLeftTextView.setText(String.valueOf(newVolume));
-        log.debug("scrollIncrementalVolumeUpdate: increase=" + increase + ", currentVolume=" + currentVolume + ", maxVolume=" + maxVolume + ", newVolume=" + newVolume);
+        log.debug("scrollIncrementalVolumeUpdate: increase={}, currentVolume={}, maxVolume={}, newVolume={}", increase, currentVolume, maxVolume, newVolume);
         if (newVolume == 0) volumeIcon = getDrawable(mContext, R.drawable.ic_volume_off);
         else volumeIcon = getDrawable(mContext, R.drawable.ic_volume);
         if (mOsdLeftTextView != null) mOsdLeftTextView.setCompoundDrawablesWithIntrinsicBounds(volumeIcon, null, null, null);
@@ -2048,7 +2048,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         newIntBrightness = Math.max(0, Math.min(newIntBrightness, 30)); // Constrain the brightness between 0 and maxBrightness
         PlayerBrightnessManager.setLinearBrightness(newIntBrightness, increase, mWindow);
         if (mOsdRightTextView != null) mOsdRightTextView.setCompoundDrawablesWithIntrinsicBounds(brightnessIcon, null, null, null);
-        log.debug("scrollIncrementalBrightnessUpdate: increase=" + increase + ", currentBrightness=" + currentBrightness + ", maxBrightness=" + 30 + ", newBrightness=" + newIntBrightness);
+        log.debug("scrollIncrementalBrightnessUpdate: increase={}, currentBrightness={}, maxBrightness={}, newBrightness={}", increase, currentBrightness, 30, newIntBrightness);
         hideOsdHandler.removeCallbacks(hideOsdRunnable);
         hideOsdHandler.postDelayed(hideOsdRunnable, 300);
     }
@@ -2062,7 +2062,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
             hideOsdHandler.removeCallbacks(hideOsdRunnable);
             hideOsdHandler.postDelayed(hideOsdRunnable, 300);
         }
-        log.debug("showAudioSpeedOSD: audioSpeed=" + audioSpeed);
+        log.debug("showAudioSpeedOSD: audioSpeed={}", audioSpeed);
     }
 
     public boolean hasFocus() {
@@ -2533,7 +2533,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
 
     public void setUIMode(int mode) {
         UIMode = mode;
-        log.debug("setUIMode, setting ui mode "+mode);
+        log.debug("setUIMode, setting ui mode {}", mode);
         // TODO Auto-generated method stub
         if(mode==VideoEffect.SBS_MODE){
         	  if(!mControlBarShowing)

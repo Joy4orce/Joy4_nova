@@ -311,7 +311,7 @@ public class NetworkRootFragment extends BrowseSupportFragment {
                             final Uri uri = Uri.parse(uriToBuild);
 
                             Intent intent = new Intent(getActivity(), ListingActivity.getActivityForUri(uri));
-                            log.debug("onItemClicked: NetworkBrowse ListingActivity root uri=" + uri + ", root name=" + uri.getHost());
+                            log.debug("onItemClicked: NetworkBrowse ListingActivity root uri={}, root name={}", uri, uri.getHost());
                             intent.putExtra(ListingActivity.EXTRA_ROOT_URI, uri);
                             String shareName = FileUtils.getName(uri);
                             intent.putExtra(ListingActivity.EXTRA_ROOT_NAME, (shareName==null || shareName.isEmpty())?uri.getHost():shareName);
@@ -347,7 +347,7 @@ public class NetworkRootFragment extends BrowseSupportFragment {
                 SmbShare share = (SmbShare)item;
                 final Uri uri = share.getFileCoreShare().toUri();
 
-                log.debug("onItemClicked: SmbShare ListingActivity root uri=" + uri + ", root name=" + uri.getHost());
+                log.debug("onItemClicked: SmbShare ListingActivity root uri={}, root name={}", uri, uri.getHost());
                 Intent intent = new Intent(getActivity(), ListingActivity.getActivityForUri(uri));
                 intent.putExtra(ListingActivity.EXTRA_ROOT_URI, uri);
                 intent.putExtra(ListingActivity.EXTRA_ROOT_NAME, share.getName());
@@ -360,7 +360,7 @@ public class NetworkRootFragment extends BrowseSupportFragment {
                 // Build our own special Upnp Uri
                 final Uri uri = UpnpServiceManager.getDeviceUri(server.getClingDevice());
 
-                log.debug("onItemClicked: UpnpServer ListingActivity root uri=" + uri + ", root name=" + uri.getHost());
+                log.debug("onItemClicked: UpnpServer ListingActivity root uri={}, root name={}", uri, uri.getHost());
                 Intent intent = new Intent(getActivity(), ListingActivity.getActivityForUri(uri));
                 intent.putExtra(ListingActivity.EXTRA_ROOT_URI, uri);
                 intent.putExtra(ListingActivity.EXTRA_ROOT_NAME, server.getName());
@@ -406,7 +406,7 @@ public class NetworkRootFragment extends BrowseSupportFragment {
                             // First item is not an actual shortcut, it opens the re-scan settings
                             if (cursor.getCount() > 0) {
                                 Box rescanBox = new Box(Box.ID.INDEXED_FOLDERS_REFRESH, getString(R.string.rescan), R.drawable.filetype_new_rescan);
-                                log.debug("ShortcutsLoaderTask NetworkScannerReceiver.isScannerWorking()=" + NetworkScannerReceiver.isScannerWorking());
+                                log.debug("ShortcutsLoaderTask NetworkScannerReceiver.isScannerWorking()={}", NetworkScannerReceiver.isScannerWorking());
                                 mIndexedFoldersAdapter.add(rescanBox);
                             }
 
@@ -484,7 +484,7 @@ public class NetworkRootFragment extends BrowseSupportFragment {
             }
         }
         for (NetworkSource source : toRemove) {
-            log.debug("Removing "+source.getName()+" ("+source.getClass()+")");
+            log.debug("Removing {} ({})", source.getName(), source.getClass());
             adapter.remove(source);
         }
     }
@@ -529,11 +529,11 @@ public class NetworkRootFragment extends BrowseSupportFragment {
                     }
                     int index = mSmbDiscoveryAdapter.indexOf(newInstance);
                     if (index==-1) {
-                        log.debug("smb Adding "+newInstance.getName());
+                        log.debug("smb Adding {}", newInstance.getName());
                         addInAdapterInAlphabeticalOrder(newInstance, mSmbDiscoveryAdapter);
                     }
                     else {
-                        log.debug("smb "+newInstance.getName() + " already present");
+                        log.debug("smb {} already present", newInstance.getName());
                         SmbShare existingItem = (SmbShare) mSmbDiscoveryAdapter.get(index);
                         // seen again, flag as not old
                         existingItem.setOld(false);
@@ -571,11 +571,11 @@ public class NetworkRootFragment extends BrowseSupportFragment {
                 // Check if this server is already in the adapter (even if it is not the same instance it is OK due to the equals() implementation)
                 int index = mUpnpDiscoveryAdapter.indexOf(newInstance);
                 if (index==-1) {
-                    log.trace("upnp Adding "+newInstance.getName());
+                    log.trace("upnp Adding {}", newInstance.getName());
                     addInAdapterInAlphabeticalOrder(newInstance, mUpnpDiscoveryAdapter);
                 }
                 else {
-                    log.trace("upnp "+newInstance.getName() + " already present, flag as not old");
+                    log.trace("upnp {} already present, flag as not old", newInstance.getName());
                     ((NetworkSource)mUpnpDiscoveryAdapter.get(index)).setOld(false);
                 }
             }

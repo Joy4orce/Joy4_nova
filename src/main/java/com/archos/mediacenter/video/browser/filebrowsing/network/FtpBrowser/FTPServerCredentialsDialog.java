@@ -73,7 +73,7 @@ public class FTPServerCredentialsDialog extends ServerCredentialsDialog {
         }
 
         uriB.path(path);
-        log.debug("createUri: -> " + uriB);
+        log.debug("createUri: -> {}", uriB);
         return uriB.toString();
     }
 }

@@ -145,7 +145,7 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mSeparateAnimeFromShowMovie = mPrefs.getBoolean(VideoPreferencesCommon.KEY_SEPARATE_ANIME_MOVIE_SHOW, VideoPreferencesCommon.SEPARATE_ANIME_MOVIE_SHOW_DEFAULT);
-        log.debug("onActivityCreated: mSeparateAnimeFromShowMovie=" + mSeparateAnimeFromShowMovie);
+        log.debug("onActivityCreated: mSeparateAnimeFromShowMovie={}", mSeparateAnimeFromShowMovie);
 
         mSortOrder = mPrefs.getString(getSortOrderParamKey(), mDefaultSort);
 
@@ -261,7 +261,7 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
             final String newName = newCursor.getString(newSubsetNameColumn);
             if (oldName != null && !oldName.equals(newName)) {
                 // difference found
-                log.debug("Difference found in the category list (" + oldName + " vs " + newName + ")");
+                log.debug("Difference found in the category list ({} vs {})", oldName, newName);
                 return true;
             }
             oldCursor.moveToNext();

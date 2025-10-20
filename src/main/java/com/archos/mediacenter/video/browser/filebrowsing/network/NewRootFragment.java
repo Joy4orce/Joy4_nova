@@ -113,7 +113,7 @@ public abstract class NewRootFragment extends Fragment implements WorkgroupShort
             public void onClick(View v) {
                 // Rescan the contents of the folder
                 NetworkScanner.scanVideos(getActivity(), uri);
-                log.debug("onRefreshClickListener: scanVideos " + uri);
+                log.debug("onRefreshClickListener: scanVideos {}", uri);
                 if(ShortcutDbAdapter.VIDEO.isShortcut(getActivity(), uri.toString())<0){
                     //if not a shortcut = indexed folder, add as indexed folder and remove static shortcut
                     if(ShortcutDb.STATIC.isShortcut(getContext(), uri.toString()) != -1)
@@ -138,7 +138,7 @@ public abstract class NewRootFragment extends Fragment implements WorkgroupShort
     }
 
     public NewRootFragment() {
-        log.debug("SambaDiscoveryFragment() constructor " + this);
+        log.debug("SambaDiscoveryFragment() constructor {}", this);
         setRetainInstance(false);
 
     }

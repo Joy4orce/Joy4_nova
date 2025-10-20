@@ -240,7 +240,7 @@ public class NewVideosActionProvider extends ActionProvider implements
                 // Get the size of the action bar item
                 int itemWidth = mItemView.getWidth();
                 int itemHeight = mItemView.getHeight();
-                log.debug("item size=" + itemWidth + "x" + itemHeight);
+                log.debug("item size={}x{}", itemWidth, itemHeight);
 
                 // Make sure the item is currently displayed in the action bar 
                 // (the size is 0x0 if the item is in the options menu)
@@ -256,7 +256,7 @@ public class NewVideosActionProvider extends ActionProvider implements
                     int windowWidth = windowFrame.right - windowFrame.left;
                     int windowHeight = windowFrame.bottom - windowFrame.top;
                     int statusbarHeight = windowFrame.top;
-                    log.debug("windowFrame=" + windowFrame);
+                    log.debug("windowFrame={}", windowFrame);
 
                     // Compute a target area a bit bigger than the item itself
                     int left = location[0] - mHelpOverlayHorizontalOffset;
@@ -277,7 +277,7 @@ public class NewVideosActionProvider extends ActionProvider implements
                     if (top < 0) {
                         top = 0;
                     }
-                    log.debug("Selected target area=" + left + " " + top + " " + right + " " + bottom);
+                    log.debug("Selected target area={} {} {} {}", left, top, right, bottom);
                     
                     // Start the help overlay activity with the selected target area
                     Intent hov = new Intent(Intent.ACTION_MAIN);

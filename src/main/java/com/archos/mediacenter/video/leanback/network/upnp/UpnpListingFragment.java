@@ -65,7 +65,7 @@ public class UpnpListingFragment extends NetworkListingFragment {
         if(friendlyName!=null) friendlyUri += friendlyName;
         else friendlyUri += mUri.getHost();
         friendlyUri += "/" + shortcutName;
-        log.debug("getFriendlyUri=" + friendlyUri);
+        log.debug("getFriendlyUri={}", friendlyUri);
         return friendlyUri;
     }
 
@@ -80,7 +80,7 @@ public class UpnpListingFragment extends NetworkListingFragment {
             return false;
         }
         // there is only one path segment at root level ("0"). If there are more it is OK.
-        log.debug("canBeIndexed: mUri=" + mUri +" -> " + (mUri.getPathSegments().size() > 1));
+        log.debug("canBeIndexed: mUri={} -> {}", mUri, (mUri.getPathSegments().size() > 1));
         return mUri.getPathSegments().size() > 1;
     }
 }

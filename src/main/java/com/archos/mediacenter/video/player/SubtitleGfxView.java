@@ -82,7 +82,7 @@ public class SubtitleGfxView extends View {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        log.debug("SubtitleGfxView onLayout: width=" + getWidth() + ", height=" + getHeight());
+        log.debug("SubtitleGfxView onLayout: width={}, height={}", getWidth(), getHeight());
     }
 
     @Override
@@ -298,7 +298,7 @@ public class SubtitleGfxView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        log.debug("onDraw" + (mBitmap == null ? ": no bitmap" : "") + (mBitmap != null && mBitmap.isRecycled() ? ": bitmap is recycled" : ""));
+        log.debug("onDraw{}{}", (mBitmap == null ? ": no bitmap" : ""), (mBitmap != null && mBitmap.isRecycled() ? ": bitmap is recycled" : ""));
         if (mBitmap != null && !mBitmap.isRecycled()) {
             Canvas c = canvas;
             if (mExternalSurface != null) {

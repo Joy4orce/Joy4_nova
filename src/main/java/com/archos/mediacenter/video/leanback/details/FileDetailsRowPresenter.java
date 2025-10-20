@@ -146,7 +146,7 @@ public class FileDetailsRowPresenter extends FullWidthRowPresenter implements Ba
 
         // Special error case (99.9% of the time it happens when the specified file is not reachable)
         if (videoMetadata.getFileSize()==0 && videoMetadata.getVideoTrack()==null && videoMetadata.getAudioTrackNb()==0) {
-            log.warn("file not reacheable? fileSize=" + videoMetadata.getFileSize() + ", videoTrack=" + videoMetadata.getVideoTrack() + ", audioTrackNb=" + videoMetadata.getAudioTrackNb());
+            log.warn("file not reacheable? fileSize={}, videoTrack={}, audioTrackNb={}", videoMetadata.getFileSize(), videoMetadata.getVideoTrack(), videoMetadata.getAudioTrackNb());
             // sometimes metadata are set to zero but the file is there, can be due to libavosjni not loaded
             hideAudioVideoSubs(vh);
             vh.mFileErrorTv.setVisibility(View.VISIBLE);

@@ -188,30 +188,30 @@ public class Player implements IPlayerControl,
                         int currentModeId = d.getMode().getModeId();
                         if (numberRetries > 0) { // only try NUMBER_RETRIES
                             if (currentModeId != wantedModeId) {
-                                log.debug("CONFIG current modeId rate is " + currentModeId + " trying to switch to " + wantedModeId + ", number of retries=" + numberRetries);
+                                log.debug("CONFIG current modeId rate is {} trying to switch to {}, number of retries={}", currentModeId, wantedModeId, numberRetries);
                                 numberRetries--;
                                 mHandler.postDelayed(mRefreshRateCheckerAsync, 200);
                                 return;
                             }
-                            log.debug("CONFIG modeId before video start is " + currentModeId);
+                            log.debug("CONFIG modeId before video start is {}", currentModeId);
                             mCurrentRefreshRate = d.getRefreshRate();
                         } else {
-                            log.warn("CONFIG failed to set modeId to " + wantedModeId + " it is still " + currentModeId);
+                            log.warn("CONFIG failed to set modeId to {} it is still {}", wantedModeId, currentModeId);
                             Toast.makeText(mContext, R.string.refreshrate_failed, Toast.LENGTH_SHORT).show();
                         }
                     } else {
                         float currentRefreshRate = d.getRefreshRate();
                         if (numberRetries > 0) { // only try NUMBER_RETRIES
                             if (Math.abs(mRefreshRate - currentRefreshRate) > REFRESH_RATE_EPSILON) {
-                                log.debug("CONFIG current refresh rate is " + currentRefreshRate + " trying to switch to " + mRefreshRate + ", number of retries=" + numberRetries);
+                                log.debug("CONFIG current refresh rate is {} trying to switch to {}, number of retries={}", currentRefreshRate, mRefreshRate, numberRetries);
                                 numberRetries--;
                                 mHandler.postDelayed(mRefreshRateCheckerAsync, 200);
                                 return;
                             }
                             mRefreshRate = currentRefreshRate;
-                            log.debug("CONFIG refresh rate before video start is " + currentRefreshRate);
+                            log.debug("CONFIG refresh rate before video start is {}", currentRefreshRate);
                         } else {
-                            log.warn("CONFIG failed to set refreshRate to " + mRefreshRate + " it is still " + currentRefreshRate);
+                            log.warn("CONFIG failed to set refreshRate to {} it is still {}", mRefreshRate, currentRefreshRate);
                             Toast.makeText(mContext, R.string.refreshrate_failed, Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -271,7 +271,7 @@ public class Player implements IPlayerControl,
         public void onPrepared() {
             if (mSeek != -1)
                 seekTo(mSeek);
-            log.debug("onPrepared: subtitleTrack=" + mSubtitleTrack);
+            log.debug("onPrepared: subtitleTrack={}", mSubtitleTrack);
             if (mSubtitleTrack != -1)
                 mMediaPlayer.setSubtitleTrack(mSubtitleTrack);
             if (mSubtitleDelay != 0)
@@ -284,7 +284,7 @@ public class Player implements IPlayerControl,
                 mMediaPlayer.setAvDelay(mAvDelay);
             if (mAvSpeed != 1.0f)
                 mMediaPlayer.setAvSpeed(mAvSpeed);
-            log.trace("onPrepared: audioTrack=" + mAudioTrack);
+            log.trace("onPrepared: audioTrack={}", mAudioTrack);
             if (mAudioTrack != -1)
                 mMediaPlayer.setAudioTrack(mAudioTrack);
             reset();
@@ -296,14 +296,14 @@ public class Player implements IPlayerControl,
             return mSeek;
         }
         public void setSubtitleTrack(int subtitleTrack) {
-            log.debug("setSubtitleTrack: " + subtitleTrack);
+            log.debug("setSubtitleTrack: {}", subtitleTrack);
             mSubtitleTrack = subtitleTrack;
         }
         public void setSubtitleDelay(int subtitleDelay) {
             mSubtitleDelay = subtitleDelay;
         }
         public void setAudioTrack(int audioTrack) {
-            log.debug("setAudioTrack: " + audioTrack);
+            log.debug("setAudioTrack: {}", audioTrack);
             mAudioTrack = audioTrack;
         }
         public void setSubtitleRatio(int n, int d) {
@@ -374,7 +374,7 @@ public class Player implements IPlayerControl,
         }
     }
     private void setGLSupportEnabled(boolean enable) {
-        log.debug("setGLSupportEnabled " + enable);
+        log.debug("setGLSupportEnabled {}", enable);
         saveUri();
         pause(PlayerController.STATE_OTHER);
         mSurfaceController.setGLSupportEnabled(enable);
@@ -432,7 +432,7 @@ public class Player implements IPlayerControl,
             // fixing this the quick way will break all sort of things
             mVideoMetadata.setFile(uri.getPath());
         }
-        log.debug("setVideoURI: " + uri);
+        log.debug("setVideoURI: {}", uri);
         openVideo();
     }
 
@@ -586,7 +586,7 @@ public class Player implements IPlayerControl,
     }
 
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-        log.debug("CONFIG onSurfaceTextureSizeChanged: " + width + "x" + height);
+        log.debug("CONFIG onSurfaceTextureSizeChanged: {}x{}", width, height);
         mSurfaceWidth = width;
         mSurfaceHeight = height;
         if (mEffectRenderer != null) mEffectRenderer.setSurfaceSize(width, height);
@@ -607,7 +607,7 @@ public class Player implements IPlayerControl,
     }
 
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        log.debug("CONFIG onSurfaceTextureAvailable: " + width + "x" + height);
+        log.debug("CONFIG onSurfaceTextureAvailable: {}x{}", width, height);
         if(mEffectRenderer==null)
             mEffectRenderer = new VideoEffectRenderer(mContext, VideoEffect.getDefaultType());
 
@@ -628,7 +628,7 @@ public class Player implements IPlayerControl,
     public void surfaceChanged(SurfaceHolder holder, int format,
                                 int w, int h)
     {
-        log.debug("CONFIG surfaceChanged: " + w + "x" + h);
+        log.debug("CONFIG surfaceChanged: {}x{}", w, h);
         mSurfaceWidth = w;
         mSurfaceHeight = h;
         boolean isValidState = (mCurrentState == STATE_PREPARED);
@@ -764,7 +764,7 @@ public class Player implements IPlayerControl,
     public int getCurrentPosition() {
         if (isInPlaybackState()) {
             int currentPos = mMediaPlayer.getCurrentPosition();
-            log.debug("getCurrentPosition: " + currentPos);
+            log.debug("getCurrentPosition: {}", currentPos);
             return currentPos;
         } else if (mStopPosition != -1) {
             return mStopPosition;
@@ -781,7 +781,7 @@ public class Player implements IPlayerControl,
     }
     
     public void seekTo(int msec) {
-        log.debug("seekTo: " + msec + " ms");
+        log.debug("seekTo: {} ms", msec);
         if (isInPlaybackState()) {
             if (mPlayerListener != null) {
                 mPlayerListener.onSeekStart(msec);
@@ -866,7 +866,7 @@ public class Player implements IPlayerControl,
     }
 
     public boolean setSubtitleTrack(int stream) {
-        log.debug("setSubtitleTrack: select stream " + stream);
+        log.debug("setSubtitleTrack: select stream {}", stream);
         if (isInPlaybackState()) {
             return mMediaPlayer.setSubtitleTrack(stream);
         } else {
@@ -949,7 +949,7 @@ public class Player implements IPlayerControl,
     };
 
     public boolean setAudioTrack(int stream) {
-        log.debug("setAudioTrack: select stream " + stream);
+        log.debug("setAudioTrack: select stream {}", stream);
         if (isInPlaybackState()) {
             return mMediaPlayer.setAudioTrack(stream);
         } else {
@@ -989,14 +989,14 @@ public class Player implements IPlayerControl,
                     int currentAudio = -1;
                     if (data.has(IMediaPlayer.METADATA_KEY_CURRENT_AUDIO_TRACK))
                         currentAudio = data.getInt(IMediaPlayer.METADATA_KEY_CURRENT_AUDIO_TRACK);
-                    log.debug("handleMetadata: currentAudioTrack -1 -> " + currentAudio + ", calling onAudioMetadataUpdated");
+                    log.debug("handleMetadata: currentAudioTrack -1 -> {}, calling onAudioMetadataUpdated", currentAudio);
                     mPlayerListener.onAudioMetadataUpdated(mVideoMetadata, currentAudio);
                 }
                 if (data.has(IMediaPlayer.METADATA_KEY_NB_SUBTITLE_TRACK)) {
                     int currentSubtitle = -1;
                     if (data.has(IMediaPlayer.METADATA_KEY_CURRENT_SUBTITLE_TRACK))
                         currentSubtitle = data.getInt(IMediaPlayer.METADATA_KEY_CURRENT_SUBTITLE_TRACK);
-                    log.debug("handleMetadata: currentSubtitleTrack -1 -> " + currentSubtitle + ", calling onSubtitleMetadataUpdated");
+                    log.debug("handleMetadata: currentSubtitleTrack -1 -> {}, calling onSubtitleMetadataUpdated", currentSubtitle);
                     mPlayerListener.onSubtitleMetadataUpdated(mVideoMetadata, currentSubtitle);
                 }
             }
@@ -1011,7 +1011,7 @@ public class Player implements IPlayerControl,
 
         // Get the capabilities of the player for this stream
         mCanPause = mCanSeekForward = mCanSeekBack = true;
-        log.debug("onPrepared: mCanPause=" + mCanPause + ", mCanSeekForward=" + mCanSeekForward + ", mCanSeekBack=" + mCanSeekBack + " -> handleMetadata");
+        log.debug("onPrepared: mCanPause={}, mCanSeekForward={}, mCanSeekBack={} -> handleMetadata", mCanPause, mCanSeekForward, mCanSeekBack);
         handleMetadata(mMediaPlayer);
 
         mResumeCtx.onPrepared();
@@ -1037,9 +1037,9 @@ public class Player implements IPlayerControl,
                     LayoutParams lp = mWindow.getAttributes();
                     mWaitForNewRate = false;
                     if (lp != null && video != null && video.fpsRate > 0 && video.fpsScale > 0) {
-                        log.debug("CONFIG video.fpsRate=" + video.fpsRate + ", video.fpsScale=" + video.fpsScale + " -> wantedFps=" + wantedFps);
+                        log.debug("CONFIG video.fpsRate={}, video.fpsScale={} -> wantedFps={}", video.fpsRate, video.fpsScale, wantedFps);
                         if (refreshRateSwitchMode == 2 && Build.VERSION.SDK_INT >= 31 && mSurfaceHolder != null) {
-                            log.debug("CONFIG setting frame rate to " + wantedFps + " fps through setFrameRate Android 12+ API");
+                            log.debug("CONFIG setting frame rate to {} fps through setFrameRate Android 12+ API", wantedFps);
                             Surface videoSurface = mSurfaceHolder.getSurface();
                             // Surface.CHANGE_FRAME_RATE_ALWAYS is needed to get the refresh rate switch
                             videoSurface.setFrameRate(wantedFps, Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE, Surface.CHANGE_FRAME_RATE_ALWAYS);
@@ -1049,9 +1049,9 @@ public class Player implements IPlayerControl,
                                 Display.Mode currentMode = d.getMode();
                                 int currentModeId = currentMode.getModeId();
                                 if (log.isDebugEnabled()) {
-                                    log.debug("CONFIG current display mode is " + currentMode);
+                                    log.debug("CONFIG current display mode is {}", currentMode);
                                     for (Mode mode : supportedModes)
-                                        log.debug("CONFIG display supported mode " + mode);
+                                        log.debug("CONFIG display supported mode {}", mode);
                                 }
 
                                 wantedModeId = 0;
@@ -1066,21 +1066,21 @@ public class Player implements IPlayerControl,
                                 // minimize judder in 2 passes selecting:
                                 // highest rr matching rr%fr=0
                                 // else highest rr maximizing number of glitches per second
-                                log.debug("CONFIG min judder targeting " + wantedFps + " fps video");
+                                log.debug("CONFIG min judder targeting {} fps video", wantedFps);
                                 log.debug("CONFIG min judder: highest rr matching rr%fr=0 pass");
                                 for (int i = 0; i < supportedModes.length; i++) {
                                     sM = supportedModes[i];
                                     rhz = Math.round(1001 * sM.getRefreshRate());
                                     if (rhz >= fps) { // no frame drop
                                         metric = rhz % fps;
-                                        log.debug("CONFIG evaluating " + sM.getPhysicalWidth() + "x" + sM.getPhysicalHeight() + "(" + sM.getRefreshRate() + "Hz) metric = " + metric);
+                                        log.debug("CONFIG evaluating {}x{}({}Hz) metric = {}", sM.getPhysicalWidth(), sM.getPhysicalHeight(), sM.getRefreshRate(), metric);
                                         // be more tolerant on metric == 0 check since on firestick roundings make it not null
                                         if (sM.getPhysicalWidth() == currentMode.getPhysicalWidth() && sM.getPhysicalHeight() == currentMode.getPhysicalHeight() &&
                                                 metric < 10 && rhz >= maxRhz) {
                                             foundMatch = true;
                                             maxRhz = rhz;
                                             wantedModeId = sM.getModeId();
-                                            log.debug("CONFIG selecting modeId " + wantedModeId + " for " + rhz + " Hz and " + fps + " fps (metric = " + metric + ")");
+                                            log.debug("CONFIG selecting modeId {} for {} Hz and {} fps (metric = {})", wantedModeId, rhz, fps, metric);
                                         }
                                     }
                                 }
@@ -1097,14 +1097,14 @@ public class Player implements IPlayerControl,
                                             k = rhz % fps;
                                             kp = fps - k;
                                             g = Math.min(k, kp); // number of glitches (uneven image duration) in 1001s
-                                            log.debug("CONFIG evaluating " + sM.getPhysicalWidth() + "x" + sM.getPhysicalHeight() + "(" + sM.getRefreshRate() + "Hz) glitches = " + g);
+                                            log.debug("CONFIG evaluating {}x{}({}Hz) glitches = {}", sM.getPhysicalWidth(), sM.getPhysicalHeight(), sM.getRefreshRate(), g);
                                             if (sM.getPhysicalWidth() == currentMode.getPhysicalWidth() && sM.getPhysicalHeight() == currentMode.getPhysicalHeight() &&
                                                     g >= maxG && rhz >= maxRhz) {
                                                 foundMatch = true;
                                                 maxRhz = rhz;
                                                 maxG = g;
                                                 wantedModeId = sM.getModeId();
-                                                log.debug("CONFIG selecting modeId " + wantedModeId + " for " + rhz + " Hz and " + fps + " fps (glitches = " + g + ")");
+                                                log.debug("CONFIG selecting modeId {} for {} Hz and {} fps (glitches = {})", wantedModeId, rhz, fps, g);
                                             }
                                         }
                                     }
@@ -1123,8 +1123,7 @@ public class Player implements IPlayerControl,
                                 Arrays.sort(supportedRates);
                                 if (log.isDebugEnabled())
                                     for (float r : supportedRates)
-                                        log.debug("CONFIG Display supported refresh rate " + r);
-
+                                        log.debug("CONFIG Display supported refresh rate {}", r);
                                 mRefreshRate = 0f;
 
                                 int metric = 0;
@@ -1136,19 +1135,19 @@ public class Player implements IPlayerControl,
                                 // minimize judder in 2 passes selecting:
                                 // highest rr matching rr%fr=0
                                 // else highest rr maximizing number of glitches per second
-                                log.debug("CONFIG min judder targeting " + wantedFps + " fps video");
+                                log.debug("CONFIG min judder targeting {} fps video", wantedFps);
                                 log.debug("CONFIG min judder: highest rr matching rr%fr=0 pass");
                                 for (float rate : supportedRates) {
                                     rhz = Math.round(1001 * rate);
                                     if (rhz >= fps) { // no frame drop
                                         metric = rhz % fps;
-                                        log.debug("CONFIG evaluating " + rate + "Hz metric = " + metric);
+                                        log.debug("CONFIG evaluating {}Hz metric = {}", rate, metric);
                                         // be more tolerant on metric == 0 check since on firestick roundings make it not null
                                         if (metric < 10 && rhz >= maxRhz) {
                                             foundMatch = true;
                                             maxRhz = rhz;
                                             mRefreshRate = rate;
-                                            log.debug("CONFIG selecting " + mRefreshRate + " Hz for " + wantedFps + " fps (metric = " + metric + ")");
+                                            log.debug("CONFIG selecting {} Hz for {} fps (metric = {})", mRefreshRate, wantedFps, metric);
                                         }
                                     }
                                 }
@@ -1164,13 +1163,13 @@ public class Player implements IPlayerControl,
                                             k = rhz % fps;
                                             kp = fps - k;
                                             g = Math.min(k, kp); // number of glitches (uneven image duration) in 1001s
-                                            log.debug("CONFIG evaluating " + rate + "Hz metric = " + g);
+                                            log.debug("CONFIG evaluating {}Hz metric = {}", rate, g);
                                             if (g >= maxG && rhz >= maxRhz) {
                                                 foundMatch = true;
                                                 maxRhz = rhz;
                                                 maxG = g;
                                                 mRefreshRate = rate;
-                                                log.debug("CONFIG selecting " + mRefreshRate + " Hz " + wantedFps + " fps (glitches = " + g + ")");
+                                                log.debug("CONFIG selecting {} Hz {} fps (glitches = {})", mRefreshRate, wantedFps, g);
                                             }
                                         }
                                     }
@@ -1193,7 +1192,7 @@ public class Player implements IPlayerControl,
         }
         mHandler.post(mRefreshRateCheckerAsync);
 
-        log.debug("CONFIG technicalInfo: " + CodecDiscovery.getTechnicalInfo(mContext));
+        log.debug("CONFIG technicalInfo: {}", CodecDiscovery.getTechnicalInfo(mContext));
     }
 
     public void onCompletion(IMediaPlayer mp) {
@@ -1213,7 +1212,7 @@ public class Player implements IPlayerControl,
     public void onVideoSizeChanged(IMediaPlayer mp, int width, int height) {
         mVideoWidth = width;
         mVideoHeight = height;
-        log.debug("CONFIG OnVideoSizeChanged: "+mVideoWidth+"x"+mVideoHeight);
+        log.debug("CONFIG OnVideoSizeChanged: {}x{}", mVideoWidth, mVideoHeight);
         mSurfaceController.setVideoSize(mVideoWidth, mVideoHeight, mVideoAspect);
         if (mEffectRenderer != null)
                 mEffectRenderer.setVideoSize(mVideoWidth, mVideoHeight, mVideoAspect);
@@ -1221,7 +1220,7 @@ public class Player implements IPlayerControl,
 
     public void onVideoAspectChanged(IMediaPlayer mp, double aspect) {
         mVideoAspect = aspect;
-        log.debug("CONFIG OnVideoAspectChanged: "+mVideoAspect);
+        log.debug("CONFIG OnVideoAspectChanged: {}", mVideoAspect);
         mSurfaceController.setVideoSize(mVideoWidth, mVideoHeight, mVideoAspect);
         if (mEffectRenderer != null)
                 mEffectRenderer.setVideoSize(mVideoWidth, mVideoHeight, mVideoAspect);
@@ -1253,7 +1252,7 @@ public class Player implements IPlayerControl,
     }
 
     public boolean onInfo(IMediaPlayer mp, int what, int extra) {
-        log.debug("onInfo: "+what+" "+extra);
+        log.debug("onInfo: {} {}", what, extra);
         switch(what) {
         case IMediaPlayer.MEDIA_INFO_METADATA_UPDATE:
             if (mIsBusy) {
@@ -1270,7 +1269,7 @@ public class Player implements IPlayerControl,
     }
 
     public boolean onError(IMediaPlayer mp, int errorCode, int errorQualCode, String msg) {
-        log.warn("onError: Error: " + errorCode + "," + errorQualCode);
+        log.warn("onError: Error: {},{}", errorCode, errorQualCode);
         mCurrentState = STATE_ERROR;
         mTargetState = STATE_ERROR;
 

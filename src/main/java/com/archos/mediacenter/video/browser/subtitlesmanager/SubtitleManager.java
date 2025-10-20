@@ -101,14 +101,14 @@ public class SubtitleManager {
         public boolean equals(Object o) {
             // test checks if the file is already in the list via fileSize and fleName
             SubtitleFile other = (SubtitleFile)o;
-            //log.trace("equals: " + mFile.getStreamingUri() + " vs " + other.mFile.getStreamingUri() + " (" + mFile.length() + " vs " + other.mFile.length() + ")");
+            //log.trace("equals: {} vs {} ({} vs {})", mFile.getStreamingUri(), other.mFile.getStreamingUri(), mFile.length(), other.mFile.length());
             // do not compare entire fileName but only trailing part (i.e. "en.srt" instead of "videoName.en.srt") to capture copy of Subs/en.srt to videoName.en.srt by privatePrefetchSub
             //return ((mFile.getName().equals(other.mFile.getName())) && (mFile.length() == other.mFile.length()));
             return ((mFile.getName().endsWith(other.mFile.getName())) && (mFile.length() == other.mFile.length()));
         }
     }
     public static void deleteAssociatedSubs(Uri fileUri, Context context) {
-        log.debug("deleteAssociatedSubs: " + fileUri.toString());
+        log.debug("deleteAssociatedSubs: {}", fileUri.toString());
         try {
             List<MetaFile2> subs = getSubtitleList(fileUri);
             for(MetaFile2 sub : subs){
@@ -142,18 +142,18 @@ public class SubtitleManager {
     private static List<String> listOfLocalSubs;
 
     public static List<String> getPreFetchedListOfSubs() {
-        log.debug("getPreFetchedListOfSubs: " + Arrays.toString(prefetchedListOfSubs.toArray()));
+        log.debug("getPreFetchedListOfSubs: {}", Arrays.toString(prefetchedListOfSubs.toArray()));
         return prefetchedListOfSubs;
     }
 
     public static List<String> getListOfLocalSubs() {
-        if (listOfLocalSubs != null) log.debug("getListOfLocalSubs: " + Arrays.toString(listOfLocalSubs.toArray()));
+        if (listOfLocalSubs != null) log.debug("getListOfLocalSubs: {}", Arrays.toString(listOfLocalSubs.toArray()));
         else log.debug("getListOfLocalSubs: null");
         return listOfLocalSubs;
     }
 
     public void preFetchHTTPSubtitlesAndPrepareUpnpSubs(final Uri upnpNiceUri, final Uri fileUri){
-        log.debug("preFetchHTTPSubtitlesAndPrepareUpnpSubs on " + upnpNiceUri + ", " + fileUri);
+        log.debug("preFetchHTTPSubtitlesAndPrepareUpnpSubs on {}, {}", upnpNiceUri, fileUri);
         new Thread() {
             public void run() {
                 prefetchedListOfSubs = new ArrayList<>();
@@ -182,7 +182,7 @@ public class SubtitleManager {
                                         }
                                         FileEditorFactory.getFileEditorForUrl(Uri.fromFile(file), mContext).copyFileTo(destFile, mContext);
                                         prefetchedListOfSubs.add(destFile.getPath());
-                                        log.trace("preFetchHTTPSubtitlesAndPrepareUpnpSubs: copy " + nameWithoutExtension + " -> " + destFile.getPath());
+                                        log.trace("preFetchHTTPSubtitlesAndPrepareUpnpSubs: copy {} -> {}", nameWithoutExtension, destFile.getPath());
                                     } catch (Exception e) {
                                         log.error("preFetchHTTPSubtitlesAndPrepareUpnpSubs: caught exception", e);
                                     }
@@ -219,7 +219,7 @@ public class SubtitleManager {
                                 }
                                 in = con.getInputStream();
                                 File subFile = new File(MediaUtils.getSubsDir(mContext), name);
-                                log.trace("preFetchHTTPSubtitlesAndPrepareUpnpSubs: copy " + name + " -> " + subFile.getPath());
+                                log.trace("preFetchHTTPSubtitlesAndPrepareUpnpSubs: copy {} -> {}", name, subFile.getPath());
                                 prefetchedListOfSubs.add(subFile.getPath());
                                 fos = new FileOutputStream(subFile);
                                 l = 0;
@@ -252,7 +252,7 @@ public class SubtitleManager {
                 }
                 else {
                     if (!"upnp".equals(fileUri.getScheme()) && UriUtils.isImplementedByFileCore(fileUri)) {
-                        log.debug("preFetchHTTPSubtitlesAndPrepareUpnpSubs: trying to fetch subtitles from " + fileUri);
+                        log.debug("preFetchHTTPSubtitlesAndPrepareUpnpSubs: trying to fetch subtitles from {}", fileUri);
                         privatePrefetchSub(fileUri);
                     }
                 }
@@ -296,7 +296,7 @@ public class SubtitleManager {
                     public void onProgress(int currentFile, long currentFileProgress,int currentRootFile, long currentRootFileProgress, long totalProgress, double currentSpeed) {}
                     @Override
                     public void onSuccess(Uri target) {
-                        log.trace("privatePrefetchSub: onSuccess copy " + baseName + " -> " + target);
+                        log.trace("privatePrefetchSub: onSuccess copy {} -> {}", baseName, target);
                         prefetchedListOfSubs.add(target.getPath());
                         if(FileUtils.isLocal(target)){
                             try {
@@ -326,7 +326,7 @@ public class SubtitleManager {
                 });
                 //force prefixing with video name before copy if this is not the case i.e. Subs/en.srt -> videoName.en.srt,
                 // /!\ it will cause subs duplicates because detection is based on fileName
-                log.debug("privatePrefetchSub: setAllTargetFilesShouldStartWithString " + stripExtension(videoUri) + ".");
+                log.debug("privatePrefetchSub: setAllTargetFilesShouldStartWithString {}.", stripExtension(videoUri));
                 engine.setAllTargetFilesShouldStartWithString(stripExtension(videoUri) + ".");
                 //engine.setAllTargetFilesShouldStartWithString(stripExtension(videoUri));
                 engine.copy(subs, target, true);
@@ -491,7 +491,7 @@ public class SubtitleManager {
                         // ensures that we have a file with the same name as the video
                         if (file.getName().startsWith(filenameWithoutExtension + ".") || addAllSubs) {
                             allFiles.add(file);
-                            log.trace("listLocalAndRemotesSubtitles: cache add " + file.getName());
+                            log.trace("listLocalAndRemotesSubtitles: cache add {}", file.getName());
                         }
                     }
                 } catch (Exception e) {
@@ -515,7 +515,7 @@ public class SubtitleManager {
                         subtitleName = getSubLanguageFromSubPathAndVideoPath(mContext, file.getUri().getPath(), video.getPath());
                         if (subtitleFileName.equals(subtitleName)) subtitleName = "SRT";
                         subList.add(new SubtitleFile(file, subtitleName));
-                        log.trace("listLocalAndRemotesSubtitles: add external " + file.getUri().toString() + " (" + subtitleName +")");
+                        log.trace("listLocalAndRemotesSubtitles: add external {} ({})", file.getUri().toString(), subtitleName);
                     }
                 }
             } catch (Exception e) {
@@ -528,11 +528,11 @@ public class SubtitleManager {
             // this test checks if the file is already in the list via fileSize and fleName (it captures Subs/en.srt then it is renamed in privatePrefetchSub to videoName.en.srt)
             // refer to equal() method for this
             if (!subListUnique.contains(f)) {
-                log.debug("listLocalAndRemotesSubtitles: adding only unique " + f.mFile.getUri().toString() + " (" + f.mName +")");
+                log.debug("listLocalAndRemotesSubtitles: adding only unique {} ({})", f.mFile.getUri().toString(), f.mName);
                 subListUnique.add(f);
                 if (FileUtils.isLocal(f.mFile.getUri())) listOfLocalSubs.add(f.mFile.getUri().getPath());
             } else {
-                log.debug("listLocalAndRemotesSubtitles: skipping duplicate " + f.mFile.getUri().toString() + " (" + f.mName +")");
+                log.debug("listLocalAndRemotesSubtitles: skipping duplicate {} ({})", f.mFile.getUri().toString(), f.mName);
             }
         }
 
@@ -579,7 +579,7 @@ public class SubtitleManager {
         String subFilenameWithoutExtension = stripExtensionFromName(getName(subPath));
         String videoFilenameWithoutExtension = stripExtensionFromName(getName(videoPath));
         if (subFilenameWithoutExtension.equals(videoFilenameWithoutExtension)) {
-            log.debug("getSubLanguageFromSubPathAndVideoPath: video and sub have same name " + subFilenameWithoutExtension + " -> SRT");
+            log.debug("getSubLanguageFromSubPathAndVideoPath: video and sub have same name {} -> SRT", subFilenameWithoutExtension);
             return "SRT";
         }
         // subtract video name from sub name if they start the same (they should) but there could be Subs/en.srt too
@@ -606,7 +606,7 @@ public class SubtitleManager {
         } else { // subLanguageName is likely subFilenameWithoutExtension but cannot compare here because video filename not available
             subLanguageName = subFilenameWithoutExtension;
         }
-        log.debug("getSubLanguageFromSubPathAndVideoPath: " + subPath + " -> " + subLanguageName);
+        log.debug("getSubLanguageFromSubPathAndVideoPath: {} -> {}", subPath, subLanguageName);
         return subLanguageName;
     }
 
@@ -615,7 +615,7 @@ public class SubtitleManager {
         // for some reason, some yts subtitles have a .HI at the end of the filename, and apparently this is not for Hindi but Hearing Impaired, note that they are preceded by SDH for Deaf and hard of Hearing
         Pattern pattern = Pattern.compile("(?:^|" + SEP + ")(" + COUNTRYCODE + ")" + SEP + HI + "$");
         Matcher matcher = pattern.matcher(basename);
-        //log.debug("isSubtitleHearingImpaired: " + basename + " -> " + matcher.group(1));
+        //log.debug("isSubtitleHearingImpaired: {} -> {}", basename, matcher.group(1));
         return matcher.find();
     }
 

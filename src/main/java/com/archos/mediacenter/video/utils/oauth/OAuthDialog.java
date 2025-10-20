@@ -157,7 +157,7 @@ public class OAuthDialog extends Dialog {
         @SuppressWarnings("deprecation")
         @Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
-			log.debug("shouldOverrideUrlLoading API21-23 for url " + url);
+			log.debug("shouldOverrideUrlLoading API21-23 for url {}", url);
 			String urldecode = null;
 			try {
 				urldecode = URLDecoder.decode(url, "UTF-8");
@@ -166,7 +166,7 @@ public class OAuthDialog extends Dialog {
 			}
 			Uri uri = Uri.parse(urldecode);
 			if (!"localhost".equals(uri.getHost()) || !urldecode.contains("code=")) {
-				log.debug("shouldOverrideUrlLoading: shouldOverrideUrlLoading false for host " + uri.getHost() + " and urldecode is " + urldecode);
+				log.debug("shouldOverrideUrlLoading: shouldOverrideUrlLoading false for host {} and urldecode is {}", uri.getHost(), urldecode);
 				return false;
 			}
 			mdata.code = uri.getQueryParameter("code");
@@ -181,7 +181,7 @@ public class OAuthDialog extends Dialog {
         @Override
 		public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
 			String url = request.getUrl().toString();
-			log.debug("shouldOverrideUrlLoading API24+ for url " + url);
+			log.debug("shouldOverrideUrlLoading API24+ for url {}", url);
 			String urldecode = null;
 			try {
 				urldecode = URLDecoder.decode(url, "UTF-8");
@@ -190,7 +190,7 @@ public class OAuthDialog extends Dialog {
 			}
 			Uri uri = Uri.parse(urldecode);
 			if (!"localhost".equals(uri.getHost()) || !urldecode.contains("code=")) {
-				log.debug("shouldOverrideUrlLoading: shouldOverrideUrlLoading false for host " + uri.getHost() + " and urldecode is " + urldecode);
+				log.debug("shouldOverrideUrlLoading: shouldOverrideUrlLoading false for host {} and urldecode is {}", uri.getHost(), urldecode);
 				return false;
 			}
 			mdata.code = uri.getQueryParameter("code");
@@ -211,11 +211,11 @@ public class OAuthDialog extends Dialog {
         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl)
         {
             super.onReceivedError(view, errorCode, description, failingUrl);
-			log.debug("onReceivedError API21,22 for url " + failingUrl);
+			log.debug("onReceivedError API21,22 for url {}", failingUrl);
         	if(mListener!=null)
         		mListener.onFinished(mdata);
             OAuthDialog.this.dismiss();
-			log.warn("onReceivedError: error code=" + errorCode + ", meaning " + description);
+			log.warn("onReceivedError: error code={}, meaning {}", errorCode, description);
 			Toast.makeText(getContext(), "No Internet or " + description , Toast.LENGTH_LONG).show();
 		}
 
@@ -229,7 +229,7 @@ public class OAuthDialog extends Dialog {
 			if(mListener!=null)
                 mListener.onFinished(mdata);
 			OAuthDialog.this.dismiss();
-			log.warn("onReceivedError: error code is " + error.getErrorCode() + ", description " + error.getDescription());
+			log.warn("onReceivedError: error code is {}, description {}", error.getErrorCode(), error.getDescription());
 			Toast.makeText(getContext(), "No Internet or code " + + error.getErrorCode() + ", description " + error.getDescription() , Toast.LENGTH_LONG).show();
 		}
 
@@ -240,7 +240,7 @@ public class OAuthDialog extends Dialog {
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon)
         {
-			log.debug("onPageStarted for url " + url);
+			log.debug("onPageStarted for url {}", url);
 			super.onPageStarted(view, url, favicon);
 			Activity activity = MiscUtils.getActivityFromContext(getContext());
 			if (activity != null && ! activity.isFinishing() && ! activity.isDestroyed())
@@ -254,7 +254,7 @@ public class OAuthDialog extends Dialog {
 		@Override
 				public void onPageFinished(WebView view, String url)
 		{
-			log.debug("onPageFinished for url " + url);
+			log.debug("onPageFinished for url {}", url);
 			super.onPageFinished(view, url);
 				mWebView.resetDoItOnce();
 				mProgress.dismiss();

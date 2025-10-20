@@ -175,15 +175,15 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
             new ActivityResultContracts.StartIntentSenderForResult(),
             result -> { // result can be RESULT_OK, RESULT_CANCELED
                 Context context = getActivity();
-                log.debug("ActivityResultLauncher deleteLauncher: result " + result.toString());
+                log.debug("ActivityResultLauncher deleteLauncher: result {}", result.toString());
                 if (result.getResultCode() == Activity.RESULT_OK) {
-                    log.debug("ActivityResultLauncher deleteLauncher: OK, deleteUris " + ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
+                    log.debug("ActivityResultLauncher deleteLauncher: OK, deleteUris {}", ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
                     if (delete != null && deleteUrisList != null && deleteUrisList.size() >= 1) {
-                        log.debug("ActivityResultLauncher deleteLauncher: calling delete.deleteOK on " + deleteUrisList.get(0));
+                        log.debug("ActivityResultLauncher deleteLauncher: calling delete.deleteOK on {}", deleteUrisList.get(0));
                         delete.deleteOK(deleteUrisList.get(0));
                     }
                 } else {
-                    log.debug("ActivityResultLauncher deleteLauncher: NO, deleteUris " + ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
+                    log.debug("ActivityResultLauncher deleteLauncher: NO, deleteUris {}", ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
                     if (delete != null && deleteUrisList != null && deleteUrisList.size() > 1)
                         delete.deleteNOK(deleteUrisList.get(0));
                 }
@@ -333,7 +333,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     private boolean isFilePlayable = true;
 
     public static VideoInfoActivityFragment getInstance(Video video, Uri path, long id, boolean forceVideoSelection){
-        log.debug("VideoInfoActivityFragment for uri=" + path);
+        log.debug("VideoInfoActivityFragment for uri={}", path);
         Bundle arguments = new Bundle();
         arguments.putSerializable(EXTRA_VIDEO, video);
         if(path!=null)
@@ -566,7 +566,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
         }
         final int finalResume = resume;
         final int finalResumePos = resumePos;
-        log.debug("updateGenericButtonAction: resume=" + resume + ", resumePos=" + resumePos);
+        log.debug("updateGenericButtonAction: resume={}, resumePos={}", resume, resumePos);
         mGenericPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -661,7 +661,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
         if (propertyChangeListener == null)
             propertyChangeListener = evt -> {
                 if (evt.getOldValue() != evt.getNewValue()) {
-                    log.debug("NetworkState for " + evt.getPropertyName() + " changed:" + evt.getOldValue() + " -> " + evt.getNewValue());
+                    log.debug("NetworkState for {} changed:{} -> {}", evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
                     updateUI();
                 }
             };
@@ -694,7 +694,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     }
 
     private void updateActionButtons(){
-        log.debug("updateActionButtons: RemoteResumeMs=" + mCurrentVideo.getRemoteResumeMs() + ", getResumeMs=" + mCurrentVideo.getResumeMs());
+        log.debug("updateActionButtons: RemoteResumeMs={}, getResumeMs={}", mCurrentVideo.getRemoteResumeMs(), mCurrentVideo.getResumeMs());
         if(mCurrentVideo.getRemoteResumeMs()>0&&mCurrentVideo.getResumeMs()!=mCurrentVideo.getRemoteResumeMs()) {
             mRemoteResumeButton.setVisibility(View.VISIBLE);
             mRemoteResumeButton.setText(getResources().getString(R.string.remote_resume)+" "+MediaUtils.formatTime(mCurrentVideo.getRemoteResumeMs()));
@@ -711,7 +711,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
 
     @Override
     public void onSaveInstanceState(Bundle bundle){
-        log.debug("onSaveInstanceState: mCurrentVideo.getFilePath()=" + ((mCurrentVideo!=null) ? mCurrentVideo.getFilePath() : "null"));
+        log.debug("onSaveInstanceState: mCurrentVideo.getFilePath()={}", ((mCurrentVideo!=null) ? mCurrentVideo.getFilePath() : "null"));
         bundle.putSerializable(EXTRA_METADATA_CACHE, mVideoMetadateCache);
         bundle.putSerializable(EXTRA_SUBTITLE_CACHE, mSubtitleListCache);
         bundle.putBoolean(EXTRA_FORCE_VIDEO_SELECTION, true);
@@ -744,7 +744,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
 
     private void setCurrentVideo(Video video){
         updateWatchedStatus(); //independant of current video
-        log.debug( "setCurrentVideo: mCurrentVideo.getFilePath()=" + ((mCurrentVideo!=null) ? mCurrentVideo.getFilePath() : "null"));
+        log.debug( "setCurrentVideo: mCurrentVideo.getFilePath()={}", ((mCurrentVideo!=null) ? mCurrentVideo.getFilePath() : "null"));
         if(shouldChangeVideo(mCurrentVideo, video)) {
             log.debug("setCurrentVideo: should change video");
             mTitleBar.getMenu().clear();
@@ -764,8 +764,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                     name = episode.getShowName();
                 }
                 setTextOrHideContainer(mEpisodeSeasonView, getContext().getString(R.string.leanback_episode_SXEX_code, episode.getSeasonNumber(), episode.getEpisodeNumber()), mEpisodeSeasonView);
-                log.debug("setCurrentVideo: " + name + "-s" +
-                        episode.getSeasonNumber()+ "e" + episode.getEpisodeNumber() + " " + episode.getName());
+                log.debug("setCurrentVideo: {}-s{}e{} {}", name, episode.getSeasonNumber(), episode.getEpisodeNumber(), episode.getName());
 
                 if(mSecondaryEpisodeSeasonView!=null)
                     setTextOrHideContainer(mSecondaryEpisodeSeasonView, getContext().getString(R.string.leanback_episode_SXEX_code, episode.getSeasonNumber(), episode.getEpisodeNumber()), mSecondaryEpisodeSeasonView);
@@ -939,7 +938,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     }
 
     private boolean shouldChangeVideo(Video v1, Video v2) {
-        log.debug("shouldChangeVideo: called on videos " + ((v1 == null) ? "null" : v1.getFilePath()) + " and " + ((v2 == null) ? "null" : v2.getFilePath()));
+        log.debug("shouldChangeVideo: called on videos {} and {}", ((v1 == null) ? "null" : v1.getFilePath()), ((v2 == null) ? "null" : v2.getFilePath()));
         if (v1==null || v2==null) {log.debug("foundDifferencesRequiringDetailsUpdate null"); return true;}
         if (v1.getClass() != v2.getClass()) {log.debug("foundDifferencesRequiringDetailsUpdate class"); return true;}
         if (v1.getId() != v2.getId()) {log.debug("foundDifferencesRequiringDetailsUpdate id"); return true;}
@@ -990,7 +989,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                     new Thread() {
                         public void run() {
                             if (!VideoStoreImportImpl.isNoMediaPath(uri)) {
-                                log.debug("requestIndexAndScrap: isNoMediaPath asking VideoStore.requestIndexing " + uri);
+                                log.debug("requestIndexAndScrap: isNoMediaPath asking VideoStore.requestIndexing {}", uri);
                                 VideoStore.requestIndexing(uri, getActivity(),false);
                             }
                         }
@@ -1058,10 +1057,10 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     }
 
     private void updateSubtitleInfo(VideoMetadata videoMetadata, List<SubtitleManager.SubtitleFile> externalSubs){
-        log.debug("updateSubtitleInfo: metadata=" + (videoMetadata != null) + ", externalSubs=" + (externalSubs != null ? externalSubs.size() : "null"));
+        log.debug("updateSubtitleInfo: metadata={}, externalSubs={}", (videoMetadata != null), (externalSubs != null ? externalSubs.size() : "null"));
         // Subtitles tracks info
         int subtitleTrackNb = videoMetadata!=null?videoMetadata.getSubtitleTrackNb():0;
-        log.debug("updateSubtitleInfo: subtitleTrackNb=" + subtitleTrackNb);
+        log.debug("updateSubtitleInfo: subtitleTrackNb={}", subtitleTrackNb);
 
         if (subtitleTrackNb > 0 || externalSubs!=null&&externalSubs.size()>0) {
             log.debug("updateAudioVideoInfo: subtitle");
@@ -1084,7 +1083,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                     totSubs++;
                 }
             }
-            log.debug("updateSubtitleInfo: showing subtitle track with " + lines.size() + " lines");
+            log.debug("updateSubtitleInfo: showing subtitle track with {} lines", lines.size());
             mSubtitleTrack.setVisibility(View.VISIBLE);
             mSubtitleTrack.setText(TextUtils.join("\n", lines));
         } else {
@@ -1104,11 +1103,11 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
             } else if (view == mResumeLocalButton) {
                 resume = PlayerService.RESUME_FROM_LOCAL_POS;
                 resumePos = mCurrentVideo.getResumeMs();
-                log.debug("onClick: resume from local resumePos=" + resumePos);
+                log.debug("onClick: resume from local resumePos={}", resumePos);
             } else if (view == mRemoteResumeButton) {
                 resume = PlayerService.RESUME_FROM_REMOTE_POS;
                 resumePos = mCurrentVideo.getRemoteResumeMs();
-                log.debug("onClick: resume from remote resumePos=" + resumePos);
+                log.debug("onClick: resume from remote resumePos={}", resumePos);
             }
             mIsLeavingPlayerActivity = true;
             VideoMetadata mMetadata = mCurrentVideo.getMetadata();
@@ -1120,7 +1119,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                 }
             }
             if (isFilePlayable) {
-                log.debug("onClick: startVideo resumePos=" + resumePos);
+                log.debug("onClick: startVideo resumePos={}", resumePos);
                 // note to self: resumePos only used for external player...
                 // real resume for local file is VideoDbInfo.resume
                 PlayUtils.startVideo(
@@ -1136,11 +1135,11 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
             }
         }
         else if(view == mIndexButton){
-            log.debug("onClick: mIndexButton " + mCurrentVideo.getFileUri());
+            log.debug("onClick: mIndexButton {}", mCurrentVideo.getFileUri());
             VideoStore.requestIndexing(mCurrentVideo.getFileUri(), getActivity());
 
         }else if(view == mScrapButton) {
-            log.debug("onClick: mScrapButton " + mCurrentVideo.getFileUri());
+            log.debug("onClick: mScrapButton {}", mCurrentVideo.getFileUri());
             Intent intent = new Intent(getActivity(), VideoInfoScraperActivity.class);
             intent.putExtra(VideoInfoScraperActivity.EXTRA_VIDEO, mCurrentVideo);
             startActivity(intent);
@@ -1166,7 +1165,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                 language = Scraper.getLanguage(getActivity());
                 tmdbUrl = String.format(getResources().getString(R.string.tmdb_tvshow_title_url), Long.toString(mOnlineId), language);
             }
-            log.debug("onClick: mTMDBId=" + mTMDBId + ", tmdbUrl=" + tmdbUrl);
+            log.debug("onClick: mTMDBId={}, tmdbUrl={}", mTMDBId, tmdbUrl);
             // Breaks AndroidTV acceptance
             Intent it = new Intent(Intent.ACTION_VIEW, Uri.parse(tmdbUrl));
             startActivity(it);
@@ -1257,7 +1256,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
             log.debug("result.success");
             videoInfo = xmlDb.getEntry(mCurrentVideo.getFileUri());
             if(videoInfo!=null){
-                log.debug("videoInfo!=null "+videoInfo.resume);
+                log.debug("videoInfo!=null {}", videoInfo.resume);
                 mCurrentVideo.setRemoteResumeMs(videoInfo.resume);
                 updateActionButtons();
             }
@@ -1266,7 +1265,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        log.debug("onMenuItemClick: " + item.getItemId());
+        log.debug("onMenuItemClick: {}", item.getItemId());
         switch(item.getItemId()){
             case R.string.video_browser_unindex_file :
                 DbUtils.markAsHiddenByUser(getActivity(), mCurrentVideo);
@@ -1282,7 +1281,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                 break;
             case R.string.delete:
                 deleteFile_async(mCurrentVideo);
-                log.debug("onMenuItemClick: deleteUris " + ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
+                log.debug("onMenuItemClick: deleteUris {}", ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
                 break;
             case R.string.nfo_export_button:
                 NfoWriter.ExportContext exportContext = new NfoWriter.ExportContext();
@@ -1334,20 +1333,20 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     }
 
     public void startAsyncTasks() {
-        log.debug("startAsyncTasks with " + mCurrentVideo.getFilePath());
+        log.debug("startAsyncTasks with {}", mCurrentVideo.getFilePath());
         //do not execute file info task when torrent file
         String getLastPathSegment = FileUtils.getName(mCurrentVideo.getFileUri());
         if((mCurrentVideo.getFileUri() != null &&
                 getLastPathSegment != null &&
                 !getLastPathSegment.endsWith("torrent")) ||
                 mIsLaunchFromPlayer) {
-            log.debug("startAsyncTasks not a torrent or mIsLaunchFromPlayer starting VideoInfoTask for " + mCurrentVideo.getFilePath());
+            log.debug("startAsyncTasks not a torrent or mIsLaunchFromPlayer starting VideoInfoTask for {}", mCurrentVideo.getFilePath());
             if (mVideoInfoTask != null)
                 mVideoInfoTask.cancel(true);
             mVideoInfoTask = new VideoInfoTask().execute(mCurrentVideo);//crash when different executor (can't run 2, when leaving activity and launching another)
         }
         else{
-            log.debug("startAsyncTasks torrent and not mIsLaunchFromPlayer removing views " + mCurrentVideo.getFilePath());
+            log.debug("startAsyncTasks torrent and not mIsLaunchFromPlayer removing views {}", mCurrentVideo.getFilePath());
             log.debug("startAsyncTasks: hiding file info views for torrent file");
             mFileInfoAudioVideoContainer.setVisibility(View.GONE);
             mFileError.setVisibility(View.GONE);
@@ -1449,11 +1448,11 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
             Video video = videos[0];
             String startingPath= video.getFilePath();
 
-            log.debug("VideoInfoTask doInBackground for " + startingPath);
+            log.debug("VideoInfoTask doInBackground for {}", startingPath);
 
 
             if(mVideoMetadateCache.containsKey(startingPath)){
-                log.debug( "VideoInfoTask doInBackground, metadata retrieved from cache "+startingPath);
+                log.debug( "VideoInfoTask doInBackground, metadata retrieved from cache {}", startingPath);
                 return mVideoMetadateCache.get(startingPath);
             }
             else {
@@ -1461,15 +1460,15 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                 // Get metadata from file
                 VideoMetadata videoMetaData = VideoInfoCommonClass.retrieveMetadata(video, getActivity());
                 if(video!=null&&video.isIndexed()) {
-                    log.debug("VideoInfoTask doInBackground, saving "+startingPath);
+                    log.debug("VideoInfoTask doInBackground, saving {}", startingPath);
 
                     videoMetaData.save(getActivity(), startingPath);
-                    log.debug("VideoInfoTask doInBackground, saved " + startingPath);
+                    log.debug("VideoInfoTask doInBackground, saved {}", startingPath);
 
 
                 }
                 mVideoMetadateCache.put(startingPath, videoMetaData);
-                log.debug("VideoInfoTask doInBackground, set MetaData " + startingPath);
+                log.debug("VideoInfoTask doInBackground, set MetaData {}", startingPath);
                 video.setMetadata(videoMetaData);
                 return videoMetaData;
             }
@@ -1544,26 +1543,26 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     }
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        log.debug("onCreateLoader for id=" + id);
+        log.debug("onCreateLoader for id={}", id);
 
         // If we don't have the video object
         if(mCurrentVideo==null){
             log.debug("onCreateLoader, current video object null, searching");
             if(mVideoIdFromPlayer!=-1){
-                log.debug("onCreateLoader, mVideoIdFromPlayer!=-1, SingleVideoLoader on mVideoIdFromPlayer=" + mVideoIdFromPlayer);
+                log.debug("onCreateLoader, mVideoIdFromPlayer!=-1, SingleVideoLoader on mVideoIdFromPlayer={}", mVideoIdFromPlayer);
                 return new SingleVideoLoader(getActivity(),mVideoIdFromPlayer).getV4CursorLoader(true, false);
             }
             if(mPath!=null){
-                log.debug("onCreateLoader, mVideoIdFromPlayer==-1, SingleVideoLoader on mPath=" + mPath);
+                log.debug("onCreateLoader, mVideoIdFromPlayer==-1, SingleVideoLoader on mPath={}", mPath);
                 return new SingleVideoLoader(getActivity(),mPath).getV4CursorLoader(true, false);
             }
         }
         else {
             if (mCurrentVideo.isIndexed()) {
-                log.debug("onCreateLoader, dealing with non indexed video id " + mCurrentVideo.getId());
+                log.debug("onCreateLoader, dealing with non indexed video id {}", mCurrentVideo.getId());
                 return new MultipleVideoLoader(getActivity(), mCurrentVideo.getId()).getV4CursorLoader(true, false);
             } else {
-                log.debug("onCreateLoader, dealing with idexed video path " + mCurrentVideo.getFilePath());
+                log.debug("onCreateLoader, dealing with idexed video path {}", mCurrentVideo.getFilePath());
                 return new MultipleVideoLoader(getActivity(), mCurrentVideo.getFilePath()).getV4CursorLoader(true, false);
             }
         }
@@ -1575,12 +1574,12 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
         if(mVideoBadgePresenter == null)
             mVideoBadgePresenter = new VideoBadgePresenter(getActivity());
         mVideoBadgePresenter.setSelectedBackgroundColor(mColor);
-        log.debug("updateSourceList, mCurrentVideo.getFileUri()=" + mCurrentVideo.getFileUri());
+        log.debug("updateSourceList, mCurrentVideo.getFileUri()={}", mCurrentVideo.getFileUri());
         mVideoBadgePresenter.setSelectedUri(mCurrentVideo.getFileUri());
         mSourceLayout.removeAllViews();
         if(mVideoList.size()>1){
             for(final Video video: mVideoList){
-                log.debug("updateSourceList, mVideoList.size()>1 video.getFilepath()=" + video.getFilePath());
+                log.debug("updateSourceList, mVideoList.size()>1 video.getFilepath()={}", video.getFilePath());
                 View view = mVideoBadgePresenter.getView(mSourceLayout, video,null);
                 mVideoBadgePresenter.bindView(view, video, null, 0);
                 mSourceLayout.addView(view);
@@ -1595,7 +1594,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     }
 
     private void setSelectedSource(Video video) {
-        log.debug("setSelectedSource video.getFilepath()=" + video.getFilePath());
+        log.debug("setSelectedSource video.getFilepath()={}", video.getFilePath());
         setCurrentVideo(video);
         LoaderManager.getInstance(this).restartLoader(1, null, this);
     }
@@ -1611,7 +1610,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
         if (cursor.getCount()<1) {
             // we're changing from indexed case to non-indexed case (user probably unindexed file some milliseconds ago)
             if (oldVideoObject!=null) {
-                log.debug("onLoadFinished: " + ((oldVideoObject == null) ? "null" : oldVideoObject.getFilePath()) );
+                log.debug("onLoadFinished: {}", ((oldVideoObject == null) ? "null" : oldVideoObject.getFilePath()) );
                 // building a new unindexed video object using the Uri and name we had in the previous video object
                 newVideo = new NonIndexedVideo( oldVideoObject.getStreamingUri(),oldVideoObject.getFileUri(), oldVideoObject.getName(), oldVideoObject.getPosterUri() );
 
@@ -1625,12 +1624,12 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
             // If we have no Video object (case it's launched from player with path only)
             else {
                 newVideo = new NonIndexedVideo(mPath); // TODO corner case BUG: gte only cryptic name from url for non-indexed UPnP when Details are opened from player
-                log.debug("onLoadFinished: " + ((newVideo == null) ? "null" : newVideo.getFilePath()) );
+                log.debug("onLoadFinished: {}", ((newVideo == null) ? "null" : newVideo.getFilePath()) );
             }
 
             //TODO remove sources list
         } else {
-            log.debug("onLoadFinished: found " + cursor.getCount() + " videos");
+            log.debug("onLoadFinished: found {} videos", cursor.getCount());
             // Build video objects from the new cursor data
 
             cursor.moveToFirst();
@@ -1640,12 +1639,12 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
             do {
 
                 Video video =  (Video) cursorMapper.publicBind(cursor);
-                log.debug("onLoadFinished: " + ((video == null) ? "null" : video.getFilePath()) );
+                log.debug("onLoadFinished: {}", ((video == null) ? "null" : video.getFilePath()) );
                 mOnlineId = cursor.getLong(cursor.getColumnIndex(VideoStore.Video.VideoColumns.SCRAPER_ONLINE_ID));
-                log.debug("online id " + mOnlineId);
+                log.debug("online id {}", mOnlineId);
                 mVideoList.add(video);
                 video.setMetadata(mVideoMetadateCache.get(video.getFilePath()));
-                log.debug("found video : " + video.getFileUri());
+                log.debug("found video : {}", video.getFileUri());
                 if(!mSelectCurrentVideo){ // get most advanced video
                     if(video.getLastPlayed()>0&&newVideo==null||newVideo!=null&&video.getLastPlayed()>newVideo.getLastPlayed()){
                         newVideo = video;
@@ -1666,7 +1665,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
             alreadyComputedVideoMetadata = mVideoMetadateCache.get(newVideo.getFileUri().toString());
         // Keep the video decoder metadata if we already have it
         newVideo.setMetadata(alreadyComputedVideoMetadata); // may be null (fyi)
-        log.debug("onLoadFinished: setCurrentVideo " + ((newVideo == null) ? "null" : newVideo.getFilePath()) );
+        log.debug("onLoadFinished: setCurrentVideo {}", ((newVideo == null) ? "null" : newVideo.getFilePath()) );
         setCurrentVideo(newVideo);
 
         updateSourceList();
@@ -1676,14 +1675,14 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
         mWatchedStatus = false;
         if((mVideoList == null || mVideoList.size()==0)){
             if(mCurrentVideo!=null) {
-                log.debug("updateWatchedStatus for mCurrentVideo=" + mCurrentVideo.getFilePath());
+                log.debug("updateWatchedStatus for mCurrentVideo={}", mCurrentVideo.getFilePath());
                 mWatchedStatus = mCurrentVideo.isWatched();
             }
         }
         else{
             for(Video video : mVideoList){
                 mWatchedStatus = video.isWatched();
-                log.debug("updateWatchedStatus for multiple videos, video=" + video.getFilePath());
+                log.debug("updateWatchedStatus for multiple videos, video={}", video.getFilePath());
                 if(mWatchedStatus)
                     break;
             }
@@ -1807,7 +1806,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                     mTMDBIcon.setVisibility(mOnlineId>=0?View.VISIBLE:View.GONE);
                     //mTMDBId = tags.getOnlineId();
                     mTMDBId = mOnlineId;
-                    log.debug("FullScraperTagsTask:onPostExecute: mTMDBId=" + mTMDBId);
+                    log.debug("FullScraperTagsTask:onPostExecute: mTMDBId={}", mTMDBId);
                 }
                 else if(tags instanceof MovieTags){
                     mIsVideoMovie = true;
@@ -1816,7 +1815,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                     mTMDBId = tags.getOnlineId();
                     date = ((MovieTags) tags).getYear()+"";
                     studio = ((MovieTags) tags).getStudiosFormatted();
-                    log.debug("FullScraperTagsTask:onPostExecute: mTMDBId=" + mTMDBId);
+                    log.debug("FullScraperTagsTask:onPostExecute: mTMDBId={}", mTMDBId);
                 }
                 // set content rating
                 if (tags.getContentRating()==null || tags.getContentRating().isEmpty()) {
@@ -1898,13 +1897,13 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     private void deleteFile_async(Video video) {
         delete = new Delete(this, getActivity());
         deleteUrisList = new ArrayList<>(Arrays.asList(video.getFileUri()));
-        log.debug("deleteFile_async: " + video.getFilePath() + ", deleteUris " + ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
+        log.debug("deleteFile_async: {}, deleteUris {}", video.getFilePath(), ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
         delete.startDeleteProcess(video.getFileUri());
     }
 
     @Override
     public void onVideoFileRemoved(final Uri videoFile,boolean askForFolderRemoval, final Uri folder) {
-        log.debug("onVideoFileRemoved: " + videoFile);
+        log.debug("onVideoFileRemoved: {}", videoFile);
         if (getActivity() != null) {
             Toast.makeText(getActivity(), R.string.delete_done, Toast.LENGTH_SHORT).show();
             if (askForFolderRemoval) {
@@ -1922,7 +1921,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 delete = new Delete(VideoInfoActivityFragment.this, getActivity());
                                 deleteUrisList = Collections.singletonList(folder);
-                                log.debug("onVideoFileRemoved: " + folder + ", deleteUris " + ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
+                                log.debug("onVideoFileRemoved: {}, deleteUris {}", folder, ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
                                 delete.deleteFolder(folder);
                             }
                         });
@@ -1940,7 +1939,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     }
 
     private void sendDeleteResult(Uri file){
-        log.debug("sendDeleteResult: " + file);
+        log.debug("sendDeleteResult: {}", file);
         Intent intent = new Intent();
         intent.setData(file);
         getActivity().setResult(BrowserByFolder.RESULT_FILE_DELETED, intent);
@@ -1954,7 +1953,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
 
     @Override
     public void onDeleteVideoFailed(Uri videoFile) {
-        log.debug("onDeleteVideoFailed: " + videoFile);
+        log.debug("onDeleteVideoFailed: {}", videoFile);
         if (getActivity() != null) {
             Toast.makeText(getActivity(), R.string.delete_error, Toast.LENGTH_SHORT).show();
             // close the fragment anyway because the un-indexing may work even if the actual delete fails
@@ -1964,7 +1963,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
 
     @Override
     public void onFolderRemoved(Uri folder) {
-        log.debug("onFolderRemoved: " + folder);
+        log.debug("onFolderRemoved: {}", folder);
         if (getActivity() != null) {
             Toast.makeText(getActivity(), R.string.delete_done, Toast.LENGTH_SHORT).show();
             sendDeleteResult(folder);
@@ -1980,12 +1979,10 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
         // do not forget this one otherwise com.android.providers.media.PermissionActivity NullPointerException Unable to destroy activity
         FileUtilsQ.setDeleteLauncher(deleteLauncher);
         // update video in case of binge watching or repeat mode
-        log.debug("onResume: mIsLeavingPlayerActivity " + mIsLeavingPlayerActivity);
+        log.debug("onResume: mIsLeavingPlayerActivity {}", mIsLeavingPlayerActivity);
         long playerVideoId = CustomApplication.getLastVideoPlayedId();
         Uri playerVideoUri = CustomApplication.getLastVideoPlayedUri();
-        if (mCurrentVideo != null) log.debug("onResume: current mCurrentVideo " + mCurrentVideo.getFileUri() + "(" + mCurrentVideo.getId() +
-                "), playerVideo " + playerVideoUri + "(" + playerVideoId +"), mVideoIdFromPlayer " + mVideoIdFromPlayer +
-                ", mVideoFromPlayer " + mVideoPathFromPlayer + "(" + mVideoIdFromPlayer + ")");
+        if (mCurrentVideo != null) log.debug("onResume: current mCurrentVideo {}({}), playerVideo {}({}), mVideoIdFromPlayer {}, mVideoFromPlayer {}({})", mCurrentVideo.getFileUri(), mCurrentVideo.getId(), playerVideoUri, playerVideoId, mVideoIdFromPlayer, mVideoPathFromPlayer, mVideoIdFromPlayer);
         else log.debug("onResume: current mVideo is null");
 
         if ((playerVideoId != -42 && mCurrentVideo.getId() != playerVideoId) ||
@@ -1993,14 +1990,14 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
             Video mNewVideo;
             mVideoPathFromPlayer = playerVideoUri.toString();
             mVideoIdFromPlayer = playerVideoId;
-            log.debug("onResume: not the same video than before (repeat mode?) target is " + mVideoPathFromPlayer);
+            log.debug("onResume: not the same video than before (repeat mode?) target is {}", mVideoPathFromPlayer);
             // get mVideo set to new video
             CursorLoader loader = new MultipleVideoLoader(getActivity(), mVideoPathFromPlayer);
             Cursor c = loader.loadInBackground();
             if (c.getCount()>0) {
                 c.moveToFirst();
                 mNewVideo = (Video) new CompatibleCursorMapperConverter(new VideoCursorMapper()).convert(c);
-                log.debug("onResume: yay we get a new video " + mNewVideo.getFilePath());
+                log.debug("onResume: yay we get a new video {}", mNewVideo.getFilePath());
                 setSelectedSource(mNewVideo);
                 //setCurrentVideo(mNewVideo);
                 //updateSourceList();
@@ -2019,7 +2016,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
         addNetworkListener();
         updateUI(); // be sure to be on right state
         if (mCurrentVideo != null) {
-            log.debug("onResume: mCurrentVideo.getName()=" + mCurrentVideo.getName());
+            log.debug("onResume: mCurrentVideo.getName()={}", mCurrentVideo.getName());
         } else {
             log.debug("onResume: mCurrentVideo=null");
         }

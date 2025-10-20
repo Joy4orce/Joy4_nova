@@ -226,7 +226,7 @@ public class SurfaceController {
         }
     }
     public void setVideoFormat(int fmt) {
-        log.debug("setVideoFormat fmt=" + fmt);
+        log.debug("setVideoFormat fmt={}", fmt);
         getVideoFormat().setFmt(fmt);
         updateSurface();
         if (mSurfaceListener != null) {

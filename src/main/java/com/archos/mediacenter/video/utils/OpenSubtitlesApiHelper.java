@@ -89,7 +89,7 @@ public class OpenSubtitlesApiHelper {
 
     public OpenSubtitlesApiHelper() {
         USER_AGENT_VALUE = "novavideoplayer " + CustomApplication.getNovaShortVersion();
-        log.debug("OpenSubtitlesApiHelper: USER_AGENT_VALUE = " + USER_AGENT_VALUE);
+        log.debug("OpenSubtitlesApiHelper: USER_AGENT_VALUE = {}", USER_AGENT_VALUE);
         if (log.isTraceEnabled()) {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
             logging.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -118,7 +118,7 @@ public class OpenSubtitlesApiHelper {
     }
 
     public static void setBaseUrl(String url) {
-        log.debug("setBaseUrl: " + url);
+        log.debug("setBaseUrl: {}", url);
         baseUrl = url;
     }
 
@@ -199,7 +199,7 @@ public class OpenSubtitlesApiHelper {
                         invalidToken();
                         return false;
                     }
-                    log.debug("login: token = " + authToken);
+                    log.debug("login: token = {}", authToken);
                     // Check if "base_url" is present in the response
                     setBaseUrl(jsonResponse.optString("https://"+"base_url", API_BASE_URL));
                     // Check if "user" object is present in the response
@@ -433,7 +433,7 @@ public class OpenSubtitlesApiHelper {
                                 }
                             }
                             if (subtitleResult.getFileId() != null) subtitleRefs.add(subtitleResult);
-                            log.debug("searchSubtitle: found " + subtitleResult);
+                            log.debug("searchSubtitle: found {}", subtitleResult);
                             // only return one best match if hash match and single language
                             if (subtitleResult.getMoviehashMatch() && languages.split(",").length == 1) {
                                 log.debug("searchSubtitle: hash match, focus on first match as single result");

@@ -204,14 +204,14 @@ public class SmbRootFragment extends UpnpSmbCommonRootFragment implements SambaD
                 // re-enable since otherwise stunnel smb://127.0.0.1:xxxx links are marked non available
                 for (ShortcutDbAdapter.Shortcut shortcut : shortcuts) {
                     Uri uri = Uri.parse(shortcut.getUri());
-                    log.debug("checkShortcutAvailability.doInBackground: checking " + shortcut.getUri());
+                    log.debug("checkShortcutAvailability.doInBackground: checking {}", shortcut.getUri());
                     if ((shares == null || !shares.contains(uri.getHost().toLowerCase())) // share not listed yet...
                             &&!forcedShortcuts.contains(shortcut.getUri()) // it is not a forced shortcut
                             && FileEditorFactory.getFileEditorForUrl(uri, getActivity()).exists()) { // shortcut exists
-                        log.debug("checkShortcutAvailability.doInBackground: shortcut " + shortcut.getUri() + " is available, display it!");
+                        log.debug("checkShortcutAvailability.doInBackground: shortcut {} is available, display it!", shortcut.getUri());
                         mAdapter.forceShortcutDisplay(shortcut.getUri());
                     } else {
-                        log.debug("checkShortcutAvailability.doInBackground: it is there, no need to check " + shortcut.getUri());
+                        log.debug("checkShortcutAvailability.doInBackground: it is there, no need to check {}", shortcut.getUri());
                     }
                 }
                 log.debug("checkShortcutAvailability.doInBackground: check finished");

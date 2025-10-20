@@ -72,7 +72,7 @@ public class NetworkShortcutDetailsFragment extends DetailsSupportFragment imple
         isCurrentDirectoryIndexed = ShortcutDbAdapter.VIDEO.isHimselfOrAncestorShortcut(getActivity(), uriStringWithoutCred);
         isHimselfIndexedFolder = ShortcutDbAdapter.VIDEO.isShortcut(getActivity(), uriStringWithoutCred) > 0;
         isCurrentDirectoryShortcut = (ShortcutDb.STATIC.isShortcut(getContext(), uriStringWithoutCred) != -1);
-        log.debug("checkIfIsShortcut: isCurrentDirectoryIndexed=" + isCurrentDirectoryIndexed + ", isHimselfIndexedFolder=" + isHimselfIndexedFolder + ", isCurrentDirectoryShortcut=" + isCurrentDirectoryShortcut);
+        log.debug("checkIfIsShortcut: isCurrentDirectoryIndexed={}, isHimselfIndexedFolder={}, isCurrentDirectoryShortcut={}", isCurrentDirectoryIndexed, isHimselfIndexedFolder, isCurrentDirectoryShortcut);
     }
 
     private ArchosDetailsOverviewRowPresenter mDetailsRowPresenter;

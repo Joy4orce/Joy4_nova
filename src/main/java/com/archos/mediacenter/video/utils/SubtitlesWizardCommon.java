@@ -104,7 +104,7 @@ public class SubtitlesWizardCommon {
         if (videoUri != null) {
             mVideoUri = videoUri;
             mVideoPath = videoUri.toString();
-            log.debug("onCreate : video to process = " + mVideoPath);
+            log.debug("onCreate : video to process = {}", mVideoPath);
 
             if (mVideoPath != null) {
                 StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -113,11 +113,11 @@ public class SubtitlesWizardCommon {
 
                 // Retrieve the list of subtitles files already associated with the video
                 mCurrentFilesCount = buildCurrentSubtitlesFilesList(mVideoPath);
-                log.debug("onCreate : mCurrentFilesCount = " + mCurrentFilesCount);
+                log.debug("onCreate : mCurrentFilesCount = {}", mCurrentFilesCount);
 
                 // Get the list of subtitles files available in the current folder
                 mAvailableFilesCount = buildAvailableSubtitlesFilesList(mVideoPath);
-                log.debug("onCreate : mAvailableFilesCount = " + mAvailableFilesCount);
+                log.debug("onCreate : mAvailableFilesCount = {}", mAvailableFilesCount);
             }
         }
         else {
@@ -262,10 +262,10 @@ public class SubtitlesWizardCommon {
         // Rename the file
         try {
             fileRenamed = oldFile.rename(newName);
-            log.debug("onItemClick : selected file renamed as " + newFilePath);
+            log.debug("onItemClick : selected file renamed as {}", newFilePath);
         }
         catch (Exception e) {
-            log.debug("renameFile : can not rename file as " + newFilePath);
+            log.debug("renameFile : can not rename file as {}", newFilePath);
         }
 
         String cacheDirPath = Uri.fromFile(MediaUtils.getSubsDir(getActivity())).toString();
@@ -279,10 +279,10 @@ public class SubtitlesWizardCommon {
             if (cacheOldFile.exists()) {
                 try {
                     cacheOldFile.renameTo(cacheNewFile);
-                    log.debug("onItemClick : selected file renamed as " + cacheNewFilePath);
+                    log.debug("onItemClick : selected file renamed as {}", cacheNewFilePath);
                 }
                 catch (Exception e) {
-                    log.error("renameFile : can not rename file as " + cacheNewFilePath);
+                    log.error("renameFile : can not rename file as {}", cacheNewFilePath);
                 }
             }
         }
@@ -297,7 +297,7 @@ public class SubtitlesWizardCommon {
                 intent2.setPackage(ArchosUtils.getGlobalContext().getPackageName());
                 sendBroadcast(intent2);
 
-                log.debug("rescanning Video: " + mVideoUri.toString());
+                log.debug("rescanning Video: {}", mVideoUri.toString());
                 Intent intent3 = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, mVideoUri);
                 intent3.setPackage(ArchosUtils.getGlobalContext().getPackageName());
                 sendBroadcast(intent3);
@@ -321,10 +321,10 @@ public class SubtitlesWizardCommon {
         FileEditor file = FileEditorFactory.getFileEditorForUrl(uri, getActivity());
         try {
             file.delete();
-            log.debug("deleteFile : file " + path + " deleted");
+            log.debug("deleteFile : file {} deleted", path);
         }
         catch (Exception e) {
-            log.debug("deleteFile : can not delete file " + path);
+            log.debug("deleteFile : can not delete file {}", path);
         }
 
         fileDeleted = !file.exists();
@@ -337,10 +337,10 @@ public class SubtitlesWizardCommon {
             if (cacheFile.exists()) {
                 try {
                     cacheFile.delete();
-                    log.debug("deleteFile : file " + cacheFilePath + " deleted");
+                    log.debug("deleteFile : file {} deleted", cacheFilePath);
                 }
                 catch (Exception e) {
-                    log.error("deleteFile : can not delete file " + cacheFilePath);
+                    log.error("deleteFile : can not delete file {}", cacheFilePath);
                 }
             }
         }
@@ -352,7 +352,7 @@ public class SubtitlesWizardCommon {
                 intent1.setPackage(ArchosUtils.getGlobalContext().getPackageName());
                 sendBroadcast(intent1);
 
-                log.debug("rescanning Video: " + mVideoUri.toString());
+                log.debug("rescanning Video: {}", mVideoUri.toString());
                 Intent intent2 = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, mVideoUri);
                 intent2.setPackage(ArchosUtils.getGlobalContext().getPackageName());
                 sendBroadcast(intent2);
@@ -402,7 +402,7 @@ public class SubtitlesWizardCommon {
             file = MetaFile2Factory.getMetaFileForUrl(uri);
         }
         catch (Exception e) {
-            log.error("getFileSize error : can not get file size for " + path + " : " + e.getMessage());
+            log.error("getFileSize error : can not get file size for {} : {}", path, e.getMessage());
         }
         if (file != null) {
             size = Formatter.formatFileSize(getActivity(), file.length());

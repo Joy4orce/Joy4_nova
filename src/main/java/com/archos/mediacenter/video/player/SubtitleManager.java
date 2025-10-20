@@ -814,7 +814,7 @@ public class SubtitleManager {
         else mSubtitleEvadedVPos = pos;
         if (mSubtitleSpacer == null) return;
         mSubtitleSpacerParams.height = mSubtitleEvadedVPos;
-        log.debug("setVerticalPositionInternal: new Height " + mSubtitleSpacerParams.height);
+        log.debug("setVerticalPositionInternal: new Height {}", mSubtitleSpacerParams.height);
         mSubtitleSpacer.setLayoutParams(mSubtitleSpacerParams);
         mSubtitleSpacer.requestLayout();
         mSubtitleSpacer.postInvalidate();

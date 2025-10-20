@@ -167,7 +167,7 @@ public abstract class ManualScrappingSearchFragment extends SafeSearchSupportFra
     }
 
     private boolean onQueryText(String text) {
-        log.debug("onQueryText() "+text);
+        log.debug("onQueryText() {}", text);
 
         // Makes no sens to search for one character
         if(text.length()==0){

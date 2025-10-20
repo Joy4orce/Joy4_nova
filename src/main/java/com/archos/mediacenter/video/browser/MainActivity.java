@@ -189,9 +189,9 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
                 mStereoForced = bundle.getBoolean("stereo_mode");
             }
         } catch (NameNotFoundException e) {
-            log.error("Failed to load meta-data, NameNotFound: " + e.getMessage());
+            log.error("Failed to load meta-data, NameNotFound: {}", e.getMessage());
         } catch (NullPointerException e) {
-            log.error("Failed to load meta-data, NullPointer: " + e.getMessage());
+            log.error("Failed to load meta-data, NullPointer: {}", e.getMessage());
         }        
     }
 
@@ -988,7 +988,7 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
             case InputDevice.SOURCE_GAMEPAD:
             case InputDevice.SOURCE_JOYSTICK:
             case InputDevice.SOURCE_HDMI:
-                log.debug("event source = "+event.getSource()+" -> probably TV");
+                log.debug("event source = {} -> probably TV", event.getSource());
                 probablyTv = true;
                 break;
             case InputDevice.SOURCE_STYLUS:
@@ -996,7 +996,7 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
             case InputDevice.SOURCE_TRACKBALL:
             case InputDevice.SOURCE_MOUSE:
             default:
-                log.debug("event source = "+event.getSource()+" -> probably not TV");
+                log.debug("event source = {} -> probably not TV", event.getSource());
                 probablyTv = false;
                 break;
         }

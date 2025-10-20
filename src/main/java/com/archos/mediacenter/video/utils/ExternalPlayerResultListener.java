@@ -84,7 +84,7 @@ public class ExternalPlayerResultListener implements ExternalPlayerWithResultSta
         mContext = context;
         mContentUri = contentUri;
         mPlayerUri = playerUri;
-        log.debug("init: playerUri=" + playerUri + ", contentUri=" + contentUri);
+        log.debug("init: playerUri={}, contentUri={}", playerUri, contentUri);
         mContentUri = Uri.parse(removeFileSlashSlash(mContentUri.toString())); // we need to remove "file://"
         if (!PrivateMode.isActive() && Trakt.isTraktV2Enabled(mContext, PreferenceManager.getDefaultSharedPreferences(mContext)))
             mTraktClient = new TraktService.Client(mContext, mTraktListener, false);
@@ -104,10 +104,7 @@ public class ExternalPlayerResultListener implements ExternalPlayerWithResultSta
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        log.debug("onActivityResult: requestCode=" + requestCode + ", resultCode=" + resultCode +
-                ", mVideoDbInfo!=null " + (mVideoDbInfo!=null) +
-                ", mPlayerUri " + mPlayerUri
-        );
+        log.debug("onActivityResult: requestCode={}, resultCode={}, mVideoDbInfo!=null {}, mPlayerUri {}", requestCode, resultCode, (mVideoDbInfo!=null), mPlayerUri        );
 
         ExternalPlayerService.stopService(mContext);
 
@@ -119,11 +116,11 @@ public class ExternalPlayerResultListener implements ExternalPlayerWithResultSta
         // vimu https://www.vimu.tv/player-api
         if (data != null) {
             Bundle bundle = data.getExtras();
-            log.debug("onActivityResult: data.getData()=" + bundle);
+            log.debug("onActivityResult: data.getData()={}", bundle);
             if (log.isDebugEnabled()) {
                 if (bundle != null) {
                     for (String key : bundle.keySet()) {
-                        log.debug("onActivityResult: data " + key + " : " + (bundle.get(key) != null ? bundle.get(key) : "NULL"));
+                        log.debug("onActivityResult: data {}  : {}", key, (bundle.get(key) != null ? bundle.get(key) : "NULL"));
                     }
                 }
             }
@@ -138,11 +135,7 @@ public class ExternalPlayerResultListener implements ExternalPlayerWithResultSta
             boolean isFinished = false;
             if (data != null) {
                 if (data.getExtras() != null) {
-                    log.debug("onActivityResult: JUSTPLAYER_RESULT_EXTRA_end_by=" + data.getStringExtra(ExternalPositionExtra.JUSTPLAYER_RESULT_EXTRA_end_by) +
-                            ", VLC_RESULT_EXTRA_position=" + data.getLongExtra(ExternalPositionExtra.VLC_RESULT_EXTRA_position, -1) +
-                            ", JUSTPLAYER_RESULT_EXTRA_duration=" + data.getIntExtra(ExternalPositionExtra.JUSTPLAYER_RESULT_EXTRA_duration, -1) +
-                            ", VLC_RESULT_EXTRA_duration=" + data.getLongExtra(ExternalPositionExtra.VLC_RESULT_EXTRA_duration, -1) +
-                            ", requestCode=" + requestCode + ", resultCode=" + resultCode);
+                    log.debug("onActivityResult: JUSTPLAYER_RESULT_EXTRA_end_by={}, VLC_RESULT_EXTRA_position={}, JUSTPLAYER_RESULT_EXTRA_duration={}, VLC_RESULT_EXTRA_duration={}, requestCode={}, resultCode={}", data.getStringExtra(ExternalPositionExtra.JUSTPLAYER_RESULT_EXTRA_end_by), data.getLongExtra(ExternalPositionExtra.VLC_RESULT_EXTRA_position, -1), data.getIntExtra(ExternalPositionExtra.JUSTPLAYER_RESULT_EXTRA_duration, -1), data.getLongExtra(ExternalPositionExtra.VLC_RESULT_EXTRA_duration, -1), requestCode, resultCode);
                     if (data.getIntExtra(ExternalPositionExtra.JUSTPLAYER_RESULT_EXTRA_position, -1) != -1) {// justplayer/mxplayer
                         position = data.getIntExtra(ExternalPositionExtra.JUSTPLAYER_RESULT_EXTRA_position, -1);
                     } else if (data.getLongExtra(ExternalPositionExtra.VLC_RESULT_EXTRA_position, -1) != -1) {// vlc
@@ -164,7 +157,7 @@ public class ExternalPlayerResultListener implements ExternalPlayerWithResultSta
                     isFinished = true;
                     position = mVideoDbInfo.duration;
                 }
-                log.debug("onActivityResult: position=" + position + ", duration=" + mDuration);
+                log.debug("onActivityResult: position={}, duration={}", position, mDuration);
                 mVideoDbInfo.lastTimePlayed = Long.valueOf(System.currentTimeMillis() / 1000L);
                 if (position != -1) {
                     mVideoDbInfo.resume = position;

@@ -267,7 +267,7 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
             final String newName = newCursor.getString(newSubsetNameColumn);
             if (oldName != null && !oldName.equals(newName)) {
                 // difference found
-                log.debug("Difference found in the category list (" + oldName + " vs " + newName + ")");
+                log.debug("Difference found in the category list ({} vs {})", oldName, newName);
                 return true;
             }
             oldCursor.moveToNext();

@@ -256,14 +256,14 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private static void getDefaultLocale(Context context) {
         // Get the locales from the locales_config.xml
         List<Locale> locales = LocaleConfigParser.getLocales(context);
-        log.debug("getDefaultLocale: locales=" + locales);
+        log.debug("getDefaultLocale: locales={}", locales);
         // Assuming the first locale in the list is the one configured for the application
         if (!locales.isEmpty()) {
             defaultLocale = locales.get(0);
         } else {
             defaultLocale = Locale.getDefault();
         }
-        log.debug("getDefaultLocale: systemLocale=" + systemLocale + ", defaultLocale=" + defaultLocale);
+        log.debug("getDefaultLocale: systemLocale={}, defaultLocale={}", systemLocale, defaultLocale);
     }
 
     @Override
@@ -324,7 +324,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         systemLocale = Locale.getDefault();
         getDefaultLocale();
         loadLocale();
-        log.debug("onCreate: systemLocale=" + systemLocale + ", defaultLocale=" + defaultLocale);
+        log.debug("onCreate: systemLocale={}, defaultLocale={}", systemLocale, defaultLocale);
 
         // must be done before sambaDiscovery otherwise no context for jcifs
         new Thread(() -> {
@@ -376,7 +376,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         if (propertyChangeListener == null)
             propertyChangeListener = evt -> {
                 if (evt.getOldValue() != evt.getNewValue()) {
-                    log.trace("NetworkState for " + evt.getPropertyName() + " changed:" + evt.getOldValue() + " -> " + evt.getNewValue());
+                    log.trace("NetworkState for {} changed:{} -> {}", evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
                     launchSambaDiscovery();
                 }
             };
@@ -397,9 +397,9 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         if(ArchosFeatures.isAndroidTV(this) && Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
             BootupRecommandationService.init(this);
 
-        log.trace("onCreate: manifest permissions " + Arrays.toString(getPermissions(mContext)));
+        log.trace("onCreate: manifest permissions {}", Arrays.toString(getPermissions(mContext)));
         hasManageExternalStoragePermissionInManifest = hasPermission("android.permission.MANAGE_EXTERNAL_STORAGE", mContext);
-        log.trace("onCreate: has permission android.permission.MANAGE_EXTERNAL_STORAGE " + hasManageExternalStoragePermissionInManifest);
+        log.trace("onCreate: has permission android.permission.MANAGE_EXTERNAL_STORAGE {}", hasManageExternalStoragePermissionInManifest);
 
         updateVersionState(this);
         if (openSubtitlesApiHelper == null) openSubtitlesApiHelper = OpenSubtitlesApiHelper.getInstance();
@@ -425,7 +425,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             // Detect initial audio devices
             AudioDeviceInfo[] devices = mAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
             for (AudioDeviceInfo device : devices) {
-                log.debug("onCreate: initial audio device " + device.getType() + " " + device.getProductName() + " capabilities " + getSupportedAudioCodecs(getEncodingFlags(device.getEncodings())));
+                log.debug("onCreate: initial audio device {} {} capabilities {}", device.getType(), device.getProductName(), getSupportedAudioCodecs(getEncodingFlags(device.getEncodings())));
                 if (device.getType() == AudioDeviceInfo.TYPE_HDMI) {
                     hasHdmi = true;
                     hdmiAudioEncodingsFlags = device.getEncodings();
@@ -466,7 +466,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     }
 
     protected void handleForeGround(boolean foreground) {
-        log.debug("handleForeGround: is app foreground " + foreground);
+        log.debug("handleForeGround: is app foreground {}", foreground);
         if (networkState == null ) networkState = NetworkState.instance(mContext);
         if (foreground) {
             registerHdmiAudioPlugReceiver();
@@ -539,13 +539,13 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                             hasHdmi = true;
                             hdmiAudioEncodingsFlags = device.getEncodings();
                             hdmiAudioEncodingFlag = getEncodingFlags(hdmiAudioEncodingsFlags);
-                            log.debug("registerAudioDeviceCallback: hdmi detected capabilities " + getSupportedAudioCodecs(hdmiAudioEncodingFlag));
+                            log.debug("registerAudioDeviceCallback: hdmi detected capabilities {}", getSupportedAudioCodecs(hdmiAudioEncodingFlag));
                         }
                         if (device.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
                             hasSpdif = true;
                             spdifAudioEncodingsFlags = device.getEncodings();
                             spdifAudioEncodingFlag = getEncodingFlags(spdifAudioEncodingsFlags);
-                            log.debug("registerAudioDeviceCallback: spdif detected capabilities " + getSupportedAudioCodecs(spdifAudioEncodingFlag));
+                            log.debug("registerAudioDeviceCallback: spdif detected capabilities {}", getSupportedAudioCodecs(spdifAudioEncodingFlag));
                         }
                         break;
                     }
@@ -583,7 +583,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private final BroadcastReceiver mHdmiAudioPlugReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            log.debug("mHdmiAudioPlugReceiver:onReceive: " + intent);
+            log.debug("mHdmiAudioPlugReceiver:onReceive: {}", intent);
             final String action = intent.getAction();
             if (action == null)
                 return;
@@ -597,7 +597,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                         maxAudioChannelCount = intent.getIntExtra(AudioManager.EXTRA_MAX_CHANNEL_COUNT, 2);
                     }
                 }
-                log.debug("mHdmiAudioPlugReceiver: received ACTION_HDMI_AUDIO_PLUG, isAudioPlugged=" + isAudioPlugged + ", hasHdmi=" + hasHdmi + ", maxAudioChannelCount=" + maxAudioChannelCount + ", hdmiAudioEncodingFlag=" + hdmiAudioEncodingFlag);
+                log.debug("mHdmiAudioPlugReceiver: received ACTION_HDMI_AUDIO_PLUG, isAudioPlugged={}, hasHdmi={}, maxAudioChannelCount={}, hdmiAudioEncodingFlag={}", isAudioPlugged, hasHdmi, maxAudioChannelCount, hdmiAudioEncodingFlag);
             }
         }
     };
@@ -632,7 +632,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                 log.warn("getEncodingFlags: audio encoding {} not identified!!!", encoding);
             }
         }
-        log.debug("getEncodingFlags: encodings={}, encodingFlags={}, allHdmiAudioCodecs=" + allHdmiAudioCodecs, Arrays.toString(encodings), encodingFlags);
+        log.debug("getEncodingFlags: encodings={}, encodingFlags={}, allHdmiAudioCodecs={}", allHdmiAudioCodecs, Arrays.toString(encodings), encodingFlags);
         return encodingFlags;
     }
 
@@ -702,7 +702,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                 novaShortVersion = "v" + novaVersionArray[0] + "." + novaVersionArray[1] + "." + novaVersionArray[2];
             } catch (IllegalArgumentException ie) {
                 novaVersionArray = new int[] { 0, 0, 0, 0, 0, 0, 0, 0};
-                log.error("updateVersionState: cannot split application version "+ novaVersionName);
+                log.error("updateVersionState: cannot split application version {}", novaVersionName);
                 novaLongVersion = "Nova v" + novaVersionName;
             }
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -713,7 +713,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                 novaPreviousVersionArray = splitVersion(previousVersionName);
             } catch (IllegalArgumentException ie) {
                 novaPreviousVersionArray = new int[] { 0, 0, 0, 0, 0, 0, 0, 0};
-                log.error("updateVersionState: cannot split application previous version "+ previousVersionName);
+                log.error("updateVersionState: cannot split application previous version {}", previousVersionName);
             }
             if (previousVersion > 0) {
                 if (previousVersion != novaVersionCode) {
@@ -725,12 +725,11 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                     sharedPreferences.edit().putBoolean("app_updated", true).commit();
                     sharedPreferences.edit().putString("current_versionName", novaVersionName).commit();
                     sharedPreferences.edit().putString("previous_versionName", previousVersionName).commit();
-                    log.debug("updateVersionState: update from " + previousVersionName + "(" + previousVersion + ") to "
-                            + novaVersionName + "(" + novaVersionCode + ")");
+                    log.debug("updateVersionState: update from {}({}) to {}({})", previousVersionName, previousVersion, novaVersionName, novaVersionCode);
                 }
             } else {
                 // save first app version
-                log.debug("updateVersionState: save first version " + novaVersionCode);
+                log.debug("updateVersionState: save first version {}", novaVersionCode);
                 sharedPreferences.edit().putInt("current_versionCode", novaVersionCode).commit();
                 sharedPreferences.edit().putInt("previous_versionCode", -1).commit();
                 sharedPreferences.edit().putString("current_versionName", novaVersionName).commit();
@@ -759,7 +758,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     }
 
     public static String getChangelog(Context context) {
-        log.debug("getChangelog: " + novaPreviousVersionArray[0] + "->" + novaVersionArray[0]);
+        log.debug("getChangelog: {}->{}", novaPreviousVersionArray[0], novaVersionArray[0]);
         if (novaPreviousVersionArray[0] > 0 && novaPreviousVersionArray[0] <= 5 && novaVersionArray[0] > 5)
             return context.getResources().getString(R.string.v5_v6_upgrade_info);
         else return null;
@@ -809,13 +808,13 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         // Warning no log.debug at this stage
         getDefaultLocale();
         if (getApplicationContext() == null) return;
-        //log.debug("loadLocale: load locale from preferences: " + language);
+        //log.debug("loadLocale: load locale from preferences: {}", language);
         setLocale(getUiLocale(getApplicationContext()));
     }
 
     public static void loadLocale(Resources resources) {
         // Warning no log.debug at this stage
-        //log.debug("loadLocale: load locale from preferences: " + language);
+        // log.debug("loadLocale: load locale from preferences: {}", language);
         getDefaultLocale(CustomApplication.getAppContext());
         setLocale(getUiLocale(CustomApplication.getAppContext()), resources);
     }
@@ -836,7 +835,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             locale = systemLocale; // Use system default language
             if (DBG) Log.d("CustomApplication", "setLocale: use system default language = " + locale);
         } else {
-            //log.debug("setLocale: use language " + lang);
+            //log.debug("setLocale: use language {}", lang);
             if (DBG) Log.d("CustomApplication", "setLocale: use localeCode " + localeCode);
             locale = VideoPreferencesCommon.getLocaleFromCode(localeCode);
         }

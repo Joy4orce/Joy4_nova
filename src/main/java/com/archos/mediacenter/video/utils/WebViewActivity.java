@@ -91,7 +91,7 @@ public class WebViewActivity extends AppCompatActivity {
             @SuppressWarnings("deprecation")
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                log.debug("shouldOverrideUrlLoading " + url);
+                log.debug("shouldOverrideUrlLoading {}", url);
                 return false;
             }
             // this one is for Android API 24+
@@ -99,7 +99,7 @@ public class WebViewActivity extends AppCompatActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
-                log.debug("shouldOverrideUrlLoading API24+ for url " + url);
+                log.debug("shouldOverrideUrlLoading API24+ for url {}", url);
                 return false;
             }
         });

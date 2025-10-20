@@ -98,7 +98,7 @@ public class MediaLibraryBackupService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        log.debug("onStartCommand: intent=" + intent);
+        log.debug("onStartCommand: intent={}", intent);
 
         if (Build.VERSION.SDK_INT >= 29) {
             ServiceCompat.startForeground(this, NOTIFICATION_ID, nb.build(),
@@ -199,17 +199,17 @@ public class MediaLibraryBackupService extends Service {
 
         // Delete old backup if it exists
         if (zipFile.exists()) {
-            log.debug("exportMediaLibrary: deleting existing backup file: " + zipFile.getAbsolutePath());
+            log.debug("exportMediaLibrary: deleting existing backup file: {}", zipFile.getAbsolutePath());
             if (!zipFile.delete()) {
                 log.warn("exportMediaLibrary: failed to delete existing backup file");
             }
         }
 
-        log.debug("exportMediaLibrary: creating new backup file: " + zipFile.getAbsolutePath());
+        log.debug("exportMediaLibrary: creating new backup file: {}", zipFile.getAbsolutePath());
 
         try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile))) {
             // Export database version first
-            log.debug("exportMediaLibrary: adding database version=" + EXPECTED_DB_VERSION);
+            log.debug("exportMediaLibrary: adding database version={}", EXPECTED_DB_VERSION);
             addVersionToZip(zos, EXPECTED_DB_VERSION);
 
             // Export media database
@@ -218,7 +218,7 @@ public class MediaLibraryBackupService extends Service {
                 log.debug("exportMediaLibrary: exporting media database");
                 addFileToZip(zos, dbFile, DATABASE_NAME);
             } else {
-                log.warn("exportMediaLibrary: media database file not found: " + dbFile.getAbsolutePath());
+                log.warn("exportMediaLibrary: media database file not found: {}", dbFile.getAbsolutePath());
             }
 
             // Export credentials database (SMB/FTP/SFTP/WebDAV credentials)
@@ -267,12 +267,12 @@ public class MediaLibraryBackupService extends Service {
             }
         }
 
-        log.debug("exportMediaLibrary: export completed to " + zipFile.getAbsolutePath());
+        log.debug("exportMediaLibrary: export completed to {}", zipFile.getAbsolutePath());
         return zipFile.getAbsolutePath();
     }
 
     private void importMediaLibrary(String importFilePath) throws IOException {
-        log.debug("importMediaLibrary: starting FULL REPLACEMENT import from " + importFilePath);
+        log.debug("importMediaLibrary: starting FULL REPLACEMENT import from {}", importFilePath);
 
         if (importFilePath == null || importFilePath.isEmpty()) {
             throw new IOException("Import file path is null or empty");
@@ -295,7 +295,7 @@ public class MediaLibraryBackupService extends Service {
                     try {
                         backupDbVersion = Integer.parseInt(versionStr.trim());
                     } catch (NumberFormatException e) {
-                        log.error("importMediaLibrary: invalid version format: " + versionStr, e);
+                        log.error("importMediaLibrary: invalid version format: {}", versionStr, e);
                     }
                     break;
                 }
@@ -303,7 +303,7 @@ public class MediaLibraryBackupService extends Service {
             }
         }
 
-        log.debug("importMediaLibrary: backup DB version=" + backupDbVersion + ", current DB version=" + EXPECTED_DB_VERSION);
+        log.debug("importMediaLibrary: backup DB version={}, current DB version={}", backupDbVersion, EXPECTED_DB_VERSION);
 
         if (backupDbVersion == -1) {
             throw new IOException("Backup file does not contain version information");
@@ -326,7 +326,7 @@ public class MediaLibraryBackupService extends Service {
 
             while ((entry = zis.getNextEntry()) != null) {
                 String fileName = entry.getName();
-                log.debug("importMediaLibrary: extracting " + fileName);
+                log.debug("importMediaLibrary: extracting {}", fileName);
 
                 // Skip version file
                 if (fileName.equals(VERSION_FILE)) {
@@ -397,7 +397,7 @@ public class MediaLibraryBackupService extends Service {
     }
 
     private void addVersionToZip(ZipOutputStream zos, int version) throws IOException {
-        log.debug("addVersionToZip: adding version=" + version);
+        log.debug("addVersionToZip: adding version={}", version);
 
         ZipEntry zipEntry = new ZipEntry(VERSION_FILE);
         zos.putNextEntry(zipEntry);
@@ -419,15 +419,15 @@ public class MediaLibraryBackupService extends Service {
         File dbShmFile = new File(dbFile.getAbsolutePath() + "-shm");
 
         if (dbFile.exists()) {
-            log.debug("cleanupExistingData: deleting " + dbFile.getAbsolutePath());
+            log.debug("cleanupExistingData: deleting {}", dbFile.getAbsolutePath());
             dbFile.delete();
         }
         if (dbWalFile.exists()) {
-            log.debug("cleanupExistingData: deleting " + dbWalFile.getAbsolutePath());
+            log.debug("cleanupExistingData: deleting {}", dbWalFile.getAbsolutePath());
             dbWalFile.delete();
         }
         if (dbShmFile.exists()) {
-            log.debug("cleanupExistingData: deleting " + dbShmFile.getAbsolutePath());
+            log.debug("cleanupExistingData: deleting {}", dbShmFile.getAbsolutePath());
             dbShmFile.delete();
         }
 
@@ -437,15 +437,15 @@ public class MediaLibraryBackupService extends Service {
         File credentialsDbShmFile = new File(credentialsDbFile.getAbsolutePath() + "-shm");
 
         if (credentialsDbFile.exists()) {
-            log.debug("cleanupExistingData: deleting " + credentialsDbFile.getAbsolutePath());
+            log.debug("cleanupExistingData: deleting {}", credentialsDbFile.getAbsolutePath());
             credentialsDbFile.delete();
         }
         if (credentialsDbWalFile.exists()) {
-            log.debug("cleanupExistingData: deleting " + credentialsDbWalFile.getAbsolutePath());
+            log.debug("cleanupExistingData: deleting {}", credentialsDbWalFile.getAbsolutePath());
             credentialsDbWalFile.delete();
         }
         if (credentialsDbShmFile.exists()) {
-            log.debug("cleanupExistingData: deleting " + credentialsDbShmFile.getAbsolutePath());
+            log.debug("cleanupExistingData: deleting {}", credentialsDbShmFile.getAbsolutePath());
             credentialsDbShmFile.delete();
         }
 
@@ -455,15 +455,15 @@ public class MediaLibraryBackupService extends Service {
         File shortcutsDbShmFile = new File(shortcutsDbFile.getAbsolutePath() + "-shm");
 
         if (shortcutsDbFile.exists()) {
-            log.debug("cleanupExistingData: deleting " + shortcutsDbFile.getAbsolutePath());
+            log.debug("cleanupExistingData: deleting {}", shortcutsDbFile.getAbsolutePath());
             shortcutsDbFile.delete();
         }
         if (shortcutsDbWalFile.exists()) {
-            log.debug("cleanupExistingData: deleting " + shortcutsDbWalFile.getAbsolutePath());
+            log.debug("cleanupExistingData: deleting {}", shortcutsDbWalFile.getAbsolutePath());
             shortcutsDbWalFile.delete();
         }
         if (shortcutsDbShmFile.exists()) {
-            log.debug("cleanupExistingData: deleting " + shortcutsDbShmFile.getAbsolutePath());
+            log.debug("cleanupExistingData: deleting {}", shortcutsDbShmFile.getAbsolutePath());
             shortcutsDbShmFile.delete();
         }
 
@@ -473,36 +473,36 @@ public class MediaLibraryBackupService extends Service {
         File shortcuts2DbShmFile = new File(shortcuts2DbFile.getAbsolutePath() + "-shm");
 
         if (shortcuts2DbFile.exists()) {
-            log.debug("cleanupExistingData: deleting " + shortcuts2DbFile.getAbsolutePath());
+            log.debug("cleanupExistingData: deleting {}", shortcuts2DbFile.getAbsolutePath());
             shortcuts2DbFile.delete();
         }
         if (shortcuts2DbWalFile.exists()) {
-            log.debug("cleanupExistingData: deleting " + shortcuts2DbWalFile.getAbsolutePath());
+            log.debug("cleanupExistingData: deleting {}", shortcuts2DbWalFile.getAbsolutePath());
             shortcuts2DbWalFile.delete();
         }
         if (shortcuts2DbShmFile.exists()) {
-            log.debug("cleanupExistingData: deleting " + shortcuts2DbShmFile.getAbsolutePath());
+            log.debug("cleanupExistingData: deleting {}", shortcuts2DbShmFile.getAbsolutePath());
             shortcuts2DbShmFile.delete();
         }
 
         // Delete all poster files
         File posterDir = MediaScraper.getPosterDirectory(this);
         if (posterDir.exists()) {
-            log.debug("cleanupExistingData: deleting all files in " + posterDir.getAbsolutePath());
+            log.debug("cleanupExistingData: deleting all files in {}", posterDir.getAbsolutePath());
             deleteDirectoryContents(posterDir);
         }
 
         // Delete all backdrop files
         File backdropDir = MediaScraper.getBackdropDirectory(this);
         if (backdropDir.exists()) {
-            log.debug("cleanupExistingData: deleting all files in " + backdropDir.getAbsolutePath());
+            log.debug("cleanupExistingData: deleting all files in {}", backdropDir.getAbsolutePath());
             deleteDirectoryContents(backdropDir);
         }
 
         // Delete all picture files
         File pictureDir = MediaScraper.getPictureDirectory(this);
         if (pictureDir.exists()) {
-            log.debug("cleanupExistingData: deleting all files in " + pictureDir.getAbsolutePath());
+            log.debug("cleanupExistingData: deleting all files in {}", pictureDir.getAbsolutePath());
             deleteDirectoryContents(pictureDir);
         }
 
@@ -526,7 +526,7 @@ public class MediaLibraryBackupService extends Service {
     }
 
     private void addFileToZip(ZipOutputStream zos, File file, String zipEntryName) throws IOException {
-        log.debug("addFileToZip: " + zipEntryName);
+        log.debug("addFileToZip: {}", zipEntryName);
 
         ZipEntry zipEntry = new ZipEntry(zipEntryName);
         zos.putNextEntry(zipEntry);
@@ -543,7 +543,7 @@ public class MediaLibraryBackupService extends Service {
     }
 
     private void addDirectoryToZip(ZipOutputStream zos, File dir, String zipDirName) throws IOException {
-        log.debug("addDirectoryToZip: " + zipDirName);
+        log.debug("addDirectoryToZip: {}", zipDirName);
 
         File[] files = dir.listFiles();
         if (files == null) {

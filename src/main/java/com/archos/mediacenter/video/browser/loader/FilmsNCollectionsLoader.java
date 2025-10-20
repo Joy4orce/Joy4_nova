@@ -85,7 +85,7 @@ ORDER BY name ASC
                             "END"
             ).build());
         }
-        log.debug("init: getProjection " + getProjection().toString() + ", getSelection " + getSelection() + ", getSelectionArgs " + getSelectionArgs());
+        log.debug("init: getProjection {}, getSelection {}, getSelectionArgs {}", getProjection().toString(), getSelection(), getSelectionArgs());
     }
     @Override
     public String[] getProjection() {

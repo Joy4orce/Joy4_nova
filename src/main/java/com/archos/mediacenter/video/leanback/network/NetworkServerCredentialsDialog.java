@@ -108,7 +108,7 @@ public class NetworkServerCredentialsDialog extends DialogFragment {
             String uriToBuild = "";
             uriToBuild = UriUtils.getTypeUri(mType);
             uriToBuild +="://"+mRemote+":"+mPort+"/";
-            log.debug("onCreateDialog: uriToBuild=" + uriToBuild);
+            log.debug("onCreateDialog: uriToBuild={}", uriToBuild);
 
             Credential cred = database.getCredential(uriToBuild);
             if(cred!=null){
@@ -162,7 +162,7 @@ public class NetworkServerCredentialsDialog extends DialogFragment {
         int portInt =  mPort;
         String portString = (portInt!=-1) ? Integer.toString(portInt) : "";
         portEt.setText(portString);
-        log.debug("onCreateDialog: username=" + mUsername + ", domain=" + mDomain + ", port=" + mPort + ", remote=" + mRemote + ", path=" + mPath + "; type=" + mType);
+        log.debug("onCreateDialog: username={}, domain={}, port={}, remote={}, path={}; type={}", mUsername, mDomain, mPort, mRemote, mPath, mType);
         usernameEt.setText(mUsername);
         passwordEt.setText(mPassword);
         if (UriUtils.requiresDomain(type)) domainEt.setText(mDomain);
@@ -217,19 +217,19 @@ public class NetworkServerCredentialsDialog extends DialogFragment {
 
                 if (! UriUtils.isValidHost(address)) {
                     Toast.makeText(getActivity(), getString(R.string.invalid_host), Toast.LENGTH_SHORT).show();
-                    log.warn("onClick: invalid host: " + address);
+                    log.warn("onClick: invalid host: {}", address);
                     validUri = false;
                 } else if (! UriUtils.isValidPort(port)) {
                     Toast.makeText(getActivity(), getString(R.string.invalid_port), Toast.LENGTH_SHORT).show();
-                    log.warn("onClick: invalid port: " + port);
+                    log.warn("onClick: invalid port: {}", port);
                     validUri = false;
                 } else if (! UriUtils.isValidPath(path)) {
                     Toast.makeText(getActivity(), getString(R.string.invalid_path), Toast.LENGTH_SHORT).show();
-                    log.warn("onClick: invalid path: " + path);
+                    log.warn("onClick: invalid path: {}", path);
                     validUri = false;
                 }
 
-                log.debug("onClick: scheme=" + scheme + ", username=" + username + ", domain=" + domain + ", port=" + port + ", remote=" + address + ", path=" + path + "; type=" + type + ", validUri=" + validUri);
+                log.debug("onClick: scheme={}, username={}, domain={}, port={}, remote={}, path={}; type={}, validUri={}", scheme, username, domain, port, address, path, type, validUri);
 
                 if(validUri){
 
@@ -250,7 +250,7 @@ public class NetworkServerCredentialsDialog extends DialogFragment {
                     String uriToBuild = scheme;
 
                     uriToBuild +="://"+(!address.isEmpty()?address+(port!=-1?":"+port:""):"")+path;
-                    log.debug("onCreateDialog: username=" + mUsername + ", domain=" + mDomain + ", port=" + mPort + ", remote=" + mRemote + ", path=" + mPath + "; type=" + mType);
+                    log.debug("onCreateDialog: username={}, domain={}, port={}, remote={}, path={}; type={}", mUsername, mDomain, mPort, mRemote, mPath, mType);
                     if(savePassword.isChecked())
                         NetworkCredentialsDatabase.getInstance().saveCredential(new Credential(username, password, uriToBuild, domain, true));
                     else

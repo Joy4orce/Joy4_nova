@@ -218,19 +218,19 @@ public abstract class ServerCredentialsDialog extends DialogFragment {
 
                 if (! UriUtils.isValidHost(address)) {
                     Toast.makeText(getActivity(), getString(R.string.invalid_host), Toast.LENGTH_SHORT).show();
-                    log.warn("onClick: invalid host: " + address);
+                    log.warn("onClick: invalid host: {}", address);
                     validUri = false;
                 } else if (! UriUtils.isValidPort(port)) {
                     Toast.makeText(getActivity(), getString(R.string.invalid_port), Toast.LENGTH_SHORT).show();
-                    log.warn("onClick: invalid port: " + port);
+                    log.warn("onClick: invalid port: {}", port);
                     validUri = false;
                 } else if (! UriUtils.isValidPath(path)) {
                     Toast.makeText(getActivity(), getString(R.string.invalid_path), Toast.LENGTH_SHORT).show();
-                    log.warn("onClick: invalid path: " + path);
+                    log.warn("onClick: invalid path: {}", path);
                     validUri = false;
                 }
 
-                log.debug("onClick: scheme=" + scheme + ", username=" + username + ", domain=" + domain + ", port=" + port + ", remote=" + address + ", path=" + path + "; type=" + type + ", validUri=" + validUri);
+                log.debug("onClick: scheme={}, username={}, domain={}, port={}, remote={}, path={}; type={}, validUri={}", scheme, username, domain, port, address, path, type, validUri);
 
                 if(validUri){
 

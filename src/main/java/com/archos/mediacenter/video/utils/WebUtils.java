@@ -34,7 +34,7 @@ public class WebUtils {
     private static final Logger log = LoggerFactory.getLogger(WebUtils.class);
 
     public static void openWebLink(Context context, String url) {
-        log.debug("openWebLink: " + url);
+        log.debug("openWebLink: {}", url);
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(url));
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -66,7 +66,7 @@ public class WebUtils {
                         continue;
                     }
                     else {
-                        log.debug("isThereAnActivityToOpenWebLinks: identified " + activityInfo.name);
+                        log.debug("isThereAnActivityToOpenWebLinks: identified {}", activityInfo.name);
                         return true;
                     }
                 }

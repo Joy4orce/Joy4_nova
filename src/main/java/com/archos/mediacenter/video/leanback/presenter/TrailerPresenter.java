@@ -55,7 +55,7 @@ public class TrailerPresenter extends PosterImageCardPresenter {
         card.setMainImageScaleType(ImageView.ScaleType.CENTER);
         card.setTitleText(box.mName);
 
-        log.debug("onBindViewHolder: get image " + getImageUrl(box));
+        log.debug("onBindViewHolder: get image {}", getImageUrl(box));
         Picasso.get()
                 .load(getImageUrl(box))
                 .resize(getWidth(mContext), getHeight(mContext)) // better resize to card size, since backdrop files are pretty large
@@ -75,7 +75,7 @@ public class TrailerPresenter extends PosterImageCardPresenter {
 
     private Uri getImageUrl(ScraperTrailer box) {
         String base = "https://img.youtube.com/vi/%s/0.jpg";
-        log.debug("getImageUrl: " + String.format(base, box.mVideoKey));
+        log.debug("getImageUrl: {}", String.format(base, box.mVideoKey));
         return Uri.parse(String.format(base, box.mVideoKey));
     }
 

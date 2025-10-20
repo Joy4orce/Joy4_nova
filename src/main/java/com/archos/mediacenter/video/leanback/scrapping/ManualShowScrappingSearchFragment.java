@@ -144,7 +144,7 @@ public class ManualShowScrappingSearchFragment extends ManualScrappingSearchFrag
             buildNewShowTags(result.getTitle());
         }
 
-        log.debug("put in mTagsToSearchResultMap: "+tags);
+        log.debug("put in mTagsToSearchResultMap: {}", tags);
         mTagsToSearchResultMap.put(tags, result);
 
         return tags;
@@ -175,7 +175,7 @@ public class ManualShowScrappingSearchFragment extends ManualScrappingSearchFrag
                     .show();
         }
         else {
-            log.debug("saveTags error should not get a " + newTags.getClass().getCanonicalName());
+            log.debug("saveTags error should not get a {}", newTags.getClass().getCanonicalName());
             Toast.makeText(getActivity(), R.string.error, Toast.LENGTH_SHORT).show();
         }
     }
@@ -218,7 +218,7 @@ public class ManualShowScrappingSearchFragment extends ManualScrappingSearchFrag
             if (log.isDebugEnabled()) {
                 log.debug("--------------------\nAll episodes in database that belong to the old show:");
                 for (EpisodeTags et : episodeList) {
-                    log.debug("      S"+et.getSeason()+" E"+et.getEpisode()+" "+et.getTitle());
+                    log.debug("      S{} E{} {}", et.getSeason(), et.getEpisode(), et.getTitle());
                 }
                 log.debug("--------------------");
 
@@ -327,7 +327,7 @@ public class ManualShowScrappingSearchFragment extends ManualScrappingSearchFrag
             if (log.isDebugEnabled()) {
                 log.debug("--------------------\nAll episodes for the new show:");
                 for (String key : epMap.keySet()) {
-                    log.debug("epMap "+key+" -> "+epMap.get(key).getShowTitle()+" "+epMap.get(key).getSeason()+ " "+epMap.get(key).getEpisode());
+                    log.debug("epMap {} -> {} {} {}", key, epMap.get(key).getShowTitle(), epMap.get(key).getSeason(), epMap.get(key).getEpisode());
                 }
                 log.debug("--------------------");
             }
@@ -413,7 +413,7 @@ public class ManualShowScrappingSearchFragment extends ManualScrappingSearchFrag
                     log.debug( "getEpisode: posters not null");
                     for (ScraperImage image : posters) {
                         if (image.getSeason() == season) {
-                            log.debug( "getEpisode: posters download poster:" + image.getLargeUrl());
+                            log.debug( "getEpisode: posters download poster:{}", image.getLargeUrl());
                             newEpTag.setPosters(image.asList());
                             newEpTag.downloadPoster(mContext);
                             break;

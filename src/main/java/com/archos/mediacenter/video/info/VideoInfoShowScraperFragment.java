@@ -117,7 +117,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        log.debug("onCreate savedInstanceState=" + savedInstanceState);
+        log.debug("onCreate savedInstanceState={}", savedInstanceState);
         super.onCreate(savedInstanceState);
 
         // we'd like to keep this instance when rotating
@@ -230,7 +230,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
         ShowTags newTag = (ShowTags) item.getFullScraperTags(getActivity());
         long oldId = mShowTag != null ? mShowTag.getId() : 0;
         long newId = newTag != null ? newTag.getId() : 0;
-        log.debug("setInfoItem: old:" + oldId + " new:" + newId);
+        log.debug("setInfoItem: old:{} new:{}", oldId, newId);
         if (oldId != newId) {
             mShowTag = newTag;
         }
@@ -291,7 +291,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                 startSearch();
                 break;
             default:
-                log.error("Click on " + v + " not supported.");
+                log.error("Click on {} not supported.", v);
                 break;
         }
     }
@@ -313,7 +313,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
     }
 
     private void setDisplayState(DisplayState state) {
-        log.debug("setDisplayState:" + state.name());
+        log.debug("setDisplayState:{}", state.name());
         mDisplayState = state;
         switch (state) {
             case SEARCH_INITIAL:
@@ -410,7 +410,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
     }
 
     protected void onUpdateProgress(ProgressItem item) {
-        log.debug("onUpdateProgress:" + item);
+        log.debug("onUpdateProgress:{}", item);
         if (item.position < 0) {
             mResultsList.clear();
             mAdapter = new ScraperResultsAdapter(getActivity(),null, item.list);
@@ -480,7 +480,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
         public SearchTask() { /* empty */ }
 
         public void requestSave(int resultId, ShowTags saveTarget, Context saveContext, Message message) {
-            log.debug("SearchTask.requestSave: " + resultId);
+            log.debug("SearchTask.requestSave: {}", resultId);
             mSaveRequestId = resultId;
             mSaveContext = saveContext.getApplicationContext();
             mSaveTarget = saveTarget;
@@ -542,7 +542,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                         HashMap<String, EpisodeTags> epMap = null;
                         if (mSaveRequested) {
                             current = mSaveRequestId;
-                            log.debug("fetching / saving item: " + current);
+                            log.debug("fetching / saving item: {}", current);
                             ScrapeDetailResult detail = Scraper.getDetails(matches.get(current), b);
                             if (detail.isOkay()) {
                                 tag = detail.tag;
@@ -559,7 +559,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                             }
                             return null;
                         }
-                        log.debug("mScraperService.getDetailsSpecial - " + current);
+                        log.debug("mScraperService.getDetailsSpecial - {}", current);
                         ScrapeDetailResult detail = Scraper.getDetails(matches.get(current), b);
 
                         if (detail.isOkay()) {
@@ -601,7 +601,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                 return;
 
             if (values != null && values.length > 0) {
-                log.debug("onProgressUpdate got " + values.length + " items");
+                log.debug("onProgressUpdate got {} items", values.length);
                 onUpdateProgress(values[0]);
             }
         }
@@ -649,7 +649,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
         private List<EpisodeTags> getEpisodeList(ShowTags sTag) {
             ArrayList<EpisodeTags> result = new ArrayList<EpisodeTags>();
             if (sTag != null) {
-                log.debug("EpSaveTask.getEpisodeList: " + sTag.getTitle());
+                log.debug("EpSaveTask.getEpisodeList: {}", sTag.getTitle());
                 // get EpisodeTags by ShowId
                 long sId = sTag.getId();
                 ContentResolver cr = mContext.getContentResolver();
@@ -698,7 +698,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                 ArrayList<ContentProviderOperation> opList = new ArrayList<ContentProviderOperation>();
                 Map<String, Long> poster2IdMap = createPosterIdMap(mContext, targetShowId);
                 for (EpisodeTags epTag : targetList) {
-                    log.debug("handleSave: saving " + (i++) + " of " + size + " episodes.");
+                    log.debug("handleSave: saving {} of {} episodes.", (i++), size);
                     EpisodeTags targetEpTag = getEpisode(item.source, epTag.getEpisode(), epTag.getSeason(), targetShow);
                     targetEpTag.setVideoId(epTag.getVideoId());
                     targetEpTag.setShowId(targetShowId);
@@ -716,7 +716,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                         }
                     }
                 }
-                log.debug("preparations took:" + t.step());
+                log.debug("preparations took:{}", t.step());
                 if (opList.size() > 0) {
                     try {
                         mContext.getContentResolver().applyBatch(ScraperStore.AUTHORITY, opList);
@@ -727,7 +727,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                     }
                 }
                 TraktService.onNewVideo(mContext);
-                log.debug("handleSave: saving in the end:" + t.step() + " thats:" + t.total());
+                log.debug("handleSave: saving in the end:{} thats:{}", t.step(), t.total());
                 return targetShowId;
             }
             return -1;
@@ -754,11 +754,11 @@ public class VideoInfoShowScraperFragment extends Fragment implements
         }
 
         private EpisodeTags getEpisode(Map<String, EpisodeTags> allEpisodes, int epnum, int season, ShowTags showTags) {
-            log.debug("buildTag allEpisodes.size=" + allEpisodes.size() + " epnum=" + epnum + ", season=" + season + ", showId=" + showTags.getId());
+            log.debug("buildTag allEpisodes.size={} epnum={}, season={}, showId={}", allEpisodes.size(), epnum, season, showTags.getId());
             EpisodeTags episodeTag = null;
             if (!allEpisodes.isEmpty()) {
                 String key = season + "|" + epnum;
-                log.debug("buildTag: allEpisodes not empty trying to find " + key);
+                log.debug("buildTag: allEpisodes not empty trying to find {}", key);
                 episodeTag = allEpisodes.get(key);
             }
             if (episodeTag == null) {
@@ -774,7 +774,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                     log.debug("buildTag: posters not null");
                     for (ScraperImage image : posters) {
                         if (image.getSeason() == season) {
-                            log.debug("buildTag: " + showTags.getTitle() + " season poster s" + season + " " + image.getLargeUrl());
+                            log.debug("buildTag: {} season poster s{} {}", showTags.getTitle(), season, image.getLargeUrl());
                             episodeTag.setPosters(image.asList());
                             episodeTag.downloadPoster(mContext);
                             break;
@@ -784,21 +784,21 @@ public class VideoInfoShowScraperFragment extends Fragment implements
             } else {
                 log.debug("buildTag: episodeTag not null");
                 if (episodeTag.getPosters() == null) {
-                    log.warn("buildTag: " + episodeTag.getTitle() + " has null posters!");
+                    log.warn("buildTag: {} has null posters!", episodeTag.getTitle());
                 } else if (episodeTag.getPosters().isEmpty()) {
-                    log.warn("buildTag: " + episodeTag.getTitle() + " has empty posters!");
+                    log.warn("buildTag: {} has empty posters!", episodeTag.getTitle());
                 }
                 if (episodeTag.getDefaultPoster() == null) {
-                    log.warn("buildTag: " + episodeTag.getTitle() + " has no defaultPoster! Should add default show one.");
+                    log.warn("buildTag: {} has no defaultPoster! Should add default show one.", episodeTag.getTitle());
                 }
                 if (episodeTag.getShowTags() == null) {
-                    log.warn("buildTag: " + episodeTag.getTitle() + " has empty showTags!");
+                    log.warn("buildTag: {} has empty showTags!", episodeTag.getTitle());
                 }
                 // download still & poster because episode has been selected here
                 episodeTag.downloadPicture(mContext);
                 episodeTag.downloadPoster(mContext);
             }
-            log.debug("buildTag: " + episodeTag.getShowTitle() + " " + episodeTag.getShowId() + " " + episodeTag.getTitle());
+            log.debug("buildTag: {} {} {}", episodeTag.getShowTitle(), episodeTag.getShowId(), episodeTag.getTitle());
             return episodeTag;
         }
     }

@@ -858,7 +858,7 @@ abstract public class BrowserByFolder extends BrowserByVideoObjects implements
         if (submenu==mSortModeSubmenu) {
             if ((itemId & MENU_ITEM_SORT_MASK)==MENU_ITEM_SORT) {
                 mSortOrder = itemid2sortorder((int)itemId);
-                log.debug("onSubmenuItemSelected: mSortOrder=" +mSortOrder + " setting listingEngine sortOrder");
+                log.debug("onSubmenuItemSelected: mSortOrder={} setting listingEngine sortOrder", mSortOrder);
                 mListingEngine.setSortOrder(getSortOrder(mSortOrder));
                 mPreferences.edit()
                         .putString(SORT_PARAM_KEY, mSortOrder)
@@ -877,7 +877,7 @@ abstract public class BrowserByFolder extends BrowserByVideoObjects implements
         String sortOrder = DEFAULT_SORT;
         itemid = itemid - MENU_ITEM_SORT;
         if (itemid >= 0 && itemid < sortOrders.size()) sortOrder = sortOrders.get(itemid);
-        log.debug("itemid2sortorder: sortOrder="+sortOrder);
+        log.debug("itemid2sortorder: sortOrder={}", sortOrder);
         return sortOrder;
     }
 

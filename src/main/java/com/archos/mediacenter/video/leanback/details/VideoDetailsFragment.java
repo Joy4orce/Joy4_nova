@@ -289,15 +289,15 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
             new ActivityResultContracts.StartIntentSenderForResult(),
             result -> { // result can be RESULT_OK, RESULT_CANCELED
                 Context context = getActivity();
-                log.debug("ActivityResultLauncher deleteLauncher: result " + result.toString());
+                log.debug("ActivityResultLauncher deleteLauncher: result {}", result.toString());
                 if (result.getResultCode() == Activity.RESULT_OK) {
-                    log.debug("ActivityResultLauncher deleteLauncher: OK, deleteUris " + ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
+                    log.debug("ActivityResultLauncher deleteLauncher: OK, deleteUris {}", ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
                     if (delete != null && deleteUrisList != null && deleteUrisList.size() >= 1) {
-                        log.debug("ActivityResultLauncher deleteLauncher: calling delete.deleteOK on " + deleteUrisList.get(0));
+                        log.debug("ActivityResultLauncher deleteLauncher: calling delete.deleteOK on {}", deleteUrisList.get(0));
                         delete.deleteOK(deleteUrisList.get(0));
                     }
                 } else {
-                    log.debug("ActivityResultLauncher deleteLauncher: NO, deleteUris " + ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
+                    log.debug("ActivityResultLauncher deleteLauncher: NO, deleteUris {}", ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
                     if (delete != null && deleteUrisList != null && deleteUrisList.size() > 1)
                         delete.deleteNOK(deleteUrisList.get(0));
                 }
@@ -388,7 +388,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
             }
         } else { // initialization of watched state
             mIsVideoWatched = mVideo.isWatched();
-            log.debug("onCreate: init mIsVideoWatched=" + mIsVideoWatched);
+            log.debug("onCreate: init mIsVideoWatched={}", mIsVideoWatched);
         }
 
         mLaunchedFromPlayer = intent.getBooleanExtra(EXTRA_LAUNCHED_FROM_PLAYER, false);
@@ -409,15 +409,15 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, ((ScraperTrailer)item).getUrl());
                     ActivityInfo activityInfo = browserIntent.resolveActivityInfo(getActivity().getPackageManager(), browserIntent.getFlags());
                     if (activityInfo == null) log.debug("onCreate.onItemClicked: activity identified null");
-                    else log.debug("onCreate.onItemClicked: activity identified " + activityInfo.processName);
+                    else log.debug("onCreate.onItemClicked: activity identified {}", activityInfo.processName);
                     if (activityInfo != null) {
                         // not used to exclude !activityInfo.processName.equals("com.google.android.tv.frameworkpackagestubs") but was preventing opening youtube on ADTV
-                        log.debug("onCreate.onItemClicked: browserintent on " + ((ScraperTrailer)item).getUrl() + " with activityInfo " + activityInfo.processName);
+                        log.debug("onCreate.onItemClicked: browserintent on {} with activityInfo {}", ((ScraperTrailer)item).getUrl(), activityInfo.processName);
                         startActivity(browserIntent);
                     }
                     else {
                         String url = ((ScraperTrailer)item).getUrl().toString().replace("https://www.youtube.com/watch", "https://www.youtube.com/tv#/watch");
-                        log.debug("onCreate.onItemClicked: open url " + url);
+                        log.debug("onCreate.onItemClicked: open url {}", url);
                         WebUtils.openWebLink(getActivity(), url);
                     }
                 }
@@ -552,26 +552,24 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
         }
 
         // update video in case of binge watching or repeat mode
-        log.debug("onResume: mFirstOnResume " + mFirstOnResume + ", mResumeFromPlayer " + mResumeFromPlayer);
+        log.debug("onResume: mFirstOnResume {}, mResumeFromPlayer {}", mFirstOnResume, mResumeFromPlayer);
         long playerVideoId = CustomApplication.getLastVideoPlayedId();
         Uri playerVideoUri = CustomApplication.getLastVideoPlayedUri();
-        if (mVideo != null) log.debug("onResume: current mVideo " + mVideo.getFileUri() + "(" + mVideo.getId() +
-                "), playerVideo " + playerVideoUri + "(" + playerVideoId +"), mVideoIdFromPlayer " + mVideoIdFromPlayer +
-                ", mVideoFromPlayer " + mVideoPathFromPlayer + "(" + mVideoIdFromPlayer + ")");
+        if (mVideo != null) log.debug("onResume: current mVideo {}({}), playerVideo {}({}), mVideoIdFromPlayer {}, mVideoFromPlayer {}({})", mVideo.getFileUri(), mVideo.getId(), playerVideoUri, playerVideoId, mVideoIdFromPlayer, mVideoPathFromPlayer, mVideoIdFromPlayer);
         else log.debug("onResume: current mVideo is null");
         if ((playerVideoId != -42 && mVideo.getId() != playerVideoId) ||
             (playerVideoUri != null && ! mVideo.getFileUri().equals(playerVideoUri))) {
             log.debug("onResume: different playerVideo and mVideo detected!");
             mVideoPathFromPlayer = playerVideoUri.toString();
             mVideoIdFromPlayer = playerVideoId;
-            log.debug("onResume: not the same video than before (repeat mode?) target is " + mVideoPathFromPlayer);
+            log.debug("onResume: not the same video than before (repeat mode?) target is {}", mVideoPathFromPlayer);
             // get mVideo set to new video
             CursorLoader loader = new MultipleVideoLoader(getActivity(), mVideoPathFromPlayer);
             Cursor c = loader.loadInBackground();
             if (c.getCount()>0) {
                 c.moveToFirst();
                 mVideo = (Video) new CompatibleCursorMapperConverter(new VideoCursorMapper()).convert(c);
-                log.debug("onResume: yay we get a new video " + mVideo.getFilePath());
+                log.debug("onResume: yay we get a new video {}", mVideo.getFilePath());
                 mRepeatModeDetected = true; // to signal smoothUpdateVideo that it should all details since video is different from initial one
             } else {
                 log.debug("onResume: oops no video found");
@@ -789,19 +787,19 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
         // If we don't have the video object
         if (mVideo==null) {
             if (mVideoIdFromPlayer >=0) {
-                log.debug("onCreateLoader: mVideo is null, working from mVideoIdFromPlayer " + mVideoIdFromPlayer);
+                log.debug("onCreateLoader: mVideo is null, working from mVideoIdFromPlayer {}", mVideoIdFromPlayer);
                 return new MultipleVideoLoader(getActivity(), mVideoIdFromPlayer);
             } else {
-                log.debug("onCreateLoader: mVideo is null, working from mVideoPathFromPlayer " + mVideoPathFromPlayer);
+                log.debug("onCreateLoader: mVideo is null, working from mVideoPathFromPlayer {}", mVideoPathFromPlayer);
                 return new MultipleVideoLoader(getActivity(), mVideoPathFromPlayer);
             }
         }
         // If we already have the Video object
         else if (mVideo.isIndexed()) {
-            log.debug("onCreateLoader: mVideo is known and indexed with id " + mVideo.getId());
+            log.debug("onCreateLoader: mVideo is known and indexed with id {}", mVideo.getId());
             return new MultipleVideoLoader(getActivity(), mVideo.getId());
         } else {
-            log.debug("onCreateLoader: mVideo is known not indexed with path " + mVideo.getFilePath());
+            log.debug("onCreateLoader: mVideo is known not indexed with path {}", mVideo.getFilePath());
             return new MultipleVideoLoader(getActivity(), mVideo.getFilePath());
         }
     }
@@ -829,7 +827,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
                 log.debug("result.success");
                 videoInfo = xmlDb.getEntry(mVideo.getFileUri());
                 if(videoInfo!=null){
-                    log.debug("videoInfo!=null "+videoInfo.resume);
+                    log.debug("videoInfo!=null {}", videoInfo.resume);
                     mVideo.setRemoteResumeMs(videoInfo.resume);
                     // Update the action adapter if there is a network resume
                     if (mDetailsOverviewRow!=null) {
@@ -837,7 +835,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
                         if (mAdapter instanceof VideoActionAdapter) {
                             ((VideoActionAdapter) mAdapter).updateRemoteResume(getActivity(), mVideo);
                         } else {
-                            log.warn("onParseOk: mAdapter is not a VideoActionAdapter it is a " + mAdapter.getClass().getName());
+                            log.warn("onParseOk: mAdapter is not a VideoActionAdapter it is a {}", mAdapter.getClass().getName());
                         }
                     }
                 }
@@ -877,7 +875,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
             //TODO remove sources list
         }
         else {
-            log.debug("onLoadFinished: found " + cursor.getCount() + " videos");
+            log.debug("onLoadFinished: found {} videos", cursor.getCount());
             // Build video objects from the new cursor data
 
             mVideoBadgePresenter.setDisplay3dBadge(false);
@@ -891,9 +889,9 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
                 if(video.is3D())
                     mVideoBadgePresenter.setDisplay3dBadge(true);
                 mOnlineId = cursor.getLong(cursor.getColumnIndex(VideoStore.Video.VideoColumns.SCRAPER_ONLINE_ID));
-                log.debug("onLoadFinished: online id " + mOnlineId);
+                log.debug("onLoadFinished: online id {}", mOnlineId);
                 mVideoList.add(video);
-                log.debug("onLoadFinished: found video : " + video.getFileUri());
+                log.debug("onLoadFinished: found video : {}", video.getFileUri());
                 if(!mSelectCurrentVideo){ // get most advanced video
                     if(video.getLastPlayed()>0&&mVideo==null||mVideo!=null&&video.getLastPlayed()>mVideo.getLastPlayed()){
                         mVideo = video;
@@ -981,7 +979,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
             mRepeatModeDetected = false;
         } else {
             needToUpdateDetailsOverview = foundDifferencesRequiringDetailsUpdate(oldVideoObject, currentVideo); // update
-            log.debug("smoothUpdateVideo: needToUpdateDetailsOverview " + needToUpdateDetailsOverview);
+            log.debug("smoothUpdateVideo: needToUpdateDetailsOverview {}", needToUpdateDetailsOverview);
         }
 
         // Update if needed
@@ -1191,7 +1189,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
      */
 
     private void fullyReloadVideo(Video video, Bitmap poster) {
-        log.debug("fullyReloadVideo: mShouldLoadBackdrop=" + mShouldLoadBackdrop);
+        log.debug("fullyReloadVideo: mShouldLoadBackdrop={}", mShouldLoadBackdrop);
         if(mShouldLoadBackdrop)
             BackgroundManager.getInstance(getActivity()).setDrawable(new ColorDrawable(VideoInfoCommonClass.getDarkerColor(mColor)));
         mSubtitlesDetailsRow = new SubtitlesDetailsRow(getActivity(), video, null);
@@ -1315,7 +1313,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
             mDetailsOverviewRow.setImageScaleUpAllowed(false);
             mThumbnailAsyncTask = new ThumbnailAsyncTask().execute(mVideo);
         }else{
-            log.debug("fullyReloadVideo: should put watched mark on poster " + (mVideo.isWatched() || mIsVideoWatched));
+            log.debug("fullyReloadVideo: should put watched mark on poster {}", (mVideo.isWatched() || mIsVideoWatched));
             if (mVideo.isWatched() || mIsVideoWatched)
                 poster = PresenterUtils.addWatchedMark(poster, getContext());
             mDetailsOverviewRow.setImageBitmap(getActivity(), poster);
@@ -1386,7 +1384,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
             if(mLaunchedFromPlayer && mVideoMetadataFromPlayer!=null && mVideoMetadataFromPlayer.getVideoTrack()!=null)
                 return mVideoMetadataFromPlayer;
             else if(mVideoMetadateCache.containsKey(startingPath)){
-                log.debug("metadata retrieved from cache "+startingPath);
+                log.debug("metadata retrieved from cache {}", startingPath);
                 return mVideoMetadateCache.get(startingPath);
             }
             else {
@@ -1591,14 +1589,14 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
         @Override
         protected List<SubtitleManager.SubtitleFile> doInBackground(Video... videos) {
             Video video = videos[0];
-            log.debug("SubtitleFilesListerTask:doInBackground starting for: " + video.getFileUri());
-            log.debug("SubtitleFilesListerTask:doInBackground file name: " + FileUtils.getName(video.getFileUri()));
+            log.debug("SubtitleFilesListerTask:doInBackground starting for: {}", video.getFileUri());
+            log.debug("SubtitleFilesListerTask:doInBackground file name: {}", FileUtils.getName(video.getFileUri()));
 
             try {
                 SubtitleManager lister = new SubtitleManager(getActivity(),null );
                 log.debug("SubtitleFilesListerTask:doInBackground calling listLocalAndRemotesSubtitles");
-                List<SubtitleManager.SubtitleFile> list = lister.listLocalAndRemotesSubtitles(video.getFileUri(), true);
-                log.debug("SubtitleFilesListerTask:doInBackground completed, found " + (list != null ? list.size() : 0) + " subtitles");
+                List<SubtitleManager.SubtitleFile> list = lister.listLocalAndRemotesSubtitles(video.getFileUri(), video.getFilePath(), false, false, true);
+                log.debug("SubtitleFilesListerTask:doInBackground completed, found {} subtitles", (list != null ? list.size() : 0));
                 mSubtitleListCache.put(video.getFileUri(), list);
                 return list;
             } catch (Exception e) {
@@ -1613,7 +1611,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
                 log.debug("SubtitleFilesListerTask: onPostExecute cancelled");
                 return;
             }
-            log.debug("SubtitleFilesListerTask: onPostExecute with " + (subtitleFiles != null ? subtitleFiles.size() : 0) + " subtitles");
+            log.debug("SubtitleFilesListerTask: onPostExecute with {} subtitles", (subtitleFiles != null ? subtitleFiles.size() : 0));
             mExternalSubtitles = subtitleFiles;
             log.debug("SubtitleFilesListerTask: onPostExecute calling updateSubtitleRowWhenReady");
             updateSubtitleRowWhenReady();
@@ -1625,8 +1623,8 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
      */
     private void updateSubtitleRowWhenReady() {
         log.debug("updateSubtitleRowWhenReady: called");
-        log.debug("updateSubtitleRowWhenReady: metadata=" + (mVideo.getMetadata() != null));
-        log.debug("updateSubtitleRowWhenReady: cache entry=" + (mSubtitleListCache.get(mVideo.getFileUri()) != null));
+        log.debug("updateSubtitleRowWhenReady: metadata={}", (mVideo.getMetadata() != null));
+        log.debug("updateSubtitleRowWhenReady: cache entry={}", (mSubtitleListCache.get(mVideo.getFileUri()) != null));
 
         if ((mVideo.getMetadata()!=null) && (mSubtitleListCache.get(mVideo.getFileUri())!=null)) {
             log.debug("updateSubtitleRowWhenReady: updating row");
@@ -1638,7 +1636,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
                 log.error("updateSubtitleRowWhenReady: error updating row", e);
             }
         } else {
-            log.debug("updateSubtitleRowWhenReady: not ready - metadata=" + (mVideo.getMetadata() != null) + ", cache=" + (mSubtitleListCache.get(mVideo.getFileUri()) != null));
+            log.debug("updateSubtitleRowWhenReady: not ready - metadata={}, cache={}", (mVideo.getMetadata() != null), (mSubtitleListCache.get(mVideo.getFileUri()) != null));
         }
     }
 
@@ -1893,7 +1891,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
 
     @Override
     public void onVideoFileRemoved(final Uri videoFile,boolean askForFolderRemoval, final Uri folder) {
-        log.debug("onVideoFileRemoved: " + videoFile);
+        log.debug("onVideoFileRemoved: {}", videoFile);
         if (getActivity() != null) {
             Toast.makeText(getActivity(), R.string.delete_done, Toast.LENGTH_SHORT).show();
             if (askForFolderRemoval) {
@@ -1931,7 +1929,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
     }
 
     private void sendDeleteResult(Uri file){
-        log.debug("sendDeleteResult: " + file);
+        log.debug("sendDeleteResult: {}", file);
         Intent intent = new Intent();
         intent.setData(file);
         if (getActivity() != null) getActivity().setResult(ListingActivity.RESULT_FILE_DELETED, intent);
@@ -1942,7 +1940,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
 
     @Override
     public void onDeleteVideoFailed(Uri videoFile) {
-        log.debug("onDeleteVideoFailed: " + videoFile);
+        log.debug("onDeleteVideoFailed: {}", videoFile);
         if (getActivity() != null) Toast.makeText(getActivity(),R.string.delete_error, Toast.LENGTH_SHORT).show();
 
         // close the fragment anyway because the un-indexing may work even if the actual delete fails
@@ -1951,7 +1949,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
 
     @Override
     public void onFolderRemoved(Uri folder) {
-        log.debug("onFolderRemoved: " + folder);
+        log.debug("onFolderRemoved: {}", folder);
         if (getActivity() != null) Toast.makeText(getActivity(), R.string.delete_done, Toast.LENGTH_SHORT).show();
         sendDeleteResult(folder);
     }
@@ -1963,14 +1961,14 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
     //---------------------------------------------------
 
     private void deleteFile_async(Video video) {
-        log.debug("deleteFile_async: " + video.getFileUri());
+        log.debug("deleteFile_async: {}", video.getFileUri());
         delete = new Delete(this, getActivity());
         deleteUrisList = new ArrayList<>(Arrays.asList(video.getFileUri()));
         delete.startDeleteProcess(video.getFileUri());
     }
 
     private void deleteScraperInfo(Video video) {
-        log.debug("deleteScraperInfo: " + video.getFileUri());
+        log.debug("deleteScraperInfo: {}", video.getFileUri());
         // Reset the scraper fields for this item in the medialib
         // (set them to -1 because there is no need to search it again when running the automated task)
         // this also deletes the scraper data
@@ -2010,7 +2008,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
         // TMDB
         if (tags instanceof MovieTags) {
             final long onlineId = tags.getOnlineId();
-            //log.debug("tags.getOnlineId() = " + onlineId);
+            //log.debug("tags.getOnlineId() = {}", onlineId);
             if (onlineId > 0) {
                 final String language = Scraper.getLanguage(getActivity());
                 list.add(String.format(getResources().getString(R.string.tmdb_movie_title_url), onlineId, language));
@@ -2025,7 +2023,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
         // IMDB (valid for both movies and episodes)
         String imdbId = null;
         if (tags != null) imdbId = tags.getImdbId();
-        //log.debug("tags.getImdbId() = "+imdbId);
+        //log.debug("tags.getImdbId() = {}", imdbId);
         if ((imdbId!=null) && (!imdbId.isEmpty())) {
             list.add(getResources().getString(R.string.imdb_title_url) + imdbId);
         }
@@ -2144,7 +2142,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
     }
 
     public static void setWatchState(Boolean isVideoWatched) {
-        log.debug("setWatchState to " + isVideoWatched);
+        log.debug("setWatchState to {}", isVideoWatched);
         mIsVideoWatched = isVideoWatched;
     }
 
