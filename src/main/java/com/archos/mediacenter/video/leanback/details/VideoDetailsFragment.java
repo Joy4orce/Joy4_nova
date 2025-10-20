@@ -1595,7 +1595,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
             try {
                 SubtitleManager lister = new SubtitleManager(getActivity(),null );
                 log.debug("SubtitleFilesListerTask:doInBackground calling listLocalAndRemotesSubtitles");
-                List<SubtitleManager.SubtitleFile> list = lister.listLocalAndRemotesSubtitles(video.getFileUri(), video.getFilePath(), false, false, true);
+                List<SubtitleManager.SubtitleFile> list = lister.listLocalAndRemotesSubtitles(video.getFileUri(), true);
                 log.debug("SubtitleFilesListerTask:doInBackground completed, found {} subtitles", (list != null ? list.size() : 0));
                 mSubtitleListCache.put(video.getFileUri(), list);
                 return list;
