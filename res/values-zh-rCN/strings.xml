@@ -512,6 +512,7 @@
     <string name="preferences_force_audio_passthrough_disabled">已禁用 (推荐)</string>
     <string name="preferences_force_audio_passthrough_enable">Nova 封装（实验性）</string>
     <string name="preferences_force_audio_passthrough_enable2">系统封装</string>
+    <string name="preferences_force_audio_passthrough_ac3">通用（AC3 重编码）</string>
     <string name="preferences_force_audio_passthrough_summary">通过 HDMI 或 S/PDIF 传输压缩音频。⚠实验性功能，可能导致 A/V不同步</string>
     <string name="preferences_parser_sync_mode">解析器同步模式</string>
     <string name="preferences_parser_sync_mode_cdata">基于 PTS (推荐)</string>
@@ -874,6 +875,23 @@
     <string name="db_export_manual_title">导出媒体数据库</string>
     <string name="db_export_manual_summary">为调试目的将 media.db 文件导出到 /sdcard</string>
     <string name="db_export_in_progress">正在导出数据库</string>
+    <string name="media_library_export_title">导出媒体库 + 凭据 + 快捷方式</string>
+    <string name="media_library_export_summary">将 media.db、网络凭据（SMB/FTP/SFTP）、网络快捷方式和所有缓存图片导出为 ZIP 文件</string>
+    <string name="media_library_import_title">导入媒体库 + 凭据 + 快捷方式</string>
+    <string name="media_library_import_summary">从之前导出的 ZIP 文件中导入 media.db、网络凭据、网络快捷方式和缓存图片</string>
+    <string name="media_library_export_in_progress">正在导出媒体库、凭据和快捷方式</string>
+    <string name="media_library_import_in_progress">正在导入媒体库、凭据和快捷方式</string>
+    <string name="media_library_export_success">媒体库、凭据和快捷方式已成功导出到：\n%s</string>
+    <string name="media_library_import_success">媒体库、凭据和快捷方式已成功导入。正在重启应用…</string>
+    <string name="media_library_import_error">导入媒体库时出错</string>
+    <string name="media_library_export_error">导出媒体库时出错</string>
+    <string name="media_library_export_dir_not_found">未找到导出目录</string>
+    <string name="media_library_no_backup_found">未找到备份文件，请先导出。</string>
+    <string name="media_library_backup_info">找到备份文件：backup.zip\n大小：%d MB\n\n⚠️ 包含：元数据、凭据、快捷方式、图片\n\n是否继续导入？</string>
+    <string name="media_library_import_dialog_title">导入媒体库 + 凭据 + 快捷方式</string>
+    <string name="media_library_import_confirm_title">⚠️ 确认完全替换</string>
+    <string name="media_library_import_warning">⚠️ 警告：完全替换 ⚠️\n\n此操作将完全删除您当前的媒体库，并替换为备份文件中的内容。\n\n当前所有数据都将永久丢失：\n• 所有已抓取的电影/电视节目元数据\n• 所有缓存的海报和背景墙\n• 所有观看进度和历史记录\n• 所有网络凭据（SMB/FTP/SFTP/WebDAV）\n• 所有网络快捷方式/书签\n• 所有自定义编辑和设置\n\n此操作无法撤销！\n\n导入后应用将自动重启。\n\n是否确定要继续？</string>
+    <string name="media_library_import_button_confirm">是的，删除并替换</string>
     <string name="system">系统</string>
     <string name="keep_setting">记住此设置</string>
     <string name="select_sub_file"><![CDATA[找不到针对 <font color=#29b6f6><i>%s</i></font><br />的字幕文件，请在此列表中尝试：]]></string>

@@ -517,6 +517,7 @@
     <string name="preferences_force_audio_passthrough_disabled">Desativado (recomendado)</string>
     <string name="preferences_force_audio_passthrough_enable">Nova encapsulação</string>
     <string name="preferences_force_audio_passthrough_enable2">Encapsulação do sistema</string>
+    <string name="preferences_force_audio_passthrough_ac3">AC3 universal</string>
     <string name="preferences_force_audio_passthrough_summary">Transmitir audio comprimido via HDMI or S/PDIF. ⚠ Experimental e talvez resulte em falta de sincronia de A/V</string>
     <string name="preferences_parser_sync_mode">Modo de sincronização do parser</string>
     <string name="preferences_parser_sync_mode_cdata">Baseado em PTS (recomendado)</string>
@@ -879,6 +880,23 @@
     <string name="db_export_manual_title">Exportar base de dados de mídia</string>
     <string name="db_export_manual_summary">Exportar arquivo media.db para /sdcard para fins de diagnóstico</string>
     <string name="db_export_in_progress">Exportação da base de dados em andamento</string>
+    <string name="media_library_export_title">Exportar biblioteca de mídia + credenciais + atalhos</string>
+    <string name="media_library_export_summary">Exportar media.db, credenciais de rede (SMB/FTP/SFTP), atalhos de rede e todas as imagens em cache como um arquivo zip</string>
+    <string name="media_library_import_title">Importar biblioteca de mídia + credenciais + atalhos</string>
+    <string name="media_library_import_summary">Importar media.db, credenciais de rede, atalhos de rede e imagens em cache de um arquivo zip exportado anteriormente</string>
+    <string name="media_library_export_in_progress">Exportando biblioteca de mídia, credenciais e atalhos</string>
+    <string name="media_library_import_in_progress">Importando biblioteca de mídia, credenciais e atalhos</string>
+    <string name="media_library_export_success">Biblioteca de mídia, credenciais e atalhos exportados com sucesso para:\n%s</string>
+    <string name="media_library_import_success">Biblioteca de mídia, credenciais e atalhos importados com sucesso. Reiniciando o aplicativo...</string>
+    <string name="media_library_import_error">Erro ao importar biblioteca de mídia</string>
+    <string name="media_library_export_error">Erro ao exportar biblioteca de mídia</string>
+    <string name="media_library_export_dir_not_found">Diretório de exportação não encontrado</string>
+    <string name="media_library_no_backup_found">Nenhum arquivo de backup encontrado. Exporte primeiro.</string>
+    <string name="media_library_backup_info">Arquivo de backup encontrado: backup.zip\nTamanho: %d MB\n\n⚠️ Contém: metadados, credenciais, atalhos, imagens\n\nProsseguir com a importação?</string>
+    <string name="media_library_import_dialog_title">Importar biblioteca de mídia + credenciais + atalhos</string>
+    <string name="media_library_import_confirm_title">CONFIRMAR SUBSTITUIÇÃO COMPLETA</string>
+    <string name="media_library_import_warning">⚠️ AVISO: SUBSTITUIÇÃO COMPLETA ⚠️\n\nIsso EXCLUIRÁ COMPLETAMENTE sua biblioteca de mídia atual e a substituirá pelo backup.\n\nTODOS os dados atuais serão PERDIDOS PERMANENTEMENTE:\n• Todos os metadados de filmes/programas de TV copiados\n• Todos os pôsteres e cenários armazenados em cache\n• Todo o progresso e histórico de exibição\n• Todas as credenciais de rede (SMB/FTP/SFTP/WebDAV)\n• Todos os atalhos/marcadores de rede\n• Todas as edições e configurações personalizadas\n\nEsta ação NÃO PODE ser desfeita!\n\nO aplicativo será reiniciado automaticamente após a importação.\n\nTem certeza absoluta de que deseja continuar?</string>
+    <string name="media_library_import_button_confirm">SIM, EXCLUIR E SUBSTITUIR</string>
     <string name="system">Sistema</string>
     <string name="keep_setting">Manter esta configuração</string>
     <string name="select_sub_file"><![CDATA[Legendas exatas não encontradas para o arquivo <font color=#29b6f6><i>%s</i></font><br />Por favor, tente entre esta lista:]]></string>

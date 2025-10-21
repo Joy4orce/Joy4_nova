@@ -517,6 +517,7 @@
     <string name="preferences_force_audio_passthrough_disabled">Desactivado (recomendado)</string>
     <string name="preferences_force_audio_passthrough_enable">Encapsulación de Nova (experimental)</string>
     <string name="preferences_force_audio_passthrough_enable2">Encapsulación del sistema</string>
+    <string name="preferences_force_audio_passthrough_ac3">Universal (recodificando AC3)</string>
     <string name="preferences_force_audio_passthrough_summary">Transmite audio comprimido sobre HDMI o S/PDIF. ⚠ Experimental puede resultar en A/V desincronizados</string>
     <string name="preferences_parser_sync_mode">Modo de sincronización del analizador</string>
     <string name="preferences_parser_sync_mode_cdata">Basado en PTS (recomendado)</string>
@@ -879,6 +880,23 @@
     <string name="db_export_manual_title">Exportar base de datos</string>
     <string name="db_export_manual_summary">Exporta archivo media.db a /sdcard para propósitos de depuración</string>
     <string name="db_export_in_progress">Exportación de base de datos en curso</string>
+    <string name="media_library_export_title">Exportar biblioteca de medios + credenciales + accesos directos</string>
+    <string name="media_library_export_summary">Exportar biblioteca de medios, credenciales de red (SMB/FTP/SFTP), acceso directo a la red y todas las imágenes cacheadas como un archivo zip</string>
+    <string name="media_library_import_title">Importar biblioteca de medios + credenciales + accesos directos</string>
+    <string name="media_library_import_summary">Importar biblioteca de medios, credenciales de red, accesos directos de red e imágenes en caché desde un archivo zip previamente exportado</string>
+    <string name="media_library_export_in_progress">Exportando biblioteca de medios, credenciales y accesos directos</string>
+    <string name="media_library_import_in_progress">Importando biblioteca de medios, credenciales y accesos directos</string>
+    <string name="media_library_export_success">Biblioteca de medios, credenciales y accesos directos exportados con éxito a:\n%s</string>
+    <string name="media_library_import_success">Biblioteca de medios, credenciales y accesos directos importados con éxito. Reiniciando la aplicación...</string>
+    <string name="media_library_import_error">Error importando biblioteca de medios</string>
+    <string name="media_library_export_error">Error al exportar la biblioteca de medios</string>
+    <string name="media_library_export_dir_not_found">Directorio de exportación no encontrado</string>
+    <string name="media_library_no_backup_found">No se encontró archivo de copia de seguridad. Por favor, exportelo primero.</string>
+    <string name="media_library_backup_info">Copia de seguridad encontrada: backup.zip\nTamaño: %d MB\n\n⚠️ Contiene: metadatos, credenciales, accesos directos, imágenes\n\n¿Proceder a importar?</string>
+    <string name="media_library_import_dialog_title">Importar biblioteca de medios + credenciales + accesos directos</string>
+    <string name="media_library_import_confirm_title">CONFIRMAR SOBREESCRITURA COMPLETA</string>
+    <string name="media_library_import_warning">⚠️ ADVERTENCIA: SUSTITUCIÓN COMPLETA ⚠️\n\nEsto BORRARÁ COMPLETAMENTE tu biblioteca multimedia actual y la sustituirá por la copia de seguridad.\ n\nTODOS los datos actuales se PERDERÁN DE FORMA PERMANENTE:\n• Todos los metadatos de películas/programas de televisión recopilados\n• Todos los pósteres y fondos almacenados en caché\n• Todo el progreso y el historial de visualización\n• Todas las credenciales de red (SMB/FTP/SFTP/WebDAV)\n• Todos los accesos directos/marcadores de red\n• Todas las ediciones y configuraciones personalizadas\n\n¡Esta acción NO SE PUEDE deshacer! n\nLa aplicación se reiniciará automáticamente después de la importación.\n\n¿Está completamente seguro de que desea continuar?</string>
+    <string name="media_library_import_button_confirm">SÍ, ELIMINAR Y REEMPLAZAR</string>
     <string name="system">Sistema</string>
     <string name="keep_setting">Mantener esta configuración globalmente</string>
     <string name="select_sub_file"><![CDATA[No encontrados los subtítulos exactos para este archivo <font color=#29b6f6><i>%s</i></font><br />Por favor, inténtalo con alguno de esta lista:]]></string>

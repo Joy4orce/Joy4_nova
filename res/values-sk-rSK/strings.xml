@@ -527,6 +527,7 @@
     <string name="preferences_force_audio_passthrough_disabled">Vypnuté (odporúčané)</string>
     <string name="preferences_force_audio_passthrough_enable">Nova zapuzdrenie (experimentálne)</string>
     <string name="preferences_force_audio_passthrough_enable2">Zapuzdrenie systému</string>
+    <string name="preferences_force_audio_passthrough_ac3">Univerzálne (rekódovanie AC3)</string>
     <string name="preferences_force_audio_passthrough_summary">Prenos komprimovaného zvuku cez HDMI alebo S/PDIF. ⚠ Experimentálne môže dôjsť k nesynchronizácii A/V</string>
     <string name="preferences_parser_sync_mode">Synchronizačný režim analyzátora</string>
     <string name="preferences_parser_sync_mode_cdata">PTS (odporúčané)</string>
@@ -889,6 +890,23 @@
     <string name="db_export_manual_title">Exportovať databázu médií</string>
     <string name="db_export_manual_summary">Exportovanie súboru media.db do /sdcard na účely ladenia</string>
     <string name="db_export_in_progress">Prebieha export databázy</string>
+    <string name="media_library_export_title">Export knižnice médií + poverenia + skratky</string>
+    <string name="media_library_export_summary">Exportovať súbor media.db, sieťové poverenia (SMB/FTP/SFTP), sieťové skratky a všetky obrázky v medzipamäti ako súbor zip</string>
+    <string name="media_library_import_title">Import knižnice médií + poverenia + skratky</string>
+    <string name="media_library_import_summary">Importovať súbor media.db, sieťové poverenia, sieťové skratky a obrázky v medzipamäti z predtým exportovaného súboru zip</string>
+    <string name="media_library_export_in_progress">Exportovanie knižnice médií, poverení a skratiek</string>
+    <string name="media_library_import_in_progress">Importovanie knižnice médií, poverení a skratiek</string>
+    <string name="media_library_export_success">Knižnica médií, poverenia a skratky boli úspešne exportované do:\n%s</string>
+    <string name="media_library_import_success">Knižnica médií, poverenia a skratky boli úspešne importované. Reštartovanie aplikácie...</string>
+    <string name="media_library_import_error">Chyba pri importovaní mediálnej knižnice</string>
+    <string name="media_library_export_error">Chyba pri exporte mediálnej knižnice</string>
+    <string name="media_library_export_dir_not_found">Adresár pre export nebol nájdený</string>
+    <string name="media_library_no_backup_found">Nenašiel sa žiadny záložný súbor. Najskôr exportujte.</string>
+    <string name="media_library_backup_info">Nájdený súbor zálohy: backup.zip\nVeľkosť: %d MB\n\n⚠️ Obsahuje: metadáta, poverenia, skratky, obrázky\n\nPokračovať v importe?</string>
+    <string name="media_library_import_dialog_title">Import knižnice médií + poverenia + skratky</string>
+    <string name="media_library_import_confirm_title">⚠️ POTVRDITE ÚPLNÚ OBNOVU</string>
+    <string name="media_library_import_warning">⚠️ UPOZORNENIE: ÚPLNÁ OBNOVA ⚠️\n\nTýmto sa ÚPLNE VYMAŽE vaša aktuálna knižnica médií a nahradí sa zálohou. \n\nVšetky aktuálne údaje sa natrvalo stratia:\n- Všetky uložené metadáta filmov/televíznych programov\n- Všetky plagáty a pozadia v medzipamäti\n- Všetok priebeh a história sledovania\n- Všetky sieťové poverenia (SMB/FTP/SFTP/WebDAV)\n- Všetky sieťové skratky/záložky\n- Všetky vlastné úpravy a nastavenia\n\nTúto akciu NIE JE MOŽNÉ vrátiť späť! \n\nAplikácia sa po importe automaticky reštartuje.\n\nVy ste si úplne istí, že chcete pokračovať?</string>
+    <string name="media_library_import_button_confirm">ÁNO, VYMAZAŤ A OBNOVIŤ</string>
     <string name="system">Systém</string>
     <string name="keep_setting">Zapamätať si toto nastavenie</string>
     <string name="select_sub_file"><![CDATA[Presné titulky neboli nájdené pre súbor <font color=#29b6f6><i>%s</i></font><br />Vyskúšajte tento zoznam:]]></string>
