@@ -1779,7 +1779,12 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
                 mAudioTracksTVMenu.createAndAddSeparator();
 
+                // Get passthrough mode to disable audio boost and night mode for passthrough modes 1, 2, and 3
+                int passthroughMode = Integer.parseInt(mPreferences.getString("force_audio_passthrough_multiple", "0"));
+                boolean isPassthroughActive = passthroughMode >= 1;
+
                 final TVMenuItem tvmi = mAudioTracksTVMenu.createAndAddTVSwitchableMenuItem(getResources().getString(R.string.pref_audio_filt_title), PlayerService.sPlayerService.mAudioFilt > 0);
+                tvmi.setDisabled(isPassthroughActive);
                 tvmi.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -1790,6 +1795,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 });
 
                 final TVMenuItem tvmi2 = mAudioTracksTVMenu.createAndAddTVSwitchableMenuItem(getResources().getString(R.string.pref_audio_filt_night_mode), PlayerService.sPlayerService.mNightModeOn);
+                tvmi2.setDisabled(isPassthroughActive);
                 tvmi2.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -2272,6 +2278,9 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 AlertDialog.Builder adb = new AlertDialog.Builder(this);
                 adb.setTitle(R.string.pref_audio_parameters_title);
                 final ArrayList<RadioButton> rbs = new  ArrayList<RadioButton>();
+                // Get passthrough mode to disable audio boost and night mode for passthrough modes 1, 2, and 3
+                final int passthroughMode = Integer.parseInt(mPreferences.getString("force_audio_passthrough_multiple", "0"));
+                final boolean isPassthroughActive = passthroughMode >= 1;
                 adb.setAdapter(new ArrayAdapter<View>(mContext, R.layout.menu_item_layout) {
                     @Override
                     public View getView(final int position, View convertView, ViewGroup parent) {
@@ -2302,6 +2311,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                             tb.setText(R.string.pref_audio_filt_title);
                             tb.setPadding(20,20, 20, 20);
                             tb.setChecked( PlayerService.sPlayerService.mAudioFilt>0);
+                            tb.setEnabled(!isPassthroughActive);
                             tb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
                                 @Override
                                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -2315,6 +2325,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                             tb.setText(R.string.pref_audio_filt_night_mode);
                             tb.setPadding(20,20, 20, 20);
                             tb.setChecked(PlayerService.sPlayerService.mNightModeOn);
+                            tb.setEnabled(!isPassthroughActive);
                             tb.setOnCheckedChangeListener(new OnCheckedChangeListener() {
                                 @Override
                                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
