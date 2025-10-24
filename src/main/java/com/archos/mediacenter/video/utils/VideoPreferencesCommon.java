@@ -490,12 +490,14 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             boolean passthroughEnabled = !"0".equals(passthroughMode);
             mForceAudioPassthrough.setEnabled(passthroughEnabled);
             mPlaybackSpeed.setEnabled(!passthroughEnabled);
+            mPlaybackSpeed.setSelectable(!passthroughEnabled);
             mEnableDynamicAudioDelay.setEnabled(!passthroughEnabled);
             mEnableDynamicAudioDelay.setSelectable(!passthroughEnabled);
             mForceAudioPassthroughMultiple.setOnPreferenceChangeListener((preference, newValue) -> {
                 boolean newPassthroughEnabled = !"0".equals(newValue.toString());
                 mForceAudioPassthrough.setEnabled(newPassthroughEnabled);
                 mPlaybackSpeed.setEnabled(!newPassthroughEnabled);
+                mPlaybackSpeed.setSelectable(!newPassthroughEnabled);
                 mEnableDynamicAudioDelay.setEnabled(!newPassthroughEnabled);
                 mEnableDynamicAudioDelay.setSelectable(!newPassthroughEnabled);
                 return true;
