@@ -114,6 +114,7 @@ import com.archos.mediacenter.video.utils.WebUtils;
 import com.archos.mediaprovider.ArchosMediaIntent;
 import com.archos.mediaprovider.ImportState;
 import com.archos.mediaprovider.video.NetworkScannerReceiver;
+import com.archos.mediaprovider.video.VideoStore;
 import com.archos.mediascraper.AutoScrapeService;
 
 import org.slf4j.Logger;
@@ -197,6 +198,9 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
     private String mTvShowSortOrder;
 
     private boolean restartLastAddedLoader, restartLastPlayedLoader, restartMoviesLoader, restartTvshowsLoader, restartAnimesLoader, restartWatchingUpNextLoader;
+
+    // Track the video ID at position 0 of last played row to detect when a new video was played
+    private long mLastPlayedPosition0VideoId = -1;
 
     // Track initial load completion for each loader to allow UI population before blocking during scanning
     private boolean mWatchingUpNextInitialLoadComplete = false;
@@ -1329,7 +1333,31 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
                         if (mShowLastPlayedRow && mLastPlayedInitFocus == InitFocus.NOT_FOCUSED)
                             mLastPlayedInitFocus = cursor.getCount() > 0 ? InitFocus.NEED_FOCUS : InitFocus.NO_NEED_FOCUS;
                         log.debug("onLoadFinished: LastPlayed cursor ready with {} entries and {}, updating row", cursor.getCount(), mLastAddedInitFocus);
-                        if (mShowLastPlayedRow) updateLastPlayedRow(cursor);
+                        if (mShowLastPlayedRow) {
+                            // Check if the video at position 0 has changed (indicating a new video was played)
+                            long newPosition0VideoId = -1;
+                            if (cursor.getCount() > 0) {
+                                cursor.moveToFirst();
+                                int idColumnIndex = cursor.getColumnIndex(VideoStore.Video.VideoColumns._ID);
+                                if (idColumnIndex != -1) {
+                                    newPosition0VideoId = cursor.getLong(idColumnIndex);
+                                }
+                            }
+                            boolean videoPosition0Changed = (mLastPlayedPosition0VideoId != -1 && newPosition0VideoId != -1 && mLastPlayedPosition0VideoId != newPosition0VideoId);
+                            log.debug("onLoadFinished: LastPlayed position 0 video ID changed from {} to {}, changed={}", mLastPlayedPosition0VideoId, newPosition0VideoId, videoPosition0Changed);
+                            mLastPlayedPosition0VideoId = newPosition0VideoId;
+
+                            updateLastPlayedRow(cursor);
+                            // Only reset item position to 0 if we're currently on that row AND a new video was played
+                            // This ensures that when returning from video playback, the focus goes to position 0
+                            // where the just-played video now is, but stays at the current position if no video was played
+                            int lastPlayedRowPosition = getRowPosition(ROW_ID_LAST_PLAYED);
+                            if (videoPosition0Changed && lastPlayedRowPosition != -1 && lastPlayedRowPosition == getSelectedPosition()) {
+                                log.debug("onLoadFinished: LastPlayed row is currently selected and video at position 0 changed, resetting item position to 0");
+                                // Use setSelectedPosition with SelectItemViewHolderTask to reset horizontal position
+                                setSelectedPosition(lastPlayedRowPosition, false, new ListRowPresenter.SelectItemViewHolderTask(0));
+                            }
+                        }
                     } else {
                         log.debug("onLoadFinished: LastPlayed skipping UI update during scanning, but swapping cursor");
                         if (mLastPlayedAdapter != null) mLastPlayedAdapter.changeCursor(cursor);
