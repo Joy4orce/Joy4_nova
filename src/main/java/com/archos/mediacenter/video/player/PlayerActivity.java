@@ -815,6 +815,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             LibAvos.enableAudioSpeed(mPreferences.getBoolean(KEY_PLAYBACK_SPEED,false));
             LibAvos.setAndroidFrameTiming(mPreferences.getBoolean(KEY_ENABLE_ANDROID_FRAME_TIMING,false));
             LibAvos.setAudioSpeed(audioSpeed); // set audio speed playback (does nothing if audio speed not enabled)
+            LibAvos.setDynamicAudioDelay(mPreferences.getBoolean(VideoPreferencesCommon.KEY_ENABLE_DYNAMIC_AUDIO_DELAY, true)); // set dynamic audio delay estimation (default enabled)
             LibAvos.parserSyncMode(Integer.parseInt(mPreferences.getString(KEY_PARSER_SYNC_MODE,"0"))); // set lavc parser sync mode (0: PTS, 1 samples)
             if (ArchosFeatures.isAndroidTV(this)) {
                 if (mPreferences.getBoolean("enable_downmix_androidtv", false))
@@ -1779,9 +1780,10 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
                 mAudioTracksTVMenu.createAndAddSeparator();
 
-                // Get passthrough mode to disable audio boost and night mode for passthrough modes 1, 2, and 3
+                // Get passthrough mode to disable audio boost and night mode for passthrough modes 1 and 2 only
+                // Modes 0 (disabled) and 3 (recoding) support audio filters
                 int passthroughMode = Integer.parseInt(mPreferences.getString("force_audio_passthrough_multiple", "0"));
-                boolean isPassthroughActive = passthroughMode >= 1;
+                boolean isPassthroughActive = passthroughMode == 1 || passthroughMode == 2;
 
                 final TVMenuItem tvmi = mAudioTracksTVMenu.createAndAddTVSwitchableMenuItem(getResources().getString(R.string.pref_audio_filt_title), PlayerService.sPlayerService.mAudioFilt > 0);
                 tvmi.setDisabled(isPassthroughActive);
@@ -2278,9 +2280,10 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 AlertDialog.Builder adb = new AlertDialog.Builder(this);
                 adb.setTitle(R.string.pref_audio_parameters_title);
                 final ArrayList<RadioButton> rbs = new  ArrayList<RadioButton>();
-                // Get passthrough mode to disable audio boost and night mode for passthrough modes 1, 2, and 3
+                // Get passthrough mode to disable audio boost and night mode for passthrough modes 1 and 2 only
+                // Modes 0 (disabled) and 3 (recoding) support audio filters
                 final int passthroughMode = Integer.parseInt(mPreferences.getString("force_audio_passthrough_multiple", "0"));
-                final boolean isPassthroughActive = passthroughMode >= 1;
+                final boolean isPassthroughActive = passthroughMode == 1 || passthroughMode == 2;
                 adb.setAdapter(new ArrayAdapter<View>(mContext, R.layout.menu_item_layout) {
                     @Override
                     public View getView(final int position, View convertView, ViewGroup parent) {

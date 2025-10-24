@@ -148,6 +148,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
     public static final String KEY_STREAM_BUFFER_SIZE = "stream_buffer_size";
     public static final String KEY_STREAM_MAX_IFRAME_SIZE = "stream_max_iframe_size";
     public static final String KEY_PLAYBACK_SPEED = "playback_speed";
+    public static final String KEY_ENABLE_DYNAMIC_AUDIO_DELAY = "enable_dynamic_audio_delay";
     public static final String KEY_ACTIVATE_REFRESHRATE_SWITCH = "enable_tv_refreshrate_switch_mode";
     public static final String KEY_ACTIVATE_3D_SWITCH = "activate_tv_switch";
     public static final String KEY_ADULT_SCRAPE = "enable_adult_scrap_key";
@@ -236,6 +237,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
     private CheckBoxPreference mForceSwDecPreferences = null;
     private CheckBoxPreference mForceAudioPassthrough = null;
     private CheckBoxPreference mPlaybackSpeed = null;
+    private CheckBoxPreference mEnableDynamicAudioDelay = null;
     private CheckBoxPreference mDisableDownmix = null;
     private CheckBoxPreference mEnableDownmixATV = null;
     private ListPreference mActivateRefreshrateTVSwitch = null;
@@ -478,6 +480,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         mWatchingUpNext = (CheckBoxPreference) findPreference(KEY_SHOW_WATCHING_UP_NEXT_ROW);
         mForceAudioPassthrough = (CheckBoxPreference) findPreference(KEY_FORCE_AUDIO_PASSTHROUGH);
         mPlaybackSpeed = (CheckBoxPreference) findPreference(KEY_PLAYBACK_SPEED);
+        mEnableDynamicAudioDelay = (CheckBoxPreference) findPreference(KEY_ENABLE_DYNAMIC_AUDIO_DELAY);
         final ListPreference mForceAudioPassthroughMultiple = (ListPreference) findPreference("force_audio_passthrough_multiple");
         if (!CustomApplication.isPassthroughSupported()) {
             mForceAudioPassthrough.setEnabled(false);
@@ -487,10 +490,14 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             boolean passthroughEnabled = !"0".equals(passthroughMode);
             mForceAudioPassthrough.setEnabled(passthroughEnabled);
             mPlaybackSpeed.setEnabled(!passthroughEnabled);
+            mEnableDynamicAudioDelay.setEnabled(!passthroughEnabled);
+            mEnableDynamicAudioDelay.setSelectable(!passthroughEnabled);
             mForceAudioPassthroughMultiple.setOnPreferenceChangeListener((preference, newValue) -> {
                 boolean newPassthroughEnabled = !"0".equals(newValue.toString());
                 mForceAudioPassthrough.setEnabled(newPassthroughEnabled);
                 mPlaybackSpeed.setEnabled(!newPassthroughEnabled);
+                mEnableDynamicAudioDelay.setEnabled(!newPassthroughEnabled);
+                mEnableDynamicAudioDelay.setSelectable(!newPassthroughEnabled);
                 return true;
             });
         }
