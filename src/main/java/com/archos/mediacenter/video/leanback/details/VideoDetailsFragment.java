@@ -1143,7 +1143,13 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
                 try {
                     Uri imageUri = null;
                     if (video.isIndexed()) {
-                        imageUri = ThumbnailRequestHandler.buildUri(video.getId()); // Thumbnail
+                        // First try to get poster
+                        if (video.hasScraperData() && video.getPosterUri() != null) {
+                            imageUri = video.getPosterUri();
+                        } else {
+                            // Only create thumbnail if no poster available
+                            imageUri = ThumbnailRequestHandler.buildUri(video.getId()); // Thumbnail
+                        }
                     }
                     if (imageUri!=null) {
                         bitmap = Picasso.get()

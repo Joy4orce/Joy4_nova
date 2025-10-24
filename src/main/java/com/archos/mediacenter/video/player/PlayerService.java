@@ -1622,8 +1622,13 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE,title);
         metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI,
                 mVideoInfo.scraperCover);
-        Bitmap bitmap = BitmapFactory.decodeFile(mVideoInfo.scraperCover);
-        if (bitmap == null&&mVideoInfo.id >= 0) { //if no scrapped poster, try to get a thumbnail
+        Bitmap bitmap = null;
+        if (mVideoInfo.scraperCover != null && !mVideoInfo.scraperCover.isEmpty()) {
+            // Video has a poster, try to decode it
+            bitmap = BitmapFactory.decodeFile(mVideoInfo.scraperCover);
+        }
+        if (bitmap == null && mVideoInfo.id >= 0 && (mVideoInfo.scraperCover == null || mVideoInfo.scraperCover.isEmpty())) {
+            // No poster available, generate thumbnail
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inSampleSize = 2;
             bitmap = VideoStore.Video.Thumbnails.getThumbnail(getContentResolver(),mVideoInfo.id, VideoStore.Video.Thumbnails.MINI_KIND, options);
