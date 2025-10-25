@@ -16,6 +16,7 @@ package com.archos.mediaprovider.video;
 
 import static com.archos.filecorelibrary.FileUtils.canReadExternalStorage;
 
+import android.app.ForegroundServiceStartNotAllowedException;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -177,8 +178,21 @@ public class VideoStoreImportService extends Service implements Handler.Callback
         n = createNotification();
         log.debug("onCreate: create notification + startService {}", NOTIFICATION_ID);
         ArchosUtils.addBreadcrumb(SentryLevel.INFO, "VideoStoreImportService.onCreate", "created notification + startService " + NOTIFICATION_ID + " notification null? " + (n == null));
-        ServiceCompat.startForeground(this, NOTIFICATION_ID, n,
-                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
+        try {
+            ServiceCompat.startForeground(this, NOTIFICATION_ID, n,
+                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
+        } catch (Exception e) {
+            // Android 12+ (API 31+) throws ForegroundServiceStartNotAllowedException when app is in background
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && e instanceof ForegroundServiceStartNotAllowedException) {
+                log.warn("onCreate: Cannot start foreground service - app is in background", e);
+                ArchosUtils.addBreadcrumb(SentryLevel.WARNING, "VideoStoreImportService.onCreate", "ForegroundServiceStartNotAllowedException - stopping service");
+            } else {
+                log.error("onCreate: Unexpected error starting foreground service", e);
+                ArchosUtils.addBreadcrumb(SentryLevel.ERROR, "VideoStoreImportService.onCreate", "Unexpected error: " + e.getMessage());
+            }
+            stopSelf();
+            return;
+        }
         // importer logic
         mImporter = new VideoStoreImportImpl(this);
         // setup background worker thread
@@ -250,9 +264,22 @@ public class VideoStoreImportService extends Service implements Handler.Callback
         // intents are delivered here.
         log.debug("onStartCommand:{} flags:{} startId:{} getAction {}", intent, flags, startId, ((intent != null) ? intent.getAction() : "null"));
 
-        ServiceCompat.startForeground(this, NOTIFICATION_ID, n,
-                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
-        ArchosUtils.addBreadcrumb(SentryLevel.INFO, "VideoStoreImportService.onStartCommand", "created notification + startService " + NOTIFICATION_ID + " notification null? " + (n == null));
+        try {
+            ServiceCompat.startForeground(this, NOTIFICATION_ID, n,
+                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
+            ArchosUtils.addBreadcrumb(SentryLevel.INFO, "VideoStoreImportService.onStartCommand", "created notification + startService " + NOTIFICATION_ID + " notification null? " + (n == null));
+        } catch (Exception e) {
+            // Android 12+ (API 31+) throws ForegroundServiceStartNotAllowedException when app is in background
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && e instanceof ForegroundServiceStartNotAllowedException) {
+                log.warn("onStartCommand: Cannot start foreground service - app is in background", e);
+                ArchosUtils.addBreadcrumb(SentryLevel.WARNING, "VideoStoreImportService.onStartCommand", "ForegroundServiceStartNotAllowedException - stopping service");
+            } else {
+                log.error("onStartCommand: Unexpected error starting foreground service", e);
+                ArchosUtils.addBreadcrumb(SentryLevel.ERROR, "VideoStoreImportService.onStartCommand", "Unexpected error: " + e.getMessage());
+            }
+            stopSelf(startId);
+            return Service.START_NOT_STICKY;
+        }
 
         if (intent == null || intent.getAction() == null) {
             removeAllMessages(mHandler);
@@ -655,8 +682,18 @@ public class VideoStoreImportService extends Service implements Handler.Callback
             log.debug("handleVolumeMounted: cleared volume_hidden for {} rows", updated);
         }
 
-        ServiceCompat.startForeground(this, NOTIFICATION_ID, n,
-                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
+        try {
+            ServiceCompat.startForeground(this, NOTIFICATION_ID, n,
+                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
+        } catch (Exception e) {
+            // Android 12+ (API 31+) throws ForegroundServiceStartNotAllowedException when app is in background
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && e instanceof ForegroundServiceStartNotAllowedException) {
+                log.warn("handleVolumeMounted: Cannot start foreground service - app is in background", e);
+            } else {
+                log.error("handleVolumeMounted: Unexpected error starting foreground service", e);
+            }
+            return;
+        }
 
         // Key change: Use incremental import instead of full import for remounts
         // Files are already unhidden by updateVolumeHiddenStates(), so incremental scan will pick them up
@@ -705,8 +742,18 @@ public class VideoStoreImportService extends Service implements Handler.Callback
                 log.debug("onChange: triggering VIDEO_SCANNER_IMPORT_INCR");
                 // First ensure we're in foreground mode for the new import
                 log.debug("ContentChangeObserver.onChange: ensuring foreground mode for new import");
-                ServiceCompat.startForeground(mService, NOTIFICATION_ID, mService.n,
-                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
+                try {
+                    ServiceCompat.startForeground(mService, NOTIFICATION_ID, mService.n,
+                        (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
+                } catch (Exception e) {
+                    // Android 12+ (API 31+) throws ForegroundServiceStartNotAllowedException when app is in background
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && e instanceof ForegroundServiceStartNotAllowedException) {
+                        log.warn("ContentChangeObserver.onChange: Cannot start foreground service - app is in background", e);
+                    } else {
+                        log.error("ContentChangeObserver.onChange: Unexpected error starting foreground service", e);
+                    }
+                    return;
+                }
                 removeAllMessages(mHandler);
                 Message msg = mHandler.obtainMessage(MESSAGE_IMPORT_INCR, DONT_KILL_SELF, 0);
                 mHandler.sendMessageDelayed(msg, 1000);
@@ -835,8 +882,20 @@ public class VideoStoreImportService extends Service implements Handler.Callback
         if (ImportState.VIDEO.isDirty()) {
             log.debug("onStart: onForeGround && ImportState.isDirty MESSAGE_IMPORT_FULL");
             // First ensure we're in foreground mode for the new import
-            ServiceCompat.startForeground(this, NOTIFICATION_ID, n,
-                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
+            try {
+                ServiceCompat.startForeground(this, NOTIFICATION_ID, n,
+                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
+            } catch (Exception e) {
+                // Android 12+ (API 31+) throws ForegroundServiceStartNotAllowedException when app is in background
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && e instanceof ForegroundServiceStartNotAllowedException) {
+                    log.warn("onStart: Cannot start foreground service - app is in background", e);
+                    ArchosUtils.addBreadcrumb(SentryLevel.WARNING, "VideoStoreImportService.onStart", "ForegroundServiceStartNotAllowedException");
+                } else {
+                    log.error("onStart: Unexpected error starting foreground service", e);
+                    ArchosUtils.addBreadcrumb(SentryLevel.ERROR, "VideoStoreImportService.onStart", "Unexpected error: " + e.getMessage());
+                }
+                return;
+            }
             ArchosUtils.addBreadcrumb(SentryLevel.INFO, "VideoStoreImportService.onStart", "app is foreground ImportState.isDirty MESSAGE_IMPORT_FULL");
             mHandler.obtainMessage(MESSAGE_IMPORT_FULL, DONT_KILL_SELF, 0).sendToTarget();
         } else {
