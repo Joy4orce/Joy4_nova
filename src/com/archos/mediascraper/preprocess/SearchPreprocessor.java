@@ -69,8 +69,11 @@ public class SearchPreprocessor {
             if (matcher.matchesFileInput(uri, simplifiedUri)) {
                 SearchInfo result = matcher.getFileInputMatch(uri, simplifiedUri);
                 if (result == null) {
-                    throw new AssertionError("Matcher:" + matcher.getMatcherName() +
-                            " returned null file:" + ((uri != null) ? uri.toString() : null));
+                    // Matcher claimed to match but returned null - log error and try next matcher
+                    // This can happen with false positives (e.g., folder name looks like TV show but isn't)
+                    log.error("parseFileBased: Matcher {} returned null despite matching file {}",
+                            matcher.getMatcherName(), (uri != null) ? uri.toString() : null);
+                    continue; // Try next matcher instead of crashing
                 }
                 log.debug("parseFileBased: result from {} for {} -> {}",
                         matcher.getMatcherName(), candidate, result.getSearchSuggestion());
@@ -101,7 +104,10 @@ public class SearchPreprocessor {
                 if (matcher.matchesUserInput(userInput)) {
                     SearchInfo result = matcher.getUserInputMatch(userInput, file);
                     if (result == null) {
-                        throw new AssertionError("Matcher:" + matcher + " returned null userinput:" + userInput);
+                        // Matcher claimed to match but returned null - log error and try next matcher
+                        log.error("reParseInfo: Matcher {} returned null for user input: {}",
+                                matcher.getMatcherName(), userInput);
+                        continue; // Try next matcher instead of crashing
                     }
                     log.debug("re-parse result from {}", matcher.getMatcherName());
                     return reParseInfo(result);
