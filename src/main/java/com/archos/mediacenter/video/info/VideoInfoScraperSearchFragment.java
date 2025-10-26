@@ -473,6 +473,13 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
                     searchInfo = SearchPreprocessor.instance().parseFileBased(mUri, mTitle!=null&&!mTitle.isEmpty()?Uri.parse("/"+mTitle):mUri);
                 }
                 searchInfo.setUserInput(search);
+
+                // Check if scraper is still available (fragment may have been detached)
+                if (mScraper == null) {
+                    log.warn("ScraperMatchesThread: mScraper is null, fragment was likely detached");
+                    return;
+                }
+
                 mResults = mScraper.getBestMatches(searchInfo, SELECTION_DIALOG_MAX_ITEMS).results;
 
                 // reset the results
