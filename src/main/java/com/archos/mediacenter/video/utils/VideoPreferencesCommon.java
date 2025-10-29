@@ -482,10 +482,12 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         mPlaybackSpeed = (CheckBoxPreference) findPreference(KEY_PLAYBACK_SPEED);
         mEnableDynamicAudioDelay = (CheckBoxPreference) findPreference(KEY_ENABLE_DYNAMIC_AUDIO_DELAY);
         final ListPreference mForceAudioPassthroughMultiple = (ListPreference) findPreference("force_audio_passthrough_multiple");
-        if (!CustomApplication.isPassthroughSupported()) {
-            mForceAudioPassthrough.setEnabled(false);
-            mForceAudioPassthroughMultiple.setEnabled(false);
-        } else {
+        boolean isPassthroughSupported = CustomApplication.isPassthroughSupported();
+        mForceAudioPassthrough.setEnabled(isPassthroughSupported);
+        mForceAudioPassthroughMultiple.setEnabled(isPassthroughSupported);
+        mForceAudioPassthrough.setSelectable(isPassthroughSupported);
+        mForceAudioPassthroughMultiple.setSelectable(isPassthroughSupported);
+        if (isPassthroughSupported) {
             String passthroughMode = mSharedPreferences.getString("force_audio_passthrough_multiple", "0");
             boolean passthroughEnabled = !"0".equals(passthroughMode);
             mForceAudioPassthrough.setEnabled(passthroughEnabled);
