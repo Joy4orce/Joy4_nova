@@ -453,10 +453,18 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             if (mSambaDiscovery != null) {
                 mSambaDiscovery.abort();
             }
-            SambaDiscovery.flushShareNameResolver();
-            mSambaDiscovery = new SambaDiscovery(mContext);
-            mSambaDiscovery.setMinimumUpdatePeriodInMs(0);
-            mSambaDiscovery.start();
+            try {
+                SambaDiscovery.flushShareNameResolver();
+                mSambaDiscovery = new SambaDiscovery(mContext);
+                mSambaDiscovery.setMinimumUpdatePeriodInMs(0);
+                mSambaDiscovery.start();
+            } catch (UnsatisfiedLinkError e) {
+                log.warn("launchSambaDiscovery: Failed to initialize SambaDiscovery due to missing or corrupted native library", e);
+                mSambaDiscovery = null;
+            } catch (Exception e) {
+                log.error("launchSambaDiscovery: Unexpected error during SambaDiscovery initialization", e);
+                mSambaDiscovery = null;
+            }
         } else
             log.debug("launchSambaDiscovery: no local connection, doing nothing");
     }
