@@ -253,9 +253,36 @@ public class AutoScrapeService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         log.debug("onStartCommand");
-        ServiceCompat.startForeground(this, NOTIFICATION_ID, nb.build(),
-                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
-        
+
+        // Ensure notification manager and builder are initialized (race condition protection)
+        if (nm == null) {
+            nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        }
+        if (nb == null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && nm != null) {
+                NotificationChannel nc = new NotificationChannel(notifChannelId, notifChannelName,
+                        nm.IMPORTANCE_LOW);
+                nc.setDescription(notifChannelDescr);
+                nm.createNotificationChannel(nc);
+            }
+            nb = new NotificationCompat.Builder(this, notifChannelId)
+                    .setSmallIcon(R.drawable.stat_notify_scraper)
+                    .setContentTitle(getString(R.string.scraping_in_progress))
+                    .setPriority(NotificationCompat.PRIORITY_LOW)
+                    .setTicker(null).setOnlyAlertOnce(true).setOngoing(true).setAutoCancel(true);
+        }
+
+        // Call startForeground to satisfy the requirement of startForegroundService()
+        if (nb != null && nm != null) {
+            ServiceCompat.startForeground(this, NOTIFICATION_ID, nb.build(),
+                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
+        } else {
+            log.warn("onStartCommand: Unable to start foreground - notification resources not available");
+            // If we can't start foreground, stop the service immediately to avoid crash
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
         // Check for dirty state and restart scraping if needed
         isForeground = true;
         isForceAfterNetworkScan = intent != null && intent.getBooleanExtra("FORCE_AFTER_NETWORK_SCAN", false);
