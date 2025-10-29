@@ -236,119 +236,141 @@ public class AutoScrapeService extends Service {
 
     @Override
     public void onCreate() {
-        super.onCreate();
-        log.debug("onCreate() {}", this);
-
-        // need to do that early to avoid ANR on Android 26+
-        nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel nc = new NotificationChannel(notifChannelId, notifChannelName,
-                    nm.IMPORTANCE_LOW);
-            nc.setDescription(notifChannelDescr);
-            if (nm != null)
-                nm.createNotificationChannel(nc);
-        }
-        nb = new NotificationCompat.Builder(this, notifChannelId)
-                .setSmallIcon(R.drawable.stat_notify_scraper)
-                .setContentTitle(getString(R.string.scraping_in_progress))
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setTicker(null).setOnlyAlertOnce(true).setOngoing(true).setAutoCancel(true);
         try {
-            ServiceCompat.startForeground(this, NOTIFICATION_ID, nb.build(),
-                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
-        } catch (Exception e) {
-            // Handle ForegroundServiceStartNotAllowedException on Android 12+ when permission is not available
-            // The service will still run but without the foreground notification
-            log.warn("onCreate: Unable to start foreground service ({}), service will continue without foreground priority", e.getClass().getSimpleName());
-        }
-        mBinder = new AutoScraperBinder();
-    }
+            super.onCreate();
+            log.debug("onCreate() {}", this);
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, flags, startId);
-        log.debug("onStartCommand");
-
-        // Ensure notification manager and builder are initialized (race condition protection)
-        if (nm == null) {
+            // need to do that early to avoid ANR on Android 26+
             nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        }
-        if (nb == null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && nm != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 NotificationChannel nc = new NotificationChannel(notifChannelId, notifChannelName,
                         nm.IMPORTANCE_LOW);
                 nc.setDescription(notifChannelDescr);
-                nm.createNotificationChannel(nc);
+                if (nm != null)
+                    nm.createNotificationChannel(nc);
             }
             nb = new NotificationCompat.Builder(this, notifChannelId)
                     .setSmallIcon(R.drawable.stat_notify_scraper)
                     .setContentTitle(getString(R.string.scraping_in_progress))
                     .setPriority(NotificationCompat.PRIORITY_LOW)
                     .setTicker(null).setOnlyAlertOnce(true).setOngoing(true).setAutoCancel(true);
-        }
-
-        // Call startForeground to satisfy the requirement of startForegroundService()
-        if (nb != null && nm != null) {
             try {
                 ServiceCompat.startForeground(this, NOTIFICATION_ID, nb.build(),
                         (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
             } catch (Exception e) {
                 // Handle ForegroundServiceStartNotAllowedException on Android 12+ when permission is not available
-                log.warn("onStartCommand: Unable to start foreground service ({}), service will continue without foreground priority", e.getClass().getSimpleName());
+                // The service will still run but without the foreground notification
+                log.warn("onCreate: Unable to start foreground service ({}), service will continue without foreground priority", e.getClass().getSimpleName());
             }
-        } else {
-            log.warn("onStartCommand: Unable to start foreground - notification resources not available");
-            // If we can't start foreground, stop the service immediately to avoid crash
+            mBinder = new AutoScraperBinder();
+        } catch (Throwable t) {
+            // Catch any unexpected exceptions during onCreate to prevent service crash
+            log.error("onCreate: Unexpected error during service creation", t);
+            mBinder = new AutoScraperBinder();
+        }
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        try {
+            super.onStartCommand(intent, flags, startId);
+            log.debug("onStartCommand");
+
+            // Ensure notification manager and builder are initialized (race condition protection)
+            if (nm == null) {
+                nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            }
+            if (nb == null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && nm != null) {
+                    NotificationChannel nc = new NotificationChannel(notifChannelId, notifChannelName,
+                            nm.IMPORTANCE_LOW);
+                    nc.setDescription(notifChannelDescr);
+                    nm.createNotificationChannel(nc);
+                }
+                nb = new NotificationCompat.Builder(this, notifChannelId)
+                        .setSmallIcon(R.drawable.stat_notify_scraper)
+                        .setContentTitle(getString(R.string.scraping_in_progress))
+                        .setPriority(NotificationCompat.PRIORITY_LOW)
+                        .setTicker(null).setOnlyAlertOnce(true).setOngoing(true).setAutoCancel(true);
+            }
+
+            // Call startForeground to satisfy the requirement of startForegroundService()
+            if (nb != null && nm != null) {
+                try {
+                    ServiceCompat.startForeground(this, NOTIFICATION_ID, nb.build(),
+                            (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
+                } catch (Exception e) {
+                    // Handle ForegroundServiceStartNotAllowedException on Android 12+ when permission is not available
+                    log.warn("onStartCommand: Unable to start foreground service ({}), service will continue without foreground priority", e.getClass().getSimpleName());
+                }
+            } else {
+                log.warn("onStartCommand: Unable to start foreground - notification resources not available");
+                // If we can't start foreground, stop the service immediately to avoid crash
+                stopSelf();
+                return START_NOT_STICKY;
+            }
+        } catch (Throwable t) {
+            // Catch any unexpected exceptions during initialization to prevent service crash
+            log.error("onStartCommand: Unexpected error during initialization", t);
             stopSelf();
             return START_NOT_STICKY;
         }
 
-        // Check for dirty state and restart scraping if needed
-        isForeground = true;
-        isForceAfterNetworkScan = intent != null && intent.getBooleanExtra("FORCE_AFTER_NETWORK_SCAN", false);
-        if (isForceAfterNetworkScan) {
-            log.debug("onStartCommand: Force start after network scan - ensuring isForeground = true");
+        try {
+            // Check for dirty state and restart scraping if needed
             isForeground = true;
-        }
-        if (isDirtyState()) {
-            log.debug("onStartCommand: Rescanning everything due to dirty state");
-            // Reset the dirty flag in SharedPreferences
-            saveDirtyState(false);
-            startScraping(false, false);
+            isForceAfterNetworkScan = intent != null && intent.getBooleanExtra("FORCE_AFTER_NETWORK_SCAN", false);
+            if (isForceAfterNetworkScan) {
+                log.debug("onStartCommand: Force start after network scan - ensuring isForeground = true");
+                isForeground = true;
+            }
+            if (isDirtyState()) {
+                log.debug("onStartCommand: Rescanning everything due to dirty state");
+                // Reset the dirty flag in SharedPreferences
+                saveDirtyState(false);
+                startScraping(false, false);
+                // START_STICKY: Persistent service that monitors ContentObserver for new videos
+                // If killed by system, it will restart and check dirty state to resume interrupted operations
+                return START_STICKY;
+            }
+
+            if (log.isDebugEnabled() && intent != null && intent.getAction()==null) log.debug("onStartCommand: action is nul!!!");
+            if (log.isDebugEnabled() && intent != null && intent.getAction()!=null) log.debug("onStartCommand: action {}", intent.getAction());
+            try {
+                if(intent!=null) {
+                    if(intent.getAction()!=null&&intent.getAction().equals(EXPORT_EVERYTHING)) {
+                        log.debug("onStartCommand: EXPORT_EVERYTHING");
+                        startExporting();
+                    } else if (intent.getAction()!=null&&intent.getAction().equals(RESCAN_MOVIES)) {
+                        scrapeOnlyMovies = true;
+                        log.debug("onStartCommand: RESCAN_MOVIES, scrapeOnlyMovies={}", scrapeOnlyMovies);
+                        startScraping(true, intent.getBooleanExtra(RESCAN_ONLY_DESC_NOT_FOUND, false));
+                    } else {
+                        log.debug("onStartCommand: RESCAN_EVERYTHING");
+                        startScraping(intent.getBooleanExtra(RESCAN_EVERYTHING, false), intent.getBooleanExtra(RESCAN_ONLY_DESC_NOT_FOUND, false));
+                    }
+                } else {
+                    log.debug("onStartCommand: rescan incremental");
+                    startScraping(false, false);
+                }
+            } catch (Exception e) {
+                log.error("onStartCommand: Exception in service operation", e);
+                // Save dirty state if operation was interrupted
+                if (sIsScraping) {
+                    saveDirtyState(true);
+                }
+            }
             // START_STICKY: Persistent service that monitors ContentObserver for new videos
             // If killed by system, it will restart and check dirty state to resume interrupted operations
             return START_STICKY;
-        }
-
-        if (log.isDebugEnabled() && intent != null && intent.getAction()==null) log.debug("onStartCommand: action is nul!!!");
-        if (log.isDebugEnabled() && intent != null && intent.getAction()!=null) log.debug("onStartCommand: action {}", intent.getAction());
-        try {
-            if(intent!=null) {
-                if(intent.getAction()!=null&&intent.getAction().equals(EXPORT_EVERYTHING)) {
-                    log.debug("onStartCommand: EXPORT_EVERYTHING");
-                    startExporting();
-                } else if (intent.getAction()!=null&&intent.getAction().equals(RESCAN_MOVIES)) {
-                    scrapeOnlyMovies = true;
-                    log.debug("onStartCommand: RESCAN_MOVIES, scrapeOnlyMovies={}", scrapeOnlyMovies);
-                    startScraping(true, intent.getBooleanExtra(RESCAN_ONLY_DESC_NOT_FOUND, false));
-                } else {
-                    log.debug("onStartCommand: RESCAN_EVERYTHING");
-                    startScraping(intent.getBooleanExtra(RESCAN_EVERYTHING, false), intent.getBooleanExtra(RESCAN_ONLY_DESC_NOT_FOUND, false));
-                }
-            } else {
-                log.debug("onStartCommand: rescan incremental");
-                startScraping(false, false);
-            }
-        } catch (Exception e) {
-            log.error("onStartCommand: Exception in service operation", e);
-            // Save dirty state if operation was interrupted
+        } catch (Throwable t) {
+            // Catch any unexpected exceptions in scraping operations to prevent service crash
+            log.error("onStartCommand: Unexpected error during scraping operations", t);
             if (sIsScraping) {
                 saveDirtyState(true);
             }
+            return START_STICKY;
         }
-        // START_STICKY: Persistent service that monitors ContentObserver for new videos
-        // If killed by system, it will restart and check dirty state to resume interrupted operations
-        return START_STICKY;
     }
 
     protected void startExporting() {
