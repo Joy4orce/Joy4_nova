@@ -51,6 +51,7 @@ public class RemoteStateService extends Service implements UpnpServiceManager.Li
     private static final Logger log = LoggerFactory.getLogger(RemoteStateService.class);
 
     private static volatile boolean isForeground = true;
+    private static volatile boolean mHandleDbInProgress = false;
 
     private static final int REMOTE_CHECK_RETRY_COUNT = 3;
     private static final int REMOTE_CHECK_RETRY_DELAY_MS = 5000; // 5 seconds
@@ -109,9 +110,25 @@ public class RemoteStateService extends Service implements UpnpServiceManager.Li
         log.debug("onStartCommand: {}", intent);
         if (!isForeground) return START_NOT_STICKY; // prevent to be executed if app is in background
         if (intent != null && ACTION_CHECK_SMB.equals(intent.getAction())) {
+            // Prevent multiple concurrent handleDb operations to avoid thread explosion
+            // and concurrent database access issues
+            if (mHandleDbInProgress) {
+                log.debug("onStartCommand: handleDb already in progress, skipping");
+                return START_STICKY;
+            }
+            mHandleDbInProgress = true;
             NetworkState state = NetworkState.instance(this);
             state.updateFrom();
-            handleDb(this, state.isConnected(), state.hasLocalConnection());
+            // Move database operations to background thread to prevent ANR on main thread
+            final boolean hasConnection = state.isConnected();
+            final boolean hasLocalConnection = state.hasLocalConnection();
+            new Thread(() -> {
+                try {
+                    handleDb(RemoteStateService.this, hasConnection, hasLocalConnection);
+                } finally {
+                    mHandleDbInProgress = false;
+                }
+            }).start();
         }
         // Keep the service running
         return START_STICKY;
