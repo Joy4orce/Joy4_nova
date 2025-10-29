@@ -110,12 +110,17 @@ public class ImageScaler {
             stream = fileEditor.getInputStream();
             tmp = BitmapFactory.decodeStream(stream, null, opts);
         } catch (IOException e1) {
-            Log.e(TAG, "Could not decode Bitmap " + rawFile.toString());
+            Log.e(TAG, "Could not decode Bitmap " + rawFile.toString(), e1);
             tmp = null;
         } catch (Exception e) {
-            Log.e(TAG, "Could not decode Bitmap " + rawFile.toString());
+            // Catch any exceptions including hardware decoder failures (e.g., JPEG_HDEC on Hisilicon)
+            Log.e(TAG, "Could not decode Bitmap " + rawFile.toString(), e);
             tmp = null;
-        }finally {
+        } catch (Error e) {
+            // Catch even Errors to prevent app crash from native JPEG decoder issues
+            Log.e(TAG, "Error decoding Bitmap (possible hardware decoder failure): " + rawFile.toString(), e);
+            tmp = null;
+        } finally {
             if(stream!=null)
                 try {
                     stream.close();
@@ -155,9 +160,14 @@ public class ImageScaler {
                 stream = fileEditor.getInputStream();
                 sampled = BitmapFactory.decodeStream(stream, null, opts);
             } catch (Exception e) {
-                Log.e(TAG, "Could not decode Bitmap " + rawFile.toString());
+                // Catch any exceptions including hardware decoder failures (e.g., JPEG_HDEC on Hisilicon)
+                Log.e(TAG, "Could not decode Bitmap " + rawFile.toString(), e);
                 sampled = null;
-            }finally {
+            } catch (Error e) {
+                // Catch even Errors to prevent app crash from native JPEG decoder issues
+                Log.e(TAG, "Error decoding Bitmap (possible hardware decoder failure): " + rawFile.toString(), e);
+                sampled = null;
+            } finally {
                 if(stream!=null)
                     try {
                         stream.close();

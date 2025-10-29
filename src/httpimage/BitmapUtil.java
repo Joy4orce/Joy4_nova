@@ -46,9 +46,9 @@ public class BitmapUtil {
 
 
     public static Bitmap decodeByteArray( byte[] bytes, int maxNumOfPixels) {
-        
+
         if (bytes == null) return null;
-        
+
         try {
             BitmapFactory.Options option = new BitmapFactory.Options();
             // Decode only image size
@@ -64,6 +64,10 @@ public class BitmapUtil {
         } catch (OutOfMemoryError oom) {
 
             Log.w(TAG, oom);
+            return null;
+        } catch (Exception e) {
+            // Catch any other exceptions including those from hardware JPEG decoder crashes
+            Log.w(TAG, "Error decoding bitmap: " + e.getMessage(), e);
             return null;
         }
     }
