@@ -13,9 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * 
- */
 package com.archos.mediacenter.video.utils.oauth;
 
 import java.io.UnsupportedEncodingException;
@@ -117,14 +114,24 @@ public class OAuthDialog extends Dialog {
 		getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
 
 		mWebView = (NovaWebView) findViewById(R.id.webview);
+		// Essential JavaScript for OAuth flow
 		mWebView.getSettings().setJavaScriptEnabled(true);
+		// Enhanced security settings
+		mWebView.getSettings().setDomStorageEnabled(false);
+		mWebView.getSettings().setDatabaseEnabled(false);
+		// App cache is disabled by default in modern WebView, setAppCacheEnabled was deprecated
+		mWebView.getSettings().setGeolocationEnabled(false);
+		mWebView.getSettings().setAllowFileAccess(false);
+		mWebView.getSettings().setAllowContentAccess(false);
+		mWebView.getSettings().setAllowFileAccessFromFileURLs(false);
+		mWebView.getSettings().setAllowUniversalAccessFromFileURLs(false);
+		// TV-friendly display settings
 		//mWebView.setVerticalScrollBarEnabled(false);
 		//mWebView.setHorizontalScrollBarEnabled(false);
 		// resize to fit content
 		mWebView.getSettings().setUseWideViewPort(true);
 		mWebView.getSettings().setLoadWithOverviewMode(true);
-
-		        mWebView.setWebViewClient(new OAuthWebViewClient());
+		mWebView.setWebViewClient(new OAuthWebViewClient());
 		mWebView.setWebChromeClient(new WebChromeClient());
 		mWebView.loadUrl(mReq.getLocationUri());
 
@@ -166,8 +173,14 @@ public class OAuthDialog extends Dialog {
 			}
 			Uri uri = Uri.parse(urldecode);
 			if (!"localhost".equals(uri.getHost()) || !urldecode.contains("code=")) {
-				log.debug("shouldOverrideUrlLoading: shouldOverrideUrlLoading false for host {} and urldecode is {}", uri.getHost(), urldecode);
-				return false;
+				// Enhanced validation for OAuth callback - allow only Trakt domain and localhost
+				if (uri.getHost() != null && (uri.getHost().endsWith("trakt.tv") || uri.getHost().equals("localhost"))) {
+					log.debug("shouldOverrideUrlLoading API21-23: allowing Trakt domain or localhost: {}", uri.getHost());
+					return false; // Continue loading
+				} else {
+					log.warn("shouldOverrideUrlLoading API21-23: blocking non-Trakt domain: {}", uri.getHost());
+					return true; // Block navigation to non-Trakt domains
+				}
 			}
 			mdata.code = uri.getQueryParameter("code");
 			OAuthDialog.this.dismiss();
@@ -190,8 +203,14 @@ public class OAuthDialog extends Dialog {
 			}
 			Uri uri = Uri.parse(urldecode);
 			if (!"localhost".equals(uri.getHost()) || !urldecode.contains("code=")) {
-				log.debug("shouldOverrideUrlLoading: shouldOverrideUrlLoading false for host {} and urldecode is {}", uri.getHost(), urldecode);
-				return false;
+				// Enhanced validation for OAuth callback - allow only Trakt domain and localhost
+				if (uri.getHost() != null && (uri.getHost().endsWith("trakt.tv") || uri.getHost().equals("localhost"))) {
+					log.debug("shouldOverrideUrlLoading API24+: allowing Trakt domain or localhost: {}", uri.getHost());
+					return false; // Continue loading
+				} else {
+					log.warn("shouldOverrideUrlLoading API24+: blocking non-Trakt domain: {}", uri.getHost());
+					return true; // Block navigation to non-Trakt domains
+				}
 			}
 			mdata.code = uri.getQueryParameter("code");
 			OAuthDialog.this.dismiss();
