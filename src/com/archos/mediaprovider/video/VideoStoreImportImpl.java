@@ -292,6 +292,7 @@ public class VideoStoreImportImpl {
         log.info("handleScanCursor: media scanned:" + scanned + " nfo-scraped:" + scraped);
         if (scraped > 0)
             TraktService.onNewVideo(context); // done once for the full import
+        // TODO MARC do an else with sync!!!
     }
 
     private static class Job {
@@ -351,6 +352,8 @@ public class VideoStoreImportImpl {
     private static String WHERE_FILE = "_data = ?";
     /** executes metadata scan of files defined by Uri */
     public void doScan(Uri what) {
+        // TODO MARC only works with local storage does not work with FileEditor editor = FileEditorFactoryWithUpnp.getFileEditorForUrl(what, null);
+        // TODO MARC this makes fail the associate sub on remote storage
         mIsImportInterrupted = false;
         log.debug("doScan: Scanning Metadata single uri: {}", what);
         if (what == null) return;

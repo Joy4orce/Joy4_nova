@@ -51,6 +51,7 @@ import com.uwetrottmann.trakt5.entities.BaseSeason;
 import com.uwetrottmann.trakt5.entities.BaseShow;
 import com.uwetrottmann.trakt5.entities.EpisodeIds;
 import com.uwetrottmann.trakt5.entities.GenericProgress;
+import com.uwetrottmann.trakt5.entities.HistoryEntry;
 import com.uwetrottmann.trakt5.entities.LastActivities;
 import com.uwetrottmann.trakt5.entities.ListEntry;
 import com.uwetrottmann.trakt5.entities.MovieIds;
@@ -113,17 +114,29 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
     public static final int FLAG_SYNC_LAST_ACTIVITY_VETO =  0x002;
     public static final int FLAG_SYNC_MOVIES =              0x004;
     public static final int FLAG_SYNC_SHOWS =               0x008;
-    public static final int FLAG_SYNC_TO_DB_WATCHED =       0x010;
+    public static final int FLAG_SYNC_TO_DB_WATCHED =       0x010; // need to resync watched status from trakt to db
     public static final int FLAG_SYNC_TO_DB_COLLECTION =    0x020;
     public static final int FLAG_SYNC_TO_TRAKT_WATCHED =    0x040;
     public static final int FLAG_SYNC_TO_TRAKT_COLLECTION = 0x080;
     public static final int FLAG_SYNC_NOW =                 0x100;
-    public static final int FLAG_SYNC_PROGRESS =       0x200;
+    public static final int FLAG_SYNC_PROGRESS =            0x200; // need to sync resume points
     public static final int FLAG_SYNC_TO_DB = FLAG_SYNC_TO_DB_WATCHED | FLAG_SYNC_TO_DB_COLLECTION;
     public static final int FLAG_SYNC_TO_TRAKT = FLAG_SYNC_TO_TRAKT_WATCHED | FLAG_SYNC_TO_TRAKT_COLLECTION;
     public static final int FLAG_SYNC_FULL = FLAG_SYNC_TO_DB | FLAG_SYNC_TO_TRAKT | FLAG_SYNC_MOVIES | FLAG_SYNC_SHOWS;
 
     private static final long TRAKT_SYNC_DELAY = 30; // in sec
+
+    public static final String PREFERENCE_TRAKT_LAST_ACTIVITY = "trakt_last_activity";
+    public static final String PREFERENCE_TRACK_LAST_ACTIVITY_MOVIE = "trakt_last_activity_movie";
+    public static final String PREFERENCE_TRAKT_LAST_ACTIVITY_EPISODE = "trakt_last_activity_episode";
+    public static final String PREFERENCE_TRAKT_LAST_ACTIVITY_LIST = "trakt_last_activity_list";
+    public static final String PREFERENCE_TRAKT_LAST_ACTIVITY_TIME_CHECKED_UTC = "trakt_last_activity_time_checked_utc";
+    public static final String PREFERENCE_TRAKT_LAST_TIME_SYNC_TO_DB_WATCHED = "trakt_last_time_sync_to_db_watched";
+    public static final String PREFERENCE_TRAKT_LAST_TIME_SYNC_TO_DB_PROGRESS = "trakt_last_time_sync_to_db_progress";
+    public static final String PREFERENCE_TRAKT_LAST_TIME_SYNC_WATCHED = "trakt_last_time_sync_watched";
+    public static final String PREFERENCE_TRAKT_LAST_TIME_SYNC_PROGRESS = "trakt_last_time_sync_progress";
+    public static final String PREFERENCE_TRAKT_LAST_TIME_SYNC_LIST = "trakt_last_time_sync_list";
+    public static final String PREFERENCE_TRAKT_LAST_TIME_SYNC_TO_DB_LIST = "trakt_last_time_sync_to_db_list";
 
     private static volatile boolean isForeground = true;
 
@@ -261,12 +274,12 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
                         if (traktAction != null && videoInfo != null) {
                             final boolean wasBusy = mBusy;
                             mBusy = true;
+                            // TODO MARC no need of this
                             result = mTrakt.getLastActivity();
 
                             lastActivityFlag = getFlagsFromTraktLastActivity(result);
                             if (result != null && result.status != Trakt.Status.ERROR_NETWORK) {
                                 result = mTrakt.markAs(traktAction, videoInfo);
-
                             } else
 
                                 Trakt.setFlagSyncPreference(mPreferences, FLAG_SYNC_TO_TRAKT_WATCHED);
@@ -516,8 +529,20 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
         return Trakt.Status.SUCCESS;
     }
 
-    // sync playback status i.e. resume time and last time played (not capturing fully watched videos) both ways (db/trakt)
-    private Trakt.Status syncPlaybackStatus(){
+    /**
+     * @deprecated This method is replaced by {@link #syncPlaybackStatusHybrid()}
+     * which provides the same functionality with better architecture.
+     * 
+     * DEPRECATED: sync playback status i.e. resume time and last time played (not capturing fully watched videos) both ways (db/trakt)
+     * This method is being replaced by syncPlaybackStatusHybrid() which uses separate 
+     * syncResumePointsToTrakt() and syncWatchedStatusToDb() methods while preserving the original logic.
+     * 
+     * @see #syncPlaybackStatusHybrid()
+     * TODO: Remove this method in future release once hybrid approach is fully tested
+     */
+    @Deprecated
+    @SuppressWarnings("unused") // Kept for emergency fallback during transition period
+    private Trakt.Status syncPlaybackStatusLegacy(){
         log.debug("syncPlaybackStatus start");
         final ContentResolver cr = getContentResolver();
         // get all playback status from trakt since last sync
@@ -595,6 +620,9 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
             c1.close();
         }
 
+        // save sync time
+        PreferenceManager.getDefaultSharedPreferences(TraktService.this).edit().putLong(PREFERENCE_TRAKT_LAST_TIME_SYNC_PROGRESS, System.currentTimeMillis() / 1000L).apply();
+
         //from trakt to db
 
         if (videos != null && !videos.isEmpty()) {
@@ -666,6 +694,470 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
             }
         }
         log.debug("syncPlaybackStatus complete");
+
+        // save sync time
+        PreferenceManager.getDefaultSharedPreferences(TraktService.this).edit().putLong(PREFERENCE_TRAKT_LAST_TIME_SYNC_TO_DB_PROGRESS, System.currentTimeMillis() / 1000L).apply();
+
+        return Trakt.Status.SUCCESS;
+    }
+
+    // HYBRID APPROACH: Combines original logic with new architecture
+    // This method preserves the original's smart conflict resolution while using cleaner separation
+    private Trakt.Status syncPlaybackStatusHybrid() {
+        log.debug("syncPlaybackStatusHybrid start - combining original logic with new architecture");
+        
+        // 1. FETCH TRAKT DATA ONCE (like original) - single API call for efficiency
+        Trakt.Result resultTraktProgress = mTrakt.getPlaybackStatus();
+        java.util.List<PlaybackResponse> traktProgress = null;
+        if (resultTraktProgress.status == Trakt.Status.SUCCESS &&
+                resultTraktProgress.objType == Trakt.Result.ObjectType.MOVIES) {
+            traktProgress = (java.util.List<PlaybackResponse>) resultTraktProgress.obj;
+        }
+        
+        Trakt.Result resultTraktWatched = mTrakt.getWatchedStatus();
+        java.util.List<HistoryEntry> traktWatched = null;
+        if (resultTraktWatched.status == Trakt.Status.SUCCESS &&
+                resultTraktWatched.objType == Trakt.Result.ObjectType.MOVIES) {
+            traktWatched = (java.util.List<HistoryEntry>) resultTraktWatched.obj;
+        }
+        
+        // 2. UPLOAD WITH ORIGINAL CONFLICT CHECKING (DB → Trakt)
+        // This preserves the critical "don't overwrite newer progress" logic
+        Trakt.Status uploadStatus = syncResumePointsToTrakt(traktProgress);
+        if (uploadStatus == Trakt.Status.ERROR_NETWORK) {
+            return uploadStatus;
+        }
+        
+        // Upload watched status (minimal for now since most logic is in resume points)
+        uploadStatus = syncWatchedStatusToTrakt(traktWatched);
+        if (uploadStatus == Trakt.Status.ERROR_NETWORK) {
+            return uploadStatus;
+        }
+        
+        // 3. DOWNLOAD WITH NEW IMPROVED LOGIC (Trakt → DB)
+        // This uses your enhanced conflict resolution and specification compliance
+        Trakt.Status downloadStatus = syncResumePointsToDb(traktProgress);
+        if (downloadStatus == Trakt.Status.ERROR_NETWORK) {
+            return downloadStatus;
+        }
+        
+        downloadStatus = syncWatchedStatusToDb(traktWatched);
+        if (downloadStatus == Trakt.Status.ERROR_NETWORK) {
+            return downloadStatus;
+        }
+        
+        log.debug("syncPlaybackStatusHybrid complete - preserved original logic with new architecture");
+        return Trakt.Status.SUCCESS;
+    }
+
+    // Upload resume points from DB to Trakt with original conflict checking logic
+    private Trakt.Status syncResumePointsToTrakt(java.util.List<PlaybackResponse> traktVideos) {
+        log.debug("syncResumePointsToTrakt start");
+        final ContentResolver cr = getContentResolver();
+        
+        // Get all videos watched on device not yet synced to trakt (traktResume < 0: negative traktResume means set but not yet synced)
+        // This is the EXACT same query from the original method
+        Cursor c1= cr.query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, VideoDbInfo.COLUMNS,
+                VideoStore.Video.VideoColumns.ARCHOS_MEDIA_SCRAPER_ID + " > 0 AND " + 
+                VideoStore.Video.VideoColumns.ARCHOS_TRAKT_RESUME + " < 0 AND " + 
+                VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED + " > 0",
+                null, null);
+        
+        if (c1 != null) {
+            if (c1.getCount() > 0) {
+                c1.moveToFirst();
+                do {
+                    VideoDbInfo videoInfo = VideoDbInfo.fromCursor(c1, false);
+                    if (videoInfo != null &&
+                            (videoInfo.scraperMovieId != null || videoInfo.scraperEpisodeId != null) &&
+                            videoInfo.traktResume < 0) {
+                        boolean send = true;
+                        GenericProgress gprog = null;
+                        
+                        // PRESERVED ORIGINAL LOGIC: Check if Trakt has more recent progress than what we're about to send
+                        if (traktVideos != null) {
+                            for (PlaybackResponse video : traktVideos) { // video is from trakt and videoInfo is from db
+                                if ((video.movie != null
+                                        && video.movie.ids != null
+                                        && videoInfo.scraperMovieId != null
+                                        && Objects.equals(video.movie.ids.tmdb, Integer.valueOf(videoInfo.scraperMovieId))
+                                        && video.progress > -videoInfo.traktResume) || // negative traktResume means set but not yet synced
+                                        (video.episode != null
+                                                && video.episode.ids != null
+                                                && videoInfo.scraperEpisodeId != null
+                                                && Objects.equals(video.episode.ids.tmdb, Integer.valueOf(videoInfo.scraperEpisodeId))
+                                                && video.progress > -videoInfo.traktResume)) {
+                                    //trakt mark is more advanced, we don't send anything
+                                    send = false;
+                                    log.debug("syncResumePointsToTrakt: db->trakt {}{} not sent, trakt progress is more advanced", videoInfo.scraperTitle, videoInfo.isShow ? ", s" + videoInfo.scraperSeasonNr + "e" + videoInfo.scraperEpisodeNr : "");
+                                    gprog = video;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (send) {
+                            log.debug("syncResumePointsToTrakt: db->trakt {}{}", videoInfo.scraperTitle, (videoInfo.isShow ? ", s" + videoInfo.scraperSeasonNr + "e" + videoInfo.scraperEpisodeNr : ""));
+                            ContentValues values = new ContentValues();
+                            Trakt.Result result;
+                            
+                            // PRESERVED ORIGINAL LOGIC: Check if should mark as seen or just update progress
+                            if (Trakt.shouldMarkAsSeen(Math.abs(videoInfo.traktResume))) {
+                                result = mTrakt.markAs(Trakt.ACTION_SEEN, videoInfo);
+                                if (result.status == Trakt.Status.SUCCESS || result.status == Trakt.Status.SUCCESS_ALREADY) {
+                                    videoInfo.traktSeen = 1;
+                                }
+                            } else {
+                                result = mTrakt.postWatchingStop(videoInfo, -videoInfo.traktResume);
+                            }
+                            
+                            // PRESERVED ORIGINAL LOGIC: Update local DB on successful upload
+                            if (result.status == Trakt.Status.SUCCESS || result.status == Trakt.Status.SUCCESS_ALREADY) {
+                                if (gprog != null)
+                                    gprog.progress = Double.valueOf(Math.abs(videoInfo.traktResume));
+                                videoInfo.traktResume = Math.abs(videoInfo.traktResume);
+                                values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_RESUME, videoInfo.traktResume);
+                                values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_SEEN, videoInfo.traktSeen);
+                                cr.update(VideoStore.Video.Media.EXTERNAL_CONTENT_URI,
+                                        values, VideoStore.Video.VideoColumns._ID + " = " + videoInfo.id, null);
+                            } else if (result.status == Trakt.Status.ERROR_NETWORK) {
+                                c1.close();
+                                return Trakt.Status.ERROR_NETWORK;
+                            }
+                        }
+                    }
+                } while (c1.moveToNext());
+            }
+            c1.close();
+        }
+
+        // save sync time
+        PreferenceManager.getDefaultSharedPreferences(TraktService.this).edit().putLong(PREFERENCE_TRAKT_LAST_TIME_SYNC_PROGRESS, System.currentTimeMillis() / 1000L).apply();
+        log.debug("syncResumePointsToTrakt complete");
+        return Trakt.Status.SUCCESS;
+    }
+
+    // Upload watched status from DB to Trakt (placeholder for future implementation)
+    private Trakt.Status syncWatchedStatusToTrakt(java.util.List<HistoryEntry> traktWatched) {
+        log.debug("syncWatchedStatusToTrakt start");
+        // TODO: Implement watched status upload logic if needed
+        // Currently, watched status is primarily uploaded via syncResumePointsToTrakt when progress > scrobble threshold
+        log.debug("syncWatchedStatusToTrakt complete");
+        return Trakt.Status.SUCCESS;
+    }
+
+    // Overloaded method: sync watched status using pre-fetched data (for hybrid approach)
+    private Trakt.Status syncWatchedStatusToDb(java.util.List<HistoryEntry> traktWatched) {
+        log.debug("syncWatchedStatusToDb start (using pre-fetched data)");
+        final ContentResolver cr = getContentResolver();
+        
+        if (traktWatched != null && !traktWatched.isEmpty()) {
+            String whereR;
+            for (HistoryEntry video : traktWatched){
+                if (video.movie != null) { // it is a movie
+                    whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
+                            "SELECT video_id FROM movie where " + VideoStore.Video.VideoColumns.SCRAPER_M_ONLINE_ID + "= " + video.movie.ids.tmdb+")";
+                } else { // it is an episode
+                    whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
+                            "SELECT video_id FROM episode where " + VideoStore.Video.VideoColumns.SCRAPER_E_ONLINE_ID + "= " + video.episode.ids.tmdb+")";
+                }
+                Cursor c = cr.query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, SYNC_PROGRESS_PROJECTION, whereR, null, null);
+                if (c != null) {
+                    if (c.getCount() > 0) {
+                        final int idIdx = c.getColumnIndex(BaseColumns._ID);
+                        while (c.moveToNext()) {
+                            int id = c.getInt(idIdx);
+                            VideoDbInfo i = VideoDbInfo.fromId(cr, id);
+                            // i is the video from db and video is the video from trakt
+                            if (i != null) {
+                                long lastWatched = 1; // 1st second of 1970 by default
+                                OffsetDateTime lastWatchedOffsetDateTime = video.watched_at;
+                                String lastPlayedDateString = "1";
+                                if (lastWatchedOffsetDateTime != null) {
+                                    lastWatched = lastWatchedOffsetDateTime.toEpochSecond();
+                                    lastPlayedDateString = LocalDateTime.ofEpochSecond(lastWatched, 0, ZoneOffset.UTC).toString();
+                                }
+                                log.debug("syncWatchedStatusToDb: trakt->db {}{} db traktResume= {}%, traktSeen={}, resume={}, lastTimePlayed={}; trakt lastTimePlayed={}, lastWatched={}",
+                                        i.scraperTitle, i.isShow ? "-s" + i.scraperSeasonNr + "e" + i.scraperEpisodeNr : "", i.traktResume, i.traktSeen, i.resume, i.lastTimePlayed, lastWatched, lastPlayedDateString);
+                                // Conflict resolution: handle multi-device scenarios per specification
+                                ContentValues values = new ContentValues();
+                                if (i.lastTimePlayed < lastWatched) {
+                                    // Video was completed on another device more recently
+                                    // This implements Rule 3: Videos marked as watched on any device must disappear from "Recently Played" on all devices
+                                    log.debug("syncWatchedStatusToDb: trakt->db {} completed on another device, updating local state to hide from Recently Played", 
+                                              i.scraperTitle + (i.isShow ? "-s" + i.scraperSeasonNr + "e" + i.scraperEpisodeNr : ""));
+                                    values.put(VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED, lastWatched);
+                                    values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_SEEN, 1); 
+                                    values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_RESUME, 99); 
+                                    values.put(VideoStore.Video.VideoColumns.BOOKMARK, -2); // This will hide from "Recently Played"
+                                } else {
+                                    // Device was played more recently, just mark as seen on Trakt to prevent re-sync
+                                    // Keep existing resume and timestamp - don't override newer local data
+                                    log.debug("syncWatchedStatusToDb: trakt->db {} marked as watched on Trakt but played more recently on device, keeping device state", 
+                                              i.scraperTitle + (i.isShow ? "-s" + i.scraperSeasonNr + "e" + i.scraperEpisodeNr : ""));
+                                    values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_SEEN, 1); // Mark as seen to prevent re-sync
+                                    // Don't change ARCHOS_LAST_TIME_PLAYED, BOOKMARK, or ARCHOS_TRAKT_RESUME
+                                }
+                                cr.update(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, values, VideoStore.Video.VideoColumns._ID + " = '" + i.id + "'", null);
+                            }
+                        }
+                    }
+                    c.close();
+                } else {
+                    log.debug("syncWatchedStatusToDb: trakt->db cursor null!");
+                }
+            }
+        }
+        log.debug("syncWatchedStatusToDb complete (pre-fetched)");
+        
+        // Save sync time to prevent re-downloading same data
+        PreferenceManager.getDefaultSharedPreferences(TraktService.this).edit().putLong(PREFERENCE_TRAKT_LAST_TIME_SYNC_TO_DB_WATCHED, System.currentTimeMillis() / 1000L).apply();
+        
+        return Trakt.Status.SUCCESS;
+    }
+
+    // Original method: sync watched status by fetching data first (kept for backward compatibility)
+    private Trakt.Status syncWatchedStatusToDb(){
+        log.debug("syncWatchedStatusToDb start");
+        final ContentResolver cr = getContentResolver();
+        // get all playback status from trakt since last sync
+        Trakt.Result resultTrakt = mTrakt.getWatchedStatus();
+        java.util.List<HistoryEntry> videos = null;
+        // MOVIES here is either MOVIE or EPISODE
+        if (resultTrakt.status == Trakt.Status.SUCCESS &&
+                resultTrakt.objType == Trakt.Result.ObjectType.MOVIES) {
+            videos = (java.util.List<HistoryEntry>) resultTrakt.obj;
+        }
+        log.debug("syncWatchedStatusToDb: processing batch of " + ((videos !=null) ? videos.size() : "null"));
+        //from trakt to db
+        if (videos != null && !videos.isEmpty()) {
+            String whereR;
+            for (HistoryEntry video : videos){
+                if (video.movie != null) { // it is a movie
+                    whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
+                            "SELECT video_id FROM movie where " + VideoStore.Video.VideoColumns.SCRAPER_M_ONLINE_ID + "= " + video.movie.ids.tmdb+")";
+                } else { // it is an episode
+                    whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
+                            "SELECT video_id FROM episode where " + VideoStore.Video.VideoColumns.SCRAPER_E_ONLINE_ID + "= " + video.episode.ids.tmdb+")";
+                }
+                Cursor c = cr.query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, SYNC_PROGRESS_PROJECTION, whereR, null, null);
+                if (c != null) {
+                    if (c.getCount() > 0) {
+                        final int idIdx = c.getColumnIndex(BaseColumns._ID);
+                        while (c.moveToNext()) {
+                            int id = c.getInt(idIdx);
+                            VideoDbInfo i = VideoDbInfo.fromId(cr, id);
+                            // i is the video from db and video is the video from trakt
+                            if (i != null) {
+                                long lastWatched = 1; // 1st second of 1970 by default
+                                OffsetDateTime lastWatchedOffsetDateTime = video.watched_at;
+                                String lastPlayedDateString = "1";
+                                if (lastWatchedOffsetDateTime != null) {
+                                    lastWatched = lastWatchedOffsetDateTime.toEpochSecond();
+                                    lastPlayedDateString = LocalDateTime.ofEpochSecond(lastWatched, 0, ZoneOffset.UTC).toString();
+                                }
+                                log.debug("syncWatchedStatusToDb: trakt->db {}{} db traktResume= {}%, traktSeen={}, resume={}, lastTimePlayed={}; trakt lastTimePlayed={}, lastWatched={}",
+                                        i.scraperTitle, i.isShow ? "-s" + i.scraperSeasonNr + "e" + i.scraperEpisodeNr : "", i.traktResume, i.traktSeen, i.resume, i.lastTimePlayed, lastWatched, lastPlayedDateString);
+                                // Conflict resolution: handle multi-device scenarios per specification
+                                ContentValues values = new ContentValues();
+                                if (i.lastTimePlayed < lastWatched) {
+                                    // Video was completed on another device more recently
+                                    // This implements Rule 3: Videos marked as watched on any device must disappear from "Recently Played" on all devices
+                                    log.debug("syncWatchedStatusToDb: trakt->db {} completed on another device, updating local state to hide from Recently Played", 
+                                              i.scraperTitle + (i.isShow ? "-s" + i.scraperSeasonNr + "e" + i.scraperEpisodeNr : ""));
+                                    values.put(VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED, lastWatched);
+                                    values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_SEEN, 1); 
+                                    values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_RESUME, 99); 
+                                    values.put(VideoStore.Video.VideoColumns.BOOKMARK, -2); // This will hide from "Recently Played"
+                                } else {
+                                    // Device was played more recently, just mark as seen on Trakt to prevent re-sync
+                                    // Keep existing resume and timestamp - don't override newer local data
+                                    log.debug("syncWatchedStatusToDb: trakt->db {} marked as watched on Trakt but played more recently on device, keeping device state", 
+                                              i.scraperTitle + (i.isShow ? "-s" + i.scraperSeasonNr + "e" + i.scraperEpisodeNr : ""));
+                                    values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_SEEN, 1); // Mark as seen to prevent re-sync
+                                    // Don't change ARCHOS_LAST_TIME_PLAYED, BOOKMARK, or ARCHOS_TRAKT_RESUME
+                                }
+                                cr.update(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, values, VideoStore.Video.VideoColumns._ID + " = '" + i.id + "'", null);
+                            }
+                        }
+                    }
+                    c.close();
+                } else {
+                    log.debug("syncWatchedStatusToDb: trakt->db cursor null!");
+                }
+            }
+        }
+        log.debug("syncWatchedStatusToDb complete");
+        
+        // Save sync time to prevent re-downloading same data
+        PreferenceManager.getDefaultSharedPreferences(TraktService.this).edit().putLong(PREFERENCE_TRAKT_LAST_TIME_SYNC_TO_DB_WATCHED, System.currentTimeMillis() / 1000L).apply();
+        
+        return Trakt.Status.SUCCESS;
+    }
+
+    // Overloaded method: sync resume points using pre-fetched data (for hybrid approach)
+    private Trakt.Status syncResumePointsToDb(java.util.List<PlaybackResponse> traktVideos) {
+        log.debug("syncResumePointsToDb start (using pre-fetched data)");
+        final ContentResolver cr = getContentResolver();
+        
+        if (traktVideos != null && !traktVideos.isEmpty()) {
+            String whereR;
+            for (PlaybackResponse video : traktVideos){
+                if (video.movie != null) { // it is a movie
+                    whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
+                            "SELECT video_id FROM movie where " + VideoStore.Video.VideoColumns.SCRAPER_M_ONLINE_ID + "= " + video.movie.ids.tmdb+")";
+                } else { // it is an episode
+                    whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
+                            "SELECT video_id FROM episode where " + VideoStore.Video.VideoColumns.SCRAPER_E_ONLINE_ID + "= " + video.episode.ids.tmdb+")";
+                }
+                Cursor c = cr.query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, SYNC_PROGRESS_PROJECTION, whereR, null, null);
+                if (c != null) {
+                    if (c.getCount() > 0) {
+                        final int idIdx = c.getColumnIndex(BaseColumns._ID);
+                        while (c.moveToNext()) {
+                            int id = c.getInt(idIdx);
+                            VideoDbInfo i = VideoDbInfo.fromId(cr, id);
+                            // i is the video from db and video is the video from trakt
+                            if (i != null) {
+                                int newResumePercent = (int) Math.round(video.progress);
+                                int newResume = (int) (video.progress/100.0*i.duration);
+                                long lastWatched = 1; // 1st second of 1970 by default
+                                OffsetDateTime lastWatchedOffsetDateTime = video.paused_at;
+                                String lastPlayedDateString = "1";
+                                if (lastWatchedOffsetDateTime != null) {
+                                    lastWatched = lastWatchedOffsetDateTime.toEpochSecond();
+                                    lastPlayedDateString = LocalDateTime.ofEpochSecond(lastWatched, 0, ZoneOffset.UTC).toString();
+                                }
+                                log.debug("syncResumePointsToDb: trakt->db {}{} db traktResume={}%, traktSeen={}, resume={}, lastTimePlayed={}; trakt resume={}%, resume {}, lastTimePlayed {}, lastWatched={}",
+                                        i.scraperTitle, i.isShow ? "-s" + i.scraperSeasonNr + "e" + i.scraperEpisodeNr : "", i.traktResume, i.traktSeen, i.resume, i.lastTimePlayed, newResumePercent, newResume, lastWatched, lastPlayedDateString);
+                                boolean toConsider = false;
+                                ContentValues values = new ContentValues();
+                                if (i.lastTimePlayed < lastWatched && newResumePercent > 0) {
+                                    // Trakt has more recent progress update - this implements Rule 2: Cross-Device Resume Point Consistency
+                                    // Update ARCHOS_LAST_TIME_PLAYED so video appears in "Recently Played" with correct timestamp order
+                                    log.debug("syncResumePointsToDb: trakt->db updating timestamp to most recent playback time {}", lastPlayedDateString);
+                                    toConsider = true;
+                                    values.put(VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED, lastWatched);
+                                }
+                                if (Math.abs(i.traktResume) != newResumePercent && // trakt resume % != db resume %
+                                        i.traktSeen != 1 && // marked not watched on trakt (even if replayed)
+                                        newResume > i.resume && // trakt resume time > db resume time
+                                        i.resume != -2) { //not end of file (i.resume = -2 is file end)
+                                    // trakt resume time is ahead of device one: only update device one in this case
+                                    log.debug("syncResumePointsToDb: trakt->db trakt has the latest bookmark {}% for {}{}, use this one", newResumePercent, i.scraperTitle, i.isShow ? "-s" + i.scraperSeasonNr + "e" + i.scraperEpisodeNr : "");
+                                    toConsider = true;
+                                    values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_RESUME, newResumePercent);
+                                    values.put(VideoStore.Video.VideoColumns.BOOKMARK, newResume);
+                                    if (newResumePercent > Trakt.SCROBBLE_THRESHOLD) { // we are at end of file
+                                        log.debug("syncResumePointsToDb: trakt->db trakt {}{} has been completed on trakt, mark it viewed and hide from Recently Played", i.scraperTitle, i.isShow ? "-s" + i.scraperSeasonNr + "e" + i.scraperEpisodeNr : "");
+                                        values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_RESUME, 99); // resume%
+                                        values.put(VideoStore.Video.VideoColumns.BOOKMARK, -2); // file end - this hides from Recently Played
+                                        values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_SEEN, 1); // mark as seen to match watched status
+                                    }
+                                }
+                                if (toConsider) {
+                                    cr.update(VideoStore.Video.Media.EXTERNAL_CONTENT_URI,
+                                            values, VideoStore.Video.VideoColumns._ID+" = '"+i.id+"'", null);
+                                }
+                            }
+                        }
+                    }
+                    c.close();
+                } else {
+                    log.debug("syncResumePointsToDb: trakt->db cursor null!");
+                }
+            }
+        }
+        log.debug("syncResumePointsToDb complete (pre-fetched)");
+        
+        // save sync time
+        PreferenceManager.getDefaultSharedPreferences(TraktService.this).edit().putLong(PREFERENCE_TRAKT_LAST_TIME_SYNC_TO_DB_PROGRESS, System.currentTimeMillis() / 1000L).apply();
+        
+        return Trakt.Status.SUCCESS;
+    }
+
+    // Original method: sync resume points by fetching data first (kept for backward compatibility)
+    private Trakt.Status syncResumePointsToDb(){
+        log.debug("syncResumePointsToDb start");
+        final ContentResolver cr = getContentResolver();
+        // get all playback status from trakt since last sync
+        Trakt.Result resultTrakt = mTrakt.getPlaybackStatus();
+        java.util.List<PlaybackResponse> videos = null;
+        // MOVIES here is either MOVIE or EPISODE
+        if (resultTrakt.status == Trakt.Status.SUCCESS &&
+                resultTrakt.objType == Trakt.Result.ObjectType.MOVIES) {
+            videos = (java.util.List<PlaybackResponse>) resultTrakt.obj;
+        }
+        log.debug("syncResumePointsToDb: processing batch of " + ((videos !=null) ? videos.size() : "null"));
+        if (videos != null && !videos.isEmpty()) {
+            String whereR;
+            for (PlaybackResponse video : videos){
+                if (video.movie != null) { // it is a movie
+                    whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
+                            "SELECT video_id FROM movie where " + VideoStore.Video.VideoColumns.SCRAPER_M_ONLINE_ID + "= " + video.movie.ids.tmdb+")";
+                } else { // it is an episode
+                    whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
+                            "SELECT video_id FROM episode where " + VideoStore.Video.VideoColumns.SCRAPER_E_ONLINE_ID + "= " + video.episode.ids.tmdb+")";
+                }
+                Cursor c = cr.query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, SYNC_PROGRESS_PROJECTION, whereR, null, null);
+                if (c != null) {
+                    if (c.getCount() > 0) {
+                        final int idIdx = c.getColumnIndex(BaseColumns._ID);
+                        while (c.moveToNext()) {
+                            int id = c.getInt(idIdx);
+                            VideoDbInfo i = VideoDbInfo.fromId(cr, id);
+                            // i is the video from db and video is the video from trakt
+                            if (i != null) {
+                                int newResumePercent = (int) Math.round(video.progress);
+                                int newResume = (int) (video.progress/100.0*i.duration);
+                                long lastWatched = 1; // 1st second of 1970 by default
+                                OffsetDateTime lastWatchedOffsetDateTime = video.paused_at;
+                                String lastPlayedDateString = "1";
+                                if (lastWatchedOffsetDateTime != null) {
+                                    lastWatched = lastWatchedOffsetDateTime.toEpochSecond();
+                                    lastPlayedDateString = LocalDateTime.ofEpochSecond(lastWatched, 0, ZoneOffset.UTC).toString();
+                                }
+                                log.debug("syncResumePointsToDb: trakt->db {}{} db traktResume={}%, traktSeen={}, resume={}, lastTimePlayed={}; trakt resume={}%, resume {}, lastTimePlayed {}, lastWatched={}",
+                                        i.scraperTitle, i.isShow ? "-s" + i.scraperSeasonNr + "e" + i.scraperEpisodeNr : "", i.traktResume, i.traktSeen, i.resume, i.lastTimePlayed, newResumePercent, newResume, lastWatched, lastPlayedDateString);
+                                boolean toConsider = false;
+                                ContentValues values = new ContentValues();
+                                if (i.lastTimePlayed < lastWatched && newResumePercent > 0) {
+                                    // Trakt has more recent progress update - this implements Rule 2: Cross-Device Resume Point Consistency
+                                    // Update ARCHOS_LAST_TIME_PLAYED so video appears in "Recently Played" with correct timestamp order
+                                    log.debug("syncResumePointsToDb: trakt->db updating timestamp to most recent playback time {}", lastPlayedDateString);
+                                    toConsider = true;
+                                    values.put(VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED, lastWatched);
+                                }
+                                if (Math.abs(i.traktResume) != newResumePercent && // trakt resume % != db resume %
+                                        i.traktSeen != 1 && // marked not watched on trakt (even if replayed)
+                                        newResume > i.resume && // trakt resume time > db resume time
+                                        i.resume != -2) { //not end of file (i.resume = -2 is file end)
+                                    // trakt resume time is ahead of device one: only update device one in this case
+                                    log.debug("syncResumePointsToDb: trakt->db trakt has the latest bookmark {}% for {}{}, use this one", newResumePercent, i.scraperTitle, i.isShow ? "-s" + i.scraperSeasonNr + "e" + i.scraperEpisodeNr : "");
+                                    toConsider = true;
+                                    values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_RESUME, newResumePercent);
+                                    values.put(VideoStore.Video.VideoColumns.BOOKMARK, newResume);
+                                    if (newResumePercent > Trakt.SCROBBLE_THRESHOLD) { // we are at end of file
+                                        log.debug("syncResumePointsToDb: trakt->db trakt {}{} has been completed on trakt, mark it viewed and hide from Recently Played", i.scraperTitle, i.isShow ? "-s" + i.scraperSeasonNr + "e" + i.scraperEpisodeNr : "");
+                                        values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_RESUME, 99); // resume%
+                                        values.put(VideoStore.Video.VideoColumns.BOOKMARK, -2); // file end - this hides from Recently Played
+                                        values.put(VideoStore.Video.VideoColumns.ARCHOS_TRAKT_SEEN, 1); // mark as seen to match watched status
+                                    }
+                                }
+                                if (toConsider) {
+                                    cr.update(VideoStore.Video.Media.EXTERNAL_CONTENT_URI,
+                                            values, VideoStore.Video.VideoColumns._ID+" = '"+i.id+"'", null);
+                                }
+                            }
+                        }
+                    }
+                    c.close();
+                } else {
+                    log.debug("syncResumePointsToDb: trakt->db cursor null!");
+                }
+            }
+        }
+        log.debug("syncResumePointsToDb complete");
         return Trakt.Status.SUCCESS;
     }
 
@@ -864,6 +1356,35 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
         return (System.currentTimeMillis() / 1000) + TRAKT_SYNC_DELAY; // add a delay in case trakt date is earlier than us.
     }
 
+    // similar usage to simplify:
+    // VideoUtils.getLastTimeVideoPlayedUtc()
+    // VideoUtils.getLastTimeVideoScrapedUtc()
+    // Trakt.getLastTimeMovieWatched(mPreferences)
+    // Trakt.getLastTimeShowWatched(mPreferences)
+    // PREFERENCE_TRAKT_LAST_TIME_SYNC_LIST PREFERENCE_TRAKT_LAST_TIME_SYNC_TO_DB_LIST
+    // PREFERENCE_TRAKT_LAST_TIME_SYNC_PROGRESS PREFERENCE_TRAKT_LAST_TIME_SYNC_TO_DB_PROGRESS
+    // PREFERENCE_TRAKT_LAST_TIME_SYNC_WATCHED PREFERENCE_TRAKT_LAST_TIME_SYNC_TO_DB_WATCHED
+    //PreferenceManager.getDefaultSharedPreferences(TraktService.this).edit().putLong(PREFERENCE_TRAKT_LAST_ACTIVITY_TIME_CHECKED_UTC, System.currentTimeMillis() / 1000L).apply();
+
+    // Design we need to capture the following scenarios with device 1 and 2 with remote network shares A and B
+    // - D1 is out of date with NSA syncs on trakt, refresh NSA revealing new video files -> cannot resync on trakt since last sync because could miss resume points/watched status on the new video files -> need to sync last TRAKT_HISTORY backlog
+
+    // design rules:
+    // - only watched status is synced to trakt, not resume points because we do not want to show resume points from other devices
+    // - trakt resume point is proposed when playing a video and checked at this time (TO BE VERIFIED)
+    // - on multiple devices: e.g. one in the living room and one in the bedroom, if you have children binwatching cartoons you do not want to see the resume points of the other parent bedroom device. Conversely, you do not want to expose bedroom gore show to children in the living room. This means no sync of recently played resume points to fully sync devices.
+
+    // limitations:
+    // - cannot use VideoUtils.getLastTimeVideoScrapedUtc() since there could be multiple indexed folders and could have refreshed only one folder and the timestamp does not account for all indexed folders
+
+    // improvements:
+    // - VideoUtils.getLastTimeVideoScrapedUtc() < PREFERENCE_TRAKT_LAST_TIME_SYNC_TO_DB_PROGRESS -> can I do a delta time sync? -> answer is NO! (cf. limitations section)
+    // - lastActivity.all.toEpochSecond() < PREFERENCE_TRAKT_LAST_TIME_SYNC_WATCHED do nothing (already the case) -> already done in the code
+
+    // TODO verify resume checked when playing a video or network resume time (thus no sync on trakt)
+    // TODO check if I need to sync with delta time (if there is really a use case) cf. improvements
+    // TODO check the sync calls and getFlagsFromTraktLastActivity
+
     private int getFlagsFromTraktLastActivity(Trakt.Result result, long movieTime, long showTime) {
         int flag = 0;
         log.debug("getFlagsFromTraktLastActivity: getLastActivity input is flag={}, movieTime={}, showTime={}", flag, movieTime, showTime);
@@ -886,6 +1407,12 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
                 log.debug("getFlagsFromTraktLastActivity: new activity on progress on trakt side detected either for movie or show");
                 flag |= FLAG_SYNC_PROGRESS; // need to sync resume points
             }
+            // save last time in preference
+            PreferenceManager.getDefaultSharedPreferences(TraktService.this).edit().putLong(PREFERENCE_TRAKT_LAST_ACTIVITY, lastActivity.all.toEpochSecond()).apply();
+            PreferenceManager.getDefaultSharedPreferences(TraktService.this).edit().putLong(PREFERENCE_TRACK_LAST_ACTIVITY_MOVIE, lastActivity.movies.watched_at.toEpochSecond()).apply();
+            PreferenceManager.getDefaultSharedPreferences(TraktService.this).edit().putLong(PREFERENCE_TRAKT_LAST_ACTIVITY_EPISODE, lastActivity.episodes.watched_at.toEpochSecond()).apply();
+            //PreferenceManager.getDefaultSharedPreferences(TraktService.this).edit().putLong(PREFERENCE_TRAKT_LAST_ACTIVITY_LIST, lastActivity.lists.updated_at.toEpochSecond()).apply();
+            PreferenceManager.getDefaultSharedPreferences(TraktService.this).edit().putLong(PREFERENCE_TRAKT_LAST_ACTIVITY_TIME_CHECKED_UTC, System.currentTimeMillis() / 1000L).apply();
         }
         return flag;
     }
@@ -996,8 +1523,14 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
         // if we know we have something to sync from last activity
         final boolean syncShowsFromTrakt = (flag & FLAG_SYNC_SHOWS) != 0;
         final boolean syncMoviesFromTrakt = (flag & FLAG_SYNC_MOVIES) != 0;
-        if(Trakt.getSyncPlaybackPreference(mPreferences)){
-            syncPlaybackStatus();
+        
+        // HYBRID APPROACH: Use new method that preserves original logic with new architecture
+        if(Trakt.getSyncPlaybackPreference(mPreferences)) {
+            log.debug("sync: using hybrid playback sync (preserves original logic + new improvements)");
+            Trakt.Status hybridStatus = syncPlaybackStatusHybrid();
+            if (hybridStatus == Trakt.Status.ERROR_NETWORK) {
+                return handleSyncStatus(hybridStatus, flag, "syncPlaybackStatusHybrid");
+            }
         }
         syncLists();
 
@@ -1102,6 +1635,9 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
             }
         }
 
+        // save last sync time
+        PreferenceManager.getDefaultSharedPreferences(TraktService.this).edit().putLong(PREFERENCE_TRAKT_LAST_TIME_SYNC_TO_DB_LIST, System.currentTimeMillis() / 1000L).apply();
+
         //DB to trakt
         for (VideoStore.List.ListObj localList : originalLocalLists) {
             boolean isIn = false;
@@ -1132,6 +1668,9 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
                 }
             }
         }
+
+        // save last sync time
+        PreferenceManager.getDefaultSharedPreferences(TraktService.this).edit().putLong(PREFERENCE_TRAKT_LAST_TIME_SYNC_LIST, System.currentTimeMillis() / 1000L).apply();
 
         //Sync videos
         //reload local and distant
@@ -1468,6 +2007,11 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
     public static void onNewVideo(Context context) {
         if (Trakt.isTraktV2Enabled(context, PreferenceManager.getDefaultSharedPreferences(context)))
             new Client(context, null, false).sync(FLAG_SYNC_TO_DB_WATCHED|FLAG_SYNC_TO_TRAKT|FLAG_SYNC_MOVIES|FLAG_SYNC_SHOWS);
+    }
+
+    public static void syncAtStart(Context context) {
+        if (Trakt.isTraktV2Enabled(context, PreferenceManager.getDefaultSharedPreferences(context)))
+            new Client(context, null, false).sync(FLAG_SYNC_TO_DB_WATCHED|FLAG_SYNC_MOVIES|FLAG_SYNC_SHOWS|FLAG_SYNC_PROGRESS);
     }
 
     private void addListener() {

@@ -34,6 +34,7 @@ import com.uwetrottmann.trakt5.entities.AccessToken;
 import com.uwetrottmann.trakt5.entities.BaseMovie;
 import com.uwetrottmann.trakt5.entities.BaseShow;
 import com.uwetrottmann.trakt5.entities.EpisodeIds;
+import com.uwetrottmann.trakt5.entities.HistoryEntry;
 import com.uwetrottmann.trakt5.entities.LastActivities;
 import com.uwetrottmann.trakt5.entities.ListEntry;
 import com.uwetrottmann.trakt5.entities.MovieIds;
@@ -568,18 +569,68 @@ public class Trakt {
         }
     }
 
+    // get playback status from trakt: this covers only videos with progress/resume not watched!
     public Result getPlaybackStatus(int trial){
-        // for the moment trakt-java API does not support getting history between two dates
-        //Long epochUtcSeconds = System.currentTimeMillis() / 1000L;
-        //Long lastTraktSyncUtcEpochSeconds = PreferenceManager.getDefaultSharedPreferences(mContext).getLong("trakt_last_sync", 1);
-        List<PlaybackResponse> list = exec(mTraktV2.sync().getPlayback(PLAYBACK_HISTORY_SIZE));
-        if(list == null)
+        // Use incremental sync based on last progress sync time for better performance
+        Long lastSyncTime = PreferenceManager.getDefaultSharedPreferences(mContext)
+            .getLong("trakt_last_time_sync_to_db_progress", 1);
+        OffsetDateTime lastSync = OffsetDateTime.ofInstant(Instant.ofEpochSecond(lastSyncTime), ZoneOffset.UTC);
+        
+        log.debug("getPlaybackStatus: getting playback history since {} UTC", lastSync);
+        
+        // Use incremental sync if available in your trakt-java fork, otherwise fallback to full history
+        List<PlaybackResponse> list;
+        try {
+            // Try incremental sync first (if your fork supports it)
+            list = exec(mTraktV2.sync().getPlaybackSince(lastSync));
+        } catch (Exception e) {
+            log.debug("getPlaybackStatus: incremental sync not available, falling back to full history");
+            list = exec(mTraktV2.sync().getPlayback(PLAYBACK_HISTORY_SIZE));
+        }
+        
+        if(list == null) {
+            log.debug("getPlaybackStatus: no playback history");
             return handleRet(null, new Exception(), null, ObjectType.NULL);
-        return handleRet(null, null, list, ObjectType.MOVIES);
+        } else {
+            log.debug("getPlaybackStatus: playback history size is {}", list.size());
+            return handleRet(null, null, list, ObjectType.MOVIES);
+        }
+    }
+
+    // get playback status from trakt: this covers only fully watched videos!
+    public Result getWatchedStatus(int trial){
+        // Use incremental sync based on last watched status sync time for better performance
+        Long lastSyncTime = PreferenceManager.getDefaultSharedPreferences(mContext)
+            .getLong("trakt_last_time_sync_to_db_watched", 1);
+        OffsetDateTime lastSync = OffsetDateTime.ofInstant(Instant.ofEpochSecond(lastSyncTime), ZoneOffset.UTC);
+        
+        log.debug("getWatchedStatus: getting watched history since {} UTC", lastSync);
+        
+        // Use incremental sync if available in your trakt-java fork, otherwise fallback to full history
+        List<HistoryEntry> list;
+        try {
+            // Try incremental sync first (if your fork supports it)
+            list = exec(mTraktV2.sync().getWatchedHistorySince(lastSync));
+        } catch (Exception e) {
+            log.debug("getWatchedStatus: incremental sync not available, falling back to full history");
+            list = exec(mTraktV2.sync().getWatchedHistory(PLAYBACK_HISTORY_SIZE));
+        }
+        
+        if(list == null) {
+            log.debug("getWatchedStatus: no watched history");
+            return handleRet(null, new Exception(), null, ObjectType.NULL);
+        } else {
+            log.debug("getWatchedStatus: watched history size is {}", list.size());
+            return handleRet(null, null, list, ObjectType.MOVIES);
+        }
     }
 
     public Result getPlaybackStatus() {
         return getPlaybackStatus(0);
+    }
+
+    public Result getWatchedStatus() {
+        return getWatchedStatus(0);
     }
 
     public Result getAllMovies(String library, boolean sync) {

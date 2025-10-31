@@ -131,7 +131,8 @@ dependencies {
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.5.1'
     implementation 'org.json:json:20250517'
     // see https://github.com/UweTrottmann/trakt-java?tab=readme-ov-file for threetenabp instead of threetenbp
-    implementation ('com.uwetrottmann.trakt5:trakt-java:6.16.0') {
+    //implementation ('com.uwetrottmann.trakt5:trakt-java:6.16.0') {
+    implementation ('com.github.nova-video-player:trakt-java:0.0.1') {
         exclude group: 'org.threeten', module: 'threetenbp'
     }
     implementation 'com.jakewharton.threetenabp:threetenabp:1.4.9'

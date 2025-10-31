@@ -72,6 +72,8 @@ public class AutoScrapeService extends Service {
     private static final int PARAM_MOVIES = 4;
     private static final Logger log = LoggerFactory.getLogger(AutoScrapeService.class);
 
+    public static final String PREFERENCE_LAST_TIME_VIDEO_SCRAPED_UTC = "last_time_video_scraped_utc";
+
     // window size used to split queries to db
     private final static int WINDOW_SIZE = 2000;
 
@@ -787,7 +789,14 @@ public class AutoScrapeService extends Service {
                             WrapperChannelManager.refreshChannels(AutoScrapeService.this);
                         }
                     });
-                    if (totalNumberOfFilesScraped > 0) TraktService.onNewVideo(AutoScrapeService.this); // should be done only at the end to not resync in loop
+                    if (totalNumberOfFilesScraped > 0) {
+                        // Save the last scraped timestamp in UTC seconds
+                        long utcSeconds = System.currentTimeMillis() / 1000L;
+                        PreferenceManager.getDefaultSharedPreferences(AutoScrapeService.this)
+                        .edit()
+                        .putLong(PREFERENCE_LAST_TIME_VIDEO_SCRAPED_UTC, utcSeconds).apply();
+                        TraktService.onNewVideo(AutoScrapeService.this); // should be done only at the end to not resync in loop
+                    }
                 }
             };
             mThread.start();
