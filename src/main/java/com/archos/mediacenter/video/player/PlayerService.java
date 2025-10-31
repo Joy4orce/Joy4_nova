@@ -83,6 +83,7 @@ import static com.archos.mediacenter.video.browser.subtitlesmanager.ISO639codes.
 import static com.archos.mediacenter.video.browser.subtitlesmanager.SubtitleManager.getSubLanguageFromSubPathAndVideoPath;
 import static com.archos.mediacenter.video.utils.VideoPreferencesCommon.KEY_PLAYBACK_SPEED;
 import static com.archos.mediascraper.StringUtils.stringContainsForced;
+import com.archos.mediacenter.video.utils.VideoUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -172,6 +173,8 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
     private static final String KEY_AUDIO_TRACK_FAVORITE_LANGUAGE = "favAudioLang";
     private static final String VIDEO_PLAYER_DEMO_MODE_EXTRA = "demo_mode";
     private boolean mForceSingleRepeatMode;
+
+    public static final String PREFERENCE_LAST_TIME_VIDEO_PLAYED_UTC = "last_time_video_played_utc";
 
     private boolean mNetworkBookmarksEnabled;
     private int mLastPosition = -1;
@@ -780,8 +783,19 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
                     int duration = mPlayer.getDuration();
                     if (duration > 0)
                         mVideoInfo.duration = duration;
-                    mVideoInfo.lastTimePlayed = Long.valueOf(System.currentTimeMillis() / 1000L);
-                    log.info("saveVideoStateIfReady: save bookmark at " + mVideoInfo.lastTimePlayed + " for videoId " + mVideoInfo.id);
+                    long utcSeconds = System.currentTimeMillis() / 1000L;
+                    // Save UTC seconds only if the video has been scraped (has media information)
+                    if (mVideoInfo.scraperTitle != null && !mVideoInfo.scraperTitle.isEmpty()) {
+                        PreferenceManager.getDefaultSharedPreferences(this)
+                                .edit()
+                                .putLong(PREFERENCE_LAST_TIME_VIDEO_PLAYED_UTC, utcSeconds)
+                                .apply();
+                        log.debug("saveVideoStateIfReady: saved last video played UTC timestamp {}", utcSeconds);
+                    }
+                    // saving seconds since the Unix epoch (January 1, 1970, 00:00:00 UTC) and this value is in UTC
+                    // traktResume is set to -resume unless synced
+                    mVideoInfo.lastTimePlayed = utcSeconds;
+                    log.info("saveVideoStateIfReady: save bookmark at {} for videoId {}", mVideoInfo.lastTimePlayed, mVideoInfo.id);
                     mIndexHelper.writeVideoInfo(mVideoInfo, mNetworkBookmarksEnabled);
                     // disable periodic trakt save this should be done with pauseTrakt() anyway
                     //stopTrakt(); //this writes mVideoInfo.traktResume
@@ -875,6 +889,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         Trakt
      */
 
+    // TODO MARC not sure we need to do this: only on pause
     private final Runnable mTraktWatchingRunnable = new Runnable() {
         @Override
         public void run() {

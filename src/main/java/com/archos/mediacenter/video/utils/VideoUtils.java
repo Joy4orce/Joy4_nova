@@ -16,14 +16,21 @@ package com.archos.mediacenter.video.utils;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.preference.PreferenceManager;
+
 import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediacenter.utils.videodb.VideoDbInfo;
 import com.archos.mediacenter.video.R;
+import com.archos.mediacenter.video.player.PlayerService;
+import com.archos.mediaprovider.video.VideoStore;
+import com.archos.mediascraper.AutoScrapeService;
 
 import java.io.File;
 import java.util.Arrays;
@@ -269,6 +276,84 @@ public class VideoUtils {
             return R.drawable.filetype_new_folder;
         } else
             return R.drawable.filetype_new_folder;
+    }
+
+    public static long getLastTimeVideoPlayedUtcFromVideoStore(Context context) {
+        long lastPlayedUtc = 0;
+        Cursor cursor = null;
+        try {
+            String[] projection = {VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED};
+            String selection = VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED + " > 0";
+            String sortOrder = VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED + " DESC LIMIT 1";
+
+            cursor = context.getContentResolver().query(
+                    VideoStore.Video.Media.EXTERNAL_CONTENT_URI,
+                    projection,
+                    selection,
+                    null,
+                    sortOrder
+            );
+
+            if (cursor != null && cursor.moveToFirst()) {
+                lastPlayedUtc = cursor.getLong(cursor.getColumnIndexOrThrow(VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED));
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return lastPlayedUtc;
+    }
+
+    public static long getLastTimeVideoScrapedUtcFromVideoStore(Context context) {
+        long lastScrapedUtc = 0;
+        Cursor cursor = null;
+        try {
+            String[] projection = {VideoStore.MediaColumns.DATE_ADDED};
+            String selection = VideoStore.MediaColumns.DATE_ADDED + " > 0 AND " + VideoStore.Video.VideoColumns.SCRAPER_TITLE + " IS NOT NULL";
+            String sortOrder = VideoStore.MediaColumns.DATE_ADDED + " DESC LIMIT 1";
+
+            cursor = context.getContentResolver().query(
+                    VideoStore.Video.Media.EXTERNAL_CONTENT_URI,
+                    projection,
+                    selection,
+                    null,
+                    sortOrder
+            );
+
+            if (cursor != null && cursor.moveToFirst()) {
+                lastScrapedUtc = cursor.getLong(cursor.getColumnIndexOrThrow(VideoStore.MediaColumns.DATE_ADDED));
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return lastScrapedUtc;
+    }
+
+    public static long getLastTimeVideoPlayedUtc(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        long lastPlayedUtc = preferences.getLong(PlayerService.PREFERENCE_LAST_TIME_VIDEO_PLAYED_UTC, 0L);
+        if (lastPlayedUtc == 0L) {
+            lastPlayedUtc = getLastTimeVideoPlayedUtcFromVideoStore(context);
+            if (lastPlayedUtc > 0L) {
+                preferences.edit().putLong(PlayerService.PREFERENCE_LAST_TIME_VIDEO_PLAYED_UTC, lastPlayedUtc).apply();
+            }
+        }
+        return lastPlayedUtc;
+    }
+
+    public static long getLastTimeVideoScrapedUtc(Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        long lastScrapedUtc = preferences.getLong(AutoScrapeService.PREFERENCE_LAST_TIME_VIDEO_SCRAPED_UTC, 0L); // Default to 0 if not found
+        if (lastScrapedUtc == 0L) {
+            lastScrapedUtc = getLastTimeVideoScrapedUtcFromVideoStore(context);
+            if (lastScrapedUtc > 0L) {
+                preferences.edit().putLong(AutoScrapeService.PREFERENCE_LAST_TIME_VIDEO_SCRAPED_UTC, lastScrapedUtc).apply();
+            }
+        }
+        return lastScrapedUtc;
     }
 
 }
