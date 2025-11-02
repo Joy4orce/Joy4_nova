@@ -178,6 +178,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
 
     private boolean mNetworkBookmarksEnabled;
     private int mLastPosition = -1;
+    private int mExplicitPosition = -1; // Position passed from intent (e.g., from floating player)
     private boolean mIsChangingSurface;
     private int mResume;
     private boolean firstTimeSubCalled = true;
@@ -456,6 +457,22 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         mPlayMode = mPreferences.getInt(KEY_PLAY_MODE, PLAYMODE_SINGLE);
         mResume = intent.getIntExtra(RESUME, RESUME_NO);
         log.debug("PlayerService.onStart: read mResume={} from intent", mResume);
+
+        // Reset explicit position at the start
+        mExplicitPosition = -1;
+
+        // Check if floating player is passing position when switching between players
+        if (intent.hasExtra("floating_player_position")) {
+            mExplicitPosition = intent.getIntExtra("floating_player_position", -1);
+            log.debug("PlayerService.onStart: Found floating_player_position={}", mExplicitPosition);
+        } else if (intent.hasExtra("position")) {
+            int position = intent.getIntExtra("position", -1);
+            if (position > 0) {
+                mExplicitPosition = position;
+                log.debug("PlayerService.onStart: Found position extra={}", mExplicitPosition);
+            }
+        }
+
         mUri = intent.getData();
         mTorrentURL = mIntent.getStringExtra(PlayerActivity.KEY_TORRENT_URL);
         if(mIntent.hasExtra(KEY_ORIGINAL_TORRENT_URL)){
@@ -611,6 +628,13 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
 
     private int getLastPosition(VideoDbInfo videoInfo, int resume) {
         int lastPosition = 0;
+
+        // If an explicit position was passed from intent (e.g., from floating player), use it
+        if (mExplicitPosition > 0) {
+            log.debug("getLastPosition: Using explicit position={}", mExplicitPosition);
+            return mExplicitPosition;
+        }
+
         if (resume != RESUME_NO && (videoInfo.lastTimePlayed > 0 || resume == RESUME_FROM_REMOTE_POS)) {
             if (mResume == RESUME_FROM_LAST_POS || mResume == RESUME_FROM_REMOTE_POS || mResume ==  RESUME_FROM_LOCAL_POS) {
                 lastPosition = videoInfo.resume;

@@ -27,7 +27,12 @@ import android.view.MenuItem;
 
 import com.archos.mediacenter.utils.videodb.IndexHelper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class FloatingPlayerActivity extends FragmentActivity {
+
+    private static final Logger log = LoggerFactory.getLogger(FloatingPlayerActivity.class);
 
     private ServiceConnection mPlayerServiceConnection = new ServiceConnection() {
         @Override
@@ -45,6 +50,7 @@ public class FloatingPlayerActivity extends FragmentActivity {
 
         }
     };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,10 +72,7 @@ public class FloatingPlayerActivity extends FragmentActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
-
-
         return super.onOptionsItemSelected(item);
     }
 }

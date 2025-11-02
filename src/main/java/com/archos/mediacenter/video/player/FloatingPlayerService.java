@@ -28,13 +28,13 @@ import android.graphics.Point;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import androidx.preference.PreferenceManager;
 import androidx.annotation.Nullable;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
@@ -56,10 +56,15 @@ import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.utils.VideoMetadata;
 import com.archos.medialib.Subtitle;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Created by alexandre on 27/08/15.
  */
 public class FloatingPlayerService extends Service implements PlayerService.PlayerFrontend {
+
+    private static final Logger log = LoggerFactory.getLogger(FloatingPlayerService.class);
 
     private static final int MIN_WIDTH = 200; //in dip
     private static final int STARTING_WIDTH = 300; //in dip
@@ -88,18 +93,13 @@ public class FloatingPlayerService extends Service implements PlayerService.Play
     private RepeatingImageButton mVolumeDownButton;
     private RepeatingImageButton mVolumeUpButton;
 
-
-
-
     private ServiceConnection mPlayerServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-
         }
     };
     private ImageView mHideButton;
@@ -114,6 +114,7 @@ public class FloatingPlayerService extends Service implements PlayerService.Play
     private ImageView mDiscreteButton;
     private ImageView mNormalButton;
     private WindowManager.LayoutParams mNormalButtonLayoutParams;
+    private Intent mStartIntent;
 
     public void onCreate() {
         super.onCreate();
@@ -169,8 +170,10 @@ public class FloatingPlayerService extends Service implements PlayerService.Play
     }
     @Override
     public int onStartCommand(Intent intent,int flags, int startID){
-        if(intent != null && !"DISPLAY_FLOATING_PLAYER".equals(intent.getAction()))
+        if(intent != null && !"DISPLAY_FLOATING_PLAYER".equals(intent.getAction())) {
+            mStartIntent = intent;
             addFloatingView();
+        }
         return super.onStartCommand(intent,flags, startID);
     }
     public void onDestroy(){
@@ -211,9 +214,6 @@ public class FloatingPlayerService extends Service implements PlayerService.Play
         mVolumeLevel.incrementProgressBy(amount);
         setMusicVolume(mVolumeLevel.getProgress());
     }
-
-
-
 
     @Nullable
     public void addFloatingView() {
@@ -266,6 +266,7 @@ public class FloatingPlayerService extends Service implements PlayerService.Play
             mFullscreenButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                   log.debug("Fullscreen button clicked");
                    startPlayerActivity();
                 }
             });
@@ -453,18 +454,39 @@ public class FloatingPlayerService extends Service implements PlayerService.Play
             Player.sPlayer.setEffect(VideoEffect.EFFECT_STEREO_SPLIT, VideoEffect.NORMAL_2D_MODE);
             mSubtitleManager = new SubtitleManager(this, (ViewGroup) mFloatingPlayerRootView.findViewById(R.id.subtitle_root_view), mWindowManager, true);
             updateSizes(mParamsF);
-            PlayerService.sPlayerService.onStart(PlayerService.sPlayerService.getLastIntent());
+
+            // Get the last intent which has all video data, then add the position extra
+            Intent intentToUse = PlayerService.sPlayerService.getLastIntent();
+            if (mStartIntent != null && mStartIntent.hasExtra("floating_player_position")) {
+                intentToUse.putExtra("floating_player_position", mStartIntent.getIntExtra("floating_player_position", -1));
+                log.debug("addFloatingView: Added floating_player_position to intent");
+            }
+            PlayerService.sPlayerService.onStart(intentToUse);
 
         }
 
     }
 
     private void startPlayerActivity() {
+        Intent lastIntent = PlayerService.sPlayerService.getLastIntent();
         Intent intent = new Intent(FloatingPlayerService.this, PlayerActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setData(lastIntent.getData());
+
+        // Copy all extras from original intent EXCEPT RESUME
+        if (lastIntent.getExtras() != null) {
+            Bundle newExtras = new Bundle(lastIntent.getExtras());
+            newExtras.remove(PlayerActivity.RESUME);
+            intent.putExtras(newExtras);
+        }
+
         intent.putExtra(PlayerActivity.LAUNCH_FROM_FLOATING_PLAYER, true);
-        intent.putExtras(PlayerService.sPlayerService.getLastIntent());
-        intent.setData(PlayerService.sPlayerService.getLastIntent().getData());
+
+        // Pass current playback position from floating player
+        if (Player.sPlayer != null) {
+            int currentPos = Player.sPlayer.getCurrentPosition();
+            intent.putExtra("position", currentPos);
+        }
         startActivity(intent);
     }
 
@@ -549,9 +571,9 @@ public class FloatingPlayerService extends Service implements PlayerService.Play
                         ((TextView)torrent_status).setText(toDisplay);
 
                     } catch(NumberFormatException e) {
-                        Log.d("AVP", "Display update", e);
+                        log.warn("Display update", e);
                     } catch(java.lang.ArrayIndexOutOfBoundsException e) {
-                        Log.d("AVP", "Display update, out of bound", e);
+                        log.warn("Display update, out of bound", e);
                     }
                     break;
             }

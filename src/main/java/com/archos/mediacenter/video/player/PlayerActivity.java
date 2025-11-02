@@ -847,20 +847,25 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     }
 
     private void postOnPlayerServiceBind() {
+        log.debug("postOnPlayerServiceBind: START, mResumeFromLast={}", mResumeFromLast);
         if (!mResumeFromLast && getSharedPreferences("player", 0).getInt("lastintent", 0) == getIntent().hashCode()) {
             /* resume video if last intent == current intent
              * (when resumed from history for example)
              */
             mResumeFromLast = true;
+            log.debug("postOnPlayerServiceBind: Set mResumeFromLast=true due to lastintent match");
         }
         final String action = getIntent().getAction();
         if (mResumeFromLast || (action != null && action.equals(ArchosIntents.ARCHOS_RESUME_VIDEOPLAYER))) {
             mResume = RESUME_FROM_LAST_POS;
             getIntent().putExtra(RESUME, mResume);
+            log.debug("postOnPlayerServiceBind: Set mResume=RESUME_FROM_LAST_POS due to mResumeFromLast or ARCHOS_RESUME action");
         } else {
             mResume = getIntent().getIntExtra(RESUME, RESUME_NO);
+            log.debug("postOnPlayerServiceBind: Retrieved mResume from intent, value={}", mResume);
             // Check for external resume position if no other resume mode is set
             if (mResume == RESUME_NO) {
+                log.debug("postOnPlayerServiceBind: mResume==RESUME_NO, checking for position extras");
                 log.debug("postOnPlayerServiceBind: resume from extra");
                 // Debug: dump all intent extras
                 if (log.isTraceEnabled()) {
@@ -882,6 +887,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                     } else if (positionExtra instanceof Long) {
                         mRemotePosition = ((Long) positionExtra).intValue();
                     }
+                    log.debug("postOnPlayerServiceBind: found startfrom extra, mRemotePosition={}", mRemotePosition);
                 } else if (getIntent().hasExtra("position")) {
                     Object positionExtra = getIntent().getExtras().get("position");
                     if (positionExtra instanceof Integer) {
@@ -889,6 +895,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                     } else if (positionExtra instanceof Long) {
                         mRemotePosition = ((Long) positionExtra).intValue();
                     }
+                    log.debug("postOnPlayerServiceBind: found position extra, mRemotePosition={}", mRemotePosition);
                 } else if (getIntent().hasExtra("resume_position")) {
                     Object positionExtra = getIntent().getExtras().get("resume_position");
                     if (positionExtra instanceof Integer) {
@@ -896,6 +903,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                     } else if (positionExtra instanceof Long) {
                         mRemotePosition = ((Long) positionExtra).intValue();
                     }
+                    log.debug("postOnPlayerServiceBind: found resume_position extra, mRemotePosition={}", mRemotePosition);
                 }
                 if (mRemotePosition > 0) {
                     mResume = RESUME_FROM_REMOTE_POS;
@@ -904,8 +912,12 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                     // Set the remote position in VideoDbInfo for playback
                     if (mVideoInfo != null) {
                         mVideoInfo.resume = mRemotePosition;
+                        log.debug("postOnPlayerServiceBind: Set mVideoInfo.resume={}", mRemotePosition);
                     } else {
+                        log.debug("postOnPlayerServiceBind: mVideoInfo is null, cannot set resume position yet");
                     }
+                } else {
+                    log.debug("postOnPlayerServiceBind: mRemotePosition not > 0, value={}", mRemotePosition);
                 }
             }
         }
@@ -2221,8 +2233,15 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 mLaunchFloatingPlayer = true;
                 if(Build.VERSION.SDK_INT>=  Build.VERSION_CODES.M&&!Settings.canDrawOverlays(this))
                     displayFloatingWindowPermissionDialog();
-                else
-                    startService(new Intent(this, FloatingPlayerService.class));
+                else {
+                    Intent floatingIntent = new Intent(this, FloatingPlayerService.class);
+                    // Pass current playback position to floating player
+                    if (mPlayer != null) {
+                        int currentPos = mPlayer.getCurrentPosition();
+                        floatingIntent.putExtra("floating_player_position", currentPos);
+                    }
+                    startService(floatingIntent);
+                }
                 //finish();
                 return true;
             case MENU_INFO_ID:
@@ -4065,8 +4084,13 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
      * Apply remote position to VideoDbInfo if we're in remote resume mode
      */
     private void applyRemotePositionIfNeeded() {
+        log.debug("applyRemotePositionIfNeeded: mResume={}, mRemotePosition={}, mVideoInfo={}", mResume, mRemotePosition, mVideoInfo != null ? "not null" : "null");
         if (mResume == RESUME_FROM_REMOTE_POS && mRemotePosition > 0 && mVideoInfo != null) {
             mVideoInfo.resume = mRemotePosition;
+            log.debug("applyRemotePositionIfNeeded: Applied mRemotePosition={} to mVideoInfo.resume", mRemotePosition);
+        } else {
+            log.debug("applyRemotePositionIfNeeded: Conditions not met. mResume==RESUME_FROM_REMOTE_POS? {}, mRemotePosition>0? {}, mVideoInfo!=null? {}",
+                    mResume == RESUME_FROM_REMOTE_POS, mRemotePosition > 0, mVideoInfo != null);
         }
     }
 }
