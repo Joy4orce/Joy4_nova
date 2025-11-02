@@ -2650,58 +2650,12 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 mPlayerController.hide();
                 break;
             case DIALOG_CODEC_NOT_SUPPORTED:
-                String msg;
-                int storeStringId;
-                int notSupportedId;
-
-                // First check if there are already codecs needing an update
-                mDialog = getPluginNeedUpdateDialog();
-                // If no update needed display the regular codec upselling dialog
-                if (mDialog == null) {
-                    notSupportedId = mErrorCode == IMediaPlayer.MEDIA_ERROR_VE_VIDEO_NOT_SUPPORTED ?
-                            R.string.videocodec_not_supported :
-                            R.string.audiocodec_not_supported;
-
-                    msg = mResources.getString(notSupportedId, mErrorMsg) + "\n";
-                    msg += mResources.getString(R.string.player_plugin_purchase_google_play_msg);
-                    storeStringId = R.string.player_plugin_purchase_google_play_button;
-                    final OnClickListener onCancelButtonClick = new OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (mErrorCode == IMediaPlayer.MEDIA_ERROR_VE_VIDEO_NOT_SUPPORTED)
-                                finish();
-                            else
-                                dialog.cancel();
-                        }
-                    };
-                    final int storeStringIdFinal = storeStringId;
-                    final OnClickListener onPositiveButtonClick = new OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                            try {
-                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://search?q=archos+video+plugins")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-                            } catch (ActivityNotFoundException e) {}
-                        }
-                    };
-                    mDialog = new AlertDialog.Builder(this)
-                            .setTitle(mErrorCode == IMediaPlayer.MEDIA_ERROR_VE_VIDEO_NOT_SUPPORTED ?
-                                    R.string.player_err_cantplayvideo : R.string.player_err_cantplaysound)
-                            .setMessage(msg)
-                            .setNegativeButton(android.R.string.cancel, onCancelButtonClick)
-                            .setPositiveButton(storeStringId, onPositiveButtonClick)
-                            .setNeutralButton(R.string.learn_more, new OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    new AlertDialog.Builder(PlayerActivity.this)
-                                            .setTitle(R.string.learn_more)
-                                            .setMessage(R.string.learn_more_about_codecs)
-                                            .setNegativeButton(android.R.string.cancel, onCancelButtonClick)
-                                            .setPositiveButton(storeStringIdFinal, onPositiveButtonClick)
-                                            .show();
-
-                                }
-                            })
-                            .setCancelable(true)
-                            .create();
+                // Show toast instead of plugin download dialog
+                int toastStringId = mErrorCode == IMediaPlayer.MEDIA_ERROR_VE_VIDEO_NOT_SUPPORTED ?
+                        R.string.player_err_cantplayvideo : R.string.player_err_cantplaysound;
+                Toast.makeText(this, toastStringId, Toast.LENGTH_SHORT).show();
+                if (mErrorCode == IMediaPlayer.MEDIA_ERROR_VE_VIDEO_NOT_SUPPORTED) {
+                    finish();
                 }
                 break;
             case DIALOG_WRONG_DEVICE_KINDLE:
