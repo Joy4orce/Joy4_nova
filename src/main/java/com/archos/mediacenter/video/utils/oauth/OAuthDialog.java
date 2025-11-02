@@ -28,6 +28,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.RequiresApi;
@@ -35,9 +36,11 @@ import androidx.annotation.RequiresApi;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.CookieManager;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
@@ -116,6 +119,10 @@ public class OAuthDialog extends Dialog {
 		mWebView = (NovaWebView) findViewById(R.id.webview);
 		// Essential JavaScript for OAuth flow
 		mWebView.getSettings().setJavaScriptEnabled(true);
+		// Allow mixed content (for OAuth callback URL handling)
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			mWebView.getSettings().setMixedContentMode(android.webkit.WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+		}
 		// Enhanced security settings
 		mWebView.getSettings().setDomStorageEnabled(false);
 		mWebView.getSettings().setDatabaseEnabled(false);
@@ -125,17 +132,30 @@ public class OAuthDialog extends Dialog {
 		mWebView.getSettings().setAllowContentAccess(false);
 		mWebView.getSettings().setAllowFileAccessFromFileURLs(false);
 		mWebView.getSettings().setAllowUniversalAccessFromFileURLs(false);
+		// Set user agent to avoid being served a mobile-optimized/minimal version
+		String userAgent = "Mozilla/5.0 (Linux; Android " + Build.VERSION.RELEASE + "; " +
+				Build.BRAND + " " + Build.MODEL + ") AppleWebKit/537.36";
+		mWebView.getSettings().setUserAgentString(userAgent);
+		log.debug("onCreate: Using user agent: {}", userAgent);
 		// TV-friendly display settings
 		//mWebView.setVerticalScrollBarEnabled(false);
 		//mWebView.setHorizontalScrollBarEnabled(false);
-		// resize to fit content
-		mWebView.getSettings().setUseWideViewPort(true);
-		mWebView.getSettings().setLoadWithOverviewMode(true);
+		// Use narrow columns for proper mobile/TV viewport (don't use wide viewport which renders as desktop)
+		mWebView.getSettings().setUseWideViewPort(false);
+		mWebView.getSettings().setLoadWithOverviewMode(false);
+		// Scale content smaller for TV viewing
+		mWebView.getSettings().setDefaultZoom(android.webkit.WebSettings.ZoomDensity.FAR);
 		mWebView.setWebViewClient(new OAuthWebViewClient());
 		mWebView.setWebChromeClient(new WebChromeClient());
-		mWebView.loadUrl(mReq.getLocationUri());
 
-		CookieManager.getInstance().removeAllCookies(null);
+		// Enable cookies for OAuth flow
+		CookieManager cookieManager = CookieManager.getInstance();
+		cookieManager.setAcceptCookie(true);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+			cookieManager.setAcceptThirdPartyCookies(mWebView, true);
+		}
+
+		mWebView.loadUrl(mReq.getLocationUri());
 
 	}
 
@@ -234,8 +254,13 @@ public class OAuthDialog extends Dialog {
         	if(mListener!=null)
         		mListener.onFinished(mdata);
             OAuthDialog.this.dismiss();
-			log.warn("onReceivedError: error code={}, meaning {}", errorCode, description);
-			Toast.makeText(getContext(), "No Internet or " + description , Toast.LENGTH_LONG).show();
+			log.warn("onReceivedError: error code={}, description={}, failingUrl={}", errorCode, description, failingUrl);
+			// ERR_FAILED (-1) often indicates SSL certificate issues or DNS resolution failures
+			String errorMsg = "No Internet";
+			if (errorCode == -1) {
+				errorMsg = "Cannot reach Trakt (network error). Check internet, DNS, or proxy settings";
+			}
+			Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
 		}
 
         // for Android 23+
@@ -248,8 +273,51 @@ public class OAuthDialog extends Dialog {
 			if(mListener!=null)
                 mListener.onFinished(mdata);
 			OAuthDialog.this.dismiss();
-			log.warn("onReceivedError: error code is {}, description {}", error.getErrorCode(), error.getDescription());
-			Toast.makeText(getContext(), "No Internet or code " + + error.getErrorCode() + ", description " + error.getDescription() , Toast.LENGTH_LONG).show();
+			log.warn("onReceivedError: error code={}, description={}, failingUrl={}", error.getErrorCode(), error.getDescription(), request.getUrl());
+			// ERR_FAILED (-1) often indicates SSL certificate issues or DNS resolution failures
+			String errorMsg = "No Internet";
+			if (error.getErrorCode() == -1) {
+				errorMsg = "Cannot reach Trakt (network error). Check internet, DNS, or proxy settings";
+			}
+			Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
+		}
+
+		/*
+		**  Handle SSL certificate errors
+		**
+		*/
+		@Override
+		public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error)
+		{
+			log.debug("onReceivedSslError");
+			super.onReceivedSslError(view, handler, error);
+			if(mListener!=null)
+				mListener.onFinished(mdata);
+			OAuthDialog.this.dismiss();
+			log.error("onReceivedSslError: SSL error on url {}, primary error: {}", error.getUrl(), error.getPrimaryError());
+			Toast.makeText(getContext(), "SSL Certificate Error - Cannot connect to Trakt", Toast.LENGTH_LONG).show();
+		}
+
+		/*
+		**  Handle HTTP errors (API 23+)
+		**
+		*/
+		@RequiresApi(Build.VERSION_CODES.M)
+		@Override
+		public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse)
+		{
+			super.onReceivedHttpError(view, request, errorResponse);
+			// Log all HTTP errors for debugging
+			String resourceType = request.isForMainFrame() ? "MAIN FRAME" : "RESOURCE";
+			log.warn("onReceivedHttpError: HTTP {} for {} resource: {}", errorResponse.getStatusCode(), resourceType, request.getUrl());
+			// Only dismiss dialog and show error for main frame HTTP errors
+			if (request.isForMainFrame()) {
+				log.error("onReceivedHttpError: Main frame failed with HTTP {}", errorResponse.getStatusCode());
+				if(mListener!=null)
+					mListener.onFinished(mdata);
+				OAuthDialog.this.dismiss();
+				Toast.makeText(getContext(), "HTTP Error " + errorResponse.getStatusCode() + " - Cannot connect to Trakt", Toast.LENGTH_LONG).show();
+			}
 		}
 
         /*
