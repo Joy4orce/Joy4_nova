@@ -504,7 +504,7 @@
     <string name="ssh_shortcut_name">Shortcut-Name</string>
     <string name="smb_domain">Domain (optional)</string>
     <!-- Preferences -->
-    <string name="preferences">Voreinstellungen</string>
+    <string name="preferences">Einstellungen</string>
     <string name="get_the_ad_free_version">Erhalten Sie die werbefreie Version auf Google Play</string>
     <string name="upgrade_to_add_free_version">Auf werbefreie Version upgraden</string>
     <string name="upgrade_to_add_free_version_description">Kaufen Sie die Applikationslizenz, um die Werbung zu entfernen und alle Features zu aktivieren</string>
@@ -517,6 +517,7 @@
     <string name="preferences_force_audio_passthrough_disabled">Deaktiviert (empfohlen)</string>
     <string name="preferences_force_audio_passthrough_enable">Nova-Verkapselung (experimentell)</string>
     <string name="preferences_force_audio_passthrough_enable2">Systemverkapselung</string>
+    <string name="preferences_force_audio_passthrough_ac3">Universell (AC3 Rekodierung)</string>
     <string name="preferences_force_audio_passthrough_summary">Komprimiertes Audio über HDMI oder S/PDIF übertragen. ⚠ Experimentell, kann darin resultieren, dass A/V nicht synchron ist</string>
     <string name="preferences_parser_sync_mode">Parser-Synchronisations-Modus</string>
     <string name="preferences_parser_sync_mode_cdata">PTS basiert (empfohlen)</string>
@@ -576,8 +577,8 @@
     <string name="preferences_network_prefer_vpn_summary">VPN über lokale Netzwerkschnittstellen verwenden.</string>
     <string name="preferences_network_prefer_vpn_title">VPN-Netzwerk bevorzugen</string>
     <string name="preferences_video_advanced">Erweitert</string>
-    <string name="preferences_video_advanced_quit_title">Reguläre Voreinstellungen</string>
-    <string name="preferences_video_advanced_quit_summary">Zu regulären Voreinstellungen zurückkehren</string>
+    <string name="preferences_video_advanced_quit_title">Standard-Einstellungen</string>
+    <string name="preferences_video_advanced_quit_summary">Zurück zu Standard-Einstellungen</string>
     <string name="trakt_change">Eine Modifikation an der Trakt API erfordert eine erneute Verbindung.</string>
     <string name="tv_scraper">TV-Sendungen</string>
     <string name="movie_scraper">Filme</string>
@@ -695,7 +696,7 @@
     <string name="dec_any">Default</string>
     <string name="dec_android">Android MediaPlayer</string>
     <string name="audio_interface_choice_title">Audio-Schnittstelle auswählen</string>
-    <string name="audio_interface_choice_summary">Erweiterte Voreinstellung, kann Audio-Decodierung unterbrechen.</string>
+    <string name="audio_interface_choice_summary">Erweiterte Einstellung, kann die Audio-Dekodierung unterbrechen.</string>
     <string name="audio_interface_opensles">OpenSL ES erzwingen</string>
     <string name="audio_interface_audiotrack">Audiospur erzwingen</string>
     <string name="audio_interface_any">Standardlogik</string>
@@ -879,6 +880,23 @@
     <string name="db_export_manual_title">Mediendatenbank exportieren</string>
     <string name="db_export_manual_summary">media.db-Datei zu /sdcard für Debug-Zwecke exportieren</string>
     <string name="db_export_in_progress">Datenbankexport im Gange</string>
+    <string name="media_library_export_title">Exportiere Medienbibliothek + Zugangsdaten + Verknüpfungen</string>
+    <string name="media_library_export_summary">Exportiere media.db, Netzwerk-Anmeldeinformationen (SMB/FTP/SFTP), Netzwerk-Verknüpfungen und alle zwischengespeicherten Bilder als Zip-Datei</string>
+    <string name="media_library_import_title">Importiere Medienbibliothek + Zugangsdaten + Verknüpfungen</string>
+    <string name="media_library_import_summary">Importiere media.db, Netzwerk-Anmeldeinformationen, Netzwerk-Verknüpfungen und Bilder aus einer zuvor exportierten Zip-Datei im Cache</string>
+    <string name="media_library_export_in_progress">Exportiere Medienbibliothek + Zugangsdaten + Verknüpfungen</string>
+    <string name="media_library_import_in_progress">Importiere Medienbibliothek + Zugangsdaten + Verknüpfungen</string>
+    <string name="media_library_export_success">Medienbibliothek, Zugangsdaten und Verknüpfungen erfolgreich exportiert in:\n%s</string>
+    <string name="media_library_import_success">Medienbibliothek, Zugangsdaten und Verknüpfungen erfolgreich importiert aus:\n%s...</string>
+    <string name="media_library_import_error">Fehler beim Importieren der Medienbibliothek</string>
+    <string name="media_library_export_error">Fehler beim Exportieren der Medienbibliothek</string>
+    <string name="media_library_export_dir_not_found">Exportverzeichnis nicht gefunden</string>
+    <string name="media_library_no_backup_found">Keine Sicherungsdatei gefunden. Bitte zuerst exportieren.</string>
+    <string name="media_library_backup_info">Sicherungsdatei gefunden: backup.zip\nGröße: %d MB\n\n:Warnung: Enthält: Metadaten, Anmeldeinformationen, Verknüpfungen, Bilder\n\nMit Importieren fortfahren?</string>
+    <string name="media_library_import_dialog_title">Importiere Medienbibliothek + Zugangsdaten + Verknüpfungen</string>
+    <string name="media_library_import_confirm_title">:Warnung: BESTÄTIGE VOLLSTÄNDIGE ERSETZUNG</string>
+    <string name="media_library_import_warning">:warnung: WARNUNG: VOLLSTÄNDIGE ERSETZUNG :Warnung:\n\nDies wird Ihre aktuelle Medienbibliothek VOLLSTÄNDIG LÖSCHEN und sie durch die Sicherung ersetzen.\n\nALLE aktuellen Daten werden PERMANENT ÜBERSCHRIEBEN:\n• Alle gescrapten Film-/Fernsehsendungs-Metadaten\n• Alle zwischengespeicherten Poster und Hintergründe\n• Alle Fortsetzungspunkte und Verlauf\n• Alle Netzwerk-Anmeldeinformationen (SMB/FTP/SFTP/WebDAV)\n• Alle Netzwerk-Verknüpfungen/Lesezeichen\n• Alle benutzerdefinierten Änderungen und Einstellungen\n\nDiese Aktion kann NICHT rückgängig gemacht werden!\n\nDie App wird nach dem Import automatisch neu gestartet.\n\nSind Sie sicher, dass Sie fortfahren möchten?</string>
+    <string name="media_library_import_button_confirm">JA, LÖSCHEN UND ERSETZEN</string>
     <string name="system">System</string>
     <string name="keep_setting">Diese Einstellung global beibehalten</string>
     <string name="select_sub_file"><![CDATA[Exakte Untertitel für Datei <font color=#29b6f6><i>%s</i></font><br /> nicht gefunden. Bitte versuchen Sie es unter dieser Liste:]]></string>
