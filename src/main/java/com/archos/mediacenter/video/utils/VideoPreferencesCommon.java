@@ -504,6 +504,16 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
                 mEnableDynamicAudioDelay.setSelectable(!newPassthroughEnabled);
                 return true;
             });
+        } else {
+            // Ensure stored value reflects the fact passthrough is unsupported so that
+            // audio-speed UI downstream does not treat it as active.
+            if (!"0".equals(mSharedPreferences.getString("force_audio_passthrough_multiple", "0"))) {
+                mSharedPreferences.edit().putString("force_audio_passthrough_multiple", "0").apply();
+            }
+            mPlaybackSpeed.setEnabled(true);
+            mPlaybackSpeed.setSelectable(true);
+            mEnableDynamicAudioDelay.setEnabled(true);
+            mEnableDynamicAudioDelay.setSelectable(true);
         }
         mStreamBufferSize = (EditTextPreference) findPreference(KEY_STREAM_BUFFER_SIZE);
         mStreamMaxIFrameSize = (EditTextPreference) findPreference(KEY_STREAM_MAX_IFRAME_SIZE);
