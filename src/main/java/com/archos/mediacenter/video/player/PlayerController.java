@@ -1802,14 +1802,18 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         if (mControllerView == null) return false;
         
         int viewWidth = mControllerView.getWidth();
-        
-        // Define central zone as middle third horizontally (full height)
+        int viewHeight = mControllerView.getHeight();
+
+        // Define central zone as middle third horizontally and Vertically.
         float centralZoneLeft = viewWidth / 3.0f;
         float centralZoneRight = viewWidth * 2.0f / 3.0f;
+        float centralZoneTop = viewHeight / 4.0f;
+        float centralZoneBottom = viewHeight * 3.0f / 4.0f;
         
         float touchX = event.getX();
+        float touchY = event.getY();
         
-        return touchX >= centralZoneLeft && touchX <= centralZoneRight;
+        return (touchX >= centralZoneLeft && touchX <= centralZoneRight) && (touchY >= centralZoneTop && touchY <= centralZoneBottom) ;
     }
 
     private void handleCentralZoneTouch() {
