@@ -66,6 +66,6 @@ public class UpNextLoader extends VideoLoader {
             ") DESC, " +
         // Add secondary sort for stability and logical ordering within the same play time
         "s_name, e_season, e_episode, m_name, m_year" +
-        " LIMIT 100";
+        " LIMIT 50";
     }
 }
