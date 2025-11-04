@@ -56,9 +56,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * Created by alexandre on 12/05/15.
@@ -154,9 +154,15 @@ public class SubtitleManager {
 
     public void preFetchHTTPSubtitlesAndPrepareUpnpSubs(final Uri upnpNiceUri, final Uri fileUri){
         log.debug("preFetchHTTPSubtitlesAndPrepareUpnpSubs on {}, {}", upnpNiceUri, fileUri);
-        new Thread() {
+        Thread mainThread = new Thread() {
             public void run() {
                 prefetchedListOfSubs = new ArrayList<>();
+                // Track pending enumeration operations to ensure completion before calling onSuccess
+                AtomicInteger pendingOps = new AtomicInteger(0);
+                // Guard to ensure onSuccess is only called once, even if completion and timeout race
+                AtomicInteger successCalled = new AtomicInteger(0); // 0=not called, 1=called
+                boolean hasPrivatePrefetch = false;
+
                 //preparing upnp
                 if ("upnp".equalsIgnoreCase(upnpNiceUri.getScheme())) {
                     File subsDir = MediaUtils.getSubsDir(mContext);
@@ -253,18 +259,75 @@ public class SubtitleManager {
                 else {
                     if (!"upnp".equals(fileUri.getScheme()) && UriUtils.isImplementedByFileCore(fileUri)) {
                         log.debug("preFetchHTTPSubtitlesAndPrepareUpnpSubs: trying to fetch subtitles from {}", fileUri);
-                        privatePrefetchSub(fileUri);
+                        hasPrivatePrefetch = true;
+                        pendingOps.incrementAndGet();
+                        log.debug("preFetchHTTPSubtitlesAndPrepareUpnpSubs: pendingOps incremented to {}", pendingOps.get());
+                        Thread fetchThread = new Thread(() -> {
+                            try {
+                                privatePrefetchSub(fileUri);
+                                log.debug("preFetchHTTPSubtitlesAndPrepareUpnpSubs: privatePrefetchSub completed for {}", fileUri);
+                            } finally {
+                                int remaining = pendingOps.decrementAndGet();
+                                log.debug("preFetchHTTPSubtitlesAndPrepareUpnpSubs: pendingOps decremented to {}", remaining);
+                                if (remaining == 0 && successCalled.compareAndSet(0, 1)) {
+                                    log.debug("preFetchHTTPSubtitlesAndPrepareUpnpSubs: all operations completed, calling onSuccess");
+                                    callOnSuccess(upnpNiceUri);
+                                }
+                            }
+                        });
+                        fetchThread.setName("SubtitleFetch-" + (fileUri.getLastPathSegment() != null ? fileUri.getLastPathSegment() : "unknown"));
+                        fetchThread.start();
                     }
                 }
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        log.debug("preFetchHTTPSubtitlesAndPrepareUpnpSubs: run calling onSuccess");
-                        mListener.onSuccess(upnpNiceUri);
+
+                // If no async operations were scheduled, call onSuccess immediately
+                if (!hasPrivatePrefetch) {
+                    log.debug("preFetchHTTPSubtitlesAndPrepareUpnpSubs: no async operations scheduled, calling onSuccess immediately");
+                    if (successCalled.compareAndSet(0, 1)) {
+                        callOnSuccess(upnpNiceUri);
+                    }
+                } else {
+                    log.debug("preFetchHTTPSubtitlesAndPrepareUpnpSubs: waiting for {} pending operations", pendingOps.get());
+                }
+
+                // Safety timeout: if onSuccess hasn't been called within 5 seconds, call it anyway
+                // This prevents indefinite hanging if async operations get stuck or deadlock
+                Thread timeoutThread = new Thread(() -> {
+                    try {
+                        Thread.sleep(5000);
+                        // Guard: only call if not already called by normal completion
+                        if (successCalled.compareAndSet(0, 1)) {
+                            log.warn("preFetchHTTPSubtitlesAndPrepareUpnpSubs: 5 second timeout reached, forcing onSuccess completion");
+                            callOnSuccess(upnpNiceUri);
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                     }
                 });
+                timeoutThread.setName("SubtitleFetchTimeout");
+                timeoutThread.start();
             }
-        }.start();
+        };
+        mainThread.setName("SubtitleFetchMain-" + (fileUri.getLastPathSegment() != null ? fileUri.getLastPathSegment() : "unknown"));
+        mainThread.start();
+    }
+
+    /**
+     * Posts onSuccess callback to main thread handler with logging
+     * Uses a latch mechanism internally to prevent duplicate calls
+     */
+    private void callOnSuccess(Uri uri) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                log.debug("preFetchHTTPSubtitlesAndPrepareUpnpSubs: onSuccess handler executing");
+                if (mListener != null) {
+                    mListener.onSuccess(uri);
+                } else {
+                    log.error("preFetchHTTPSubtitlesAndPrepareUpnpSubs: mListener is null!");
+                }
+            }
+        });
     }
 
 

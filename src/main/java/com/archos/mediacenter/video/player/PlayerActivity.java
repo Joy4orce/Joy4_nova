@@ -3190,6 +3190,9 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             mSubtitleManager.clear();
             mPlayer.setSubtitleDelay(mVideoInfo.subtitleDelay);
             mPlayer.setSubtitleRatio(mVideoInfo.subtitleRatio);
+            // Save the subtitle delay and ratio to the database for persistence across resume
+            mIndexHelper.writeVideoInfo(mVideoInfo, mNetworkBookmarksEnabled);
+            log.debug("onDelayChange: saved subtitleDelay={} subtitleRatio={} to database", mVideoInfo.subtitleDelay, mVideoInfo.subtitleRatio);
         }
     }
 
@@ -3438,8 +3441,12 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             AudioTrack at = mPlayer.getVideoMetadata().getAudioTrack(position);
             if (at != null && at.supported) {
                 ret = setPlayerAudioTrack(position);
-                if (ret)
+                if (ret) {
                     mVideoInfo.audioTrack = position;
+                    // Save the audio track selection to the database for persistence across resume
+                    mIndexHelper.writeVideoInfo(mVideoInfo, mNetworkBookmarksEnabled);
+                    log.debug("onTrackSelected: saved audioTrack {} to database", mVideoInfo.audioTrack);
+                }
             } else if (at == null || !at.supported){
                 mErrorMsg = at.format;
                 myShowDialog(DIALOG_CODEC_NOT_SUPPORTED);
@@ -3454,6 +3461,9 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                     mVideoInfo.subtitleTrack = positionToSubtitleTrack(position, mVideoInfo.nbSubtitles);
                     log.debug("onTrackSelected: -> mVideoInfo.subtitleTrack={}", mVideoInfo.subtitleTrack);
                     setSubtitleVpos("onTrackSelected");
+                    // Save the subtitle track selection to the database for persistence across resume
+                    mIndexHelper.writeVideoInfo(mVideoInfo, mNetworkBookmarksEnabled);
+                    log.debug("onTrackSelected: saved subtitleTrack {} to database", mVideoInfo.subtitleTrack);
                 } else {
                     log.debug("onTrackSelected: player failed to get to subtitletrack {}", positionToSubtitleTrack(position, mVideoInfo.nbSubtitles));
                 }

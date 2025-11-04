@@ -75,6 +75,7 @@ import com.archos.environment.ArchosUtils;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
 import static com.archos.filecorelibrary.FileUtils.removeFileSlashSlash;
@@ -202,6 +203,8 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
     private String mAudioTrackFavoriteLanguage;
     private boolean mDestroyed;
     private Runnable mAutoSaveTask;
+    private CountDownLatch mSubtitlesReadyLatch = null;
+    private static final long SUBTITLE_ENUMERATION_TIMEOUT_MS = 5000; // 5 second timeout for subtitle enumeration before starting video
 
     public enum PlayerState {
         INIT,
@@ -682,18 +685,27 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         log.debug("prepareSubs");
         if(!mIsPreparingSubs) {
             mIsPreparingSubs = true;
+            // Initialize latch to synchronize subtitle enumeration with video playback
+            // This ensures video doesn't start until subtitles are enumerated
+            mSubtitlesReadyLatch = new CountDownLatch(1);
             com.archos.mediacenter.video.browser.subtitlesmanager.SubtitleManager subtitleManager =
                     new com.archos.mediacenter.video.browser.subtitlesmanager.SubtitleManager(this, new SubtitleManager.Listener() {
                         @Override
                         public void onAbort() {
                             mIsPreparingSubs = false;
-                            log.debug("prepareSubs: onAbort");
+                            log.debug("prepareSubs: onAbort - signaling subtitles ready latch");
+                            if (mSubtitlesReadyLatch != null) {
+                                mSubtitlesReadyLatch.countDown();
+                            }
                         }
 
                         @Override
                         public void onError(Uri uri, Exception e) {
                             mIsPreparingSubs = false;
-                            log.debug("prepareSubs: onError");
+                            log.debug("prepareSubs: onError - signaling subtitles ready latch");
+                            if (mSubtitlesReadyLatch != null) {
+                                mSubtitlesReadyLatch.countDown();
+                            }
                         }
 
                         @Override
@@ -703,11 +715,20 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
                             if(mUri.equals(uri)) {
                                 mPlayer.checkSubtitles(); // will trigger subs reload
                             }
+                            // Signal that subtitles are ready after checkSubtitles completes
+                            log.debug("prepareSubs: onSuccess - signaling subtitles ready latch");
+                            if (mSubtitlesReadyLatch != null) {
+                                mSubtitlesReadyLatch.countDown();
+                            }
                         }
 
                         @Override
                         public void onNoSubtitlesFound(Uri uri) {
                             mIsPreparingSubs = false;
+                            log.debug("prepareSubs: onNoSubtitlesFound - signaling subtitles ready latch");
+                            if (mSubtitlesReadyLatch != null) {
+                                mSubtitlesReadyLatch.countDown();
+                            }
                         }
                     });
             subtitleManager.preFetchHTTPSubtitlesAndPrepareUpnpSubs(mUri, mStreamingUri);
@@ -723,6 +744,22 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         if(mPlayerFrontend!=null)
             mPlayerFrontend.setUri(mUri, mStreamingUri);
         new Thread(() -> {
+            // Wait for subtitle enumeration to complete before starting video playback
+            // This prevents glitches caused by subtitle track selection during playback
+            if (mSubtitlesReadyLatch != null) {
+                try {
+                    log.debug("onStreamingUriOK: waiting for subtitles enumeration (timeout={}ms)", SUBTITLE_ENUMERATION_TIMEOUT_MS);
+                    boolean finished = mSubtitlesReadyLatch.await(SUBTITLE_ENUMERATION_TIMEOUT_MS, java.util.concurrent.TimeUnit.MILLISECONDS);
+                    if (finished) {
+                        log.debug("onStreamingUriOK: subtitles enumeration completed successfully");
+                    } else {
+                        log.warn("onStreamingUriOK: subtitles enumeration timeout after {}ms, proceeding with video start", SUBTITLE_ENUMERATION_TIMEOUT_MS);
+                    }
+                } catch (InterruptedException e) {
+                    log.error("onStreamingUriOK: interrupted while waiting for subtitles", e);
+                    Thread.currentThread().interrupt();
+                }
+            }
             mPlayer.setVideoURI(mStreamingUri, null);
         }).start();
     }
