@@ -35,6 +35,7 @@ import com.archos.mediacenter.filecoreextension.UriUtils;
 import com.archos.mediacenter.filecoreextension.upnp2.RawListerFactoryWithUpnp;
 import com.archos.mediacenter.utils.MediaUtils;
 import com.archos.filecorelibrary.FileUtils;
+import com.archos.mediacenter.video.utils.VideoMetadata;
 import com.archos.mediacenter.video.utils.VideoUtils;
 import com.archos.mediaprovider.ArchosMediaIntent;
 import com.jcraft.jsch.JSchException;
@@ -55,6 +56,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -127,9 +129,30 @@ public class SubtitleManager {
         void onNoSubtitlesFound(Uri uri);
     }
 
+    /**
+     * Cache entry for subtitle enumeration and AVOS processing results
+     * Holds both raw file list and processed metadata
+     */
+    private static class SubtitleCacheEntry {
+        List<SubtitleFile> subtitleFiles;
+        VideoMetadata processedMetadata;
+
+        SubtitleCacheEntry(List<SubtitleFile> files) {
+            this.subtitleFiles = files;
+            this.processedMetadata = null;
+        }
+
+        void updateMetadata(VideoMetadata metadata) {
+            this.processedMetadata = metadata;
+        }
+    }
+
     private final Context mContext;
     private final Handler mHandler;
     private Listener mListener;
+    // Thread-safe cache for subtitle enumeration results keyed by video URI string
+    // Using String key (Uri.toString()) instead of Uri object to handle Uri object inequality
+    private static final ConcurrentHashMap<String, SubtitleCacheEntry> mSubtitleCache = new ConcurrentHashMap<>();
 
     public SubtitleManager(Context context, Listener listener){
         mContext = context;
@@ -150,6 +173,81 @@ public class SubtitleManager {
         if (listOfLocalSubs != null) log.debug("getListOfLocalSubs: {}", Arrays.toString(listOfLocalSubs.toArray()));
         else log.debug("getListOfLocalSubs: null");
         return listOfLocalSubs;
+    }
+
+    /**
+     * Get cached subtitle files for a video if they exist
+     * Cache is invalidated when exiting VideoDetailsFragment or VideoInfoActivityFragment
+     * @param videoUri The video file URI
+     * @return List of SubtitleFiles if cached, null otherwise
+     */
+    public static List<SubtitleFile> getCachedSubtitleFiles(Uri videoUri) {
+        String uriKey = videoUri.toString();
+        SubtitleCacheEntry entry = mSubtitleCache.get(uriKey);
+        if (entry != null) {
+            log.debug("getCachedSubtitleFiles: cache hit for {}", uriKey);
+            return entry.subtitleFiles;
+        }
+        log.debug("getCachedSubtitleFiles: cache miss for {}", uriKey);
+        return null;
+    }
+
+    /**
+     * Get cached processed AVOS metadata if it exists
+     * @param videoUri The video file URI
+     * @return VideoMetadata if cached, null otherwise
+     */
+    public static VideoMetadata getCachedProcessedMetadata(Uri videoUri) {
+        String uriKey = videoUri.toString();
+        SubtitleCacheEntry entry = mSubtitleCache.get(uriKey);
+        if (entry != null && entry.processedMetadata != null) {
+            log.debug("getCachedProcessedMetadata: cache hit for {}", uriKey);
+            return entry.processedMetadata;
+        }
+        log.debug("getCachedProcessedMetadata: cache miss for {}", uriKey);
+        return null;
+    }
+
+    /**
+     * Cache enumerated subtitle files for a video
+     * @param videoUri The video file URI
+     * @param subtitleFiles List of found subtitles
+     */
+    public static void cacheSubtitleFiles(Uri videoUri, List<SubtitleFile> subtitleFiles) {
+        String uriKey = videoUri.toString();
+        mSubtitleCache.put(uriKey, new SubtitleCacheEntry(subtitleFiles));
+        log.debug("cacheSubtitleFiles: cached {} subtitles for {}", subtitleFiles.size(), uriKey);
+    }
+
+    /**
+     * Cache processed AVOS metadata for a video
+     * @param videoUri The video file URI
+     * @param metadata The processed VideoMetadata from AVOS
+     */
+    public static void cacheProcessedMetadata(Uri videoUri, VideoMetadata metadata) {
+        String uriKey = videoUri.toString();
+        SubtitleCacheEntry entry = mSubtitleCache.get(uriKey);
+        if (entry != null) {
+            entry.updateMetadata(metadata);
+            log.debug("cacheProcessedMetadata: cached metadata for {}", uriKey);
+        } else {
+            // If cache entry doesn't exist, create one (shouldn't normally happen but be safe)
+            SubtitleCacheEntry newEntry = new SubtitleCacheEntry(new ArrayList<>());
+            newEntry.updateMetadata(metadata);
+            mSubtitleCache.put(uriKey, newEntry);
+            log.debug("cacheProcessedMetadata: created new cache entry with metadata for {}", uriKey);
+        }
+    }
+
+    /**
+     * Invalidate cached subtitle data for a specific video
+     * Called when exiting VideoDetailsFragment or VideoInfoActivityFragment to ensure fresh enumeration on next browse
+     * @param videoUri The video file URI to invalidate cache for
+     */
+    public static void invalidateCache(Uri videoUri) {
+        String uriKey = videoUri.toString();
+        mSubtitleCache.remove(uriKey);
+        log.debug("invalidateCache: cleared cache for {}", uriKey);
     }
 
     public void preFetchHTTPSubtitlesAndPrepareUpnpSubs(final Uri upnpNiceUri, final Uri fileUri){

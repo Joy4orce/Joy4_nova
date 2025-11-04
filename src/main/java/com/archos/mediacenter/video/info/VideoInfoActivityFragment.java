@@ -1515,6 +1515,11 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
             if(isCancelled())
                 return;
 
+            // Cache the subtitle files for this video to avoid re-enumeration on playback
+            // Cache is invalidated when exiting this fragment
+            SubtitleManager.cacheSubtitleFiles(mCurrentVideo.getFileUri(), subtitleFiles);
+            log.debug("SubtitleFilesListerTask: cached {} subtitles for {}", subtitleFiles.size(), mCurrentVideo.getFileUri());
+
             updateSubtitleInfo(mCurrentVideo.getMetadata(), subtitleFiles);
         }
     }
@@ -2049,6 +2054,11 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
             mFullScraperTagsTask.cancel(true);
         }
         // ===========================================================================
+
+        // Invalidate subtitle cache when exiting to ensure fresh enumeration on next browse
+        if (mCurrentVideo != null) {
+            SubtitleManager.invalidateCache(mCurrentVideo.getFileUri());
+        }
 
         super.onDestroy(); // This must be called last.
     }

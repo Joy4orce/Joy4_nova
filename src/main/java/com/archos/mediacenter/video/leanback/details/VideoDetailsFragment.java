@@ -502,6 +502,11 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
         super.onDestroy();
         mHandler.removeCallbacksAndMessages(null);
 
+        // Invalidate subtitle cache when fragment is destroyed to ensure fresh enumeration on next browse
+        if (mVideo != null) {
+            SubtitleManager.invalidateCache(mVideo.getFileUri());
+        }
+
         // Clear the static launcher to prevent memory leak
         FileUtilsQ.setDeleteLauncher(null);
     }
@@ -1619,6 +1624,14 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
             }
             log.debug("SubtitleFilesListerTask: onPostExecute with {} subtitles", (subtitleFiles != null ? subtitleFiles.size() : 0));
             mExternalSubtitles = subtitleFiles;
+
+            // Cache the subtitle files for this video to avoid re-enumeration on playback
+            // Cache is invalidated when exiting this fragment
+            if (subtitleFiles != null && mVideo != null) {
+                SubtitleManager.cacheSubtitleFiles(mVideo.getFileUri(), subtitleFiles);
+                log.debug("SubtitleFilesListerTask: cached {} subtitles for {}", subtitleFiles.size(), mVideo.getFileUri());
+            }
+
             log.debug("SubtitleFilesListerTask: onPostExecute calling updateSubtitleRowWhenReady");
             updateSubtitleRowWhenReady();
         }

@@ -73,6 +73,7 @@ import com.archos.mediascraper.ScrapeDetailResult;
 import com.archos.environment.ArchosUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
@@ -84,7 +85,6 @@ import static com.archos.mediacenter.video.browser.subtitlesmanager.ISO639codes.
 import static com.archos.mediacenter.video.browser.subtitlesmanager.SubtitleManager.getSubLanguageFromSubPathAndVideoPath;
 import static com.archos.mediacenter.video.utils.VideoPreferencesCommon.KEY_PLAYBACK_SPEED;
 import static com.archos.mediascraper.StringUtils.stringContainsForced;
-import com.archos.mediacenter.video.utils.VideoUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,7 +123,6 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
 
     public static final boolean AUDIO_SPEED_ON_THE_FLY = true;
     public static final boolean USE_NONETRACK_IF_SUB_LANG_NOT_FOUND = false;
-    public static boolean FOUND_PREFERRED_SUB_TRACK = false;
     public static final int RESUME_NO = 0;
     public static final int RESUME_FROM_LAST_POS = 1;
     public static final int RESUME_FROM_BOOKMARK = 2;
@@ -682,14 +681,46 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
     }
 
     private void prepareSubs() {
-        log.debug("prepareSubs");
+        log.debug("prepareSubs: checking cache for mUri={}", mUri);
         if(!mIsPreparingSubs) {
             mIsPreparingSubs = true;
             // Initialize latch to synchronize subtitle enumeration with video playback
             // This ensures video doesn't start until subtitles are enumerated
             mSubtitlesReadyLatch = new CountDownLatch(1);
-            com.archos.mediacenter.video.browser.subtitlesmanager.SubtitleManager subtitleManager =
-                    new com.archos.mediacenter.video.browser.subtitlesmanager.SubtitleManager(this, new SubtitleManager.Listener() {
+
+            // Check if raw subtitle files are cached (within 10 second TTL)
+            // If cached, we can skip the expensive SMB enumeration
+            List<SubtitleManager.SubtitleFile> cachedFiles =
+                    SubtitleManager.getCachedSubtitleFiles(mUri);
+            if (cachedFiles != null) {
+                log.debug("prepareSubs: cache HIT - found {} cached subtitle files, skipping enumeration", cachedFiles.size());
+                // Check if AVOS metadata is also cached
+                VideoMetadata cachedMetadata =
+                        SubtitleManager.getCachedProcessedMetadata(mUri);
+                if (cachedMetadata != null) {
+                    log.debug("prepareSubs: cache HIT for both files AND metadata - using cached AVOS metadata, skipping checkSubtitles entirely");
+                    // Both file list and AVOS result cached - skip all processing
+                    onSubtitleMetadataUpdated(cachedMetadata, cachedMetadata.getSubtitleTrack(0) != null ? 0 : -1);
+                    mIsPreparingSubs = false;
+                    if (mSubtitlesReadyLatch != null) {
+                        mSubtitlesReadyLatch.countDown();
+                    }
+                    return;
+                } else {
+                    log.debug("prepareSubs: cache HIT for files, but not metadata - will call checkSubtitles");
+                    // Files cached but not AVOS result - call checkSubtitles to process them
+                    mIsPreparingSubs = false;
+                    mPlayer.checkSubtitles();
+                    if (mSubtitlesReadyLatch != null) {
+                        mSubtitlesReadyLatch.countDown();
+                    }
+                    return;
+                }
+            }
+
+            log.debug("prepareSubs: cache MISS - proceeding with normal enumeration");
+            SubtitleManager subtitleManager =
+                    new SubtitleManager(this, new SubtitleManager.Listener() {
                         @Override
                         public void onAbort() {
                             mIsPreparingSubs = false;
@@ -713,7 +744,17 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
                             log.debug("prepareSubs: onSuccess request player to check subs if {} = {}", mUri, uri);
                             mIsPreparingSubs = false;
                             if(mUri.equals(uri)) {
-                                mPlayer.checkSubtitles(); // will trigger subs reload
+                                // Check if AVOS metadata is cached (within 10 second TTL)
+                                VideoMetadata cachedMetadata =
+                                        SubtitleManager.getCachedProcessedMetadata(mUri);
+                                if (cachedMetadata != null) {
+                                    log.debug("prepareSubs: onSuccess - using cached AVOS metadata, skipping checkSubtitles");
+                                    // Use cached metadata directly instead of querying AVOS again
+                                    onSubtitleMetadataUpdated(cachedMetadata, cachedMetadata.getSubtitleTrack(0) != null ? 0 : -1);
+                                } else {
+                                    log.debug("prepareSubs: onSuccess - no cached metadata, calling checkSubtitles");
+                                    mPlayer.checkSubtitles(); // will trigger subs reload
+                                }
                             }
                             // Signal that subtitles are ready after checkSubtitles completes
                             log.debug("prepareSubs: onSuccess - signaling subtitles ready latch");
@@ -1476,12 +1517,12 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
 
         int nbTrack = vMetadata.getSubtitleTrackNb(); // this contains the number of subtitlesTracks not including the none track
         Integer srtTrack = null; // track for video.srt with no language provided
-        log.debug("onSubtitleMetadataUpdated: nbTrack={} newSubtitleTrack={} mVideoInfo.subtitleTrack={} mHideSubtitles={} mSubsFavoriteLanguage={} mVideoInfo.subtitleTrack={} FOUND_PREFERRED_SUB_TRACK={} firstTimeSubCalled={} mIsPreparingSubs={}", nbTrack, newSubtitleTrack, mVideoInfo.subtitleTrack, mHideSubtitles, mSubsFavoriteLanguage, mVideoInfo.subtitleTrack, FOUND_PREFERRED_SUB_TRACK, firstTimeSubCalled, mIsPreparingSubs);
+        log.debug("onSubtitleMetadataUpdated: nbTrack={} newSubtitleTrack={} mVideoInfo.subtitleTrack={} mHideSubtitles={} mSubsFavoriteLanguage={} firstTimeSubCalled={} mIsPreparingSubs={}", nbTrack, newSubtitleTrack, mVideoInfo.subtitleTrack, mHideSubtitles, mSubsFavoriteLanguage, firstTimeSubCalled, mIsPreparingSubs);
         // selection logic
         if (nbTrack != 0) {
             int noneTrack = nbTrack; // here it tracks mVideoInfo.subtitleTrack that are the tracks of the video (not the none from menu)
             // do the scan for preferred lang at second call since onSubtitleMetadataUpdated is called twice and the first time it does not get all subtracks when there are a Subs/ dir with a lot of subs
-            if ((mVideoInfo.subtitleTrack == -1 || ! FOUND_PREFERRED_SUB_TRACK) && (firstTimeSubCalled || ! mIsPreparingSubs)) { // means no track has been selected before or preferred sub track found
+            if (mVideoInfo.subtitleTrack == -1 && (firstTimeSubCalled || ! mIsPreparingSubs)) { // means no track has been selected before
                 if (mHideSubtitles) {
                     log.debug("onSubtitleMetadataUpdated: hide subs -> selected none track");
                     mVideoInfo.subtitleTrack = noneTrack;
@@ -1510,7 +1551,6 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
                             } else {
                                 if (lang.toLowerCase().contains(locale.getDisplayLanguage().toLowerCase())) {
                                     log.debug("onSubtitleMetadataUpdated: selected default track: {} identified lang: {} matching locale language {}", trackName, lang, locale.getDisplayLanguage());
-                                    FOUND_PREFERRED_SUB_TRACK = true;
                                     mVideoInfo.subtitleTrack = i;
                                     break;
                                 } else {
@@ -1581,6 +1621,10 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
             log.debug("onSubtitleMetadataUpdated: subtitletrack onSubtitleMetadataUpdated {} -> {}", newSubtitleTrack, mVideoInfo.subtitleTrack);
             mPlayerFrontend.onSubtitleMetadataUpdated(vMetadata, newSubtitleTrack);
         }
+
+        // Cache the AVOS metadata result for future playback within 10 second TTL
+        SubtitleManager.cacheProcessedMetadata(mUri, vMetadata);
+        log.debug("onSubtitleMetadataUpdated: cached AVOS metadata for {}", mUri);
     }
 
     @Override
