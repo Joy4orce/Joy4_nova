@@ -185,6 +185,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     private float               scrollGestureHorizontal = 0f;
     private final float         BORDER_WIDTH = MiscUtils.dp2Px(24);
     private final float         SCROLL_THRESHOLD = MiscUtils.dp2Px(16);
+    private final float         SCROLL_ANGLE = 30;
     private SeekBar             mProgress;
     private SeekBar             mProgress2;
     private TextView            mEndTime, mCurrentTime;
@@ -1882,10 +1883,19 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
 
         scrollGestureHorizontal += distanceX;
         scrollGestureVertical += distanceY;
-
         float halfWidth = screenWidth / 2f;
 
-        if (Math.abs(scrollGestureVertical) > SCROLL_THRESHOLD) {
+        //Check the angle of the scroll, and make sure its in range.
+        float angleRadians = (float) Math.atan2(distanceY, distanceX);
+        float angleDegrees = (float) Math.toDegrees(angleRadians);
+        if (angleDegrees < 0)
+            angleDegrees += 360;
+
+        // Define upward/downward angle ranges
+        boolean isVerticalScroll = (angleDegrees >= 90-SCROLL_ANGLE && angleDegrees <= 90+SCROLL_ANGLE) || (angleDegrees >= 270-SCROLL_ANGLE && angleDegrees <= 270+SCROLL_ANGLE);
+        //boolean isVerticalScroll = (Math.abs(distanceY) > Math.abs(distanceX));
+
+        if (Math.abs(scrollGestureVertical) > SCROLL_THRESHOLD && isVerticalScroll) {
             if (e1.getX() < halfWidth) { // left screen part
                 log.debug("onScroll: left screen part, direction={}", (scrollGestureVertical > 0 ? "up" : "down"));
                 scrollIncrementalBrightnessUpdate(scrollGestureVertical > 0);
