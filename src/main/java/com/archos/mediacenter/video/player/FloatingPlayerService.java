@@ -486,6 +486,7 @@ public class FloatingPlayerService extends Service implements PlayerService.Play
         if (Player.sPlayer != null) {
             int currentPos = Player.sPlayer.getCurrentPosition();
             intent.putExtra("position", currentPos);
+            intent.removeExtra("floating_player_position");
         }
         startActivity(intent);
     }
