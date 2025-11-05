@@ -127,6 +127,8 @@ public class TraktSigninDialogPreference extends Preference {
                                     log.debug("onClick: trakt access token is {}", res.access_token);
                                     Trakt.setAccessToken(getSharedPreferences(), res.access_token);
                                     Trakt.setRefreshToken(getSharedPreferences(), res.refresh_token);
+                                    // Clear account locked flag on successful re-authentication
+                                    Trakt.setAccountLocked(getSharedPreferences(), false);
                                     TraktSigninDialogPreference.this.notifyChanged();
                                 }
                             }
