@@ -1190,9 +1190,12 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
             CustomApplication.setLastVideoPlayedUri(mVideoInfo.uri);
         }
         mLastPosition = getLastPosition(mVideoInfo, mResume);
-        if (!PrivateMode.isActive()&&mIndexHelper!=null) {
+        // Do not write videoInfo here to avoid race condition overwriting resume position
+        // when returning quickly from screensaver (issue #1590). The lastTimePlayed will
+        // be updated when the video is actually stopped via saveVideoStateIfReady().
+        // Simply update the in-memory timestamp for now.
+        if (!PrivateMode.isActive()&&mVideoInfo!=null) {
             mVideoInfo.lastTimePlayed = Long.valueOf(System.currentTimeMillis() / 1000L);
-            mIndexHelper.writeVideoInfo(mVideoInfo, mNetworkBookmarksEnabled);
         }
         mUri = mVideoInfo.uri;
         mIntent.setData(mUri);
