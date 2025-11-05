@@ -1334,6 +1334,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
             mIntent.setData(mUri);
             mIntent.putExtra(KEY_STREAMING_URI, mStreamingUri);
             mIntent.putExtra(RESUME, RESUME_NO);
+            mIntent.putExtra("position", -1);       //Must reset the position after a playback, we dont resume next episode at same point as this one was!
             mVideoId = mNextVideoId;
             mNextUri = null;
             mNextVideoId = -1;
