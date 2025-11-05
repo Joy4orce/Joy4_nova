@@ -381,7 +381,7 @@ public class TrackInfoController implements OnMenuItemClickListener, OnItemClick
                 TrackSettings trackSettings = (TrackSettings)item;
                 if (trackSettings.key == key) {
                     trackSettings.enabled = enabled;
-                    if (invalidate&&mPopup.getListView()!=null)
+                    if (mPopup != null && invalidate && mPopup.getListView()!=null)
                         mPopup.getListView().invalidateViews();
                     break;
                 }
