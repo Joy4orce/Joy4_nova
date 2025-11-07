@@ -30,6 +30,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
+import android.widget.CheckBox;
+import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -42,6 +45,7 @@ public class BrightnessDialog extends AlertDialog implements SeekBar.OnSeekBarCh
     private static final String TAG = "BrightnessDialog";
 
     private ArchosSeekBar mSeekBar;
+    private CheckBox mSaveSetting;
     private ContentResolver mContentResolver;
     private Context mContext;
 
@@ -92,6 +96,16 @@ public class BrightnessDialog extends AlertDialog implements SeekBar.OnSeekBarCh
         mSeekBar.setMax(MAXIMUM_BACKLIGHT - MINIMUM_BACKLIGHT);
         mSeekBar.setOnSeekBarChangeListener(this);
 
+        //Remember Brightness setting.
+        mSaveSetting = (CheckBox) view.findViewById(R.id.save_brightness_setting);
+        mSaveSetting.setChecked(PreferenceManager.getDefaultSharedPreferences(context).getBoolean("reset_brightness_on_start", false));
+        mSaveSetting.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(@NonNull CompoundButton buttonView, boolean isChecked) {
+                Activity activity = (Activity) mContext;
+                PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).edit().putBoolean("reset_brightness_on_start", isChecked).apply();
+            }
+        });
 
         setCancelable(true);
         setCanceledOnTouchOutside(true);
@@ -105,12 +119,14 @@ public class BrightnessDialog extends AlertDialog implements SeekBar.OnSeekBarCh
         // Update the current brightness value
         int currentBrightness;
         mSeekBar.setEnabled(true);
+        mSaveSetting.setEnabled(true);
         try {
             currentBrightness = (int) (((PlayerActivity)mContext).getWindow().getAttributes().screenBrightness*255f);
             if(currentBrightness<=0) {//read global brightness setting when not set on window
                 currentBrightness = Settings.System.getInt(mContentResolver, Settings.System.SCREEN_BRIGHTNESS);
                 mSystemMode.setChecked(true);
                 mSeekBar.setEnabled(false);
+                mSaveSetting.setEnabled(false);
                 if(Settings.System.getInt(mContentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE)== Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC)
                     currentBrightness = MINIMUM_BACKLIGHT;
 
@@ -194,6 +210,7 @@ public class BrightnessDialog extends AlertDialog implements SeekBar.OnSeekBarCh
     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
 
             mSeekBar.setEnabled(!b);
+            mSaveSetting.setEnabled(!b);
             if(b) {
                 PlayerBrightnessManager.getInstance().setBrightness((Activity) mContext, -1);
             }else{
