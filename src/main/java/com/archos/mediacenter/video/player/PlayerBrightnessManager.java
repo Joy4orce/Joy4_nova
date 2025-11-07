@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ProcessLifecycleOwner;
+import androidx.preference.PreferenceManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ public class PlayerBrightnessManager implements DefaultLifecycleObserver {
     private static final Logger log = LoggerFactory.getLogger(PlayerBrightnessManager.class);
 
     private static PlayerBrightnessManager sPlayerBrightnessManager;
-    private int mBrightness = -1;
+    private static int mBrightness = -1;
 
     private static volatile boolean isForeground = true;
 
@@ -54,9 +55,19 @@ public class PlayerBrightnessManager implements DefaultLifecycleObserver {
         WindowManager.LayoutParams lp = activity.getWindow().getAttributes();
         lp.screenBrightness = brightness==-1?WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE:(float)brightness / 255f;
         activity.getWindow().setAttributes(lp);
+        saveCurrentBrightness(activity, brightness);
+    }
+    
+    private static void saveCurrentBrightness(Activity activity, int brightness) {
+        //When the user selects a new brightness setting, save that to prefs for restore later.
+        PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).edit().putInt("brightness_saved", brightness).apply();
     }
 
     public void restoreBrightness(Activity activity){
+        //Get any saved brightness from the Prefs 
+        mBrightness = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext()).getInt("brightness_saved", -1);
+        
+        //Restore the old brightness setting.
         setBrightness(activity, mBrightness);
     }
 
@@ -79,10 +90,12 @@ public class PlayerBrightnessManager implements DefaultLifecycleObserver {
         // only apply change is it goes into the right increase/decrease direction to avoid glitch
         if (direction) {
             if (newBrightness > curBrightness) {
-                window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                //window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 layoutParams.screenBrightness = newBrightness;
                 window.setAttributes(layoutParams);
                 window.addFlags(WindowManager.LayoutParams.FLAGS_CHANGED);
+                saveCurrentBrightness((Activity) window.getContext(),(int) (newBrightness * 255f));
+                mBrightness = level;
             } else {
                 log.debug("setLinearBrightness: not applying change, because increasing newBrightness={} < curBrightness={}", newBrightness, curBrightness);
             }
@@ -91,6 +104,8 @@ public class PlayerBrightnessManager implements DefaultLifecycleObserver {
                 layoutParams.screenBrightness = newBrightness;
                 window.setAttributes(layoutParams);
                 window.addFlags(WindowManager.LayoutParams.FLAGS_CHANGED);
+                saveCurrentBrightness((Activity) window.getContext(),(int) (newBrightness * 255f));
+                mBrightness = level;
             } else {
                 log.debug("setLinearBrightness: not applying change, because decreasing newBrightness={} > curBrightness={}", newBrightness, curBrightness);
             }

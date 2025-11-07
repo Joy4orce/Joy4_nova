@@ -783,6 +783,8 @@
     <string name="preferences_user_interface">User Interface</string>
     <string name="preferences_display_resume_box_summary">Display or hide the button resuming the latest video in the main screen</string>
     <string name="preferences_display_resume_box">Display resume box</string>
+    <string name="reset_brightness_on_start">Remember Video Brightness.</string>
+    <string name="reset_brightness_on_start_summary">Remember last used Brightness Setting when opening LeeroyFlix. Turn off to use System Brightness.</string>
 
     <string name="preferences_leanback_user_interface">TV User Interface</string>
     <string name="preferences_separate_animation_from_movies_summary">Check to separate animation videos from movies and tv shows adding an animation row</string>
