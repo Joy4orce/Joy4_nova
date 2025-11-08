@@ -531,6 +531,10 @@
     <string name="preferences_force_passthrough_summary">Si le passthrough est activé, force son utilisation même si le codec audio n\'est pas reporté supporté par le récepteur AV au lieu de vérifier sa compatibilité</string>
     <string name="preferences_playback_speed">Choisir la vitesse de lecture</string>
     <string name="preferences_playback_speed_summary">Activer la possibilité de changer la vitesse de lecture. ⚠ Expérimental : peut conduire à une vidéo hachée</string>
+    <string name="preferences_audio_speed_audiotrack">Utiliser AudioTrack pour la vitesse de lecture</string>
+    <string name="preferences_audio_speed_audiotrack_summary">Utiliser AudioTrack au lieu du filtre FFmpeg atempo pour contrôler la vitesse de lecture. ⚠ Expérimental : peut ne pas fonctionner sur toutes les configurations.</string>
+    <string name="preferences_enable_dynamic_audio_delay_title">Estimation dynamique du retard audio/vidéo</string>
+    <string name="preferences_enable_dynamic_audio_delay_summary">Utiliser l\'estimation de latence dynamique pour une meilleure synchronisation audio/vidéo, en particulier avec des casques bluetooth. Désactiver des problèmes de synchronisation sont rencontrés.</string>
     <string name="preferences_disable_downmix_title">Désactiver le mixage audio stéréo</string>
     <string name="preferences_disable_downmix_summary">Toujours décoder tous les canaux et laisser Android remixer l\'audio en fonction des capacités du récepteur (peut résulter dans la perte du canal voix)</string>
     <string name="preferences_enable_downmix_androidtv_title">Forcer le mixage audio stéréo</string>
@@ -666,6 +670,7 @@
     <string name="sort_mode">Type de tri</string>
     <string name="sort_by_name_asc">Trier par nom (a &gt; z)</string>
     <string name="sort_by_name_desc">Trier par nom (z &gt; a)</string>
+    <string name="sort_by_release_date_desc">Trier par date de sortie (récent en premier)</string>
     <string name="sort_by_year_asc">Trier par année (croissant)</string>
     <string name="sort_by_year_desc">Trier par année (décroissant)</string>
     <string name="sort_by_date_asc">Trier par date (croissant)</string>
@@ -703,6 +708,8 @@
     <string name="preferences_user_interface">Interface utilisateur</string>
     <string name="preferences_display_resume_box_summary">Afficher ou cacher le bouton de reprise de la dernière vidéo dans l\'écran principal</string>
     <string name="preferences_display_resume_box">Afficher le bouton de reprise de la vidéo</string>
+    <string name="reset_brightness_on_start">Se souvenir de la luminosité vidéo.</string>
+    <string name="reset_brightness_on_start_summary">Se souvenir de la dernière luminosité utilisée lors de l\'ouverture de l\'application. Désactivez pour utiliser la luminosité du système.</string>
     <string name="preferences_leanback_user_interface">Interface utilisateur TV</string>
     <string name="preferences_separate_animation_from_movies_summary">Cochez pour séparer les vidéos d\'animation des films et les séries télévisées en ajoutant une ligne d\'animation</string>
     <string name="preferences_separate_animation_from_movies">Séparer les animations des films et des séries TV</string>
