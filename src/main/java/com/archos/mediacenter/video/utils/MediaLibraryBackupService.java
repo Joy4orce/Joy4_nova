@@ -67,7 +67,6 @@ public class MediaLibraryBackupService extends Service {
     private static final String VERSION_FILE = "db_version.txt";
     private static final String BACKUP_FILENAME = "backup.zip";
     private static final int BUFFER_SIZE = 8192;
-    private static final int EXPECTED_DB_VERSION = 48; // Must match VideoOpenHelper.DATABASE_VERSION
 
     private NotificationManager nm;
     private NotificationCompat.Builder nb;
@@ -210,8 +209,9 @@ public class MediaLibraryBackupService extends Service {
 
         try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile))) {
             // Export database version first
-            log.debug("exportMediaLibrary: adding database version={}", EXPECTED_DB_VERSION);
-            addVersionToZip(zos, EXPECTED_DB_VERSION);
+            int dbVersion = VideoOpenHelper.getDatabaseVersion();
+            log.debug("exportMediaLibrary: adding database version={}", dbVersion);
+            addVersionToZip(zos, dbVersion);
 
             // Export media database
             File dbFile = getDatabasePath(DATABASE_NAME);
@@ -304,15 +304,16 @@ public class MediaLibraryBackupService extends Service {
             }
         }
 
-        log.debug("importMediaLibrary: backup DB version={}, current DB version={}", backupDbVersion, EXPECTED_DB_VERSION);
+        int currentDbVersion = VideoOpenHelper.getDatabaseVersion();
+        log.debug("importMediaLibrary: backup DB version={}, current DB version={}", backupDbVersion, currentDbVersion);
 
         if (backupDbVersion == -1) {
             throw new IOException("Backup file does not contain version information");
         }
 
-        if (backupDbVersion != EXPECTED_DB_VERSION) {
+        if (backupDbVersion != currentDbVersion) {
             throw new IOException("Incompatible database version. Backup version: " + backupDbVersion +
-                    ", Current version: " + EXPECTED_DB_VERSION + ". Cannot import.");
+                    ", Current version: " + currentDbVersion + ". Cannot import.");
         }
 
         // STEP 2: FULL CLEANUP - Delete all existing data
