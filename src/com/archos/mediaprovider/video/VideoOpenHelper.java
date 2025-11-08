@@ -1464,6 +1464,14 @@ public class VideoOpenHelper extends DeleteOnDowngradeSQLiteOpenHelper {
         mContext = context;
     }
 
+    /**
+     * Get the current database version.
+     * This is used by backup/restore services to validate database compatibility.
+     */
+    public static int getDatabaseVersion() {
+        return DATABASE_VERSION;
+    }
+
     @Override
     public void onOpen(SQLiteDatabase db) {
         // Turn on WAL optimization
