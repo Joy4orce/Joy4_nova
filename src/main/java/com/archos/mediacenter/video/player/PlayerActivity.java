@@ -782,7 +782,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             VideoPreferencesCommon.resetPassthroughPref(mPreferences); // note this resets the audio_speed if in passthrough to 1.0f in prefs
             // enable passthrough only if HDMI is connected and enabled in options
             LibAvos.setPassthrough(CustomApplication.isPassthroughSupported() ? Integer.parseInt(mPreferences.getString("force_audio_passthrough_multiple","0") ) : 0);
-            if (mPreferences.getBoolean(VideoPreferencesCommon.KEY_FORCE_AUDIO_PASSTHROUGH, true)) {
+            if (mPreferences.getBoolean(VideoPreferencesCommon.KEY_FORCE_AUDIO_PASSTHROUGH, false)) {
                 LibAvos.setHdmiSupportedAudioCodecs(CustomApplication.allHdmiAudioCodecs);
             } else {
                 LibAvos.setHdmiSupportedAudioCodecs(CustomApplication.getHdmiAudioCodecsFlag());

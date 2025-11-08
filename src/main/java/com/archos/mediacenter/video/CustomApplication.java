@@ -861,6 +861,15 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                     .putBoolean(PlayerActivity.KEY_ENABLE_ANDROID_FRAME_TIMING, false)
                     .commit();
         }
+        // if nova is upgraded from 6.4.19 and below disable force_passthrough
+        if ((novaPreviousVersionArray[0] < 6) ||
+            (novaPreviousVersionArray[0] == 6 && novaPreviousVersionArray[1] < 4) ||
+            (novaPreviousVersionArray[0] == 6 && novaPreviousVersionArray[1] == 4 && novaPreviousVersionArray[2] <= 19)) {
+            PreferenceManager.getDefaultSharedPreferences(context)
+                    .edit()
+                    .putBoolean(VideoPreferencesCommon.KEY_FORCE_AUDIO_PASSTHROUGH, false)
+                    .commit();
+        }
         // do not replace lastPlayed row with watchingUpNext one since it is still a little slow on shield
         /*
         if (novaPreviousVersionArray[0] == 6 && novaPreviousVersionArray[1] == 4 && novaPreviousVersionArray[2] < 7) {
