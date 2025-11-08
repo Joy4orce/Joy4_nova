@@ -743,6 +743,7 @@
     <string name="sort_mode">Sort mode</string>
     <string name="sort_by_name_asc">Sort by name (a - z)</string>
     <string name="sort_by_name_desc">Sort by name (z - a)</string>
+    <string name="sort_by_release_date_desc">Sort by release date (newest first)</string>
     <string name="sort_by_year_asc">Sort by year (oldest first)</string>
     <string name="sort_by_year_desc">Sort by year (newest first)</string>
     <string name="sort_by_date_asc">Sort by date (oldest first)</string>

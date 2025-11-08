@@ -23,7 +23,7 @@ import com.archos.mediacenter.video.R;
  */
 public class MoviesByYearLoader extends MoviesByLoader {
 
-    private static final String DEFAULT_SORT = COLUMN_SUBSET_NAME+" COLLATE NOCASE DESC";
+    private static final String DEFAULT_SORT = "m_release_date DESC, "+COLUMN_SUBSET_NAME+" COLLATE NOCASE ASC";
 
     public MoviesByYearLoader(Context context) {
         super(context);
@@ -45,7 +45,7 @@ public class MoviesByYearLoader extends MoviesByLoader {
                 "    group_concat( m_po_large_file ) AS po_file_list,\n" +
                 "    count( m_id ) AS number\n" +
                 "FROM  ( \n" +
-                "  SELECT m_id, m_po_large_file, m_year FROM video\n"+
+                "  SELECT m_id, m_po_large_file, m_year, m_release_date FROM video\n"+
                 "  WHERE m_id IS NOT NULL AND m_year > 0" + getCommonSelection()+"\n"+
                 ") \n" +
                 "GROUP BY name\n" +

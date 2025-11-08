@@ -30,6 +30,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.ServiceCompat;
 
 import com.archos.mediacenter.video.R;
+import com.archos.mediaprovider.video.VideoOpenHelper;
 import com.archos.mediascraper.MediaScraper;
 
 import org.slf4j.Logger;
