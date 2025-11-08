@@ -854,20 +854,18 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
 
     private void upgradeActions(Context context) {
         log.info("upgradeActions: check for upgrade actions from version: " + novaPreviousVersionArray[0] + "." + novaPreviousVersionArray[1] + "." + novaPreviousVersionArray[2] + " to " + novaVersionArray[0] + "." + novaVersionArray[1] + "." + novaVersionArray[2]);
-        // if nova is upgraded from 6.3.x and below 6.3.17 set enable_android_frame_timing to true
-        if (novaPreviousVersionArray[0] == 6 && novaPreviousVersionArray[1] == 3 && novaPreviousVersionArray[2] < 19) {
-            PreferenceManager.getDefaultSharedPreferences(context)
-                    .edit()
-                    .putBoolean(PlayerActivity.KEY_ENABLE_ANDROID_FRAME_TIMING, false)
-                    .commit();
-        }
-        // if nova is upgraded from 6.4.19 and below disable force_passthrough
+
+        // if nova is upgraded from 6.4.19 and below disable force_passthrough and android frame timing
         if ((novaPreviousVersionArray[0] < 6) ||
             (novaPreviousVersionArray[0] == 6 && novaPreviousVersionArray[1] < 4) ||
             (novaPreviousVersionArray[0] == 6 && novaPreviousVersionArray[1] == 4 && novaPreviousVersionArray[2] <= 19)) {
             PreferenceManager.getDefaultSharedPreferences(context)
                     .edit()
                     .putBoolean(VideoPreferencesCommon.KEY_FORCE_AUDIO_PASSTHROUGH, false)
+                    .commit();
+            PreferenceManager.getDefaultSharedPreferences(context)
+                    .edit()
+                    .putBoolean(PlayerActivity.KEY_ENABLE_ANDROID_FRAME_TIMING, false)
                     .commit();
         }
         // do not replace lastPlayed row with watchingUpNext one since it is still a little slow on shield
