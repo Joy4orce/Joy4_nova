@@ -60,6 +60,7 @@ public class MultipleVideoLoader extends VideoLoader {
             sb.append(LoaderUtils.HIDE_USER_HIDDEN_FILTER);
             sb.append(" AND ");
         }
+        sb.append("(");
         sb.append(VideoStore.Video.VideoColumns.SCRAPER_VIDEO_ONLINE_ID + " = ");
         sb.append("(SELECT " + VideoStore.Video.VideoColumns.SCRAPER_VIDEO_ONLINE_ID + " FROM video WHERE "
                 + (mPath != null ? VideoStore.Video.VideoColumns.DATA : VideoStore.Video.VideoColumns._ID )+" = ?");
@@ -70,6 +71,19 @@ public class MultipleVideoLoader extends VideoLoader {
         sb.append(")");
 
         sb.append(" AND "+VideoStore.Video.VideoColumns.SCRAPER_VIDEO_ONLINE_ID+" > 0");
+        // Ensure we only match videos of the same type (both movies or both episodes)
+        sb.append(" AND (");
+        sb.append("(");
+        sb.append(VideoStore.Video.VideoColumns.SCRAPER_MOVIE_ID + " IS NOT NULL AND ");
+        sb.append("(SELECT " + VideoStore.Video.VideoColumns.SCRAPER_MOVIE_ID + " FROM video WHERE "
+                + (mPath != null ? VideoStore.Video.VideoColumns.DATA : VideoStore.Video.VideoColumns._ID )+" = ?) IS NOT NULL)");
+        sb.append(" OR ");
+        sb.append("(");
+        sb.append(VideoStore.Video.VideoColumns.SCRAPER_EPISODE_ID + " IS NOT NULL AND ");
+        sb.append("(SELECT " + VideoStore.Video.VideoColumns.SCRAPER_EPISODE_ID + " FROM video WHERE "
+                + (mPath != null ? VideoStore.Video.VideoColumns.DATA : VideoStore.Video.VideoColumns._ID )+" = ?) IS NOT NULL)");
+        sb.append(")");
+        sb.append(")");
         sb.append(" OR "+(mPath!=null?VideoStore.Video.VideoColumns.DATA:VideoStore.Video.VideoColumns._ID) +" = ? ");
         if (LoaderUtils.mustHideUserHiddenObjects()) {
             sb.append(" AND ");
@@ -81,8 +95,7 @@ public class MultipleVideoLoader extends VideoLoader {
 
     @Override
     public String[] getSelectionArgs() {
-
-            return new String[]{String.valueOf(mPath!=null?mPath:mId),String.valueOf(mPath!=null?mPath:mId)};
-
+        String arg = String.valueOf(mPath!=null?mPath:mId);
+        return new String[]{arg, arg, arg, arg};
     }
 }
