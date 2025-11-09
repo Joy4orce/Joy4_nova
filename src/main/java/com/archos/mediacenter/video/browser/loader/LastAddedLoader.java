@@ -38,12 +38,16 @@ public class LastAddedLoader extends VideoLoader {
         sb.append(super.getSelection()); // get common selection from the parent
 
         sb.append(") GROUP BY (");
-        sb.append(VideoStore.Video.VideoColumns.SCRAPER_M_IMDB_ID);
+        sb.append("COALESCE(");
+        sb.append(VideoStore.Video.VideoColumns.SCRAPER_MOVIE_ID);
+        sb.append(", ");
+        sb.append(VideoStore.Video.VideoColumns.SCRAPER_EPISODE_ID);
+        sb.append(")");
         return sb.toString();
     }
 
     @Override
     public String getSortOrder() {
-        return VideoStore.MediaColumns.DATE_ADDED + " DESC LIMIT 100";
+        return "MAX(" + VideoStore.MediaColumns.DATE_ADDED + ") DESC LIMIT 50";
     }
 }
