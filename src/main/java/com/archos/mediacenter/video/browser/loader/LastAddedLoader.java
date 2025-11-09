@@ -38,11 +38,7 @@ public class LastAddedLoader extends VideoLoader {
         sb.append(super.getSelection()); // get common selection from the parent
 
         sb.append(") GROUP BY (");
-        sb.append("COALESCE(");
         sb.append(VideoStore.Video.VideoColumns.SCRAPER_M_IMDB_ID);
-        sb.append(", ");
-        sb.append(VideoStore.Video.VideoColumns.SCRAPER_E_IMDB_ID);
-        sb.append(")");
         return sb.toString();
     }
 
