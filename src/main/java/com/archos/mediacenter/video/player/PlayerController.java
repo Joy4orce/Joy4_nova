@@ -1943,7 +1943,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
             // Determine if we're in top 75% (seek) or bottom 25% (audio speed) zone
             boolean isTopZone = y < (viewHeight * 0.75f);
             
-            if (x < viewWidth / 2) { // left region
+            if (x < viewWidth / 3) { // left region
                 if (isTopZone) {
                     // Top 75% left: fast rewind
                     if (Player.sPlayer.canSeekBackward() && mSeekKeyDirection != -1) {
@@ -1964,7 +1964,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
                         showAudioSpeedOSD(PlayerService.sPlayerService.getAudioSpeed());
                     }
                 }
-            } else { // right region
+            } else if (x > viewWidth / 1.5) {  // right region
                 if (isTopZone) {
                     // Top 75% right: fast forward
                     if (Player.sPlayer.canSeekBackward() && mSeekKeyDirection != 1) {
