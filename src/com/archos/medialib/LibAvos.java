@@ -305,6 +305,11 @@ public class LibAvos {
         nativeEnableAudioSpeed(enable);
     }
 
+    public static void disableAtempoFilter(boolean disable) {
+        if (DBG) Log.d(TAG, "disableAtempoFilter " + disable);
+        nativeDisableAtempoFilter(disable);
+    }
+
     public static void setStreamMaxIframeSize(int size) {
         Log.d(TAG, "setStreamMaxIframeSize " + size);
         nativeSetStreamMaxIframeSize(size);
@@ -361,6 +366,8 @@ public class LibAvos {
     private static native void nativeSetAndroidFrameTiming(boolean enable);
 
     private static native void nativeEnableAudioSpeed(boolean enable);
+
+    private static native void nativeDisableAtempoFilter(boolean disable);
 
     private static native void nativeParserSyncMode(int mode);
 
