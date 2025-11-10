@@ -480,7 +480,10 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
                     return;
                 }
 
-                mResults = mScraper.getBestMatches(searchInfo, SELECTION_DIALOG_MAX_ITEMS).results;
+                mResults = mScraper.getAllMatches(searchInfo).results;
+                if (mResults != null && mResults.size() > SELECTION_DIALOG_MAX_ITEMS) {
+                    mResults = new ArrayList<>(mResults.subList(0, SELECTION_DIALOG_MAX_ITEMS));
+                }
 
                 // reset the results
                 if (mSelectionTags != null) {

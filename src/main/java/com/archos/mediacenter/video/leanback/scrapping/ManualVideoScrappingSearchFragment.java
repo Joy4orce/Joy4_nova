@@ -91,7 +91,11 @@ public class ManualVideoScrappingSearchFragment extends ManualScrappingSearchFra
     protected ScrapeSearchResult performSearch(String text) {
         mTagsToSearchResultMap.clear();
         mSearchInfo.setUserInput(text);
-        return mScraper.getBestMatches(mSearchInfo, SEARCH_RESULT_MAX_ITEMS);
+        ScrapeSearchResult result = mScraper.getAllMatches(mSearchInfo);
+        if (result.isOkay() && result.results != null && result.results.size() > SEARCH_RESULT_MAX_ITEMS) {
+            result.results.subList(SEARCH_RESULT_MAX_ITEMS, result.results.size()).clear();
+        }
+        return result;
     }
     protected BaseTags getTagFromSearchResult(SearchResult result) {
         // Get the details for this match
