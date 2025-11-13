@@ -881,7 +881,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         if (mPlayer.getDuration() != 0) {
             /* resume a little before */
             int position = mPlayer.getCurrentPosition();
-            return position > 3000 ? position - 3000 : 0;
+            return position > 3000 ? position - 1000 : 0;
         } else {
             return mPlayer.getRelativePosition();
         }
