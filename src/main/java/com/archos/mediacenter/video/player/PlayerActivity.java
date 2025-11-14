@@ -1027,6 +1027,15 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             log.debug("onPause (activity): player is paused, setting mPlayOnResume = false");
             PlayerService.sPlayerService.setPlayOnResume(false);
         }
+
+        //Update the playback time for proper restore when resumed.
+        if (mLastPosition != LAST_POSITION_END) {
+                mLastPosition = mPlayer.getCurrentPosition();
+                log.debug("onPause: player activity paused, saving exact position {}", mLastPosition);
+                Intent intent = getIntent();
+                if (intent.hasExtra("position"))
+                    intent.putExtra("position", mLastPosition);
+        }
     }
 
     @Override
