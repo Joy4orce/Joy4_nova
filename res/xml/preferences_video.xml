@@ -180,6 +180,13 @@
             android:summary="@string/enable_android_frame_timing_summary"
             android:title="@string/enable_android_frame_timing"
             app:iconSpaceReserved="false"/>
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="hide_watched"
+            android:persistent="true"
+            android:summary="@string/hide_watched_videos_summary"
+            android:title="@string/hide_watched_videos"
+            app:iconSpaceReserved="false"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preferences_user_interface" android:key="category_user_interface"
         app:iconSpaceReserved="false" >

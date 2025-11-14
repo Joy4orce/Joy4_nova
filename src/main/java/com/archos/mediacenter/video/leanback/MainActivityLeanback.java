@@ -36,7 +36,7 @@ import com.archos.mediacenter.video.browser.PermissionChecker;
 import com.archos.mediacenter.video.leanback.settings.VideoSettingsActivity;
 import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.mediacenter.video.leanback.channels.ChannelManager;
-
+import com.archos.mediaprovider.video.LoaderUtils;
 
 import com.archos.mediascraper.AutoScrapeService;
 import com.archos.environment.ArchosUtils;
@@ -75,6 +75,9 @@ public class MainActivityLeanback extends LeanbackActivity {
         ((CustomApplication) getApplication()).loadLocale();
         super.onCreate(savedInstanceState);
 
+        //Setup an preferences before we start activites.
+        LoaderUtils.mMustHideWatchedVideo = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("hide_watched", false);
+    
         UnavailablePosterBroadcastReceiver.registerReceiver(this);
         mPermissionChecker = new PermissionChecker(hasManageExternalStoragePermission(getApplicationContext()));
         new DensityTweak(this)

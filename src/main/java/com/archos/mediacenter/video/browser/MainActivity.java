@@ -217,6 +217,16 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
         this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
         super.onCreate(savedInstanceState);
 
+        //Setup an preferences before we start activites.
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    
+        //Reset Video brightness to System on Startup.
+        if (!mPreferences.getBoolean("reset_brightness_on_start", false))
+            mPreferences.edit().putInt("brightness_saved",-1).apply();
+
+         //Set the Hide watched videos on Startup.
+        LoaderUtils.mMustHideWatchedVideo = mPreferences.getBoolean("hide_watched", false);
+
         try {
             mSearchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
             if (mSearchManager == null) {
@@ -267,12 +277,6 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
         AutoScrapeService.registerObserver(this);
         mPermissionChecker = new PermissionChecker(hasManageExternalStoragePermission(getApplicationContext()));
         setBackground();
-
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    
-        //Reset Video brightness to System on Startup.
-        if (!mPreferences.getBoolean("reset_brightness_on_start", false))
-            mPreferences.edit().putInt("brightness_saved",-1).apply();
 
         mNewVideosActionProvider = new NewVideosActionProvider(this);
         LoaderManager.getInstance(this).initLoader(0, null, mNewVideosActionProvider);

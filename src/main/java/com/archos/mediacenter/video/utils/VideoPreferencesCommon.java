@@ -75,6 +75,7 @@ import com.archos.medialib.MediaFactory;
 import com.archos.mediaprovider.video.VideoProvider;
 import com.archos.mediascraper.AllCollectionScrapeService;
 import com.archos.mediascraper.AutoScrapeService;
+import com.archos.mediaprovider.video.LoaderUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -563,6 +564,13 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             return true;
         });
 
+        findPreference("hide_watched").setOnPreferenceChangeListener((preference, newValue) -> {       
+            LoaderUtils.mMustHideWatchedVideo =  (boolean) newValue;
+            getActivity().setResult(ACTIVITY_RESULT_UI_MODE_CHANGED); // way to tell the MainActivity that an important preference has been changed
+            getActivity().finish();
+            return true;
+        });
+        
         findPreference(getString(R.string.rescrap_all_prefkey)).setOnPreferenceClickListener(preference -> {
             Intent intent = new Intent(AutoScrapeService.RESCAN_EVERYTHING, null, getActivity(), AutoScrapeService.class);
             intent.putExtra(AutoScrapeService.RESCAN_EVERYTHING, true);
