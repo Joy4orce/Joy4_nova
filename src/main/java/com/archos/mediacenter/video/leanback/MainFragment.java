@@ -1169,12 +1169,18 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
     }
 
     private void updateNonScrapedVideosVisibility(Cursor cursor) {
-        log.debug("updateNonScrapedVideosVisibility");
-        if (NonScrapedVideosCountLoader.getNonScrapedVideoCount(cursor) > 0) {
-            if (mFileBrowsingRowAdapter.indexOf(mNonScrapedVideosItem) < 0) {
+        int count = NonScrapedVideosCountLoader.getNonScrapedVideoCount(cursor);
+        int currentIndex = mFileBrowsingRowAdapter.indexOf(mNonScrapedVideosItem);
+        log.debug("updateNonScrapedVideosVisibility: count={}, currentIndex={}", count, currentIndex);
+        if (count > 0) {
+            if (currentIndex < 0) {
+                log.debug("updateNonScrapedVideosVisibility: adding non-scraped box");
                 mFileBrowsingRowAdapter.add(mNonScrapedVideosItem);
+            } else {
+                log.debug("updateNonScrapedVideosVisibility: non-scraped box already present at index {}", currentIndex);
             }
         } else {
+            log.debug("updateNonScrapedVideosVisibility: removing non-scraped box");
             mFileBrowsingRowAdapter.remove(mNonScrapedVideosItem);
         }
     }
@@ -1398,7 +1404,7 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
                 }
                 case LOADER_ID_NON_SCRAPED_VIDEOS_COUNT -> {
                     if (!skipUIUpdate) {
-                        log.debug("onLoadFinished: NonScrapedVideos cursor ready with {}", cursor.getCount());
+                        log.debug("onLoadFinished: NonScrapedVideos cursor ready, count={}", NonScrapedVideosCountLoader.getNonScrapedVideoCount(cursor));
                         updateNonScrapedVideosVisibility(cursor);
                     } else {
                         log.debug("onLoadFinished: NonScrapedVideos skipping UI update during scanning");
@@ -1499,6 +1505,10 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
         ExtStorageManager storageManager = ExtStorageManager.getExtStorageManager();
         final boolean hasExternal = storageManager.hasExtStorage();
 
+        // Remember if non-scraped box was present before clearing
+        boolean nonScrapedWasPresent = mFileBrowsingRowAdapter.indexOf(mNonScrapedVideosItem) >= 0;
+        log.debug("updateUsbAndSdcardVisibility: nonScrapedWasPresent={}", nonScrapedWasPresent);
+
         mFileBrowsingRowAdapter.clear();
         mFileBrowsingRowAdapter.add(new Box(Box.ID.NETWORK, getString(R.string.network_storage), R.drawable.filetype_new_server));
         mFileBrowsingRowAdapter.add(new Box(Box.ID.FOLDERS, getString(R.string.internal_storage), R.drawable.filetype_new_folder));
@@ -1517,6 +1527,13 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
                 mFileBrowsingRowAdapter.add(item);
             }
         }
+
+        // Re-add non-scraped box if it was present before
+        if (nonScrapedWasPresent) {
+            log.debug("updateUsbAndSdcardVisibility: re-adding non-scraped box");
+            mFileBrowsingRowAdapter.add(mNonScrapedVideosItem);
+        }
+
         mFileBrowsingRowAdapter.add(new Box(Box.ID.VIDEOS_BY_LISTS, getString(R.string.video_lists), R.drawable.filetype_new_playlist));
     }
 
