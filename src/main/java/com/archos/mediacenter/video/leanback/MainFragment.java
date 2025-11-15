@@ -1399,9 +1399,7 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
                 case LOADER_ID_NON_SCRAPED_VIDEOS_COUNT -> {
                     if (!skipUIUpdate) {
                         log.debug("onLoadFinished: NonScrapedVideos cursor ready with {}", cursor.getCount());
-                        // count works here because it lists all
-                        if (isCursorCountChanged(mLastAddedAdapter.getCursor(), cursor))
-                            updateNonScrapedVideosVisibility(cursor);
+                        updateNonScrapedVideosVisibility(cursor);
                     } else {
                         log.debug("onLoadFinished: NonScrapedVideos skipping UI update during scanning");
                         // This loader doesn't use a cursor adapter, just skip entirely
