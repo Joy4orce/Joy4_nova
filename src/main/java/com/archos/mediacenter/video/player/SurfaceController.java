@@ -273,8 +273,9 @@ public class SurfaceController {
         }
 
         // display width and height without cutout
-        int dcw = dw - mCutoutLeft - mCutoutRight;
-        int dch = dh - mCutoutTop - mCutoutBottom;
+        // When HDMI is plugged, do not apply phone's cutout metrics to external display
+        int dcw = mHdmiPlugged ? dw : (dw - mCutoutLeft - mCutoutRight);
+        int dch = mHdmiPlugged ? dh : (dh - mCutoutTop - mCutoutBottom);
         vw = mVideoWidth;
         vh = mVideoHeight;
 
@@ -358,8 +359,9 @@ public class SurfaceController {
         log.debug("CONFIG updateSurface: setLayoutParams({},{})", dcw, dch);
 
         // margins to avoid cutout
-        mMarginLeft = (int)((mCutoutLeft - mCutoutRight)/ 2.0f);
-        mMarginTop = (int)((mCutoutTop - mCutoutBottom)/ 2.0f);
+        // When HDMI is plugged, do not apply phone's cutout margins to external display
+        mMarginLeft = mHdmiPlugged ? 0 : (int)((mCutoutLeft - mCutoutRight)/ 2.0f);
+        mMarginTop = mHdmiPlugged ? 0 : (int)((mCutoutTop - mCutoutBottom)/ 2.0f);
 
         ViewGroup.LayoutParams lp = mView.getLayoutParams();
         if (lp instanceof ViewGroup.MarginLayoutParams marginParams) {
