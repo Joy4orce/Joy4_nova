@@ -531,6 +531,8 @@
     <string name="preferences_force_passthrough_summary">Wenn Passthrough aktiviert ist, wird es auch dann durchgesetzt, wenn der AV-Receiver angeblich keinen Audiocodec unterstützt, anstatt die Fähigkeiten des AV-Receivers zu prüfen</string>
     <string name="preferences_playback_speed">Wiedergabegeschwindigkeit aktivieren</string>
     <string name="preferences_playback_speed_summary">Möglichkeit aktivieren,  um Wiedergabegeschwindigkeit zu ändern. ⚠ Experimentell, kann in zerhackten Videos resultieren</string>
+    <string name="preferences_enable_dynamic_audio_delay_title">Dynamische Schätzung der Audio-/Video-Verzögerung</string>
+    <string name="preferences_enable_dynamic_audio_delay_summary">Verwende dynamische Latenzschätzungen für eine bessere Audio/Video-Synchronisation speziell mit Bluetooth-Kopfhörern. Deaktivieren bei Synchronisationsproblemen.</string>
     <string name="preferences_disable_downmix_title">Audio Stereo-Downmix deaktivieren</string>
     <string name="preferences_disable_downmix_summary">Immer alle Kanäle decodieren und Android den Downmix abhängig von der Audio-Ausgabefähigkeit durchführen lassen (kann zu verlorenen Sprachkanälen führen)</string>
     <string name="preferences_enable_downmix_androidtv_title">Audio-Stereo-Downmix erzwingen</string>
@@ -666,6 +668,7 @@
     <string name="sort_mode">Sortiermodus</string>
     <string name="sort_by_name_asc">Sortieren nach Name (a - z)</string>
     <string name="sort_by_name_desc">Sortieren nach Name (z - a)</string>
+    <string name="sort_by_release_date_desc">Nach Erscheinungsdatum sortieren (neueste zuerst)</string>
     <string name="sort_by_year_asc">Sortieren nach Jahr (älteste zuerst)</string>
     <string name="sort_by_year_desc">Sortieren nach Jahr (neueste zuerst)</string>
     <string name="sort_by_date_asc">Sortieren nach Datum (älteste zuerst)</string>
@@ -703,6 +706,8 @@
     <string name="preferences_user_interface">Benutzeroberfläche</string>
     <string name="preferences_display_resume_box_summary">Button zum Fortsetzen des letzten Videos auf dem Hauptbildschirm anzeigen oder ausblenden</string>
     <string name="preferences_display_resume_box">Wiederherstellungsfeld anzeigen</string>
+    <string name="reset_brightness_on_start">Videohelligkeit merken.</string>
+    <string name="reset_brightness_on_start_summary">Speichere die zuletzt verwendete Helligkeitseinstellung beim Öffnen der Anwendung. Deaktivieren um Systemhelligkeit zu verwenden.</string>
     <string name="preferences_leanback_user_interface">TV-Benutzeroberfläche</string>
     <string name="preferences_separate_animation_from_movies_summary">Prüfen Sie, ob Sie Animationsvideos aus Filmen und TV-Sendungen separieren können, indem Sie eine Animationszeile hinzufügen</string>
     <string name="preferences_separate_animation_from_movies">Animationen aus Filmen und TV-Sendungen separieren</string>

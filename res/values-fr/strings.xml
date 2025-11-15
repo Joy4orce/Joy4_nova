@@ -531,8 +531,6 @@
     <string name="preferences_force_passthrough_summary">Si le passthrough est activé, force son utilisation même si le codec audio n\'est pas reporté supporté par le récepteur AV au lieu de vérifier sa compatibilité</string>
     <string name="preferences_playback_speed">Choisir la vitesse de lecture</string>
     <string name="preferences_playback_speed_summary">Activer la possibilité de changer la vitesse de lecture. ⚠ Expérimental : peut conduire à une vidéo hachée</string>
-    <string name="preferences_audio_speed_audiotrack">Utiliser AudioTrack pour la vitesse de lecture</string>
-    <string name="preferences_audio_speed_audiotrack_summary">Utiliser AudioTrack au lieu du filtre FFmpeg atempo pour contrôler la vitesse de lecture. ⚠ Expérimental : peut ne pas fonctionner sur toutes les configurations.</string>
     <string name="preferences_enable_dynamic_audio_delay_title">Estimation dynamique du retard audio/vidéo</string>
     <string name="preferences_enable_dynamic_audio_delay_summary">Utiliser l\'estimation de latence dynamique pour une meilleure synchronisation audio/vidéo, en particulier avec des casques bluetooth. Désactiver des problèmes de synchronisation sont rencontrés.</string>
     <string name="preferences_disable_downmix_title">Désactiver le mixage audio stéréo</string>
@@ -545,6 +543,8 @@
     <string name="preference_tv_3d_automatic_switch_summary">Utiliser cette option si votre télé 3D supporte cette fonctionnalité\"</string>
     <string name="enable_android_frame_timing">Activer la synchronisation Android des trames</string>
     <string name="enable_android_frame_timing_summary">Utiliser la synchronisation d\'affichage d\'Android pour un rendu plus fluide (expérimental)</string>
+    <string name="hide_watched_videos">Masquer les vidéos regardées</string>
+    <string name="hide_watched_videos_summary">Masquer les vidéos de la médiathèque si elles sont marquées comme jouées.</string>
     <string name="preference_tv_refreshrate_switch">Ajuster automatiquement le taux de rafraîchissement</string>
     <string name="preference_tv_refreshrate_switch_summary">Supprime les saccades d\'affichage en adaptant la fréquence de rafraîchissement écran au fps vidéo (la prise en charge dépend de l\'appareil)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Désactivé</string>

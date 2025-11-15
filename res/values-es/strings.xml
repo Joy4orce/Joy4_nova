@@ -531,6 +531,8 @@
     <string name="preferences_force_passthrough_summary">Si la pasarela de audio (passthrough) está activa, fuerza su uso incluso si el receptor AV no asegura soportar el códec</string>
     <string name="preferences_playback_speed">Activar velocidad de reproducción</string>
     <string name="preferences_playback_speed_summary">Habilita la posibilidad de cambiar la velocidad de reproducción. ⚠ Experimental, puede estropear el vídeo</string>
+    <string name="preferences_enable_dynamic_audio_delay_title">Estimación dinámica de retardo de audio/vídeo</string>
+    <string name="preferences_enable_dynamic_audio_delay_summary">Usa estimaciones dinámicas de latencia para una mejor sincronización de audio/vídeo especialmente con auriculares bluetooth. Desactiva si experimentas problemas de sincronización.</string>
     <string name="preferences_disable_downmix_title">Desactivar reducción a estéreo</string>
     <string name="preferences_disable_downmix_summary">Decodifica siempre todos los canales y permite que Android realice una reducción a estéreo dependiendo de las capacidades de salida de audio (puede provocar la pérdida de canales de voz)</string>
     <string name="preferences_enable_downmix_androidtv_title">Forzar reducción a estéreo</string>
@@ -666,6 +668,7 @@
     <string name="sort_mode">Modo de ordenación</string>
     <string name="sort_by_name_asc">Ordenar por nombre (a - z)</string>
     <string name="sort_by_name_desc">Ordenar por nombre (z - a)</string>
+    <string name="sort_by_release_date_desc">Ordenar por fecha de lanzamiento (más reciente primero)</string>
     <string name="sort_by_year_asc">Ordenar por año (más antiguo primero)</string>
     <string name="sort_by_year_desc">Ordenar por año (más nuevo primero)</string>
     <string name="sort_by_date_asc">Ordenar por fecha (más antiguo primero)</string>
@@ -703,6 +706,8 @@
     <string name="preferences_user_interface">Interfaz de usuario</string>
     <string name="preferences_display_resume_box_summary">Mostrar u ocultar el botón reanudar el último vídeo en la pantalla principal</string>
     <string name="preferences_display_resume_box">Mostrar cuadro de reanudación</string>
+    <string name="reset_brightness_on_start">Recordar el brillo del vídeo.</string>
+    <string name="reset_brightness_on_start_summary">Recuerda el último ajuste de brillo usado al abrir la aplicación. Desactiva para usar el brillo del sistema.</string>
     <string name="preferences_leanback_user_interface">Interfaz de usuario de TV</string>
     <string name="preferences_separate_animation_from_movies_summary">Marcar para separar vídeos de animación de películas y series añadiendo una fila de animación</string>
     <string name="preferences_separate_animation_from_movies">Separar animaciones de películas y series</string>

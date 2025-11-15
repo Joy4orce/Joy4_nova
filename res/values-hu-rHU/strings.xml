@@ -515,6 +515,9 @@
     <string name="preferences_force_software_decoding_summary">Kipróbálhatja ezt a beállítást, ha néhány videó hibásan jelenik meg</string>
     <string name="preferences_force_audio_passthrough">Hangtovábbítás</string>
     <string name="preferences_force_audio_passthrough_disabled">Letiltva (ajánlott)</string>
+    <string name="preferences_force_audio_passthrough_enable">Nova csomagolás (kísérleti)</string>
+    <string name="preferences_force_audio_passthrough_enable2">Rendszer csomagolás</string>
+    <string name="preferences_force_audio_passthrough_ac3">Univerzális (AC3 átkódolás)</string>
     <string name="preferences_force_audio_passthrough_summary">Tömörített hang továbbítása HDMI vagy S/PDIF csatlakozókra. ⚠ Kísérleti, A/V szinkronizációs hiba lehetséges</string>
     <string name="preferences_parser_sync_mode">Szinkronizálási mód</string>
     <string name="preferences_parser_sync_mode_cdata">PTS alapú (ajánlott)</string>
@@ -528,6 +531,8 @@
     <string name="preferences_force_passthrough_summary">Ha a hangtovábbítás be van kapcsolva, ennek kényszerítése akkor is, ha az audiokodek támogatását az AV vevő nem erősítette meg, a készülék képességeinek ellenőrzése nélkül</string>
     <string name="preferences_playback_speed">Lejátszási sebesség be</string>
     <string name="preferences_playback_speed_summary">A lejátszási sebesség módosításának engedélyezése. ⚠ Kísérleti! Szaggatott lejátszást okozhat.</string>
+    <string name="preferences_enable_dynamic_audio_delay_title">Dinamikus audió/videó késleltetés becslése</string>
+    <string name="preferences_enable_dynamic_audio_delay_summary">Dinamikus késleltetési becslés használata jobb audió/videó szinkronizálásához, főleg bluetooth fejhallgatóknál. Kapcsolja ki, ha szinkronizálási hibákat tapasztal.</string>
     <string name="preferences_disable_downmix_title">Hang sztereólekeverés kikapcsolása</string>
     <string name="preferences_disable_downmix_summary">Mindig dekódolja az összes csatornát, és az Android kezelje a lekeverést az audio kimenettől függően (a beszéd-hangsáv elvesztését eredményezheti)</string>
     <string name="preferences_enable_downmix_androidtv_title">Sztereólekeverés kényszerítése</string>
@@ -658,6 +663,7 @@
     <string name="sort_mode">Rendezés</string>
     <string name="sort_by_name_asc">Név szerint (a &gt; z)</string>
     <string name="sort_by_name_desc">Név szerint (z &gt; a)</string>
+    <string name="sort_by_release_date_desc">Kiadási dátum szerint (legújabb előbb)</string>
     <string name="sort_by_year_asc">Év szerint (legrégebbi előbb)</string>
     <string name="sort_by_year_desc">Év szerint (legújabb előbb)</string>
     <string name="sort_by_date_asc">Dátum szerint (legrégebbi előbb)</string>
@@ -695,6 +701,8 @@
     <string name="preferences_user_interface">Felhasználói felület</string>
     <string name="preferences_display_resume_box_summary">Megjeleníti vagy elrejti a gombot a legújabb videó lejátszásának folytatásához a főképernyőn</string>
     <string name="preferences_display_resume_box">Folytatás gomb megjelenítése</string>
+    <string name="reset_brightness_on_start">Videó fényerejének megjegyzése.</string>
+    <string name="reset_brightness_on_start_summary">A legutóbb használt fényerő-beállítás megjegyzése. Kapcsolja ki, ha a rendszer fényerejét szeretné használni.</string>
     <string name="preferences_leanback_user_interface">TV felhasználói felület</string>
     <string name="preferences_separate_animation_from_movies_summary">Jelölje ki az animációk elkülönítéséhez a filmektől és sorozatoktól, valamint egy animációk sor létrehozásához</string>
     <string name="preferences_separate_animation_from_movies">Animációk elkülönítése a filmektől és sorozatoktól</string>
@@ -872,6 +880,12 @@
     <string name="db_export_manual_title">Média adatbázís exportálása</string>
     <string name="db_export_manual_summary">media.db fájl exportálása az /sdcard mappába hibakeresés miatt</string>
     <string name="db_export_in_progress">Adatbázís exportálása folyamatban</string>
+    <string name="media_library_import_error">Hiba a médiakönyvtár beolvasása során</string>
+    <string name="media_library_export_error">Hiba a médiakönyvtár exportálása során</string>
+    <string name="media_library_export_dir_not_found">A könyvtár nem található</string>
+    <string name="media_library_no_backup_found">Nem található biztonsági másolat. Kérjük, előbb készítsen egyet.</string>
+    <string name="media_library_import_confirm_title">⚠️ TELJES FELÜLÍRÁS MEGERŐSÍTÉSE</string>
+    <string name="media_library_import_button_confirm">IGEN, TÖRLÉS ÉS FELÜLÍRÁS</string>
     <string name="system">Rendszer</string>
     <string name="keep_setting">Beállítás megjegyzése globálisan</string>
     <string name="select_sub_file"><![CDATA[Nem található pontos felirat a <font color=#29b6f6><i>%s</i></font><br />fájlhoz, kérjük, próbálja meg a következő listák közül:]]></string>
@@ -917,9 +931,15 @@
     <string name="sponsor">A Nova támogatása</string>
     <string name="enable_sponsor_title">Nova támogatói link bekapcsolása</string>
     <string name="enable_sponsor_summary">Támogatói link bekapcsolása adományokhoz: minden hozzájárulás segít.</string>
+    <string name="hdr_capability">A HDR kijelző tulajdonságai:</string>
+    <string name="hdmi_audio_capabilities">A HDMI vevő hangtulajdonságai:</string>
+    <string name="max_audio_channels">Hangcsatornák maximális száma:</string>
+    <string name="supported_refresh_rates">Támogatott frissítési ráták:</string>
     <string name="upgrade_info">Frissítési információk</string>
     <string name="v5_v6_upgrade_info">FIGYELMEZTETÉS:  a Nova jelentős frissítése megköveteli az összes videogyűjtemény újraolvasását a multimédiás információk újra beszerzéséhez.
          A problémák elkerülése érdekében erősen ajánlott tiszta telepítésről újraindítani. Kérjük, olvassa el a GYIK-ot a részletekért.</string>
     <string name="networks">Hálózatok:</string>
     <string name="premiered">Bemutatva:</string>
+    <string name="external_player_service_title">Külső lejátszó</string>
+    <string name="stop">Leállítás</string>
 </resources>
