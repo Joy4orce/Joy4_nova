@@ -543,6 +543,7 @@
     <string name="preference_tv_3d_automatic_switch_summary">Nur für TV-Geräte mit 3D-Wiedergabe</string>
     <string name="enable_android_frame_timing">Android-Frame-Timing aktivieren</string>
     <string name="enable_android_frame_timing_summary">\"Frame blit timing\" für eine ruckelfreiere Wiedergabe auf Android delegieren (experimentell)</string>
+    <string name="hide_watched_videos">Gesehene Videos ausblenden</string>
     <string name="preference_tv_refreshrate_switch">Automatische Aktualisierungsrate aktivieren</string>
     <string name="preference_tv_refreshrate_switch_summary">Judder-Effekt entfernen durch Anpassung der besten Bildschirmaktualisierungsrate an die Videobildrate (Geräteunterstützung kann variieren)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Deaktiviert</string>

@@ -543,6 +543,8 @@
     <string name="preference_tv_3d_automatic_switch_summary">Utilice esta función sólo si su TV es compatible con la función 3D</string>
     <string name="enable_android_frame_timing">Activar temporización de fotogramas de Android</string>
     <string name="enable_android_frame_timing_summary">Delegar a Android la temporización de fotogramas para una reproducción más suave (experimental)</string>
+    <string name="hide_watched_videos">Ocultar videos vistos</string>
+    <string name="hide_watched_videos_summary">Ocultar vídeos de la Biblioteca de Medios si están marcados como vistos.</string>
     <string name="preference_tv_refreshrate_switch">Activar el cambio de tasa de refresco automático</string>
     <string name="preference_tv_refreshrate_switch_summary">Elimina el efecto judder adaptando la mejor frecuencia de actualización de pantalla a la velocidad de fotogramas de vídeo (la compatibilidad puede variar según el dispositivo)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Desactivado</string>
