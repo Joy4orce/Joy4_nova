@@ -292,7 +292,13 @@ public class SurfaceController {
 
         // calculate aspect ratio
         double sar = (double) vw / (double) vh; // sar = source aspect ratio (video)
-        double ar = par * sar; // ar = aspect ratio of the video
+        double ar;
+
+        //Use the aspect ratio from the decoder if we have one, otherwise calculate one ourselves.
+        if (par == 1) ar =  sar;                        // sar = source aspect ratio (video)
+        else ar = par;                                 // par = mVideoAspect (from Decoder)
+
+        //Get the Display aspect ratio, with and without cutouts.
         double dar = (double) dw / (double) dh; // display aspect ratio
         double dcar = (double) dcw / (double) dch; // display aspect ratio without cutout
 
