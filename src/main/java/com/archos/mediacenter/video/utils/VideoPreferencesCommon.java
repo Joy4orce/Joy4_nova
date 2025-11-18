@@ -440,6 +440,60 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         }
     }
 
+    /**
+     * Remove Mode 1 (IEC61937) from the passthrough mode preference list
+     * Used when device doesn't support ENCODING_IEC61937
+     * Preserves Mode 2 as "2" and Mode 3 as "3"
+     */
+    private void removeMode1FromPassthroughOptions(ListPreference preference) {
+        CharSequence[] entries = preference.getEntries();
+        CharSequence[] values = preference.getEntryValues();
+        if (entries == null || values == null) {
+            return;
+        }
+
+        // Find and remove Mode 1 entry
+        int mode1Index = -1;
+        for (int i = 0; i < values.length; i++) {
+            if ("1".equals(values[i].toString())) {
+                mode1Index = i;
+                break;
+            }
+        }
+
+        if (mode1Index < 0) {
+            return;  // Mode 1 not found
+        }
+
+        // Create new arrays without Mode 1
+        CharSequence[] newEntries = new CharSequence[entries.length - 1];
+        CharSequence[] newValues = new CharSequence[values.length - 1];
+
+        int newIndex = 0;
+        for (int i = 0; i < entries.length; i++) {
+            if (i != mode1Index) {
+                newEntries[newIndex] = entries[i];
+                newValues[newIndex] = values[i];
+                newIndex++;
+            }
+        }
+
+        // Update the preference with the modified entries (Mode 2 and 3 keep their values)
+        preference.setEntries(newEntries);
+        preference.setEntryValues(newValues);
+
+        // If Mode 1 is currently selected, reset to Mode 0
+        String currentValue = preference.getValue();
+        if ("1".equals(currentValue)) {
+            preference.setValue("0");
+            preference.setSummary(preference.getEntry());  // Update summary to reflect new selection
+            mSharedPreferences.edit().putString("force_audio_passthrough_multiple", "0").apply();
+            log.info("removeMode1FromPassthroughOptions: Mode 1 was selected but not supported, resetting to mode 0");
+        } else {
+            log.debug("removeMode1FromPassthroughOptions: Mode 1 removed from options (mode 2 and 3 preserved with original values)");
+        }
+    }
+
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         CustomApplication.loadLocale(getResources());
         mSharedPreferences = getPreferenceManager().getSharedPreferences();
@@ -484,10 +538,16 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         mEnableDynamicAudioDelay = (CheckBoxPreference) findPreference(KEY_ENABLE_DYNAMIC_AUDIO_DELAY);
         final ListPreference mForceAudioPassthroughMultiple = (ListPreference) findPreference("force_audio_passthrough_multiple");
         boolean isPassthroughSupported = CustomApplication.isPassthroughSupported();
+        boolean isIecEncapsulationCapable = CustomApplication.isIecEncapsulationCapable();
         mForceAudioPassthrough.setEnabled(isPassthroughSupported);
         mForceAudioPassthroughMultiple.setEnabled(isPassthroughSupported);
         mForceAudioPassthrough.setSelectable(isPassthroughSupported);
         mForceAudioPassthroughMultiple.setSelectable(isPassthroughSupported);
+
+        // Remove Mode 1 (IEC61937 manual wrapping) from options if not supported by device
+        if (!isIecEncapsulationCapable && mForceAudioPassthroughMultiple != null) {
+            removeMode1FromPassthroughOptions(mForceAudioPassthroughMultiple);
+        }
         if (isPassthroughSupported) {
             String passthroughMode = mSharedPreferences.getString("force_audio_passthrough_multiple", "0");
             boolean passthroughEnabled = !"0".equals(passthroughMode);

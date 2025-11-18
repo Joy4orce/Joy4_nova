@@ -115,6 +115,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private static boolean isAudioPlugged = false;
     private static AudioManager mAudioManager;
     private static AudioDeviceCallback mAudioDeviceCallback;
+    private static boolean isIecEncapsulationCapable = false;
     public static final long allHdmiAudioCodecs = 0b11111111111111111111111111111111;
     private static boolean hasManageExternalStoragePermissionInManifest = false;
     public static boolean isManageExternalStoragePermissionInManifest() { return hasManageExternalStoragePermissionInManifest; }
@@ -264,6 +265,16 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             defaultLocale = Locale.getDefault();
         }
         log.debug("getDefaultLocale: systemLocale={}, defaultLocale={}", systemLocale, defaultLocale);
+    }
+
+    /**
+     * Update IEC61937 encapsulation capability based on HDMI audio encoding flags
+     * Called whenever HDMI audio capabilities are detected or changed
+     */
+    private void updateIecEncapsulationCapability() {
+        final int AVOS_ENCODING_IEC61937 = 13;
+        isIecEncapsulationCapable = (hdmiAudioEncodingFlag & (1L << AVOS_ENCODING_IEC61937)) != 0;
+        log.debug("updateIecEncapsulationCapability: isIecEncapsulationCapable={}", isIecEncapsulationCapable);
     }
 
     @Override
@@ -430,6 +441,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                     hasHdmi = true;
                     hdmiAudioEncodingsFlags = device.getEncodings();
                     hdmiAudioEncodingFlag = getEncodingFlags(hdmiAudioEncodingsFlags);
+                    updateIecEncapsulationCapability();
                     log.debug("onCreate: hdmi initial audio device");
                 }
                 if (device.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
@@ -547,6 +559,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                             hasHdmi = true;
                             hdmiAudioEncodingsFlags = device.getEncodings();
                             hdmiAudioEncodingFlag = getEncodingFlags(hdmiAudioEncodingsFlags);
+                            updateIecEncapsulationCapability();
                             log.debug("registerAudioDeviceCallback: hdmi detected capabilities {}", getSupportedAudioCodecs(hdmiAudioEncodingFlag));
                         }
                         if (device.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
@@ -565,6 +578,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                             hasHdmi = false;
                             hdmiAudioEncodingFlag = 0;
                             hdmiAudioEncodingsFlags = null;
+                            isIecEncapsulationCapable = false;  // Clear IEC capability when HDMI removed
                         }
                         if (removedDevice.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
                             hasSpdif = false;
@@ -598,6 +612,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             if (action.equalsIgnoreCase(AudioManager.ACTION_HDMI_AUDIO_PLUG)) {
                 hasHdmi = intent.getIntExtra(AudioManager.EXTRA_AUDIO_PLUG_STATE, 0) == 1;
                 hdmiAudioEncodingFlag = !hasHdmi ? 0 : getEncodingFlags(intent.getIntArrayExtra(AudioManager.EXTRA_ENCODINGS));
+                updateIecEncapsulationCapability();
                 final Integer isAudioPlugged = intent.getIntExtra(AudioManager.EXTRA_AUDIO_PLUG_STATE, 0);
                 if (isAudioPlugged != null) {
                     // maxAudioChannelCount not exploited for now
@@ -605,7 +620,8 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                         maxAudioChannelCount = intent.getIntExtra(AudioManager.EXTRA_MAX_CHANNEL_COUNT, 2);
                     }
                 }
-                log.debug("mHdmiAudioPlugReceiver: received ACTION_HDMI_AUDIO_PLUG, isAudioPlugged={}, hasHdmi={}, maxAudioChannelCount={}, hdmiAudioEncodingFlag={}", isAudioPlugged, hasHdmi, maxAudioChannelCount, hdmiAudioEncodingFlag);
+
+                log.debug("mHdmiAudioPlugReceiver: received ACTION_HDMI_AUDIO_PLUG, isAudioPlugged={}, hasHdmi={}, maxAudioChannelCount={}, hdmiAudioEncodingFlag={}, iecCapable={}", isAudioPlugged, hasHdmi, maxAudioChannelCount, hdmiAudioEncodingFlag, isIecEncapsulationCapable);
             }
         }
     };
@@ -663,6 +679,38 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
 
     public static int getMaxAudioChannelCount() {
         return (int) maxAudioChannelCount;
+    }
+
+    public static boolean isIecEncapsulationCapable() {
+        return isIecEncapsulationCapable;
+    }
+
+    /**
+     * Calculate appropriate PCM channel limit based on HDMI capabilities
+     *
+     * For eARC: Force stereo (2 channels) since eARC doesn't support multichannel PCM
+     * For regular HDMI: Use reported maxAudioChannelCount
+     * For none: Return 0 (no HDMI connected)
+     *
+     * @return PCM channel limit to pass to native AVOS
+     */
+    public static int getEffectiveMaxPcmChannels() {
+        if (!hasHdmi) {
+            log.debug("getEffectiveMaxPcmChannels: No HDMI, returning 0");
+            return 0;
+        }
+
+        // If device advertises IEC61937, passthrough will be used for compressed formats.
+        // Keep PCM cap to the advertised channel count to avoid guessing.
+        if (isIecEncapsulationCapable && maxAudioChannelCount > 0) {
+            log.debug("getEffectiveMaxPcmChannels: IEC capable, using reported maxAudioChannelCount={} for PCM", maxAudioChannelCount);
+            return (int) maxAudioChannelCount;
+        }
+
+        // When IEC is not available, limit PCM to stereo to avoid sending multichannel PCM
+        // to sinks that only accept compressed streams.
+        log.info("getEffectiveMaxPcmChannels: IEC not available, capping PCM to 2 channels (maxAudioChannelCount={})", maxAudioChannelCount);
+        return 2;
     }
 
     public static String getSupportedRefreshRates() {
