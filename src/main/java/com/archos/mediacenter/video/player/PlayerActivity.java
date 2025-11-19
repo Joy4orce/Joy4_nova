@@ -789,7 +789,13 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             log.info("onStart: Set max PCM channels to {}", maxPcmChannels);
             LibAvos.setPassthrough(CustomApplication.isPassthroughSupported() ? Integer.parseInt(mPreferences.getString("force_audio_passthrough_multiple","0") ) : 0);
             if (mPreferences.getBoolean(VideoPreferencesCommon.KEY_FORCE_AUDIO_PASSTHROUGH, false)) {
-                LibAvos.setHdmiSupportedAudioCodecs(CustomApplication.allHdmiAudioCodecs);
+                long forcedFlags = CustomApplication.allHdmiAudioCodecs;
+                if (!CustomApplication.isIecEncapsulationCapable()) {
+                    // Don't fake IEC support on devices that never advertised it; otherwise
+                    // mode 3 fallback gets forced back into IEC and fails on IEC-less eARC.
+                    forcedFlags &= ~(1L << 13); // clear AVOS_ENCODING_IEC61937
+                }
+                LibAvos.setHdmiSupportedAudioCodecs(forcedFlags);
             } else {
                 LibAvos.setHdmiSupportedAudioCodecs(CustomApplication.getHdmiAudioCodecsFlag());
             }
