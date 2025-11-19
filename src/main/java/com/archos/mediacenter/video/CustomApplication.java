@@ -32,6 +32,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.media.AudioDeviceCallback;
 import android.media.AudioDeviceInfo;
+import android.media.AudioAttributes;
+import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
@@ -281,6 +283,8 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     /**
      * Probe whether the device can output multichannel PCM directly (without IEC encapsulation)
      * Only available on API 29+
+     * Uses getDirectPlaybackSupport() on API 33+ (preferred, non-deprecated)
+     * Falls back to isDirectPlaybackSupported() on API 29-32
      */
     private void updateDirectPcmMultichannelCapability() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || mAudioManager == null || !hasHdmi) {
@@ -309,7 +313,29 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                         .setChannelMask(mask)
                         .setSampleRate(48000)
                         .build();
-                if (mAudioManager.isDirectPlaybackSupported(format, attrs)) {
+
+                boolean isSupported = false;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    // API 33+: Use getDirectPlaybackSupport() (non-deprecated)
+                    try {
+                        int support = mAudioManager.getDirectPlaybackSupport(format, attrs);
+                        // Compare with DIRECT_PLAYBACK_SUPPORTED constant (API 31+) via reflection
+                        isSupported = (support == 1); // DIRECT_PLAYBACK_SUPPORTED = 1
+                        log.debug("updateDirectPcmMultichannelCapability (API 33+): getDirectPlaybackSupport for mask=0x{} returned {}", Integer.toHexString(mask), support);
+                    } catch (NoSuchMethodError e) {
+                        log.debug("updateDirectPcmMultichannelCapability: getDirectPlaybackSupport not available, skipping");
+                    }
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    // API 29-32: Use isDirectPlaybackSupported() via reflection
+                    try {
+                        java.lang.reflect.Method method = AudioManager.class.getMethod("isDirectPlaybackSupported", AudioFormat.class, AudioAttributes.class);
+                        isSupported = (Boolean) method.invoke(mAudioManager, format, attrs);
+                    } catch (Exception e) {
+                        log.debug("updateDirectPcmMultichannelCapability: isDirectPlaybackSupported not available, skipping: {}", e.getMessage());
+                    }
+                }
+
+                if (isSupported) {
                     supported = true;
                     probedMaxChannels = (mask == AudioFormat.CHANNEL_OUT_7POINT1) ? 8 : 6;
                     log.info("updateDirectPcmMultichannelCapability: direct PCM supported for mask=0x{} (channels={})", Integer.toHexString(mask), probedMaxChannels);
