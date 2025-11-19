@@ -38,24 +38,17 @@ public final class ArchosMediaCommon {
     public static final String AUTHORITY_ANDROID = "media";
     public static final String CONTENT_AUTHORITY_SLASH_ANDROID = CONTENT + AUTHORITY_ANDROID + SLASH;
 
-    public static final String AUTHORITY_VIDEO; // = "com.archos.media.video";
-    public static final String CONTENT_AUTHORITY_SLASH_VIDEO; // = CONTENT + AUTHORITY_VIDEO + SLASH;
+    public static final String AUTHORITY_VIDEO = "com.archos.media.videocommunity";
+    public static final String CONTENT_AUTHORITY_SLASH_VIDEO = CONTENT + AUTHORITY_VIDEO + SLASH;
 
     public static final String AUTHORITY_MUSIC = "com.archos.media.music";
     public static final String CONTENT_AUTHORITY_SLASH_MUSIC = CONTENT + AUTHORITY_MUSIC + SLASH;
 
-    public static final String AUTHORITY_SCRAPER; // = "com.archos.media.scraper";
-    public static final String CONTENT_AUTHORITY_SLASH_SCRAPER; // = CONTENT + AUTHORITY_SCRAPER + SLASH;
+    public static final String AUTHORITY_SCRAPER = "com.archos.media.scrapercommunity";
+    public static final String CONTENT_AUTHORITY_SLASH_SCRAPER = CONTENT + AUTHORITY_SCRAPER + SLASH;
 
     /* Scanned files get _id >= this value. (Integer.MAX_VALUE / 2) rounded to human readable form */
     // update: take it to 2e9 (2147483647 = 2^31-1) because in Android 13 (and apex?) _id is increase by 1e9 in
     // DatabaseHelper when next row id is not present in respective xattr. Keeping 1e9 makes local files not scanned.
     public static final long SCANNED_ID_OFFSET = 2000000000;
-
-    static {
-        AUTHORITY_VIDEO = "com.archos.media.videocommunity";
-        AUTHORITY_SCRAPER = "com.archos.media.scrapercommunity";
-        CONTENT_AUTHORITY_SLASH_VIDEO = CONTENT + AUTHORITY_VIDEO + SLASH;
-        CONTENT_AUTHORITY_SLASH_SCRAPER = CONTENT + AUTHORITY_SCRAPER + SLASH;
-    }
 }
