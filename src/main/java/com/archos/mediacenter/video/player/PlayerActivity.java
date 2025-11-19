@@ -68,7 +68,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
-import androidx.core.view.ViewCompat;
 import androidx.loader.app.LoaderManager;
 import androidx.preference.PreferenceManager;
 
@@ -991,8 +990,6 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             mIsInfoActivityDisplayed = false;
         }
 
-        //Fix the Display Cutouts on Resume.
-        if (mFullScreenWithCutout) ViewCompat.requestApplyInsets(mRootView);
 
         // Restore the previous notifications mode
         mNotificationMode = mPreferences.getInt(KEY_NOTIFICATIONS_MODE, NOTIFICATION_MODE_ALL);
