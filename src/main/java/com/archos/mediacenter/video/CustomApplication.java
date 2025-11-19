@@ -116,6 +116,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private static AudioManager mAudioManager;
     private static AudioDeviceCallback mAudioDeviceCallback;
     private static boolean isIecEncapsulationCapable = false;
+    private static boolean isDirectPcmMultichannelCapable = false;
     public static final long allHdmiAudioCodecs = 0b11111111111111111111111111111111;
     private static boolean hasManageExternalStoragePermissionInManifest = false;
     public static boolean isManageExternalStoragePermissionInManifest() { return hasManageExternalStoragePermissionInManifest; }
@@ -275,6 +276,55 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         final int AVOS_ENCODING_IEC61937 = 13;
         isIecEncapsulationCapable = (hdmiAudioEncodingFlag & (1L << AVOS_ENCODING_IEC61937)) != 0;
         log.debug("updateIecEncapsulationCapability: isIecEncapsulationCapable={}", isIecEncapsulationCapable);
+    }
+
+    /**
+     * Probe whether the device can output multichannel PCM directly (without IEC encapsulation)
+     * Only available on API 29+
+     */
+    private void updateDirectPcmMultichannelCapability() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || mAudioManager == null || !hasHdmi) {
+            isDirectPcmMultichannelCapable = false;
+            log.debug("updateDirectPcmMultichannelCapability: API<29 or no HDMI, setting false");
+            return;
+        }
+
+        boolean supported = false;
+        int probedMaxChannels = 2;
+        try {
+            AudioAttributes attrs = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MOVIE)
+                    .build();
+
+            // Probe 7.1 first, then 5.1 to derive max PCM channels supported for direct output
+            int[] channelMasks = new int[] {
+                    AudioFormat.CHANNEL_OUT_7POINT1,
+                    AudioFormat.CHANNEL_OUT_5POINT1
+            };
+
+            for (int mask : channelMasks) {
+                AudioFormat format = new AudioFormat.Builder()
+                        .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                        .setChannelMask(mask)
+                        .setSampleRate(48000)
+                        .build();
+                if (mAudioManager.isDirectPlaybackSupported(format, attrs)) {
+                    supported = true;
+                    probedMaxChannels = (mask == AudioFormat.CHANNEL_OUT_7POINT1) ? 8 : 6;
+                    log.info("updateDirectPcmMultichannelCapability: direct PCM supported for mask=0x{} (channels={})", Integer.toHexString(mask), probedMaxChannels);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("updateDirectPcmMultichannelCapability: exception while probing direct PCM", e);
+        }
+
+        isDirectPcmMultichannelCapable = supported;
+        if (supported && probedMaxChannels > maxAudioChannelCount) {
+            maxAudioChannelCount = probedMaxChannels;
+        }
+        log.info("updateDirectPcmMultichannelCapability: multichannel PCM direct playback supported={}, maxAudioChannelCount={}", supported, maxAudioChannelCount);
     }
 
     @Override
@@ -442,6 +492,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                     hdmiAudioEncodingsFlags = device.getEncodings();
                     hdmiAudioEncodingFlag = getEncodingFlags(hdmiAudioEncodingsFlags);
                     updateIecEncapsulationCapability();
+                    updateDirectPcmMultichannelCapability();
                     log.debug("onCreate: hdmi initial audio device");
                 }
                 if (device.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
@@ -560,6 +611,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                             hdmiAudioEncodingsFlags = device.getEncodings();
                             hdmiAudioEncodingFlag = getEncodingFlags(hdmiAudioEncodingsFlags);
                             updateIecEncapsulationCapability();
+                            updateDirectPcmMultichannelCapability();
                             log.debug("registerAudioDeviceCallback: hdmi detected capabilities {}", getSupportedAudioCodecs(hdmiAudioEncodingFlag));
                         }
                         if (device.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
@@ -579,6 +631,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                             hdmiAudioEncodingFlag = 0;
                             hdmiAudioEncodingsFlags = null;
                             isIecEncapsulationCapable = false;  // Clear IEC capability when HDMI removed
+                            isDirectPcmMultichannelCapable = false;
                         }
                         if (removedDevice.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
                             hasSpdif = false;
@@ -613,6 +666,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                 hasHdmi = intent.getIntExtra(AudioManager.EXTRA_AUDIO_PLUG_STATE, 0) == 1;
                 hdmiAudioEncodingFlag = !hasHdmi ? 0 : getEncodingFlags(intent.getIntArrayExtra(AudioManager.EXTRA_ENCODINGS));
                 updateIecEncapsulationCapability();
+                updateDirectPcmMultichannelCapability();
                 final Integer isAudioPlugged = intent.getIntExtra(AudioManager.EXTRA_AUDIO_PLUG_STATE, 0);
                 if (isAudioPlugged != null) {
                     // maxAudioChannelCount not exploited for now
@@ -707,9 +761,15 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             return (int) maxAudioChannelCount;
         }
 
-        // When IEC is not available, limit PCM to stereo to avoid sending multichannel PCM
-        // to sinks that only accept compressed streams.
-        log.info("getEffectiveMaxPcmChannels: IEC not available, capping PCM to 2 channels (maxAudioChannelCount={})", maxAudioChannelCount);
+        // IEC not available: allow multichannel PCM only if direct playback reports support (API 29+)
+        if (isDirectPcmMultichannelCapable && maxAudioChannelCount > 2) {
+            int pcmCh = (int) maxAudioChannelCount;
+            log.info("getEffectiveMaxPcmChannels: IEC not available but direct PCM multichannel supported, using {} channels", pcmCh);
+            return pcmCh;
+        }
+
+        // Otherwise, cap to stereo for safety
+        log.info("getEffectiveMaxPcmChannels: IEC not available and no direct PCM support, capping to 2 channels (maxAudioChannelCount={})", maxAudioChannelCount);
         return 2;
     }
 
