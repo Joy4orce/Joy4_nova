@@ -1272,7 +1272,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         if (mFormatButton == null)
             return;
 
-        switch (mSurfaceController.getNextVideoFormat()) {
+        switch (mSurfaceController.getCurrentVideoFormat()) {
             case SurfaceController.VideoFormat.ORIGINAL:
                 mFormatButton.setImageResource(R.drawable.video_format_original_selector);
                 break;

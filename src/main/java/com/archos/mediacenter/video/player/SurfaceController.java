@@ -247,6 +247,10 @@ public class SurfaceController {
         return getVideoFormat().getNextFmt();
     }
 
+    public int getCurrentVideoFormat() {
+        return getVideoFormat().getFmt();
+    }
+
     public void setEffectMode(int mode) {
         mEffectMode = mode;
         updateSurface();
