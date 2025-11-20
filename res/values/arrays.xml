@@ -67,6 +67,8 @@
         <item>@string/format_original</item>
         <item>@string/format_fullscreen</item>
         <item>@string/format_stretched</item>
+        <item>@string/format_43</item>
+        <item>@string/format_169</item>
         <item>@string/format_optimized</item>
     </string-array>
     <string-array name="pref_play_mode_entries" translatable="false">

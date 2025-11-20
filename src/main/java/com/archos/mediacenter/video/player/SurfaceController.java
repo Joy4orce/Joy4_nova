@@ -45,10 +45,13 @@ public class SurfaceController {
          *  intermediate surface height in order to don't crop too much video
          */
         public static final int STRETCHED = 2;
-        public static final int AUTO = 3;
+        public static final int FORCE43 = 3;
+        public static final int FORCE169 = 4;
+        public static final int AUTO = 5;
+        
         public static final double VIDEO_FORMAT_AUTO_THRES = 0.7;
 
-        private final int[] mode = {ORIGINAL, FULLSCREEN, STRETCHED, AUTO};
+        private final int[] mode = {ORIGINAL, FULLSCREEN, STRETCHED, FORCE43, FORCE169, AUTO};
         private final int max;
         private int idx;
         public VideoFormat(int max) {
@@ -97,8 +100,8 @@ public class SurfaceController {
     private int         mVideoWidth = 0;
     private int         mVideoHeight = 0;
     private double      mVideoAspect = 1.0f;
-    private VideoFormat mVideoFormat = new VideoFormat(3);
-    private VideoFormat mAutoVideoFormat = new VideoFormat(4);
+    private VideoFormat mVideoFormat = new VideoFormat(5);
+    private VideoFormat mAutoVideoFormat = new VideoFormat(6);
     private int         mSurfaceWidth = 0;
     private int         mSurfaceHeight = 0;
     
@@ -304,9 +307,19 @@ public class SurfaceController {
 
         log.debug("CONFIG updateSurface: sar={}, ar={}, dar={}, dcar={}", sar, ar, dar, dcar);
 
+        //Do the Aspect Ratio Override if required.
+        switch (fmt) {
+            case VideoFormat.FORCE43:
+                ar = 4f/3f;
+                break;
+            case VideoFormat.FORCE169:
+                ar = 16f/9f;
+                break;
+        }
+
         cropW = cropH = 1.0f;
         switch (fmt) {
-            case VideoFormat.ORIGINAL:
+            case VideoFormat.ORIGINAL, VideoFormat.FORCE43, VideoFormat.FORCE169:
                 if (dcar < ar) {
                     //4:3 movie on 16:9 screen or 16:9 movie on portrait screen
                     dch = (int) (dcw/ (ar));
