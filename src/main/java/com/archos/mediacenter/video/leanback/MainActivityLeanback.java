@@ -75,6 +75,10 @@ public class MainActivityLeanback extends LeanbackActivity {
         ((CustomApplication) getApplication()).loadLocale();
         super.onCreate(savedInstanceState);
 
+        //Reset the Video Aspect Ratio on Startup.
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putString("player_pref_auto_format_key","-1").apply();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putString("player_pref_format_key","0").apply();
+
         //Setup an preferences before we start activites.
         LoaderUtils.mMustHideWatchedVideo = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("hide_watched", false);
     
