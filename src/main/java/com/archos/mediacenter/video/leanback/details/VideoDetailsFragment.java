@@ -1626,10 +1626,14 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
             mExternalSubtitles = subtitleFiles;
 
             // Cache the subtitle files for this video to avoid re-enumeration on playback
+            // Only cache for local files - remote files (SMB, FTP, etc.) require local copying during playback
             // Cache is invalidated when exiting this fragment
-            if (subtitleFiles != null && mVideo != null) {
+            // See: https://github.com/nova-video-player/aos-AVP/issues/1605
+            if (subtitleFiles != null && mVideo != null && FileUtils.isLocal(mVideo.getFileUri())) {
                 SubtitleManager.cacheSubtitleFiles(mVideo.getFileUri(), subtitleFiles);
-                log.debug("SubtitleFilesListerTask: cached {} subtitles for {}", subtitleFiles.size(), mVideo.getFileUri());
+                log.debug("SubtitleFilesListerTask: cached {} subtitles for local file {}", subtitleFiles.size(), mVideo.getFileUri());
+            } else if (subtitleFiles != null && mVideo != null) {
+                log.debug("SubtitleFilesListerTask: skipping cache for remote file (requires local copy): {}", mVideo.getFileUri());
             }
 
             log.debug("SubtitleFilesListerTask: onPostExecute calling updateSubtitleRowWhenReady");

@@ -701,10 +701,19 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
             // This ensures video doesn't start until subtitles are enumerated
             mSubtitlesReadyLatch = new CountDownLatch(1);
 
-            // Check if raw subtitle files are cached (within 10 second TTL)
-            // If cached, we can skip the expensive SMB enumeration
-            List<SubtitleManager.SubtitleFile> cachedFiles =
-                    SubtitleManager.getCachedSubtitleFiles(mUri);
+            // Only use cache for local files. Remote files (SMB, FTP, etc.) need to be copied locally
+            // by privatePrefetchSub() before AVOS can access them. Skipping this causes subtitles to disappear.
+            // See: https://github.com/nova-video-player/aos-AVP/issues/1605
+            boolean isLocalFile = FileUtils.isLocal(mUri);
+            List<SubtitleManager.SubtitleFile> cachedFiles = null;
+            if (isLocalFile) {
+                // Check if raw subtitle files are cached (within 10 second TTL)
+                // If cached, we can skip the expensive enumeration
+                cachedFiles = SubtitleManager.getCachedSubtitleFiles(mUri);
+            } else {
+                log.debug("prepareSubs: skipping cache for remote file (requires local copy): {}", mUri);
+            }
+
             if (cachedFiles != null) {
                 log.debug("prepareSubs: cache HIT - found {} cached subtitle files, skipping enumeration", cachedFiles.size());
                 // Check if AVOS metadata is also cached

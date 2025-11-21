@@ -1516,9 +1516,15 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                 return;
 
             // Cache the subtitle files for this video to avoid re-enumeration on playback
+            // Only cache for local files - remote files (SMB, FTP, etc.) require local copying during playback
             // Cache is invalidated when exiting this fragment
-            SubtitleManager.cacheSubtitleFiles(mCurrentVideo.getFileUri(), subtitleFiles);
-            log.debug("SubtitleFilesListerTask: cached {} subtitles for {}", subtitleFiles.size(), mCurrentVideo.getFileUri());
+            // See: https://github.com/nova-video-player/aos-AVP/issues/1605
+            if (FileUtils.isLocal(mCurrentVideo.getFileUri())) {
+                SubtitleManager.cacheSubtitleFiles(mCurrentVideo.getFileUri(), subtitleFiles);
+                log.debug("SubtitleFilesListerTask: cached {} subtitles for local file {}", subtitleFiles.size(), mCurrentVideo.getFileUri());
+            } else {
+                log.debug("SubtitleFilesListerTask: skipping cache for remote file (requires local copy): {}", mCurrentVideo.getFileUri());
+            }
 
             updateSubtitleInfo(mCurrentVideo.getMetadata(), subtitleFiles);
         }
