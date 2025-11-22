@@ -114,7 +114,6 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private static boolean hasHdmi = false;
     private static boolean hasSpdif = false;
     private static String supportedRefreshRates = "";
-    private static boolean isAudioPlugged = false;
     private static AudioManager mAudioManager;
     private static AudioDeviceCallback mAudioDeviceCallback;
     private static boolean isIecEncapsulationCapable = false;
@@ -192,13 +191,13 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
 
     private PropertyChangeListener propertyChangeListener = null;
 
-    private static VideoStoreImportReceiver videoStoreImportReceiver = new VideoStoreImportReceiver();
+    private static final VideoStoreImportReceiver videoStoreImportReceiver = new VideoStoreImportReceiver();
 
-    private static JcifsUtils jcifsUtils = null;
-    private static WebdavUtils webdavUtils = null;
-    private static SmbjUtils smbjUtils = null;
-    private static SshjUtils sshjUtils = null;
-    private static FileUtilsQ fileUtilsQ = null;
+    private JcifsUtils jcifsUtils = null;
+    private WebdavUtils webdavUtils = null;
+    private SmbjUtils smbjUtils = null;
+    private SshjUtils sshjUtils = null;
+    private FileUtilsQ fileUtilsQ = null;
 
     private static OpenSubtitlesApiHelper openSubtitlesApiHelper = null;
 
@@ -318,7 +317,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     // API 33+: Use getDirectPlaybackSupport() (non-deprecated)
                     try {
-                        int support = mAudioManager.getDirectPlaybackSupport(format, attrs);
+                        int support = AudioManager.getDirectPlaybackSupport(format, attrs);
                         // Compare with DIRECT_PLAYBACK_SUPPORTED constant (API 31+) via reflection
                         isSupported = (support == 1); // DIRECT_PLAYBACK_SUPPORTED = 1
                         log.debug("updateDirectPcmMultichannelCapability (API 33+): getDirectPlaybackSupport for mask=0x{} returned {}", Integer.toHexString(mask), support);
@@ -987,7 +986,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     }
 
     private void upgradeActions(Context context) {
-        log.info("upgradeActions: check for upgrade actions from version: " + novaPreviousVersionArray[0] + "." + novaPreviousVersionArray[1] + "." + novaPreviousVersionArray[2] + " to " + novaVersionArray[0] + "." + novaVersionArray[1] + "." + novaVersionArray[2]);
+        log.info("upgradeActions: check for upgrade actions from version: {}.{}.{} to {}.{}.{}", novaPreviousVersionArray[0], novaPreviousVersionArray[1], novaPreviousVersionArray[2], novaVersionArray[0], novaVersionArray[1], novaVersionArray[2]);
 
         // if nova is upgraded from 6.4.19 and below disable force_passthrough and android frame timing
         if ((novaPreviousVersionArray[0] < 6) ||
