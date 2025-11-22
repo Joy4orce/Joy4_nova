@@ -299,29 +299,25 @@ public class SurfaceController {
 
         // calculate aspect ratio
         double sar = (double) vw / (double) vh; // sar = source aspect ratio (video)
-        double ar;
+
+        //OK, so it was Married with Children having bad sources, not NoVas fault!
+        
+        //Do the Aspect Ratio Override if required.
+        double ar = switch (fmt) {
+            case VideoFormat.FORCE43 -> 4f / 3f;
+            case VideoFormat.FORCE169 -> 16f / 9f;
+            default -> par * sar;
+        };
 
         //Use the aspect ratio from the decoder if we have one, otherwise calculate one ourselves.
-        if (par == 1) ar =  sar;                        // sar = source aspect ratio (video)
-        else ar = par;                                 // par = mVideoAspect (from Decoder)
-
+        
         //Get the Display aspect ratio, with and without cutouts.
         double dar = (double) dw / (double) dh; // display aspect ratio
         double dcar = (double) dcw / (double) dch; // display aspect ratio without cutout
 
         log.debug("CONFIG updateSurface: sar={}, ar={}, dar={}, dcar={}", sar, ar, dar, dcar);
 
-        //Do the Aspect Ratio Override if required.
-        switch (fmt) {
-            case VideoFormat.FORCE43:
-                ar = 4f/3f;
-                break;
-            case VideoFormat.FORCE169:
-                ar = 16f/9f;
-                break;
-        }
-
-        cropW = cropH = 1.0f;
+        //cropW = cropH = 1.0f;
         switch (fmt) {
             case VideoFormat.ORIGINAL, VideoFormat.FORCE43, VideoFormat.FORCE169:
                 if (dcar < ar) {
@@ -348,8 +344,8 @@ public class SurfaceController {
                 }
                 break;
             case VideoFormat.AUTO: {
-                cropW = 1.0f;
-                cropH = 1.0f;
+                //cropW = 1.0f;
+                //cropH = 1.0f;
                 if (dcar > ar) {
                     dcw = dcw + (((int) (dch * ar)) - dcw) / 2;
                     cropH = (float) dch / (float) (dcw / ar);
@@ -362,8 +358,8 @@ public class SurfaceController {
                 break;
             }
             case VideoFormat.STRETCHED: { // display on full screen resolution stretched: keep dcw and dch
-                cropW = 1.0f;
-                cropH = 1.0f;
+                //cropW = 1.0f;
+                //cropH = 1.0f;
                 log.debug("CONFIG updateSurface: VideoFormat.STRETCHED dc=({},{}), crop=({},{})", dcw, dch, cropW, cropH);
                 break;
             }
