@@ -1132,13 +1132,13 @@ public class VideoStoreImportImpl {
         }
         where.append(")");
 
-        // Direct DELETE is efficient; no need for windowing
-        int deleted = mCr.delete(VideoStoreInternal.FILES_IMPORT, where.toString(), null);
-        log.debug("hideDeletedFilesFromMountedVolumes: DELETED {} files from mounted volumes", deleted);
+        // For mounted volumes, verify files truly don't exist before hiding them
+        // This prevents data loss when USB drives have MediaStore indexing delays
+        verifyAndHideDeletedFiles(where.toString(), timestamp, "hideDeletedFilesFromMountedVolumes");
     }
 
     /**
-     * More aggressive deletion for recently remounted volumes
+     * More careful handling for recently remounted volumes
      */
     private void hideDeletedFilesFromRecentlyMountedVolumes(List<String> volumePaths, String existingFiles, long timestamp) {
         if (volumePaths.isEmpty() || TextUtils.isEmpty(existingFiles)) return;
@@ -1152,11 +1152,61 @@ public class VideoStoreImportImpl {
         }
         where.append(")");
 
-        // For recently mounted volumes, DELETE ALL files that aren't in current MediaStore scan
-        // This ensures deleted files are properly removed even during incremental scans
-        // Direct DELETE is efficient; no need for windowing
-        int deleted = mCr.delete(VideoStoreInternal.FILES_IMPORT, where.toString(), null);
-        log.debug("hideDeletedFilesFromRecentlyMountedVolumes: DELETED {} files from recently mounted volumes", deleted);
+        // For recently mounted volumes, verify files truly don't exist before hiding
+        // This prevents data loss from USB drives with MediaStore indexing delays or power saving
+        verifyAndHideDeletedFiles(where.toString(), timestamp, "hideDeletedFilesFromRecentlyMountedVolumes");
+    }
+
+    /**
+     * Verify files still exist on filesystem before hiding them to prevent data loss from USB indexing delays
+     */
+    private void verifyAndHideDeletedFiles(String whereClause, long timestamp, String logTag) {
+        Cursor c = null;
+        try {
+            // Get list of files that aren't in MediaStore
+            c = mCr.query(VideoStoreInternal.FILES_IMPORT,
+                    new String[]{"_id", "_data"},
+                    whereClause,
+                    null,
+                    null);
+
+            if (c == null) return;
+
+            java.io.File file;
+            int hiddenCount = 0;
+            int existingCount = 0;
+
+            while (c.moveToNext() && !mIsImportInterrupted) {
+                long id = c.getLong(0);
+                String filePath = c.getString(1);
+
+                if (filePath == null) continue;
+
+                file = new java.io.File(filePath);
+                if (!file.exists()) {
+                    // File truly doesn't exist, hide it
+                    ContentValues cv = new ContentValues();
+                    cv.put("volume_hidden", timestamp);
+                    int updated = mCr.update(VideoStoreInternal.FILES_IMPORT, cv,
+                            "_id = ?", new String[]{String.valueOf(id)});
+                    if (updated > 0) hiddenCount++;
+                } else {
+                    // File exists on filesystem even though not in MediaStore
+                    // Unhide it so it can be rescanned (handles MediaStore indexing delays)
+                    ContentValues cv = new ContentValues();
+                    cv.put("volume_hidden", 0);
+                    mCr.update(VideoStoreInternal.FILES_IMPORT, cv,
+                            "_id = ?", new String[]{String.valueOf(id)});
+                    existingCount++;
+                }
+            }
+
+            log.debug("{}: verified files - hidden {}, found existing but unindexed {}", logTag, hiddenCount, existingCount);
+        } catch (Exception e) {
+            log.error("verifyAndHideDeletedFiles: error verifying files", e);
+        } finally {
+            if (c != null) c.close();
+        }
     }
 
     /**
