@@ -76,6 +76,10 @@
     <string name="recently_added_videos">Recently added</string>
     <string name="recently_played">Recently played</string>
     <string name="recently_played_videos">Recently played</string>
+    <string name="new_and_unwatched">New and unwatched</string>
+    <string name="new_and_unwatched_videos">New and unwatched</string>
+    <string name="keep_watching">Keep watching</string>
+    <string name="keep_watching_videos">Keep watching</string>
     <string name="video_lists">Playlists</string>
 
     <!-- The string used in main storage list -->
@@ -799,6 +803,8 @@
     <string name="preferences_show_last_played_row">Show last played row</string>
     <string name="preferences_reset_last_played_row">Reset last played row</string>
     <string name="reset_last_played_row_in_progress">Resetting last played row</string>
+    <string name="pref_smart_recently_rows_title">Smart recently rows</string>
+    <string name="pref_declutter_home_rows_summary">Show only unwatched content in recently added and avoid duplicates in recently played</string>
     <string name="preferences_show_all_movies_row_summary">Check to show a row with all your movies instead of the movie categories row</string>
     <string name="preferences_show_all_movies_row">Show all movie row</string>
     <string name="preferences_movie_sort_order_summary">Select the sort order of the all movie row</string>

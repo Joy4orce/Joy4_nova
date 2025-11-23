@@ -81,7 +81,8 @@ public class MainActivityLeanback extends LeanbackActivity {
 
         //Setup an preferences before we start activites.
         LoaderUtils.mMustHideWatchedVideo = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("hide_watched", false);
-    
+        LoaderUtils.mSmartRecentlyRows = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("smart_recently_rows", false);
+
         UnavailablePosterBroadcastReceiver.registerReceiver(this);
         mPermissionChecker = new PermissionChecker(hasManageExternalStoragePermission(getApplicationContext()));
         new DensityTweak(this)

@@ -70,6 +70,7 @@ import com.archos.mediacenter.video.browser.loader.MoviesLoader;
 import com.archos.mediacenter.video.browser.loader.NonScrapedVideosCountLoader;
 import com.archos.mediacenter.video.browser.loader.VideoLoader;
 import com.archos.mediacenter.video.browser.loader.WatchingUpNextLoader;
+import com.archos.mediaprovider.video.LoaderUtils;
 import com.archos.mediacenter.video.leanback.adapter.object.Box;
 import com.archos.mediacenter.video.leanback.adapter.object.EmptyView;
 import com.archos.mediacenter.video.leanback.adapter.object.Icon;
@@ -189,6 +190,7 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
     private boolean mShowWatchingUpNextRow;
     private boolean mShowLastAddedRow;
     private boolean mShowLastPlayedRow;
+    private boolean mSmartRecentlyRows;
     private boolean mShowMoviesRow;
     private String mMovieSortOrder;
     private boolean mShowTvshowsRow;
@@ -258,6 +260,7 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
         if (! FEATURE_WATCH_UP_NEXT) mShowWatchingUpNextRow = false;
         mShowLastAddedRow = mPrefs.getBoolean(VideoPreferencesCommon.KEY_SHOW_LAST_ADDED_ROW, VideoPreferencesCommon.SHOW_LAST_ADDED_ROW_DEFAULT);
         mShowLastPlayedRow = mPrefs.getBoolean(VideoPreferencesCommon.KEY_SHOW_LAST_PLAYED_ROW, VideoPreferencesCommon.SHOW_LAST_PLAYED_ROW_DEFAULT);
+        mSmartRecentlyRows = mPrefs.getBoolean("smart_recently_rows", false);
         mShowMoviesRow = mPrefs.getBoolean(VideoPreferencesCommon.KEY_SHOW_ALL_MOVIES_ROW, VideoPreferencesCommon.SHOW_ALL_MOVIES_ROW_DEFAULT);
         mMovieSortOrder = mPrefs.getString(VideoPreferencesCommon.KEY_MOVIE_SORT_ORDER, MoviesLoader.DEFAULT_SORT);
         mShowTvshowsRow = mPrefs.getBoolean(VideoPreferencesCommon.KEY_SHOW_ALL_TV_SHOWS_ROW, VideoPreferencesCommon.SHOW_ALL_TV_SHOWS_ROW_DEFAULT);
@@ -467,6 +470,44 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
             LoaderManager.getInstance(this).initLoader(LOADER_ID_LAST_PLAYED, null, this);
         }
 
+        // Check if smart_recently_rows preference changed - need to restart loaders to update URI and row titles
+        boolean newSmartRecentlyRows = mPrefs.getBoolean("smart_recently_rows", false);
+        if (newSmartRecentlyRows != mSmartRecentlyRows) {
+            log.debug("onResume: preference changed, smart recently rows: {} -> updating row titles and restarting loaders", newSmartRecentlyRows);
+            mSmartRecentlyRows = newSmartRecentlyRows;
+            LoaderUtils.mSmartRecentlyRows = newSmartRecentlyRows;
+
+            // Recreate rows with new titles
+            String lastAddedTitle = LoaderUtils.isSmartRecentlyRows() ? getString(R.string.new_and_unwatched) : getString(R.string.recently_added);
+            String lastPlayedTitle = LoaderUtils.isSmartRecentlyRows() ? getString(R.string.keep_watching) : getString(R.string.recently_played);
+
+            // Update last added row title
+            if (mShowLastAddedRow) {
+                int lastAddedPosition = getRowPosition(ROW_ID_LAST_ADDED);
+                if (lastAddedPosition != -1) {
+                    mRowsAdapter.removeItems(lastAddedPosition, 1);
+                }
+                mLastAddedRow = new ListRow(ROW_ID_LAST_ADDED, new HeaderItem(lastAddedTitle), mLastAddedAdapter);
+                if (lastAddedPosition != -1) {
+                    mRowsAdapter.add(lastAddedPosition, mLastAddedRow);
+                }
+                LoaderManager.getInstance(this).restartLoader(LOADER_ID_LAST_ADDED, null, this);
+            }
+
+            // Update last played row title
+            if (mShowLastPlayedRow) {
+                int lastPlayedPosition = getRowPosition(ROW_ID_LAST_PLAYED);
+                if (lastPlayedPosition != -1) {
+                    mRowsAdapter.removeItems(lastPlayedPosition, 1);
+                }
+                mLastPlayedRow = new ListRow(ROW_ID_LAST_PLAYED, new HeaderItem(lastPlayedTitle), mLastPlayedAdapter);
+                if (lastPlayedPosition != -1) {
+                    mRowsAdapter.add(lastPlayedPosition, mLastPlayedRow);
+                }
+                LoaderManager.getInstance(this).restartLoader(LOADER_ID_LAST_PLAYED, null, this);
+            }
+        }
+
         boolean newShowMoviesRow = mPrefs.getBoolean(VideoPreferencesCommon.KEY_SHOW_ALL_MOVIES_ROW, VideoPreferencesCommon.SHOW_ALL_MOVIES_ROW_DEFAULT);
         if (newShowMoviesRow != mShowMoviesRow) {
             log.debug("onResume: preference changed, display all movies row: {} -> updating", newShowMoviesRow);
@@ -621,11 +662,13 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
 
         mLastAddedAdapter = new CursorObjectAdapter(new PosterImageCardPresenter(mActivity));
         mLastAddedAdapter.setMapper(new CompatibleCursorMapperConverter(new VideoCursorMapper()));
-        mLastAddedRow = new ListRow(ROW_ID_LAST_ADDED, new HeaderItem(getString(R.string.recently_added)), mLastAddedAdapter);
+        String lastAddedTitle = LoaderUtils.isSmartRecentlyRows() ? getString(R.string.new_and_unwatched) : getString(R.string.recently_added);
+        mLastAddedRow = new ListRow(ROW_ID_LAST_ADDED, new HeaderItem(lastAddedTitle), mLastAddedAdapter);
 
         mLastPlayedAdapter = new CursorObjectAdapter(new PosterImageCardPresenter(mActivity));
         mLastPlayedAdapter.setMapper(new CompatibleCursorMapperConverter(new VideoCursorMapper()));
-        mLastPlayedRow = new ListRow(ROW_ID_LAST_PLAYED, new HeaderItem(getString(R.string.recently_played)), mLastPlayedAdapter);
+        String lastPlayedTitle = LoaderUtils.isSmartRecentlyRows() ? getString(R.string.keep_watching) : getString(R.string.recently_played);
+        mLastPlayedRow = new ListRow(ROW_ID_LAST_PLAYED, new HeaderItem(lastPlayedTitle), mLastPlayedAdapter);
 
         boolean showByRating = mPrefs.getBoolean(VideoPreferencesCommon.KEY_SHOW_BY_RATING, VideoPreferencesCommon.SHOW_BY_RATING_DEFAULT);
 

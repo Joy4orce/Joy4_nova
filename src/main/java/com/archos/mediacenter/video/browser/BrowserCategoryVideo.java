@@ -26,6 +26,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 
 import com.archos.mediacenter.video.R;
+import com.archos.mediaprovider.video.LoaderUtils;
 import com.archos.mediacenter.video.browser.BrowserByIndexedVideos.BrowserAllMovies;
 import com.archos.mediacenter.video.browser.BrowserByIndexedVideos.BrowserAllTvShows;
 import com.archos.mediacenter.video.browser.BrowserByIndexedVideos.BrowserAllVideos;
@@ -128,13 +129,13 @@ public class BrowserCategoryVideo extends BrowserCategory implements androidx.ap
 
         itemData = new ItemData();
         itemData.icon = R.drawable.category_video_added;
-        itemData.text = R.string.recently_added_videos;
+        itemData.text = LoaderUtils.isSmartRecentlyRows() ? R.string.new_and_unwatched_videos : R.string.recently_added_videos;
         itemData.id = ITEM_ID_RECENTLY_ADDED;
         categoryList.add(itemData);
 
         itemData = new ItemData();
         itemData.icon = R.drawable.category_video_played;
-        itemData.text = R.string.recently_played_videos;
+        itemData.text = LoaderUtils.isSmartRecentlyRows() ? R.string.keep_watching_videos : R.string.recently_played_videos;
         itemData.id = ITEM_ID_RECENTLY_PLAYED;
         categoryList.add(itemData);
 
@@ -254,11 +255,11 @@ public class BrowserCategoryVideo extends BrowserCategory implements androidx.ap
                 break;
             case ITEM_ID_RECENTLY_ADDED:
                 fragmentClass = BrowserLastAdded.class;
-                struc.title = R.string.recently_added_videos;
+                struc.title = LoaderUtils.isSmartRecentlyRows() ? R.string.new_and_unwatched_videos : R.string.recently_added_videos;
                 break;
             case ITEM_ID_RECENTLY_PLAYED:
                 fragmentClass = BrowserLastPlayed.class;
-                struc.title = R.string.recently_played_videos;
+                struc.title = LoaderUtils.isSmartRecentlyRows() ? R.string.keep_watching_videos : R.string.recently_played_videos;
                 break;
             case ITEM_ID_LISTS:
                 fragmentClass = BrowserPlaylists.class;

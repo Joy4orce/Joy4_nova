@@ -239,6 +239,13 @@
         app:iconSpaceReserved="false" >
 
         <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="smart_recently_rows"
+            android:summary="@string/pref_declutter_home_rows_summary"
+            android:title="@string/pref_smart_recently_rows_title"
+            app:iconSpaceReserved="false"/>
+
+        <CheckBoxPreference
             android:defaultValue="true"
             android:key="separate_anime_movie_show"
             android:summary="@string/preferences_separate_animation_from_movies_summary"
@@ -268,8 +275,8 @@
 
         <Preference
             android:key="reset_last_played_row"
-	    android:title="@string/preferences_reset_last_played_row" 
-	    app:iconSpaceReserved="false" />
+	        android:title="@string/preferences_reset_last_played_row"
+	        app:iconSpaceReserved="false" />
 
         <CheckBoxPreference
             android:defaultValue="false"

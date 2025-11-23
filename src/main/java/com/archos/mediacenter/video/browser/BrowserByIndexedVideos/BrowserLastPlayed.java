@@ -22,6 +22,7 @@ import androidx.loader.content.Loader;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.loader.LastPlayedLoader;
 import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
+import com.archos.mediaprovider.video.LoaderUtils;
 import com.archos.mediaprovider.video.VideoStore;
 
 
@@ -41,7 +42,7 @@ public class BrowserLastPlayed extends CursorBrowserByVideo {
 
     @Override
     protected String getActionBarTitle() {
-        return getString(R.string.recently_played_videos);
+        return getString(LoaderUtils.isSmartRecentlyRows() ? R.string.keep_watching_videos : R.string.recently_played_videos);
     }
 
     @Override

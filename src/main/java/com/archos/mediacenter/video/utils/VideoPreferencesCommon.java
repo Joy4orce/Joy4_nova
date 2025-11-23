@@ -70,7 +70,6 @@ import com.archos.mediacenter.video.leanback.tvshow.TvshowsSortOrderEntry;
 import com.archos.mediacenter.video.tvshow.AnimeShowSortOrderEntries;
 import com.archos.mediacenter.video.tvshow.TvshowSortOrderEntries;
 import com.archos.mediacenter.video.utils.credentialsmanager.CredentialsManagerPreferenceActivity;
-import com.archos.mediacenter.video.utils.MediaLibraryBackupService;
 import com.archos.medialib.MediaFactory;
 import com.archos.mediaprovider.video.VideoProvider;
 import com.archos.mediascraper.AllCollectionScrapeService;
@@ -624,13 +623,13 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             return true;
         });
 
-        findPreference("hide_watched").setOnPreferenceChangeListener((preference, newValue) -> {       
+        findPreference("hide_watched").setOnPreferenceChangeListener((preference, newValue) -> {
             LoaderUtils.mMustHideWatchedVideo =  (boolean) newValue;
             getActivity().setResult(ACTIVITY_RESULT_UI_MODE_CHANGED); // way to tell the MainActivity that an important preference has been changed
             getActivity().finish();
             return true;
         });
-        
+
         findPreference(getString(R.string.rescrap_all_prefkey)).setOnPreferenceClickListener(preference -> {
             Intent intent = new Intent(AutoScrapeService.RESCAN_EVERYTHING, null, getActivity(), AutoScrapeService.class);
             intent.putExtra(AutoScrapeService.RESCAN_EVERYTHING, true);
@@ -993,6 +992,14 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
                 if (!currentUiMode.equals(UiChoiceDialog.UI_CHOICE_LEANBACK_TV_VALUE)) {
                     userInterfaceCategory.removePreference(uiZoomPref);
                 }
+
+                 //Last Played Section on Phone UI
+                findPreference("reset_last_played_section").setOnPreferenceClickListener(preference -> {
+                    //Show the toast BEFORE starting the actions!
+                    Toast.makeText(getActivity(), R.string.reset_last_played_row_in_progress, Toast.LENGTH_SHORT).show();
+                    DbUtils.markAsNotRead(getActivity());
+                    return true;
+                });
             }
         }
         
@@ -1003,10 +1010,11 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
                 getPreferenceScreen().removePreference(leanbackUserInterfaceCategory);
             }
             else {
+                //Last Played section on Leanback.
                 findPreference("reset_last_played_row").setOnPreferenceClickListener(preference -> {
-                    DbUtils.markAsNotRead(getActivity());
+                    //Show the toast BEFORE starting the actions!
                     Toast.makeText(getActivity(), R.string.reset_last_played_row_in_progress, Toast.LENGTH_SHORT).show();
-
+                    DbUtils.markAsNotRead(getActivity());
                     return true;
                 });
 
