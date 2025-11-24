@@ -602,7 +602,7 @@
     <string name="hide_watched_videos">Hide watched videos</string>
     <string name="hide_watched_videos_summary">Hide videos from the media Library if they are marked as watched.</string>
     <string name="enable_projector_mode">Enable projector mode</string>
-    <string name="enable_projector_mode_summary">Play videos at the top of the Screen for viewing on a projector.</string>
+    <string name="enable_projector_mode_summary">Play videos at the top of the screen for viewing on a projector.</string>
     <string name="preference_tv_refreshrate_switch">Enable automatic refresh rate switch</string>
     <string name="preference_tv_refreshrate_switch_summary">Remove judder effect by adapting best screen refresh rate to video frame rate (device support may vary)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Disabled</string>
