@@ -180,20 +180,6 @@
             android:summary="@string/enable_android_frame_timing_summary"
             android:title="@string/enable_android_frame_timing"
             app:iconSpaceReserved="false"/>
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="hide_watched"
-            android:persistent="true"
-            android:summary="@string/hide_watched_videos_summary"
-            android:title="@string/hide_watched_videos"
-            app:iconSpaceReserved="false"/>
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="player_projector_mode_key"
-            android:persistent="true"
-            android:summary="@string/enable_projector_mode_summary"
-            android:title="@string/enable_projector_mode"
-            app:iconSpaceReserved="false"/> 
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preferences_user_interface" android:key="category_user_interface"
         app:iconSpaceReserved="false" >
@@ -206,6 +192,20 @@
             android:key="smart_recently_rows"
             android:summary="@string/pref_declutter_home_rows_summary"
             android:title="@string/pref_smart_recently_rows_title"
+            app:iconSpaceReserved="false"/>
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="player_projector_mode_key"
+            android:persistent="true"
+            android:summary="@string/enable_projector_mode_summary"
+            android:title="@string/enable_projector_mode"
+            app:iconSpaceReserved="false"/>
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="hide_watched"
+            android:persistent="true"
+            android:summary="@string/hide_watched_videos_summary"
+            android:title="@string/hide_watched_videos"
             app:iconSpaceReserved="false"/>
 
         <ListPreference
