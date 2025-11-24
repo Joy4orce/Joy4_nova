@@ -253,6 +253,13 @@
 
         <CheckBoxPreference
             android:defaultValue="true"
+            android:key="always_leanback_on_tv_key"
+            android:summary="@string/always_leanback_on_tv_summary"
+            android:title="@string/always_leanback_on_tv"
+            app:iconSpaceReserved="false"/>
+
+        <CheckBoxPreference
+            android:defaultValue="true"
             android:key="separate_anime_movie_show"
             android:summary="@string/preferences_separate_animation_from_movies_summary"
             android:title="@string/preferences_separate_animation_from_movies"

@@ -19,6 +19,7 @@ import androidx.fragment.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -89,23 +90,16 @@ public class UiChoiceDialog extends DialogFragment implements View.OnClickListen
      * @return true if the application is in leanback mode
      */
     public static boolean applicationIsInLeanbackMode(Context context) {
+        //Save preferences object because we use it more than once.
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         // When on an actual leanback device (Android TV, etc.) we give no choice -> Leanback!
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
-            return true;
-        }
-        else {
-            // string definitions are in preference_video.xml and in @array/ui_mode_leanback_entryvalues
-            final String uiMode = PreferenceManager.getDefaultSharedPreferences(context)
-                    .getString(UiChoiceDialog.UI_CHOICE_LEANBACK_KEY, "-");
+        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK) && preferences.getBoolean("always_leanback_on_tv_key",true)) 
+            return true; 
 
-            if (uiMode.equals(UiChoiceDialog.UI_CHOICE_LEANBACK_TV_VALUE)) {
-                // User explicitly choose TV mode
-                return true;
-            }
-            else { // user did not choose or user explicitly choose tablet mode
-                return false;
-            }
-        }
+        //Not on Leanback, or user turn off always on TV.
+        return UiChoiceDialog.UI_CHOICE_LEANBACK_TV_VALUE.equals(
+            preferences.getString(UiChoiceDialog.UI_CHOICE_LEANBACK_KEY, "-")
+        );
     }
 }
