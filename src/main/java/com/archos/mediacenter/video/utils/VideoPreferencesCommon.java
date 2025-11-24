@@ -967,9 +967,20 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
 
         PreferenceCategory userInterfaceCategory = (PreferenceCategory)findPreference("category_user_interface");
         if (userInterfaceCategory!=null) {
-            // Leanback device case: no UI preference at all (for now at least)
+            // Leanback device case: keep category but remove phone-specific UI preferences
             if (getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
-                getPreferenceScreen().removePreference(userInterfaceCategory);
+                // Remove phone-specific preferences on leanback devices
+                Preference uimodePref = findPreference("uimode");
+                if (uimodePref != null) userInterfaceCategory.removePreference(uimodePref);
+                Preference uimodeLeanbackPref = findPreference("uimode_leanback");
+                if (uimodeLeanbackPref != null) userInterfaceCategory.removePreference(uimodeLeanbackPref);
+                Preference uiZoomPref = findPreference("ui_zoom");
+                if (uiZoomPref != null) userInterfaceCategory.removePreference(uiZoomPref);
+                Preference displayResumeBoxPref = findPreference("display_resume_box");
+                if (displayResumeBoxPref != null) userInterfaceCategory.removePreference(displayResumeBoxPref);
+                Preference resetBrightnessPref = findPreference(getString(R.string.reset_brightness_on_start_key));
+                if (resetBrightnessPref != null) userInterfaceCategory.removePreference(resetBrightnessPref);
+                // Note: smart_recently_rows is kept visible as it applies to both phone and leanback
             }
             // Not a leanback device, but if the APK integrates leanback the user can choose to use it
             else {
@@ -994,12 +1005,15 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
                 }
 
                  //Last Played Section on Phone UI
-                findPreference("reset_last_played_section").setOnPreferenceClickListener(preference -> {
-                    //Show the toast BEFORE starting the actions!
-                    Toast.makeText(getActivity(), R.string.reset_last_played_row_in_progress, Toast.LENGTH_SHORT).show();
-                    DbUtils.markAsNotRead(getActivity());
-                    return true;
-                });
+                Preference resetLastPlayedPref = findPreference("reset_last_played_section");
+                if (resetLastPlayedPref != null) {
+                    resetLastPlayedPref.setOnPreferenceClickListener(preference -> {
+                        //Show the toast BEFORE starting the actions!
+                        Toast.makeText(getActivity(), R.string.reset_last_played_row_in_progress, Toast.LENGTH_SHORT).show();
+                        DbUtils.markAsNotRead(getActivity());
+                        return true;
+                    });
+                }
             }
         }
         

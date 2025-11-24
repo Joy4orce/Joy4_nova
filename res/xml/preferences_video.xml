@@ -194,6 +194,12 @@
         <!-- first "uimode" item is for Android before 4.2 that does not support leanback -->
         <!-- second "uimode" item is for Android >= 4.2 that does support leanback -->
         <!-- (in case of actual leanback device we display none) -->
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="smart_recently_rows"
+            android:summary="@string/pref_declutter_home_rows_summary"
+            android:title="@string/pref_smart_recently_rows_title"
+            app:iconSpaceReserved="false"/>
 
         <ListPreference
             android:defaultValue="0"
@@ -237,13 +243,6 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preferences_leanback_user_interface" android:key="category_leanback_user_interface"
         app:iconSpaceReserved="false" >
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="smart_recently_rows"
-            android:summary="@string/pref_declutter_home_rows_summary"
-            android:title="@string/pref_smart_recently_rows_title"
-            app:iconSpaceReserved="false"/>
 
         <CheckBoxPreference
             android:defaultValue="true"

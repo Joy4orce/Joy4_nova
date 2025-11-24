@@ -101,6 +101,30 @@ public class BrowserCategoryVideo extends BrowserCategory implements androidx.ap
         super.onViewCreated(v, save);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Update category labels when returning from preferences (smart mode may have changed)
+        updateCategoryLabels();
+    }
+
+    private void updateCategoryLabels() {
+        // Find and update the Recently Added and Recently Played category items
+        for (Object item : mCategoryList) {
+            if (item instanceof ItemData) {
+                ItemData itemData = (ItemData) item;
+                if (itemData.id == ITEM_ID_RECENTLY_ADDED) {
+                    itemData.text = LoaderUtils.isSmartRecentlyRows() ? R.string.new_and_unwatched_videos : R.string.recently_added_videos;
+                } else if (itemData.id == ITEM_ID_RECENTLY_PLAYED) {
+                    itemData.text = LoaderUtils.isSmartRecentlyRows() ? R.string.keep_watching_videos : R.string.recently_played_videos;
+                }
+            }
+        }
+        // Notify adapter to refresh the UI
+        if (getListAdapter() != null) {
+            ((android.widget.BaseAdapter) getListAdapter()).notifyDataSetChanged();
+        }
+    }
 
     protected int getDefaultId(){return ITEM_ID_RECENTLY_ADDED;}
 

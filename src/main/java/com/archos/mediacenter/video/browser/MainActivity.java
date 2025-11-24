@@ -464,6 +464,10 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
 
         mPermissionChecker.checkAndRequestPermission(this);
 
+        // Reload preferences that may have changed
+        LoaderUtils.mMustHideWatchedVideo = mPreferences.getBoolean("hide_watched", false);
+        LoaderUtils.mSmartRecentlyRows = mPreferences.getBoolean("smart_recently_rows", false);
+
         if (Build.VERSION.SDK_INT >= 33) {
             registerReceiver(mTraktRelogBroadcastReceiver,new IntentFilter(Trakt.TRAKT_ISSUE_REFRESH_TOKEN), Context.RECEIVER_NOT_EXPORTED);
         } else {
