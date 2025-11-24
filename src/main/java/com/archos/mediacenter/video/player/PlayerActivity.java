@@ -178,6 +178,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     public static final String KEY_SUBTITLE_COLOR = "pref_play_subtitle_color_key";
     private static final String KEY_PLAYER_FORMAT = "player_pref_format_key";
     private static final String KEY_PLAYER_AUTO_FORMAT = "player_pref_auto_format_key";
+    private static final String KEY_PLAYER_PROJECTOR_MODE = "player_projector_mode_key";
     private static final String KEY_AUDIO_FILT = "pref_audio_filt_int_key"; // used to be "pref_audio_filt_key", containing a string
     private static final String KEY_AUDIO_FILT_NIGHT = "pref_audio_filt_night_int_key";
     private static final String KEY_NOTIFICATIONS_MODE = "notifications_mode";
@@ -778,6 +779,10 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         setLockRotation(mLockRotation);
         mSurfaceController.setVideoFormat(Integer.parseInt(mPreferences.getString(KEY_PLAYER_FORMAT, "-1")),
                 Integer.parseInt(mPreferences.getString(KEY_PLAYER_AUTO_FORMAT, "-1")));
+        
+        //Set up projector mode if we need it, otherwise dont even call.
+        if (mPreferences.getBoolean(KEY_PLAYER_PROJECTOR_MODE, false)) mSurfaceController.setProjectorMode(true);
+        
         log.debug("onStart: Setting audio transformer");
         if (LibAvos.isAvailable()) {
             VideoPreferencesCommon.resetPassthroughPref(mPreferences); // note this resets the audio_speed if in passthrough to 1.0f in prefs

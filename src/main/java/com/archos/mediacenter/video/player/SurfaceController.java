@@ -23,6 +23,8 @@ import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Gravity;
+import android.widget.FrameLayout;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -261,6 +263,20 @@ public class SurfaceController {
     public void setEffectType(int type) {
         mEffectType = type;
         updateSurface();
+    }
+    
+    public void setProjectorMode(boolean projectorMode){
+        //Get the layout paramters for the Views.
+        FrameLayout.LayoutParams paramsEffect = (FrameLayout.LayoutParams) mEffectView.getLayoutParams();
+        FrameLayout.LayoutParams paramsSurface = (FrameLayout.LayoutParams) mSurfaceView.getLayoutParams();
+
+        // Set gravity to top and center horizontally if we are in projector mode.
+        paramsEffect.gravity = projectorMode ? Gravity.TOP | Gravity.CENTER_HORIZONTAL : Gravity.CENTER;
+        paramsSurface.gravity = projectorMode ? Gravity.TOP | Gravity.CENTER_HORIZONTAL : Gravity.CENTER;
+
+        // Set the new layout parameters
+        mSurfaceView.setLayoutParams(paramsSurface);
+        mEffectView.setLayoutParams(paramsEffect);
     }
     
     synchronized private void updateSurface() {

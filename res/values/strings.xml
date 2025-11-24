@@ -601,6 +601,8 @@
     <string name="enable_android_frame_timing_summary">Delegate to Android the frame blit timing for smoother playback (experimental)</string>
     <string name="hide_watched_videos">Hide Watched Videos</string>
     <string name="hide_watched_videos_summary">Hide Videos from the Media Library if they are marked as watched.</string>
+    <string name="enable_projector_mode">Enable Projector Mode</string>
+    <string name="enable_projector_mode_summary">Play Videos at the Top of the Screen for viewing on a Projector.</string> 
     <string name="preference_tv_refreshrate_switch">Enable automatic refresh rate switch</string>
     <string name="preference_tv_refreshrate_switch_summary">Remove judder effect by adapting best screen refresh rate to video frame rate (device support may vary)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Disabled</string>
