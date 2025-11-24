@@ -47,11 +47,13 @@ public class SurfaceController {
         public static final int STRETCHED = 2;
         public static final int FORCE43 = 3;
         public static final int FORCE169 = 4;
-        public static final int AUTO = 5;
+        public static final int FORCE185 = 5;
+        public static final int FORCE239 = 6;
+        public static final int AUTO = 7;
         
         public static final double VIDEO_FORMAT_AUTO_THRES = 0.7;
 
-        private final int[] mode = {ORIGINAL, FULLSCREEN, STRETCHED, FORCE43, FORCE169, AUTO};
+        private final int[] mode = {ORIGINAL, FULLSCREEN, STRETCHED, FORCE43, FORCE169, FORCE185, FORCE239, AUTO};
         private final int max;
         private int idx;
         public VideoFormat(int max) {
@@ -100,8 +102,8 @@ public class SurfaceController {
     private int         mVideoWidth = 0;
     private int         mVideoHeight = 0;
     private double      mVideoAspect = 1.0f;
-    private VideoFormat mVideoFormat = new VideoFormat(5);
-    private VideoFormat mAutoVideoFormat = new VideoFormat(6);
+    private VideoFormat mVideoFormat = new VideoFormat(7);
+    private VideoFormat mAutoVideoFormat = new VideoFormat(8);
     private int         mSurfaceWidth = 0;
     private int         mSurfaceHeight = 0;
     
@@ -306,6 +308,8 @@ public class SurfaceController {
         double ar = switch (fmt) {
             case VideoFormat.FORCE43 -> 4f / 3f;
             case VideoFormat.FORCE169 -> 16f / 9f;
+            case VideoFormat.FORCE185 -> 1.85f;
+            case VideoFormat.FORCE239 -> 2.39f;
             default -> par * sar;
         };
 
@@ -319,7 +323,7 @@ public class SurfaceController {
 
         //cropW = cropH = 1.0f;
         switch (fmt) {
-            case VideoFormat.ORIGINAL, VideoFormat.FORCE43, VideoFormat.FORCE169:
+            case VideoFormat.ORIGINAL, VideoFormat.FORCE43, VideoFormat.FORCE169, VideoFormat.FORCE185, VideoFormat.FORCE239:
                 if (dcar < ar) {
                     //4:3 movie on 16:9 screen or 16:9 movie on portrait screen
                     dch = (int) (dcw/ (ar));

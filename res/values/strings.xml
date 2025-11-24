@@ -685,6 +685,8 @@
     <string name="format_stretched">Stretched</string>
     <string name="format_43">4:3</string>
     <string name="format_169">16:9</string>
+    <string name="format_185">1.85:1</string>
+    <string name="format_239">2.39:1</string>
     <string name="stereo_dive_enable">Stereo dive effect</string>
     <string name="stereo_dive_disable">Disable stereo dive effect</string>
     <string name="rotation_unlock">Enable automatic screen rotation</string>
