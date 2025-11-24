@@ -937,8 +937,8 @@
     <string name="leanback_hint_long_press_on_back">HINT: long press on BACK key closes the file browser</string>
     <string name="leanback_archos_video_webview">Nova Video WebView</string>
     <string name="file_access_error">Did not manage to access the file</string>
-    <string name="always_leanback_on_tv">Always Start in TV User Inferface</string>
-    <string name="always_leanback_on_tv_summary">Always Start the application in TV User Inferface, turn off if you want to start in Classic UI on your TV.</string>
+    <string name="always_leanback_on_tv">Always start in TV user inferface</string>
+    <string name="always_leanback_on_tv_summary">Always start the application in TV user inferface, turn off if you want to start in classic UI on your TV.</string>
 
     <string name="interface_size">Interface size</string>
     <string name="interface_size_summary">Change this in case the user interface is too small or too large</string>

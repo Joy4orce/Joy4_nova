@@ -972,8 +972,34 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
                 // Remove phone-specific preferences on leanback devices
                 Preference uimodePref = findPreference("uimode");
                 if (uimodePref != null) userInterfaceCategory.removePreference(uimodePref);
+
+                // Show uimode_leanback selector ONLY when in Classic mode (so user can switch to TV mode)
+                // Hide it when in Leanback mode (user is already in TV mode)
                 Preference uimodeLeanbackPref = findPreference("uimode_leanback");
-                if (uimodeLeanbackPref != null) userInterfaceCategory.removePreference(uimodeLeanbackPref);
+                if (uimodeLeanbackPref != null) {
+                    if (UiChoiceDialog.applicationIsInLeanbackMode(getActivity())) {
+                        // In TV mode: hide the selector, user can use "Always Start in TV Interface" instead
+                        userInterfaceCategory.removePreference(uimodeLeanbackPref);
+                    } else {
+                        // In Classic mode: show selector so user can switch back to TV mode
+                        uimodeLeanbackPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                                // Sync with always_leanback_on_tv_key and uimode on Android TV devices
+                                String uiMode = (String) newValue;
+                                boolean isLeanbackMode = UiChoiceDialog.UI_CHOICE_LEANBACK_TV_VALUE.equals(uiMode);
+                                String uimodeValue = isLeanbackMode ? "2" : "1";
+                                getPreferenceManager().getSharedPreferences().edit()
+                                    .putBoolean("always_leanback_on_tv_key", isLeanbackMode)
+                                    .putString("uimode", uimodeValue)
+                                    .apply();
+                                getActivity().setResult(ACTIVITY_RESULT_UI_MODE_CHANGED);
+                                getActivity().finish();
+                                return true;
+                            }
+                        });
+                    }
+                }
+
                 Preference uiZoomPref = findPreference("ui_zoom");
                 if (uiZoomPref != null) userInterfaceCategory.removePreference(uiZoomPref);
                 Preference displayResumeBoxPref = findPreference("display_resume_box");
@@ -984,24 +1010,37 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             }
             // Not a leanback device, but if the APK integrates leanback the user can choose to use it
             else {
-                userInterfaceCategory.removePreference(findPreference("uimode")); // remove the old uimode settings
-                findPreference("uimode_leanback").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                    public boolean onPreferenceChange(Preference preference, Object o) {
-                        getActivity().setResult(ACTIVITY_RESULT_UI_MODE_CHANGED); // way to tell the MainActivity that an important preference has been changed
+                Preference uimodePref = findPreference("uimode");
+                if (uimodePref != null) userInterfaceCategory.removePreference(uimodePref); // remove the old uimode settings
+                Preference uimodeLeanbackPref = findPreference("uimode_leanback");
+                if (uimodeLeanbackPref != null) {
+                    uimodeLeanbackPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                        public boolean onPreferenceChange(Preference preference, Object newValue) {
+                            // Sync with uimode preference (phones/tablets don't use always_leanback_on_tv_key)
+                            String uiMode = (String) newValue;
+                            boolean isLeanbackMode = UiChoiceDialog.UI_CHOICE_LEANBACK_TV_VALUE.equals(uiMode);
+                            String uimodeValue = isLeanbackMode ? "2" : "1";
+                            getPreferenceManager().getSharedPreferences().edit()
+                                .putString("uimode", uimodeValue)
+                                .apply();
+                            getActivity().setResult(ACTIVITY_RESULT_UI_MODE_CHANGED);
+                            getActivity().finish();
+                            return true;
+                        }
+                    });
+                }
+                Preference uiZoomPref = findPreference("ui_zoom");
+                if (uiZoomPref != null) {
+                    uiZoomPref.setOnPreferenceClickListener(preference -> {
+                        getActivity().setResult(ACTIVITY_RESULT_UI_ZOOM_CHANGED); // way to tell the MainActivity that an important preference has been changed
                         getActivity().finish(); // close the preference activity right away
                         return true;
+                    });
+                    // Do not show the zoom preference if user is not in TV more UI
+                    String currentUiMode = getPreferenceManager().getSharedPreferences().getString(UiChoiceDialog.UI_CHOICE_LEANBACK_KEY, "-");
+                    if (!currentUiMode.equals(UiChoiceDialog.UI_CHOICE_LEANBACK_TV_VALUE)) {
+                        userInterfaceCategory.removePreference(uiZoomPref);
                     }
-                });
-                Preference uiZoomPref = findPreference("ui_zoom");
-                uiZoomPref.setOnPreferenceClickListener(preference -> {
-                    getActivity().setResult(ACTIVITY_RESULT_UI_ZOOM_CHANGED); // way to tell the MainActivity that an important preference has been changed
-                    getActivity().finish(); // close the preference activity right away
-                    return true;
-                });
-                // Do not show the zoom preference if user is not in TV more UI
-                String currentUiMode = getPreferenceManager().getSharedPreferences().getString(UiChoiceDialog.UI_CHOICE_LEANBACK_KEY, "-");
-                if (!currentUiMode.equals(UiChoiceDialog.UI_CHOICE_LEANBACK_TV_VALUE)) {
-                    userInterfaceCategory.removePreference(uiZoomPref);
                 }
 
                  //Last Played Section on Phone UI
@@ -1018,12 +1057,37 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         }
         
         PreferenceCategory leanbackUserInterfaceCategory = (PreferenceCategory)findPreference("category_leanback_user_interface");
-        
+
         if (leanbackUserInterfaceCategory != null) {
             if (!UiChoiceDialog.applicationIsInLeanbackMode(getActivity())) {
                 getPreferenceScreen().removePreference(leanbackUserInterfaceCategory);
             }
             else {
+                // Hide "Always Start in TV Interface" on non-TV devices (it's only relevant on Android TV)
+                if (!getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+                    Preference alwaysLeanbackPref = findPreference("always_leanback_on_tv_key");
+                    if (alwaysLeanbackPref != null) leanbackUserInterfaceCategory.removePreference(alwaysLeanbackPref);
+                } else {
+                    // On Android TV: sync "Always Start in TV Interface" with uimode/uimode_leanback
+                    Preference alwaysLeanbackPref = findPreference("always_leanback_on_tv_key");
+                    if (alwaysLeanbackPref != null) {
+                        alwaysLeanbackPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                                boolean enabled = (Boolean) newValue;
+                                // Sync with uimode_leanback and uimode preferences
+                                String modeValue = enabled ? UiChoiceDialog.UI_CHOICE_LEANBACK_TV_VALUE : UiChoiceDialog.UI_CHOICE_LEANBACK_TABLET_VALUE;
+                                String uimodeValue = enabled ? "2" : "1";
+                                getPreferenceManager().getSharedPreferences().edit()
+                                    .putString(UiChoiceDialog.UI_CHOICE_LEANBACK_KEY, modeValue)
+                                    .putString("uimode", uimodeValue)
+                                    .apply();
+                                // Don't restart - let change take effect on next app launch
+                                return true;
+                            }
+                        });
+                    }
+                }
+
                 //Last Played section on Leanback.
                 findPreference("reset_last_played_row").setOnPreferenceClickListener(preference -> {
                     //Show the toast BEFORE starting the actions!

@@ -73,7 +73,27 @@ public class MainActivityLeanback extends LeanbackActivity {
     protected void onCreate(Bundle savedInstanceState) {
         log.warn("onCreate: MainActivityLeanback instance created: {}", this.hashCode());
         ((CustomApplication) getApplication()).loadLocale();
+
+        // Check if user disabled "Always start in TV interface" - if so, redirect to phone UI
+        if (!UiChoiceDialog.applicationIsInLeanbackMode(this)) {
+            log.debug("onCreate: User disabled leanback mode, redirecting to MainActivity");
+            Intent i = new Intent(this, com.archos.mediacenter.video.browser.MainActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            if (getIntent().getData() != null) {
+                i.setData(getIntent().getData());
+            }
+            if (getIntent().getExtras() != null) {
+                i.putExtras(getIntent().getExtras());
+            }
+            startActivity(i);
+            finish();
+            return;
+        }
+
         super.onCreate(savedInstanceState);
+
+        // Update uimode/uimode_leanback to reflect we're in leanback mode
+        UiChoiceDialog.updateUiModePreferences(this, true);
 
         //Reset the Video Aspect Ratio on Startup.
         PreferenceManager.getDefaultSharedPreferences(this).edit().putString("player_pref_auto_format_key","-1").apply();

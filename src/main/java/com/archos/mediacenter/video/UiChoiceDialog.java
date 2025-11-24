@@ -93,13 +93,39 @@ public class UiChoiceDialog extends DialogFragment implements View.OnClickListen
         //Save preferences object because we use it more than once.
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-        // When on an actual leanback device (Android TV, etc.) we give no choice -> Leanback!
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK) && preferences.getBoolean("always_leanback_on_tv_key",true)) 
-            return true; 
+        boolean hasLeanbackFeature = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
 
-        //Not on Leanback, or user turn off always on TV.
-        return UiChoiceDialog.UI_CHOICE_LEANBACK_TV_VALUE.equals(
-            preferences.getString(UiChoiceDialog.UI_CHOICE_LEANBACK_KEY, "-")
-        );
+        // Initialize preferences on first run for Android TV
+        if (hasLeanbackFeature && !preferences.contains("always_leanback_on_tv_key")) {
+            android.util.Log.d("UiChoiceDialog", "First run on Android TV - initializing always_leanback_on_tv_key=true");
+            preferences.edit()
+                .putBoolean("always_leanback_on_tv_key", true)
+                .apply();
+        }
+
+        // On Android TV: check always_leanback_on_tv_key preference (default true)
+        // On Phone/Tablet: ALWAYS return false (always use MainActivity)
+        if (hasLeanbackFeature) {
+            boolean alwaysLeanbackOnTv = preferences.getBoolean("always_leanback_on_tv_key", true);
+            android.util.Log.d("UiChoiceDialog", "Android TV: always_leanback_on_tv_key=" + alwaysLeanbackOnTv);
+            return alwaysLeanbackOnTv;
+        } else {
+            android.util.Log.d("UiChoiceDialog", "Phone/Tablet: always use MainActivity");
+            return false;
+        }
+    }
+
+    /**
+     * Update uimode and uimode_leanback preferences to reflect the current UI mode
+     * Should be called after launching MainActivity or MainActivityLeanback
+     */
+    public static void updateUiModePreferences(Context context, boolean isLeanback) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String modeValue = isLeanback ? UI_CHOICE_LEANBACK_TV_VALUE : UI_CHOICE_LEANBACK_TABLET_VALUE;
+        android.util.Log.d("UiChoiceDialog", "Updating UI mode preferences to: " + modeValue);
+        preferences.edit()
+            .putString(UI_CHOICE_LEANBACK_KEY, modeValue)
+            .putString("uimode", isLeanback ? "2" : "1")
+            .apply();
     }
 }

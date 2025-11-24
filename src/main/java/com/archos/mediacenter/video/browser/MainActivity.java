@@ -217,6 +217,9 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
         this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
         super.onCreate(savedInstanceState);
 
+        // Update uimode/uimode_leanback to reflect we're in phone/tablet mode
+        com.archos.mediacenter.video.UiChoiceDialog.updateUiModePreferences(this, false);
+
         //Setup an preferences before we start activites.
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     
