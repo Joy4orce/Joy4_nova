@@ -17,6 +17,7 @@ package com.archos.mediacenter.video.leanback;
 import static com.archos.filecorelibrary.FileUtils.hasManageExternalStoragePermission;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -96,8 +97,17 @@ public class MainActivityLeanback extends LeanbackActivity {
         UiChoiceDialog.updateUiModePreferences(this, true);
 
         //Reset the Video Aspect Ratio on Startup.
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putString("player_pref_auto_format_key","-1").apply();
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putString("player_pref_format_key","0").apply();
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+        
+         //Reset the Video Aspect Ratio on Startup.
+        editor.putString("player_pref_auto_format_key","-1");
+        editor.putString("player_pref_format_key","0");
+
+        //If we are starting the Browser again, we aren't unpausing a Video
+        editor.putBoolean("user_paused_video", false);
+        
+        //Apply all the changes at once!
+        editor.apply();
 
         //Setup an preferences before we start activites.
         LoaderUtils.mMustHideWatchedVideo = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("hide_watched", false);

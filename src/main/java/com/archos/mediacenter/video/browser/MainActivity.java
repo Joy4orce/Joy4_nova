@@ -222,18 +222,25 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
 
         //Setup an preferences before we start activites.
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-    
-        //Reset Video brightness to System on Startup.
-        if (!mPreferences.getBoolean("reset_brightness_on_start", false))
-            mPreferences.edit().putInt("brightness_saved",-1).apply();
-
-         //Set the Hide watched videos on Startup.
+        
+        //Set the Hide watched videos on Startup.
         LoaderUtils.mMustHideWatchedVideo = mPreferences.getBoolean("hide_watched", false);
         LoaderUtils.mSmartRecentlyRows = mPreferences.getBoolean("smart_recently_rows", false);
 
         //Reset the Video Aspect Ratio on Startup.
-        mPreferences.edit().putString("player_pref_auto_format_key","-1").apply();
-        mPreferences.edit().putString("player_pref_format_key","0").apply();
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putString("player_pref_auto_format_key","-1");
+        editor.putString("player_pref_format_key","0");
+        
+        //If we are starting the Browser again, we aren't unpausing a Video
+        editor.putBoolean("user_paused_video", false);
+
+        //Reset Video brightness to System on Startup.
+        if (!mPreferences.getBoolean("reset_brightness_on_start", false))
+            editor.putInt("brightness_saved",-1);
+
+        //Apply all the changes at once!
+        editor.apply();
 
         try {
             mSearchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
