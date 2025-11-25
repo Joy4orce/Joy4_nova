@@ -41,7 +41,7 @@ public class LastPlayedLoader extends VideoLoader {
         if (LoaderUtils.isSmartRecentlyRows()) {
             Uri baseUri = getUri();
             Uri.Builder builder = baseUri.buildUpon();
-            builder.appendQueryParameter("group", "COALESCE(" + VideoStore.Video.VideoColumns.SCRAPER_M_IMDB_ID + ", " + VideoStore.Video.VideoColumns.SCRAPER_E_IMDB_ID + ")");
+            builder.appendQueryParameter("group", VideoStore.Video.VideoColumns.BOOKMARK+", COALESCE(" + VideoStore.Video.VideoColumns.SCRAPER_M_IMDB_ID + ", " + VideoStore.Video.VideoColumns.SCRAPER_E_IMDB_ID + ")");
             setUri(builder.build());
             if (DBG) Log.d(TAG, "Modified URI: " + builder.build());
         }
@@ -67,7 +67,7 @@ public class LastPlayedLoader extends VideoLoader {
         if (LoaderUtils.isSmartRecentlyRows()) {
             // Secondary sort by release/air date to ensure consistent ordering when last_played is equal
             // Movies use m_release_date (YYYY-MM-DD string), Episodes use e_aired (milliseconds timestamp)
-            sortOrder = "MAX(" + VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED + ") DESC, " +
+            sortOrder = "MIN(" + VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED + ") DESC, " +
                        "COALESCE(" + VideoStore.Video.VideoColumns.SCRAPER_M_RELEASE_DATE + ", " +
                        "date(" + VideoStore.Video.VideoColumns.SCRAPER_E_AIRED + "/1000, 'unixepoch')) DESC " +
                        "LIMIT 50";
