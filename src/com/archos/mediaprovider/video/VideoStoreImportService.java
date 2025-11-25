@@ -178,6 +178,13 @@ public class VideoStoreImportService extends Service implements Handler.Callback
         n = createNotification();
         log.debug("onCreate: create notification + startService {}", NOTIFICATION_ID);
         ArchosUtils.addBreadcrumb(SentryLevel.INFO, "VideoStoreImportService.onCreate", "created notification + startService " + NOTIFICATION_ID + " notification null? " + (n == null));
+
+        //Check if we are in the Foreground.
+        if (!LoaderUtils.isAppInForeground()){
+            stopSelf();
+            return;
+        }
+
         try {
             ServiceCompat.startForeground(this, NOTIFICATION_ID, n,
                     (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
@@ -270,6 +277,12 @@ public class VideoStoreImportService extends Service implements Handler.Callback
             ArchosUtils.addBreadcrumb(SentryLevel.WARNING, "VideoStoreImportService.onStartCommand", "mHandler is null, deferring start");
             // Return START_STICKY so the service will be restarted when onCreate completes
             return Service.START_STICKY;
+        }
+
+        //Check if we are in the Foreground
+        if (!LoaderUtils.isAppInForeground()){
+            stopSelf(startId);
+            return Service.START_NOT_STICKY;
         }
 
         try {
@@ -690,6 +703,11 @@ public class VideoStoreImportService extends Service implements Handler.Callback
             log.debug("handleVolumeMounted: cleared volume_hidden for {} rows", updated);
         }
 
+        //Check if we are in the Foreground.
+        if (!LoaderUtils.isAppInForeground()){
+            return;
+        }
+
         try {
             ServiceCompat.startForeground(this, NOTIFICATION_ID, n,
                     (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
@@ -754,6 +772,12 @@ public class VideoStoreImportService extends Service implements Handler.Callback
                 log.debug("onChange: triggering VIDEO_SCANNER_IMPORT_INCR");
                 // First ensure we're in foreground mode for the new import
                 log.debug("ContentChangeObserver.onChange: ensuring foreground mode for new import");
+
+                //Check if we are in the Foreground.
+                if (!LoaderUtils.isAppInForeground()){
+                    return;
+                }
+
                 try {
                     ServiceCompat.startForeground(mService, NOTIFICATION_ID, mService.n,
                         (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC : 0);
@@ -893,6 +917,12 @@ public class VideoStoreImportService extends Service implements Handler.Callback
         // (checkDatabaseForUnmountedVolumes() is called during import via updateVolumeHiddenStatesByPath())
         if (ImportState.VIDEO.isDirty()) {
             log.debug("onStart: onForeGround && ImportState.isDirty MESSAGE_IMPORT_FULL");
+
+            //Check if we are in the Foreground.
+            if (!LoaderUtils.isAppInForeground()){
+                return;
+            }
+
             // First ensure we're in foreground mode for the new import
             try {
                 ServiceCompat.startForeground(this, NOTIFICATION_ID, n,

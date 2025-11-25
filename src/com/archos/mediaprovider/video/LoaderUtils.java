@@ -15,6 +15,8 @@
 package com.archos.mediaprovider.video;
 
 import com.archos.mediacenter.utils.trakt.Trakt;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.ProcessLifecycleOwner;
 
 /**
  * Created by vapillon on 29/05/15.
@@ -39,5 +41,12 @@ public class LoaderUtils {
 
     static public boolean isSmartRecentlyRows() {
         return mSmartRecentlyRows;
+    }
+
+    static public boolean isAppInForeground() {
+        return ProcessLifecycleOwner.get()
+                .getLifecycle()
+                .getCurrentState()
+                .isAtLeast(Lifecycle.State.STARTED);
     }
 }
