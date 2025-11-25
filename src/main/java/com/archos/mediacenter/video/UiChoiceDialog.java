@@ -104,14 +104,17 @@ public class UiChoiceDialog extends DialogFragment implements View.OnClickListen
         }
 
         // On Android TV: check always_leanback_on_tv_key preference (default true)
-        // On Phone/Tablet: ALWAYS return false (always use MainActivity)
+        // On Phone/Tablet: check uimode_leanback preference to allow manual TV interface selection
         if (hasLeanbackFeature) {
             boolean alwaysLeanbackOnTv = preferences.getBoolean("always_leanback_on_tv_key", true);
             android.util.Log.d("UiChoiceDialog", "Android TV: always_leanback_on_tv_key=" + alwaysLeanbackOnTv);
             return alwaysLeanbackOnTv;
         } else {
-            android.util.Log.d("UiChoiceDialog", "Phone/Tablet: always use MainActivity");
-            return false;
+            // On phones/tablets, check if user manually selected TV interface
+            String uiMode = preferences.getString(UI_CHOICE_LEANBACK_KEY, UI_CHOICE_LEANBACK_TABLET_VALUE);
+            boolean isLeanbackMode = UI_CHOICE_LEANBACK_TV_VALUE.equals(uiMode);
+            android.util.Log.d("UiChoiceDialog", "Phone/Tablet: uimode_leanback=" + uiMode + " (returning " + isLeanbackMode + ")");
+            return isLeanbackMode;
         }
     }
 
