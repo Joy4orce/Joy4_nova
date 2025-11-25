@@ -52,13 +52,11 @@ public abstract class TvshowsByLoader extends CursorLoader implements CompatAndS
         StringBuilder sb = new StringBuilder();
 
         if (LoaderUtils.mustHideUserHiddenObjects()) {
-            sb.append(" AND ");
-            sb.append(LoaderUtils.HIDE_USER_HIDDEN_FILTER);
+            sb.append(" AND "+LoaderUtils.HIDE_USER_HIDDEN_FILTER);
         }
 
         if (LoaderUtils.mustHideWatchedVideo()||mForceHideVideos) {
-            sb.append(" AND ");
-            sb.append(LoaderUtils.HIDE_WATCHED_FILTER);
+            sb.append(" AND "+LoaderUtils.HIDE_WATCHED_FILTER);
         }
 
         return sb.toString();

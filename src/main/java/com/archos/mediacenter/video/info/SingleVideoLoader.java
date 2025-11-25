@@ -62,13 +62,12 @@ public class SingleVideoLoader extends VideoLoader {
         StringBuilder sb = new StringBuilder();
         if (LoaderUtils.mustHideUserHiddenObjects()) {
             sb.append(LoaderUtils.HIDE_USER_HIDDEN_FILTER);
-            sb.append(" AND ");
         }
         if (mPath==null) {
-            sb.append(VideoStore.Video.VideoColumns._ID + " = ? ");
+            sb.append(" AND " + VideoStore.Video.VideoColumns._ID + " = ? ");
         }
         else {
-            sb.append(VideoStore.Video.VideoColumns.DATA + " = ? ");
+            sb.append(" AND " +VideoStore.Video.VideoColumns.DATA + " = ? ");
         }
         return sb.toString();
     }

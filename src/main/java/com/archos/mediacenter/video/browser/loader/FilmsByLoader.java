@@ -56,17 +56,14 @@ public abstract class FilmsByLoader extends CursorLoader implements CompatAndSDK
         StringBuilder sb = new StringBuilder();
 
         if (LoaderUtils.mustHideUserHiddenObjects()) {
-            sb.append(" AND ");
-            sb.append(LoaderUtils.HIDE_USER_HIDDEN_FILTER);
+            sb.append(" AND "+LoaderUtils.HIDE_USER_HIDDEN_FILTER);
         }
 
         if (LoaderUtils.mustHideWatchedVideo()||mForceHideVideos) {
-            sb.append(" AND ");
-            sb.append(LoaderUtils.HIDE_WATCHED_FILTER);
+            sb.append(" AND "+LoaderUtils.HIDE_WATCHED_FILTER);
         }
 
-        sb.append(" AND ");
-        sb.append("( " + VideoStore.Video.VideoColumns.SCRAPER_M_GENRES + " IS NULL OR " +
+        sb.append(" AND ( " + VideoStore.Video.VideoColumns.SCRAPER_M_GENRES + " IS NULL OR " +
                 VideoStore.Video.VideoColumns.SCRAPER_M_GENRES + " NOT LIKE '%" + mContext.getString(com.archos.medialib.R.string.movie_genre_animation) + "%' )");
 
         return sb.toString();

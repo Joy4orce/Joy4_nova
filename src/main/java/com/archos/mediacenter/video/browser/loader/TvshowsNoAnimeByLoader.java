@@ -52,17 +52,14 @@ public abstract class TvshowsNoAnimeByLoader extends CursorLoader implements Com
         StringBuilder sb = new StringBuilder();
 
         if (LoaderUtils.mustHideUserHiddenObjects()) {
-            sb.append(" AND ");
-            sb.append(LoaderUtils.HIDE_USER_HIDDEN_FILTER);
+            sb.append(" AND "+LoaderUtils.HIDE_USER_HIDDEN_FILTER);
         }
 
         if (LoaderUtils.mustHideWatchedVideo()||mForceHideVideos) {
-            sb.append(" AND ");
-            sb.append(LoaderUtils.HIDE_WATCHED_FILTER);
+            sb.append(" AND "+LoaderUtils.HIDE_WATCHED_FILTER);
         }
 
-        sb.append(" AND ");
-        sb.append("( " + VideoStore.Video.VideoColumns.SCRAPER_S_GENRES + " IS NULL OR " +
+        sb.append(" AND ( " + VideoStore.Video.VideoColumns.SCRAPER_S_GENRES + " IS NULL OR " +
                 VideoStore.Video.VideoColumns.SCRAPER_S_GENRES + " NOT LIKE '%" + mContext.getString(com.archos.medialib.R.string.tvshow_genre_animation) + "%' )");
 
         return sb.toString();
