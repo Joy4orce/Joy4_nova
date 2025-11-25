@@ -12,8 +12,8 @@ buildscript {
 }
 
 plugins {
-    id "com.github.triplet.play" version "3.12.1" apply false
-    id "io.sentry.android.gradle" version "5.12.1" apply false
+    id "com.github.triplet.play" version "3.12.2" apply false
+    id "io.sentry.android.gradle" version "5.12.2" apply false
     //id "app.brant.amazonappstorepublisher" version "0.1.0"
 }
 
@@ -331,7 +331,7 @@ android {
 dependencies {
     implementation project(':FileCoreLibrary')
     implementation project(':MediaLib')
-    implementation 'androidx.lifecycle:lifecycle-process:2.9.4'
+    implementation 'androidx.lifecycle:lifecycle-process:2.10.0'
     // needed for old Android versions when using java 17
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
     //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
@@ -356,10 +356,10 @@ dependencies {
     implementation 'androidx.leanback:leanback:1.2.0'
     implementation 'androidx.leanback:leanback-preference:1.2.0'
     implementation 'androidx.tvprovider:tvprovider:1.1.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:5.3.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:5.3.2'
     implementation 'com.github.tony19:logback-android:3.0.0'
-    implementation 'io.sentry:sentry-android:8.25.0'
-    implementation 'io.sentry:sentry:8.25.0'
+    implementation 'io.sentry:sentry-android:8.27.1'
+    implementation 'io.sentry:sentry:8.27.1'
 }
 
 configurations { // try to exclude device specific libraries interfering
