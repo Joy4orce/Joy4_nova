@@ -254,6 +254,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
 
     private GestureDetector gestureDetector;
     private float currentBrightness;
+    public static int pauseTimeout = 0;
 
     public interface Settings {
         void switchSubtitleTrack();
@@ -890,6 +891,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         if((flags & FLAG_SIDE_UNLOCK_INSTRUCTIONS)!=0){
             showUnlockInstructions(visible);
         }
+        if (!visible && mCentralPlayIcon != null) mCentralPlayIcon.setVisibility(View.GONE);
     }
 
     /**
@@ -916,7 +918,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         }
         setOSDVisibility(true, flags);
 
-        if (timeout != 0 && Player.sPlayer.isPlaying()) {
+        if ((timeout == 5000) || (timeout != 0 && Player.sPlayer.isPlaying())) {
             sendFadeOut(timeout);
         }
     }
@@ -1308,7 +1310,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
             mSeekWasPlaying = !mSeekWasPlaying;
         } else {
             if (Player.sPlayer.isPlaying()) {
-                show(FLAG_SIDE_CONTROL_BAR, 0);
+                show(FLAG_SIDE_CONTROL_BAR, pauseTimeout);
                 Player.sPlayer.pause(PlayerController.STATE_NORMAL);
             } else {
                 Player.sPlayer.start(PlayerController.STATE_NORMAL);
@@ -1841,14 +1843,16 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
 
         // Central zone behavior: always toggle play/pause, show OSD when pausing, hide when resuming
         if (Player.sPlayer.isPlaying()) {
-            // If playing, pause and show controls (keep them visible)
-            Player.sPlayer.pause(PlayerController.STATE_NORMAL);
-            updatePausePlay();
+            //Update the controls visibility 1st, so the Fadeout takes effect.
             int flags = FLAG_SIDE_ALL_EXCEPT_UNLOCK_INSTRUCTIONS;
             if (!mVolumeBarEnabled) {
                 flags &= ~FLAG_SIDE_VOLUME_BAR;
             }
-            show(flags, 0); // Show indefinitely when paused
+            show(flags, pauseTimeout);
+
+            // If playing, pause and show controls (keep them visible)
+            Player.sPlayer.pause(PlayerController.STATE_NORMAL);
+            updatePausePlay();
         } else {
             // If paused, resume and hide controls
             Player.sPlayer.start(PlayerController.STATE_NORMAL);
@@ -2274,7 +2278,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
                                 log.debug("onKey: play/pause: pause");
                                 Player.sPlayer.pause(PlayerController.STATE_NORMAL);
                                 updatePausePlay();
-                                show(FLAG_SIDE_CONTROL_BAR|FLAG_SIDE_ACTION_BAR|FLAG_SIDE_SYSTEM_BAR, 0);
+                                show(FLAG_SIDE_CONTROL_BAR|FLAG_SIDE_ACTION_BAR|FLAG_SIDE_SYSTEM_BAR, pauseTimeout);
                             } else {
                                 log.debug("onKey: play/pause: play");
                                 Player.sPlayer.start(PlayerController.STATE_NORMAL);

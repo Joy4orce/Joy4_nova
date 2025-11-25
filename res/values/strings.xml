@@ -795,6 +795,8 @@
     <string name="preferences_display_resume_box">Display resume box</string>
     <string name="reset_brightness_on_start">Remember video brightness.</string>
     <string name="reset_brightness_on_start_summary">Remember last used brightness setting when opening application. Turn off to use system brightness.</string>
+    <string name="hide_controls_on_pause">Hide controls on pause.</string>
+    <string name="hide_controls_on_pause_summary">Hide player controls after 5 seconds when video is paused.</string>
 
     <string name="preferences_leanback_user_interface">TV User Interface</string>
     <string name="preferences_separate_animation_from_movies_summary">Check to separate animation videos from movies and tv shows adding an animation row</string>
