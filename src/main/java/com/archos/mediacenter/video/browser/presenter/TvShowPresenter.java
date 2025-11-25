@@ -72,11 +72,18 @@ public class TvShowPresenter extends CommonPresenter implements Presenter {
         if(holder.info!=null)
             holder.info.setText(String.format(format, count));
         //no resume in tv shows
-        holder.bookmark.setVisibility(View.VISIBLE);
+        holder.bookmark.setVisibility(View.GONE);
         holder.bookmark.setEnabled(false);
-        holder.subtitle.setVisibility(View.VISIBLE);
-        holder.subtitle.setEnabled(false);
+        //holder.subtitle.setVisibility(View.VISIBLE);
+        //holder.subtitle.setEnabled(false);
         holder.resume.setVisibility(View.GONE);
+
+        // Network notification
+        if(holder.network!=null){
+            holder.network.setEnabled(!FileUtils.isLocal(tvShow.getFileUri()));
+            holder.network.setVisibility(View.VISIBLE);
+        }
+
         if(holder.expanded!=null)
             holder.expanded.setVisibility(View.GONE);
 

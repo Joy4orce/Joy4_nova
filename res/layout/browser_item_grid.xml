@@ -118,6 +118,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentRight="true"
                 android:layout_below="@id/name"
+                android:layout_marginRight="6dip"
                 android:gravity="center_vertical|right"
                 android:orientation="horizontal" >
 
@@ -138,6 +139,7 @@
                     android:layout_gravity="center"
                     android:layout_marginRight="8dip"
                     android:clickable="false"
+                    android:visibility="gone"
                     android:src="@drawable/label_subtitles_small" />
 
                 <com.archos.mediacenter.utils.ImageLabel
@@ -147,6 +149,7 @@
                     android:layout_gravity="center"
                     android:layout_marginRight="2dip"
                     android:clickable="false"
+                    android:visibility="gone"
                     android:src="@drawable/label_network_small" />
                 <TextView
                     android:id="@+id/info"

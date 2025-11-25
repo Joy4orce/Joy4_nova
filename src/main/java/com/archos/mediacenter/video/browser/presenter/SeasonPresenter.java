@@ -73,9 +73,9 @@ public class SeasonPresenter extends CommonPresenter implements Presenter {
         if(holder.info!=null)
             holder.info.setText(String.format(format, count));
         //no resume in tv showspia
-        holder.bookmark.setVisibility(View.VISIBLE);
+        //holder.bookmark.setVisibility(View.VISIBLE);
         holder.bookmark.setEnabled(false);
-        holder.subtitle.setVisibility(View.VISIBLE);
+        //holder.subtitle.setVisibility(View.VISIBLE);
         holder.subtitle.setEnabled(false);
 
         holder.resume.setVisibility(View.GONE);

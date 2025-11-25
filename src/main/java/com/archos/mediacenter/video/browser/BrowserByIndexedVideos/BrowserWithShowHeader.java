@@ -96,6 +96,18 @@ public abstract class BrowserWithShowHeader extends CursorBrowserByVideo  {
     public BrowserWithShowHeader() {
         log.debug("BrowserBySeason()");
     }
+    
+    private void setContentInfoVisibility(boolean visible){
+        if (visible) {
+            mHeaderView.findViewById(R.id.content_rating_container).setVisibility(View.VISIBLE);
+            mHeaderView.findViewById(R.id.network_container).setVisibility(View.VISIBLE);
+            mHeaderView.findViewById(R.id.premiered_container).setVisibility(View.VISIBLE);
+        } else {
+            mHeaderView.findViewById(R.id.content_rating_container).setVisibility(View.GONE);
+            mHeaderView.findViewById(R.id.network_container).setVisibility(View.GONE);
+            mHeaderView.findViewById(R.id.premiered_container).setVisibility(View.GONE);
+        }
+    }
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -127,6 +139,7 @@ public abstract class BrowserWithShowHeader extends CursorBrowserByVideo  {
         mHeaderView = LayoutInflater.from(getContext()).inflate(R.layout.browser_item_header_show, null);
         mHeaderView.findViewById(R.id.loading).setVisibility(View.VISIBLE);
         mHeaderView.setMinimumHeight(getResources().getDimensionPixelSize(R.dimen.video_details_item_height_new));
+        setContentInfoVisibility(false);
         addHeaderView();
     }
 
@@ -393,11 +406,13 @@ public abstract class BrowserWithShowHeader extends CursorBrowserByVideo  {
                         plotTv.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
                         viewMore.setVisibility(View.GONE);
                         mHeaderView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                        setContentInfoVisibility(true);
                         mPlotIsFullyDisplayed = true;
                     } else {
                         plotTv.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
                         viewMore.setVisibility(View.VISIBLE);
                         mHeaderView.getLayoutParams().height = getResources().getDimensionPixelSize(R.dimen.video_details_item_height);
+                        setContentInfoVisibility(false);
                         mPlotIsFullyDisplayed = false;
                     }
                     mBrowserAdapter.notifyDataSetChanged();

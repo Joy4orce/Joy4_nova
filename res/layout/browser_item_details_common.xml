@@ -150,6 +150,7 @@
             android:layout_gravity="center"
             android:layout_marginRight="8dip"
             android:clickable="false"
+            android:visibility="gone"
             android:src="@drawable/label_subtitles" />
 
         <com.archos.mediacenter.utils.ImageLabel
@@ -158,6 +159,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:clickable="false"
+            android:visibility="gone"
             android:src="@drawable/label_network" />
     </LinearLayout>
 

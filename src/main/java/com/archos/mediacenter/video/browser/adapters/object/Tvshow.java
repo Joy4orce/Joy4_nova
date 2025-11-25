@@ -18,6 +18,7 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.archos.mediacenter.video.R;
+import com.archos.mediacenter.video.utils.VideoUtils;
 import com.archos.mediascraper.BaseTags;
 import com.archos.mediascraper.ShowTags;
 import com.archos.mediascraper.TagsFactory;
@@ -50,6 +51,11 @@ public class Tvshow extends Base implements Serializable {
         return mStudio;
     }
 
+    // this point to the file
+    public Uri getFileUri() {
+        return VideoUtils.getFileUriFromMediaLibPath(mFilePath);
+    }
+
     private final int mYear;
     private final String mStudio;
     private final String mActors;
@@ -58,6 +64,7 @@ public class Tvshow extends Base implements Serializable {
     private int mSeasonCount;
     private int mEpisodeCount;
     private int mEpisodeWatchedCount;
+    final String mFilePath;
 
     private long mPinned;
 
@@ -67,8 +74,8 @@ public class Tvshow extends Base implements Serializable {
      */
     private ShowTags mShowTags;
 
-    public Tvshow(long tvshowId, String name, Uri posterUri, int seasonCount, int episodeCount, int episodeWatchedCount) {
-        this(tvshowId, name, posterUri, seasonCount, episodeCount, episodeWatchedCount, false, false, null, null,null, -1,-1, "", 0);
+    public Tvshow(long tvshowId, String name, Uri posterUri, int seasonCount, int episodeCount, int episodeWatchedCount, String filePath) {
+        this(tvshowId, name, posterUri, seasonCount, episodeCount, episodeWatchedCount, false, false, null, null,null, -1,-1, "", 0,filePath);
     }
 
     public Tvshow(long tvshowId,
@@ -85,7 +92,8 @@ public class Tvshow extends Base implements Serializable {
                   int year,
                   float rating,
                   String contentRating,
-                  long pinned) {
+                  long pinned,
+                  String filePath) {
         super(name, posterUri);
         mTvshowId = tvshowId;
         mSeasonCount = seasonCount;
@@ -100,6 +108,7 @@ public class Tvshow extends Base implements Serializable {
         mRating = rating;
         mContentRating = contentRating;
         mPinned = pinned;
+        mFilePath = filePath;
     }
 
     public String getCountString(Context context) {

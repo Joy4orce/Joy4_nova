@@ -132,8 +132,11 @@
         android:id="@+id/content_rating_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dip"
+        android:layout_marginTop="20dip"
         android:layout_gravity="center"
-        android:background="@drawable/rounded_edges">
+        android:background="@drawable/rounded_edges"
+        >
 
         <TextView
             android:id="@+id/content_rating"
@@ -153,11 +156,12 @@
     <LinearLayout
         android:id="@+id/network_container"
         android:layout_below="@id/content_rating_container"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/video_details_poster_width"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dip"
         android:orientation="horizontal">
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/video_details_poster_width"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:id="@+id/network"
@@ -169,12 +173,15 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/premiered_container"
         android:layout_below="@id/network_container"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/video_details_poster_width"
+        android:layout_marginStart="10dip"
+        android:layout_marginBottom="10dip"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/video_details_poster_width"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:id="@+id/premiered"

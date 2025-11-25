@@ -84,7 +84,7 @@
 <dimen name="video_details_poster_width">120dip</dimen>
 <dimen name="video_details_poster_margin_top">1dip</dimen>
 <dimen name="video_details_poster_margin_bottom">1dip</dimen>
-<dimen name="video_details_poster_margin_left">1dip</dimen>
+<dimen name="video_details_poster_margin_left">10dip</dimen>
 <dimen name="video_details_number_width">45dip</dimen>
 <dimen name="video_show_details_item_height">135dip</dimen>
 

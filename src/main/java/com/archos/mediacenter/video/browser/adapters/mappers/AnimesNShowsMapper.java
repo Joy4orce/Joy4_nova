@@ -201,7 +201,8 @@ public class AnimesNShowsMapper implements CompatibleCursorMapper {
                     c.getInt(mUYear),
                     c.getFloat(mRatingColumn),
                     c.getString(mContentRatingColumn),
-                    mPinnedColumn != -1 ? c.getLong(mPinnedColumn) : -1
+                    mPinnedColumn != -1 ? c.getLong(mPinnedColumn) : -1,
+                    filePath
             );
         } else if (scraperType==BaseTags.MOVIE) {
             return new Movie(
