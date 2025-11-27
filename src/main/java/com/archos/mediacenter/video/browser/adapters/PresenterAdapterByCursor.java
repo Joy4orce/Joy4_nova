@@ -127,6 +127,14 @@ public abstract class PresenterAdapterByCursor extends CursorAdapter implements 
     }
 
     public boolean doesItemNeedAThumbnail(int position) {
+        // If video has a cover/poster, no need to generate thumbnail
+        Cursor c = getCursor();
+        if (c != null && c.moveToPosition(position)) {
+            String cover = getCover();
+            if (cover != null && !cover.isEmpty()) {
+                return false;
+            }
+        }
         return true;
     }
 

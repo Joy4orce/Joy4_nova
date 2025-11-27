@@ -153,6 +153,17 @@ public class GroupOfMovieAdapter extends CursorAdapter implements SectionIndexer
 
     @Override
     public boolean doesItemNeedAThumbnail(int position) {
+        // If video group has posters, no need to generate thumbnail
+        Cursor c = getCursor();
+        if (c != null && c.moveToPosition(position)) {
+            int columnIndex = c.getColumnIndex(BrowserMoviesBy.COLUMN_LIST_OF_POSTER_FILES);
+            if (columnIndex >= 0) {
+                String posterFileListString = c.getString(columnIndex);
+                if (posterFileListString != null && !posterFileListString.isEmpty()) {
+                    return false;
+                }
+            }
+        }
         return true;
     }
 
