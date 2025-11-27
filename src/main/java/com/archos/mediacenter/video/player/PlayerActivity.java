@@ -133,6 +133,8 @@ import static com.archos.filecorelibrary.FileUtils.hasManageExternalStoragePermi
 import static com.archos.mediacenter.video.browser.subtitlesmanager.ISO639codes.generateTrackName;
 import static com.archos.mediacenter.video.browser.subtitlesmanager.SubtitleManager.getSubLanguageFromSubPathAndVideoPath;
 import static com.archos.mediacenter.video.utils.MiscUtils.isEmulator;
+
+import com.archos.mediacenter.utils.ISO639codes;
 import static com.archos.mediacenter.video.utils.VideoPreferencesCommon.DEFAULT_MAX_IFRAME_SIZE;
 import static com.archos.mediacenter.video.utils.VideoPreferencesCommon.DEFAULT_STREAM_BUFFER_SIZE;
 import static com.archos.mediacenter.video.utils.VideoPreferencesCommon.KEY_PARSER_SYNC_MODE;
@@ -3516,6 +3518,22 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                     mSubtitleManager.clear();
                     mVideoInfo.subtitleTrack = positionToSubtitleTrack(position, mVideoInfo.nbSubtitles);
                     log.debug("onTrackSelected: -> mVideoInfo.subtitleTrack={}", mVideoInfo.subtitleTrack);
+                    // Extract and save the subtitle language for track validation on re-enumeration
+                    if (mVideoInfo.subtitleTrack >= 0) {
+                        SubtitleTrack track = mPlayer.getVideoMetadata().getSubtitleTrack(mVideoInfo.subtitleTrack);
+                        if (track != null) {
+                            String language = null;
+                            if (track.isExternal) {
+                                language = getSubLanguageFromSubPathAndVideoPath(getApplicationContext(), track.path, mUri.toString());
+                            } else {
+                                language = ISO639codes.getLanguageNameForLetterCode(track.language);
+                            }
+                            mVideoInfo.subtitleLanguage = extractLanguageCode(language).toLowerCase();
+                            log.debug("onTrackSelected: saved subtitleLanguage={} for track {}", mVideoInfo.subtitleLanguage, mVideoInfo.subtitleTrack);
+                        }
+                    } else {
+                        mVideoInfo.subtitleLanguage = null;
+                    }
                     setSubtitleVpos("onTrackSelected");
                     // Save the subtitle track selection to the database for persistence across resume
                     mIndexHelper.writeVideoInfo(mVideoInfo, mNetworkBookmarksEnabled);
@@ -3570,6 +3588,32 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         subIntent.setClass(mContext, SubtitlesWizardActivity.class);
         subIntent.setData(uri);
         startActivityForResult(subIntent, SUBTITLE_REQUEST);
+    }
+
+    /**
+     * Extract 2-letter ISO 639-1 language code from a language name or code string.
+     * Uses ISO639codes utility to handle conversions from full names or different code formats.
+     * Returns lowercase 2-letter code or empty string if unable to extract.
+     */
+    private static String extractLanguageCode(String languageStr) {
+        if (languageStr == null || languageStr.isEmpty()) {
+            return "";
+        }
+        // Handle special case for SRT files
+        if (languageStr.toLowerCase().contains("srt")) {
+            return "srt";
+        }
+        // Use ISO639codes utility to convert any format (2-letter, 3-letter, or full name) to 2-letter code
+        String code = com.archos.mediacenter.utils.ISO639codes.getISO6391ForLetterCode(languageStr);
+        if (code != null && !code.isEmpty()) {
+            return code.toLowerCase();
+        }
+        // Fallback: if it's already a 2-letter code, use it
+        if (languageStr.length() == 2 && !languageStr.contains(" ")) {
+            return languageStr.toLowerCase();
+        }
+        // Last resort: return first 2 chars
+        return languageStr.substring(0, Math.min(2, languageStr.length())).toLowerCase();
     }
 
     @Override

@@ -1554,6 +1554,25 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         // selection logic
         if (nbTrack != 0) {
             int noneTrack = nbTrack; // here it tracks mVideoInfo.subtitleTrack that are the tracks of the video (not the none from menu)
+            // Validate saved subtitle language against current track at saved index
+            if (mVideoInfo.subtitleTrack >= 0 && mVideoInfo.subtitleLanguage != null) {
+                VideoMetadata.SubtitleTrack trackAtIndex = vMetadata.getSubtitleTrack(mVideoInfo.subtitleTrack);
+                if (trackAtIndex != null) {
+                    String currentLanguage = null;
+                    if (trackAtIndex.isExternal) {
+                        currentLanguage = getSubLanguageFromSubPathAndVideoPath(getApplicationContext(), trackAtIndex.path, vMetadata.getFile().getPath());
+                    } else {
+                        currentLanguage = ISO639codes.getLanguageNameForLetterCode(trackAtIndex.language);
+                    }
+                    String currentLang2Letter = extractLanguageCode(currentLanguage).toLowerCase();
+                    String savedLang2Letter = mVideoInfo.subtitleLanguage.toLowerCase();
+                    if (!savedLang2Letter.equals(currentLang2Letter)) {
+                        log.debug("onSubtitleMetadataUpdated: subtitle language mismatch at index {}: saved={}, current={}", mVideoInfo.subtitleTrack, savedLang2Letter, currentLang2Letter);
+                        mVideoInfo.subtitleTrack = -1;
+                        mVideoInfo.subtitleLanguage = null;
+                    }
+                }
+            }
             // do the scan for preferred lang at second call since onSubtitleMetadataUpdated is called twice and the first time it does not get all subtracks when there are a Subs/ dir with a lot of subs
             if (mVideoInfo.subtitleTrack == -1 && (firstTimeSubCalled || ! mIsPreparingSubs)) { // means no track has been selected before
                 if (mHideSubtitles) {
@@ -1621,6 +1640,24 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
                         mVideoInfo.subtitleTrack = noneTrack;
                     }
                 }
+                // Extract and save the selected track's language for future validation on re-enumeration
+                if (mVideoInfo.subtitleTrack >= 0 && mVideoInfo.subtitleTrack < nbTrack) {
+                    VideoMetadata.SubtitleTrack track = vMetadata.getSubtitleTrack(mVideoInfo.subtitleTrack);
+                    if (track != null) {
+                        String language = null;
+                        if (track.isExternal) {
+                            language = getSubLanguageFromSubPathAndVideoPath(getApplicationContext(), track.path, vMetadata.getFile().getPath());
+                        } else {
+                            language = ISO639codes.getLanguageNameForLetterCode(track.language);
+                        }
+                        mVideoInfo.subtitleLanguage = extractLanguageCode(language).toLowerCase();
+                        log.debug("onSubtitleMetadataUpdated: auto-selected track {} with language={}", mVideoInfo.subtitleTrack, mVideoInfo.subtitleLanguage);
+                    }
+                } else {
+                    // None track selected or invalid, clear language
+                    mVideoInfo.subtitleLanguage = null;
+                    log.debug("onSubtitleMetadataUpdated: none track or invalid selected, clearing language");
+                }
             }
             // application logic
             // mVideoInfo.subtitleTrack is the track number without the none track 0<=mVideoInfo.subtitleTrack<=nbTrack, nbTrack is the noneTrack position
@@ -1658,6 +1695,32 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         // Cache the AVOS metadata result for future playback within 10 second TTL
         SubtitleManager.cacheProcessedMetadata(mUri, vMetadata);
         log.debug("onSubtitleMetadataUpdated: cached AVOS metadata for {}", mUri);
+    }
+
+    /**
+     * Extract 2-letter ISO 639-1 language code from a language name or code string.
+     * Uses ISO639codes utility to handle conversions from full names or different code formats.
+     * Returns lowercase 2-letter code or empty string if unable to extract.
+     */
+    private static String extractLanguageCode(String languageStr) {
+        if (languageStr == null || languageStr.isEmpty()) {
+            return "";
+        }
+        // Handle special case for SRT files
+        if (languageStr.toLowerCase().contains("srt")) {
+            return "srt";
+        }
+        // Use ISO639codes utility to convert any format (2-letter, 3-letter, or full name) to 2-letter code
+        String code = com.archos.mediacenter.utils.ISO639codes.getISO6391ForLetterCode(languageStr);
+        if (code != null && !code.isEmpty()) {
+            return code.toLowerCase();
+        }
+        // Fallback: if it's already a 2-letter code, use it
+        if (languageStr.length() == 2 && !languageStr.contains(" ")) {
+            return languageStr.toLowerCase();
+        }
+        // Last resort: return first 2 chars
+        return languageStr.substring(0, Math.min(2, languageStr.length())).toLowerCase();
     }
 
     @Override
