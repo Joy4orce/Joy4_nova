@@ -23,6 +23,7 @@ import com.archos.mediacenter.utils.ThumbnailEngine;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.adapters.AdapterDefaultValues;
 import com.archos.mediacenter.video.browser.adapters.object.Tvshow;
+import com.archos.filecorelibrary.FileUtils;
 
 /**
  * Created by alexandre on 27/10/15.
