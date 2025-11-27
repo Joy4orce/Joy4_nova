@@ -131,4 +131,16 @@ public class UiChoiceDialog extends DialogFragment implements View.OnClickListen
             .putString("uimode", isLeanback ? "2" : "1")
             .apply();
     }
+
+    /**
+     * Update uimode preferences using an existing editor to batch with other operations
+     * Avoids multiple apply() calls when batching SharedPreferences updates
+     */
+    public static void updateUiModePreferencesInEditor(Context context, SharedPreferences.Editor editor) {
+        boolean isLeanback = applicationIsInLeanbackMode(context);
+        String modeValue = isLeanback ? UI_CHOICE_LEANBACK_TV_VALUE : UI_CHOICE_LEANBACK_TABLET_VALUE;
+        android.util.Log.d("UiChoiceDialog", "Updating UI mode preferences in editor to: " + modeValue);
+        editor.putString(UI_CHOICE_LEANBACK_KEY, modeValue);
+        editor.putString("uimode", isLeanback ? "2" : "1");
+    }
 }

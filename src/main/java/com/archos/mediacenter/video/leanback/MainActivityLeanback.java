@@ -21,6 +21,8 @@ import android.content.SharedPreferences;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.preference.PreferenceManager;
 import androidx.annotation.NonNull;
@@ -93,25 +95,26 @@ public class MainActivityLeanback extends LeanbackActivity {
 
         super.onCreate(savedInstanceState);
 
+        // Batch all SharedPreferences operations into single apply
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = prefs.edit();
+
         // Update uimode/uimode_leanback to reflect we're in leanback mode
-        UiChoiceDialog.updateUiModePreferences(this, true);
+        UiChoiceDialog.updateUiModePreferencesInEditor(this, editor);
 
-        //Reset the Video Aspect Ratio on Startup.
-        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-        
-         //Reset the Video Aspect Ratio on Startup.
-        editor.putString("player_pref_auto_format_key","-1");
-        editor.putString("player_pref_format_key","0");
+        // Reset the Video Aspect Ratio on Startup
+        editor.putString("player_pref_auto_format_key", "-1");
+        editor.putString("player_pref_format_key", "0");
 
-        //If we are starting the Browser again, we aren't unpausing a Video
+        // If we are starting the Browser again, we aren't unpausing a Video
         editor.putBoolean("user_paused_video", false);
-        
-        //Apply all the changes at once!
+
+        // Apply all changes at once
         editor.apply();
 
-        //Setup an preferences before we start activites.
-        LoaderUtils.mMustHideWatchedVideo = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("hide_watched", false);
-        LoaderUtils.mSmartRecentlyRows = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("smart_recently_rows", false);
+        // Setup preferences before we start activities - read after batch write
+        LoaderUtils.mMustHideWatchedVideo = prefs.getBoolean("hide_watched", false);
+        LoaderUtils.mSmartRecentlyRows = prefs.getBoolean("smart_recently_rows", false);
 
         UnavailablePosterBroadcastReceiver.registerReceiver(this);
         mPermissionChecker = new PermissionChecker(hasManageExternalStoragePermission(getApplicationContext()));
@@ -121,13 +124,19 @@ public class MainActivityLeanback extends LeanbackActivity {
 
         setContentView(R.layout.androidtv_root_activity);
         AutoScrapeService.registerObserver(this);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            ChannelManager.refreshChannels(this);
-        else {
-            Intent intent = new Intent(BootupRecommandationService.UPDATE_ACTION);
-            intent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
-            sendBroadcast(intent);
-        }
+
+        // Defer heavy database operations until after window is visible
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(() -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                ChannelManager.refreshChannels(MainActivityLeanback.this);
+            else {
+                Intent intent = new Intent(BootupRecommandationService.UPDATE_ACTION);
+                intent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
+                sendBroadcast(intent);
+            }
+        });
+
         CustomApplication.showChangelogDialog(CustomApplication.getChangelog(this.getApplicationContext()), this);
     }
 
