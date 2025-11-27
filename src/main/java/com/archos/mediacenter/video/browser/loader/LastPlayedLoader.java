@@ -67,7 +67,7 @@ public class LastPlayedLoader extends VideoLoader {
         if (LoaderUtils.isSmartRecentlyRows()) {
             // Secondary sort by release/air date to ensure consistent ordering when last_played is equal
             // Movies use m_release_date (YYYY-MM-DD string), Episodes use e_aired (milliseconds timestamp)
-            sortOrder = "MIN(" + VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED + ") DESC, " +
+            sortOrder = "MAX(" + VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED + ") DESC, " +
                        "COALESCE(" + VideoStore.Video.VideoColumns.SCRAPER_M_RELEASE_DATE + ", " +
                        "date(" + VideoStore.Video.VideoColumns.SCRAPER_E_AIRED + "/1000, 'unixepoch')) DESC " +
                        "LIMIT 50";
