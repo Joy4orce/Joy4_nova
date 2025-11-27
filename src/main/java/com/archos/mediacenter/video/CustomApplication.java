@@ -995,11 +995,11 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             PreferenceManager.getDefaultSharedPreferences(context)
                     .edit()
                     .putBoolean(VideoPreferencesCommon.KEY_FORCE_AUDIO_PASSTHROUGH, false)
-                    .commit();
+                    .apply();
             PreferenceManager.getDefaultSharedPreferences(context)
                     .edit()
                     .putBoolean(PlayerActivity.KEY_ENABLE_ANDROID_FRAME_TIMING, false)
-                    .commit();
+                    .apply();
         }
         // do not replace lastPlayed row with watchingUpNext one since it is still a little slow on shield
         /*
