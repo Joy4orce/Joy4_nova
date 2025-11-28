@@ -155,18 +155,7 @@ public class ListingAdapter extends BaseAdapter implements AdapterByVideoObjects
 
     @Override
     public boolean doesItemNeedAThumbnail(int position) {
-        if (!(mItemList.get(position) instanceof Video)) {
-            return false;
-        }
-        Video video = (Video) mItemList.get(position);
-        if (video.getId() <= 0) {
-            return false;
-        }
-        // If video has a poster, no need to generate thumbnail
-        if (video.getPosterUri() != null) {
-            return false;
-        }
-        return true;
+        return mItemList.get(position) instanceof Video&&((Video)mItemList.get(position)).getId()>0;
     }
 
     public String getPath(int position) {
