@@ -37,11 +37,12 @@ public class LastPlayedLoader extends VideoLoader {
         // only updates the CursorLoader on data change every 10s since used only in MainFragment as nonScraped box presence
         if (VideoLoader.ALLVIDEO_THROTTLE) setUpdateThrottle(VideoLoader.ALLVIDEO_THROTTLE_DELAY);
 
-        // When smart mode is enabled, add GROUP BY via URI query parameters
+        // When smart mode is enabled, add GROUP BY and HAVING via URI query parameters
         if (LoaderUtils.isSmartRecentlyRows()) {
             Uri baseUri = getUri();
             Uri.Builder builder = baseUri.buildUpon();
-            builder.appendQueryParameter("group", VideoStore.Video.VideoColumns.BOOKMARK+", COALESCE(" + VideoStore.Video.VideoColumns.SCRAPER_M_IMDB_ID + ", " + VideoStore.Video.VideoColumns.SCRAPER_E_IMDB_ID + ")");
+            builder.appendQueryParameter("group", "COALESCE(" + VideoStore.Video.VideoColumns.SCRAPER_M_IMDB_ID + ", " + VideoStore.Video.VideoColumns.SCRAPER_E_IMDB_ID + ")");
+            builder.appendQueryParameter("having", VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED + " = MAX(" + VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED + ")");
             setUri(builder.build());
             if (DBG) Log.d(TAG, "Modified URI: " + builder.build());
         }
