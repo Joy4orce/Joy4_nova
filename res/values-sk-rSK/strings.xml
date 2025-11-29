@@ -541,6 +541,8 @@
     <string name="preferences_force_passthrough_summary">Ak je povolená funkcia passthrough, vynúti ju aj v prípade, že zvukový kodek nie je deklarovaný ako podporovaný AV prijímačom namiesto kontroly možností AV prijímača</string>
     <string name="preferences_playback_speed">Povoliť rýchlosť prehrávania</string>
     <string name="preferences_playback_speed_summary">Povolenie možnosti zmeny rýchlosti prehrávania. ⚠ Experimentálne môže mať za následok sekanie videa</string>
+    <string name="preferences_enable_dynamic_audio_delay_title">Odhad dynamického oneskorenia zvuku/videa</string>
+    <string name="preferences_enable_dynamic_audio_delay_summary">Použite dynamické odhadovanie latencie pre lepšiu synchronizáciu zvuku a videa, najmä pri bluetooth slúchadlách. Vypnite túto funkciu, ak máte problémy so synchronizáciou.</string>
     <string name="preferences_disable_downmix_title">Vypnutie stereo downmixu zvuku</string>
     <string name="preferences_disable_downmix_summary">Vždy dekódovať všetky zvukové kanály a nechať Android downmixovať v závislosti od možností zvukového výstupu (môže dôjsť k strate hlasových kanálov)</string>
     <string name="preferences_enable_downmix_androidtv_title">Vynútenie stereo downmixu zvuku</string>
@@ -551,6 +553,8 @@
     <string name="preference_tv_3d_automatic_switch_summary">Túto funkciu používajte len vtedy, ak ju váš 3D televízor podporuje</string>
     <string name="enable_android_frame_timing">Zapnutie Android časovania snímok</string>
     <string name="enable_android_frame_timing_summary">Delegovať na Android časovanie prelínania snímok pre plynulejšie prehrávanie (experimentálne)</string>
+    <string name="hide_watched_videos">Skryť sledované videá</string>
+    <string name="hide_watched_videos_summary">Skryť videá z mediálnej knižnice, ak sú označené ako pozreté.</string>
     <string name="preference_tv_refreshrate_switch">Povolenie automatického prepínania obnovovacej frekvencie</string>
     <string name="preference_tv_refreshrate_switch_summary">Odstránenie efektu trhania prispôsobením najlepšej obnovovacej frekvencie obrazovky snímkovej frekvencii videa (podpora zariadenia sa môže líšiť)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Vypnutý</string>
@@ -676,6 +680,7 @@
     <string name="sort_mode">Spôsob triedenia</string>
     <string name="sort_by_name_asc">Zoradenie podľa názvu (a - z)</string>
     <string name="sort_by_name_desc">Zoradenie podľa názvu (z - a)</string>
+    <string name="sort_by_release_date_desc">Zoradiť podľa dátumu vydania (najnovšie ako prvé)</string>
     <string name="sort_by_year_asc">Zoradenie podľa roku (najstaršie ako prvé)</string>
     <string name="sort_by_year_desc">Zoradenie podľa roku (najnovšie ako prvé)</string>
     <string name="sort_by_date_asc">Zoradenie podľa dátumu (najstaršie ako prvé)</string>
@@ -713,6 +718,8 @@
     <string name="preferences_user_interface">Užívateľské rozhranie</string>
     <string name="preferences_display_resume_box_summary">Zobrazenie alebo skrytie tlačidla obnovenia najnovšieho videa na hlavnej obrazovke</string>
     <string name="preferences_display_resume_box">Zobrazenie panelu pre obnovenie</string>
+    <string name="reset_brightness_on_start">Zapamätať si jas videa.</string>
+    <string name="reset_brightness_on_start_summary">Pri otvorení aplikácie si zapamätaj posledné nastavenie jasu. Vypni, ak chceš používať jas systému.</string>
     <string name="preferences_leanback_user_interface">Užívateľské rozhranie televízora</string>
     <string name="preferences_separate_animation_from_movies_summary">Oddelenie animovaných videí od filmov a seriálov pridaním riadku animácie</string>
     <string name="preferences_separate_animation_from_movies">Oddelenie animácií z filmov a seriálov</string>

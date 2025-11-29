@@ -541,6 +541,8 @@
     <string name="preference_tv_3d_automatic_switch_summary">Use este recurso apenas se sua TV 3D o suporta</string>
     <string name="enable_android_frame_timing">Ativar tempo de frame android</string>
     <string name="enable_android_frame_timing_summary">Indicar ao Android o frame de tempo iluminado para uma reprodução mais suave (experimental)</string>
+    <string name="hide_watched_videos">Ocultar vídeos assistidos</string>
+    <string name="hide_watched_videos_summary">Ocultar vídeos da Biblioteca de Mídia, caso estejam marcados como assistidos.</string>
     <string name="preference_tv_refreshrate_switch">Habilitar mudança automática da taxa de atualização</string>
     <string name="preference_tv_refreshrate_switch_summary">Remova o efeito \"judder\" (trepidação) adaptando a melhor taxa de atualização da tela à taxa de quadros de vídeo (o suporte ao dispositivo pode variar)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Desativado</string>
