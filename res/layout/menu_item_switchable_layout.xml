@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="80dp"
     android:focusable="true"
+    android:descendantFocusability="blocksDescendants"
     android:orientation="horizontal"
     android:padding="1dp" >
 
@@ -13,6 +14,7 @@
       android:layout_height="match_parent"
       android:background="@null"
       android:ellipsize="marquee"
+      android:focusable="false"
       android:paddingLeft="10dp"
       android:paddingRight="12dp"
       android:singleLine="true"
