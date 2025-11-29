@@ -244,6 +244,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
     private ListPreference mActivateRefreshrateTVSwitch = null;
     private CheckBoxPreference mEnableCutoutModeShortEdge = null;
     private CheckBoxPreference mActivate3DTVSwitch = null;
+    private CheckBoxPreference mEnableAndroidFrameTiming = null;
     private PreferenceCategory mAdvancedPreferences = null;
     private PreferenceCategory mScraperCategory = null;
     private ListPreference mSubtitlesFavLangPreferences = null;
@@ -441,6 +442,30 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
     }
 
     /**
+     * Update the enabled and selectable state of dynamic audio delay preference
+     * based on passthrough and frame timing settings.
+     *
+     * @param passthroughEnabled true if audio passthrough is enabled
+     * @param frameTimingEnabled true if Android frame timing is enabled
+     */
+    private void updateDynamicAudioDelayState(boolean passthroughEnabled, boolean frameTimingEnabled) {
+        if (passthroughEnabled) {
+            // Passthrough takes precedence - disable dynamic audio delay
+            mEnableDynamicAudioDelay.setEnabled(false);
+            mEnableDynamicAudioDelay.setSelectable(false);
+        } else if (frameTimingEnabled) {
+            // Frame timing forces dynamic audio delay on and makes it non-selectable
+            mEnableDynamicAudioDelay.setEnabled(true);
+            mEnableDynamicAudioDelay.setSelectable(false);
+            mEnableDynamicAudioDelay.setChecked(true);
+        } else {
+            // Normal state - user can control dynamic audio delay
+            mEnableDynamicAudioDelay.setEnabled(true);
+            mEnableDynamicAudioDelay.setSelectable(true);
+        }
+    }
+
+    /**
      * Remove Mode 1 (IEC61937) from the passthrough mode preference list
      * Used when device doesn't support ENCODING_IEC61937
      * Preserves Mode 2 as "2" and Mode 3 as "3"
@@ -536,6 +561,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         mForceAudioPassthrough = (CheckBoxPreference) findPreference(KEY_FORCE_AUDIO_PASSTHROUGH);
         mPlaybackSpeed = (CheckBoxPreference) findPreference(KEY_PLAYBACK_SPEED);
         mEnableDynamicAudioDelay = (CheckBoxPreference) findPreference(KEY_ENABLE_DYNAMIC_AUDIO_DELAY);
+        mEnableAndroidFrameTiming = (CheckBoxPreference) findPreference("enable_android_frame_timing");
         final ListPreference mForceAudioPassthroughMultiple = (ListPreference) findPreference("force_audio_passthrough_multiple");
         boolean isPassthroughSupported = CustomApplication.isPassthroughSupported();
         boolean isIecEncapsulationCapable = CustomApplication.isIecEncapsulationCapable();
@@ -548,21 +574,25 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         if (!isIecEncapsulationCapable && mForceAudioPassthroughMultiple != null) {
             removeMode1FromPassthroughOptions(mForceAudioPassthroughMultiple);
         }
+
+        // Get initial frame timing state
+        boolean frameTimingEnabled = mSharedPreferences.getBoolean("enable_android_frame_timing", false);
+
         if (isPassthroughSupported) {
             String passthroughMode = mSharedPreferences.getString("force_audio_passthrough_multiple", "0");
             boolean passthroughEnabled = !"0".equals(passthroughMode);
             mForceAudioPassthrough.setEnabled(passthroughEnabled);
             mPlaybackSpeed.setEnabled(!passthroughEnabled);
             mPlaybackSpeed.setSelectable(!passthroughEnabled);
-            mEnableDynamicAudioDelay.setEnabled(!passthroughEnabled);
-            mEnableDynamicAudioDelay.setSelectable(!passthroughEnabled);
+            // Dynamic audio delay depends on both passthrough and frame timing
+            updateDynamicAudioDelayState(passthroughEnabled, frameTimingEnabled);
             mForceAudioPassthroughMultiple.setOnPreferenceChangeListener((preference, newValue) -> {
                 boolean newPassthroughEnabled = !"0".equals(newValue.toString());
                 mForceAudioPassthrough.setEnabled(newPassthroughEnabled);
                 mPlaybackSpeed.setEnabled(!newPassthroughEnabled);
                 mPlaybackSpeed.setSelectable(!newPassthroughEnabled);
-                mEnableDynamicAudioDelay.setEnabled(!newPassthroughEnabled);
-                mEnableDynamicAudioDelay.setSelectable(!newPassthroughEnabled);
+                boolean currentFrameTimingEnabled = mEnableAndroidFrameTiming.isChecked();
+                updateDynamicAudioDelayState(newPassthroughEnabled, currentFrameTimingEnabled);
                 return true;
             });
         } else {
@@ -573,9 +603,18 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             }
             mPlaybackSpeed.setEnabled(true);
             mPlaybackSpeed.setSelectable(true);
-            mEnableDynamicAudioDelay.setEnabled(true);
-            mEnableDynamicAudioDelay.setSelectable(true);
+            // Frame timing can still affect dynamic audio delay even without passthrough
+            updateDynamicAudioDelayState(false, frameTimingEnabled);
         }
+
+        // Set up listener for frame timing changes
+        mEnableAndroidFrameTiming.setOnPreferenceChangeListener((preference, newValue) -> {
+            boolean newFrameTimingEnabled = (Boolean) newValue;
+            boolean currentPassthroughEnabled = isPassthroughSupported &&
+                !"0".equals(mSharedPreferences.getString("force_audio_passthrough_multiple", "0"));
+            updateDynamicAudioDelayState(currentPassthroughEnabled, newFrameTimingEnabled);
+            return true;
+        });
         mStreamBufferSize = (EditTextPreference) findPreference(KEY_STREAM_BUFFER_SIZE);
         mStreamMaxIFrameSize = (EditTextPreference) findPreference(KEY_STREAM_MAX_IFRAME_SIZE);
         mDisableDownmix = (CheckBoxPreference) findPreference("disable_downmix");
