@@ -59,6 +59,7 @@ public class AllMoviesIconBuilder {
         mContext = context;
         SELECTION = VideoStore.Video.VideoColumns.ARCHOS_HIDDEN_BY_USER + "=0 AND " +
                         VideoStore.Video.VideoColumns.SCRAPER_MOVIE_ID + " IS NOT NULL AND " +
+                        VideoStore.Video.VideoColumns.SCRAPER_M_IMDB_ID + " IS NOT NULL AND " +  
                         VideoStore.Video.VideoColumns.SCRAPER_COVER + " IS NOT NULL";
         mWidth  = context.getResources ().getDimensionPixelSize(R.dimen.all_movies_icon_width);
         mHeight  = context.getResources ().getDimensionPixelSize(R.dimen.all_movies_icon_height);
@@ -96,7 +97,7 @@ public class AllMoviesIconBuilder {
     private List<String> getPostersList(ContentResolver cr) {
         Cursor c = cr.query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI,
                 PROJECTION, SELECTION, null,
-                "RANDOM() LIMIT 12"); // get 12 random movies (8 + 4 in case some posters are invalid for any reason)
+                "RANDOM() LIMIT 8"); // get 12 random movies (8 + 4 in case some posters are invalid for any reason)
 
         if (c.getCount()==0) {
             c.close();

@@ -94,7 +94,7 @@ public class AllTvshowsIconBuilder {
     private List<String> getPostersList(ContentResolver cr) {
         Cursor c = cr.query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI,
                 PROJECTION, SELECTION, null,
-                "RANDOM() LIMIT 12"); // get 12 random tvshows (8 + 4 in case some posters are invalid for any reason)
+                "RANDOM() LIMIT 8"); // get 12 random tvshows (8 + 4 in case some posters are invalid for any reason)
 
         if (c.getCount()==0) {
             c.close();

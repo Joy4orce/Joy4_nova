@@ -56,6 +56,7 @@ public class CollectionsMoviesIconBuilder {
         mContext = context;
         SELECTION = VideoStore.Video.VideoColumns.ARCHOS_HIDDEN_BY_USER + "=0 AND " +
                 VideoStore.Video.VideoColumns.SCRAPER_MOVIE_ID + " IS NOT NULL AND " +
+                VideoStore.Video.VideoColumns.SCRAPER_M_IMDB_ID + " IS NOT NULL AND " +  
                 VideoStore.Video.VideoColumns.SCRAPER_COVER + " IS NOT NULL AND " +
                 VideoStore.Video.VideoColumns.SCRAPER_C_ID + " > '0' AND " +
                 VideoStore.Video.VideoColumns.SCRAPER_C_POSTER_LARGE_FILE + " IS NOT NULL" +
@@ -96,7 +97,7 @@ public class CollectionsMoviesIconBuilder {
     private List<String> getPostersList(ContentResolver cr) {
         Cursor c = cr.query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI,
                 PROJECTION, SELECTION, null,
-                "RANDOM() LIMIT 12"); // get 12 random movies (8 + 4 in case some posters are invalid for any reason)
+                "RANDOM() LIMIT 8"); // get 12 random movies (8 + 4 in case some posters are invalid for any reason)
 
         if (c.getCount()==0) {
             c.close();
