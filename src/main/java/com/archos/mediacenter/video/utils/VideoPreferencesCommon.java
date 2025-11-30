@@ -238,6 +238,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
     private CheckBoxPreference mForceSwDecPreferences = null;
     private CheckBoxPreference mForceAudioPassthrough = null;
     private CheckBoxPreference mPlaybackSpeed = null;
+    private CheckBoxPreference mAudioSpeedAudiotrack = null;
     private CheckBoxPreference mEnableDynamicAudioDelay = null;
     private CheckBoxPreference mDisableDownmix = null;
     private CheckBoxPreference mEnableDownmixATV = null;
@@ -560,6 +561,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         mWatchingUpNext = (CheckBoxPreference) findPreference(KEY_SHOW_WATCHING_UP_NEXT_ROW);
         mForceAudioPassthrough = (CheckBoxPreference) findPreference(KEY_FORCE_AUDIO_PASSTHROUGH);
         mPlaybackSpeed = (CheckBoxPreference) findPreference(KEY_PLAYBACK_SPEED);
+        mAudioSpeedAudiotrack = (CheckBoxPreference) findPreference(KEY_AUDIO_SPEED_AUDIOTRACK);
         mEnableDynamicAudioDelay = (CheckBoxPreference) findPreference(KEY_ENABLE_DYNAMIC_AUDIO_DELAY);
         mEnableAndroidFrameTiming = (CheckBoxPreference) findPreference("enable_android_frame_timing");
         final ListPreference mForceAudioPassthroughMultiple = (ListPreference) findPreference("force_audio_passthrough_multiple");
@@ -584,6 +586,8 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             mForceAudioPassthrough.setEnabled(passthroughEnabled);
             mPlaybackSpeed.setEnabled(!passthroughEnabled);
             mPlaybackSpeed.setSelectable(!passthroughEnabled);
+            // Audio speed audiotrack should be non-selectable when playback speed is non-selectable
+            mAudioSpeedAudiotrack.setSelectable(!passthroughEnabled);
             // Dynamic audio delay depends on both passthrough and frame timing
             updateDynamicAudioDelayState(passthroughEnabled, frameTimingEnabled);
             mForceAudioPassthroughMultiple.setOnPreferenceChangeListener((preference, newValue) -> {
@@ -591,6 +595,8 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
                 mForceAudioPassthrough.setEnabled(newPassthroughEnabled);
                 mPlaybackSpeed.setEnabled(!newPassthroughEnabled);
                 mPlaybackSpeed.setSelectable(!newPassthroughEnabled);
+                // Audio speed audiotrack should be non-selectable when playback speed is non-selectable
+                mAudioSpeedAudiotrack.setSelectable(!newPassthroughEnabled);
                 boolean currentFrameTimingEnabled = mEnableAndroidFrameTiming.isChecked();
                 updateDynamicAudioDelayState(newPassthroughEnabled, currentFrameTimingEnabled);
                 return true;
@@ -603,6 +609,8 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             }
             mPlaybackSpeed.setEnabled(true);
             mPlaybackSpeed.setSelectable(true);
+            // Audio speed audiotrack is selectable when playback speed is selectable
+            mAudioSpeedAudiotrack.setSelectable(true);
             // Frame timing can still affect dynamic audio delay even without passthrough
             updateDynamicAudioDelayState(false, frameTimingEnabled);
         }
