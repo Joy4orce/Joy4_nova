@@ -52,7 +52,6 @@
     <!-- Used for scanning and trakt -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" android:minSdkVersion="34"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" android:minSdkVersion="34"/>
 
     <!--<uses-permission android:name="android.permission.WRITE_SETTINGS" />-->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -1166,14 +1165,14 @@
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
 
-        <service android:name="com.archos.mediascraper.AutoScrapeService"
-            android:foregroundServiceType="dataSync"/>
-        <service android:name="com.archos.mediascraper.AllCollectionScrapeService"
-            android:foregroundServiceType="dataSync"/>
-        <service android:name="com.archos.mediacenter.video.browser.FileManagerService"
-            android:foregroundServiceType="dataSync"/>
-        <service android:name="com.archos.mediacenter.video.utils.MediaLibraryBackupService"
-            android:foregroundServiceType="dataSync"/>
+        <service android:name="com.archos.mediascraper.AutoScrapeService"/>
+            <!-- android:foregroundServiceType="dataSync"/>-->
+        <service android:name="com.archos.mediascraper.AllCollectionScrapeService"/>
+            <!-- android:foregroundServiceType="dataSync"/>-->
+        <service android:name="com.archos.mediacenter.video.browser.FileManagerService"/>
+            <!-- android:foregroundServiceType="dataSync"/>-->
+        <service android:name="com.archos.mediacenter.video.utils.MediaLibraryBackupService"/>
+            <!-- android:foregroundServiceType="dataSync"/>-->
 
         <receiver
             android:name="com.archos.mediacenter.LibAvosReceiver"
@@ -1306,12 +1305,12 @@
             android:enabled="true"/>
 
         <!-- Service doing the import -->
-        <service android:name="com.archos.mediaprovider.video.VideoStoreImportService"
-            android:foregroundServiceType="dataSync"/>
+        <service android:name="com.archos.mediaprovider.video.VideoStoreImportService"/>
+            <!--android:foregroundServiceType="dataSync"/>-->
 
         <!-- Service doing SMB scanning -->
-        <service android:name="com.archos.mediaprovider.video.NetworkScannerServiceVideo"
-            android:foregroundServiceType="dataSync"/>
+        <service android:name="com.archos.mediaprovider.video.NetworkScannerServiceVideo"/>
+            <!--android:foregroundServiceType="dataSync"/>-->
 
         <!-- Service doing Trakt.tv stuff -->
         <service android:name="com.archos.mediacenter.utils.trakt.TraktService"/>
@@ -1512,8 +1511,9 @@
         <!-- small service that can be told to export a bunch of nfo files -->
         <service
             android:name="com.archos.mediascraper.NfoExportService"
-            android:foregroundServiceType="dataSync"
             android:exported="false"/>
+            <!--android:foregroundServiceType="dataSync"-->
+            
         <service
             android:name=".browser.UpdateRecommendationsService"
             android:enabled="true"/>

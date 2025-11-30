@@ -100,13 +100,7 @@ public class MediaLibraryBackupService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         log.debug("onStartCommand: intent={}", intent);
 
-        if (Build.VERSION.SDK_INT >= 29) {
-            ServiceCompat.startForeground(this, NOTIFICATION_ID, nb.build(),
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
-        } else {
-            startForeground(NOTIFICATION_ID, nb.build());
-        }
-
+        //startForeground(NOTIFICATION_ID, nb.build());
         if (intent != null) {
             String action = intent.getAction();
             if (ACTION_EXPORT.equals(action)) {
@@ -139,6 +133,7 @@ public class MediaLibraryBackupService extends Service {
                 String exportPath = exportMediaLibrary();
 
                 showToast(getString(R.string.media_library_export_success, exportPath));
+                nm.cancel(NOTIFICATION_ID);
             } catch (Exception e) {
                 log.error("startExport: error exporting media library", e);
                 showToast(getString(R.string.media_library_export_error));
@@ -163,6 +158,7 @@ public class MediaLibraryBackupService extends Service {
 
                 importMediaLibrary(importFilePath);
 
+                nm.cancel(NOTIFICATION_ID);
                 showToast(getString(R.string.media_library_import_success));
 
                 // Wait 2 seconds for user to see success message, then restart app
