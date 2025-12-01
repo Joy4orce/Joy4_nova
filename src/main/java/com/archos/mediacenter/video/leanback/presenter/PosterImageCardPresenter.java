@@ -285,20 +285,16 @@ public class PosterImageCardPresenter extends Presenter {
                 card.setContentText("");
             }
         }
-        if (posterUri!=null) {
+         if (posterUri!=null) {
             if (!isLarge)
                 vh.updateCardView(posterUri, video.getId(),isLarge);
             else
                 vh.updateCardView(posterUri, -1, isLarge);
-        }
-        //don't try to load thumb when not indexed or not local && create remote thumb is set to false
-        else if (video.isIndexed()&& (FileUtils.isLocal(video.getFileUri())||PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean(VideoProvider.PREFERENCE_CREATE_REMOTE_THUMBS, false))) {
-            // get/build Thumbnail
-            vh.updateCardView(ThumbnailRequestHandler.buildUri(video.getId()),-1, false);
-        }
-        else {
-            vh.updateCardView(mErrorDrawable);
-
+        } else {
+            //The old logic was wrong. If we can get a thumb, get it! Even if we no lomger generate them
+            //This will fall back to error if thumb dont exist, thats perfect!
+            //And the ifIndexed() If its indexed we have a poster, if its NOT indexed if anything.
+            vh.updateCardView(ThumbnailRequestHandler.buildUri(video.getId()), -1, false);
         }
         if (resumeMs == 0 || resumeMs == PlayerActivity.LAST_POSITION_UNKNOWN || resumeMs == PlayerActivity.LAST_POSITION_END) {
             vh.setResumeInPercent(0, isLarge);
