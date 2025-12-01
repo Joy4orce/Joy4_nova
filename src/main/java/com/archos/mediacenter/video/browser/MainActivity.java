@@ -434,6 +434,16 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
                 }
             });
         }
+        else if(getString(R.string.action_recently_added).equals(intent.getAction())){
+            final BrowserCategoryVideo category = (BrowserCategoryVideo) getSupportFragmentManager().findFragmentById(R.id.category);
+            category.getView().post(new Runnable() {
+                @Override
+                public void run() {
+                    closeDrawer();
+                    category.goToNonScraped();
+                }
+            });
+        }
         else if(getString(R.string.action_recently_played).equals(intent.getAction())){
             final BrowserCategoryVideo category = (BrowserCategoryVideo) getSupportFragmentManager().findFragmentById(R.id.category);
             category.getView().post(new Runnable() {

@@ -81,7 +81,7 @@
     <string name="keep_watching">Keep watching</string>
     <string name="keep_watching_videos">Keep watching</string>
     <string name="video_lists">Playlists</string>
-
+    
     <!-- The string used in main storage list -->
     <string name="external_storage">External</string>
     <string name="internal_storage">Internal</string>
@@ -154,8 +154,8 @@
     <string name="date_view_month">Month</string>
     <string name="date_view_year">Year</string>
     <string name="all_movies_and_tv_shows">Movies and TV shows</string>
-    <string name="non_scraped_videos">Non scraped videos</string>
-
+    <string name="non_scraped_videos">Unscanned Videos</string>
+    \
     <string name="no_server">No media server found</string>
     <string name="cannot_open_video">Cannot open this video</string>
     <string name="confirm_delete">Do you really want to delete it?</string>
@@ -290,7 +290,7 @@
     <string name="you_have_no_anime_collections">No anime collections</string>
     <string name="you_have_no_tv_shows">No TV shows</string>
     <string name="you_have_no_anime_shows">No animation TV shows</string>
-    <string name="you_have_no_non_scraped_videos">No non scraped videos</string>
+    <string name="you_have_no_non_scraped_videos">All Videos have been scanned.</string>
 
     <plurals name="Nmovies">
         <item quantity="one">1 movie</item>

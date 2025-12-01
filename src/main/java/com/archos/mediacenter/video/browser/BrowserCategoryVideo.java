@@ -38,6 +38,7 @@ import com.archos.mediacenter.video.browser.BrowserByIndexedVideos.BrowserNeverP
 import com.archos.mediacenter.video.browser.BrowserByIndexedVideos.BrowserPlaylists;
 import com.archos.mediacenter.video.browser.filebrowsing.BrowserByExtStorage;
 import com.archos.mediacenter.video.browser.filebrowsing.BrowserByVideoFolder;
+import com.archos.mediacenter.video.browser.BrowserByIndexedVideos.BrowserNonScraped;
 import com.archos.mediacenter.video.browser.filebrowsing.network.ShortcutRootFragment;
 import com.archos.mediacenter.video.browser.filebrowsing.network.SmbBrowser.SmbRootFragment;
 import com.archos.mediacenter.video.browser.filebrowsing.network.UpnpBrowser.UpnpRootFragment;
@@ -73,7 +74,9 @@ public class BrowserCategoryVideo extends BrowserCategory implements androidx.ap
     private static final int ITEM_ID_ALL_VIDEOS = ITEM_ID_OFFSET + 3;
     public static final int ITEM_ID_RECENTLY_ADDED = ITEM_ID_OFFSET + 4;
     private static final int ITEM_ID_RECENTLY_PLAYED = ITEM_ID_OFFSET +5;
-    private static final int ITEM_ID_LISTS = ITEM_ID_OFFSET +6;
+    private static final int ITEM_ID_NON_SCRAPED= ITEM_ID_OFFSET +6;
+    private static final int ITEM_ID_LISTS = ITEM_ID_OFFSET +7;
+    private static final int ITEM_ID_NON_PLAYED_YET = ITEM_ID_OFFSET +8;
 
     public void setNavigationMode(int navigationMode){
         ((MainActivity)getActivity()).setNavigationMode(navigationMode);
@@ -117,6 +120,8 @@ public class BrowserCategoryVideo extends BrowserCategory implements androidx.ap
                     itemData.text = LoaderUtils.isSmartRecentlyRows() ? R.string.new_and_unwatched_videos : R.string.recently_added_videos;
                 } else if (itemData.id == ITEM_ID_RECENTLY_PLAYED) {
                     itemData.text = LoaderUtils.isSmartRecentlyRows() ? R.string.keep_watching_videos : R.string.recently_played_videos;
+                } else if (itemData.id == ITEM_ID_NON_SCRAPED) {
+                    itemData.text = R.string.non_scraped_videos;
                 }
             }
         }
@@ -145,6 +150,7 @@ public class BrowserCategoryVideo extends BrowserCategory implements androidx.ap
         itemData.id = ITEM_ID_TV_SHOWS;
         categoryList.add(itemData);
 
+        //ALL VIDEO COLLECTION TABLET/PHONE UI
         itemData = new ItemData();
         itemData.icon = R.drawable.category_video_all;
         itemData.text = R.string.all_videos;
@@ -167,6 +173,12 @@ public class BrowserCategoryVideo extends BrowserCategory implements androidx.ap
         itemData.icon = R.drawable.category_video_played;
         itemData.text = R.string.video_lists;
         itemData.id = ITEM_ID_LISTS;
+        categoryList.add(itemData);
+
+        itemData = new ItemData();
+        itemData.icon = R.drawable.category_non_scraped_videos;
+        itemData.text = R.string.non_scraped_videos;
+        itemData.id = ITEM_ID_NON_SCRAPED;
         categoryList.add(itemData);
 
         /*itemData = new ItemData();
@@ -281,6 +293,10 @@ public class BrowserCategoryVideo extends BrowserCategory implements androidx.ap
                 fragmentClass = BrowserLastAdded.class;
                 struc.title = LoaderUtils.isSmartRecentlyRows() ? R.string.new_and_unwatched_videos : R.string.recently_added_videos;
                 break;
+            case ITEM_ID_NON_SCRAPED:
+                fragmentClass = BrowserNonScraped.class;
+                struc.title = R.string.non_scraped_videos;
+                break;
             case ITEM_ID_RECENTLY_PLAYED:
                 fragmentClass = BrowserLastPlayed.class;
                 struc.title = LoaderUtils.isSmartRecentlyRows() ? R.string.keep_watching_videos : R.string.recently_played_videos;
@@ -289,7 +305,8 @@ public class BrowserCategoryVideo extends BrowserCategory implements androidx.ap
                 fragmentClass = BrowserPlaylists.class;
                 struc.title = R.string.video_lists;
                 break;
-            case R.string.not_played_yet_videos:
+                // TODO MARC WARNING
+            case ITEM_ID_NON_PLAYED_YET:
                 fragmentClass = BrowserNeverPlayed.class;
                 struc.title = R.string.not_played_yet_videos;
                 break;
@@ -325,6 +342,13 @@ public class BrowserCategoryVideo extends BrowserCategory implements androidx.ap
     public void goToRecentlyAdded() {
         if(mSelectedItemId != ITEM_ID_RECENTLY_ADDED) {
             mSelectedItemId = ITEM_ID_RECENTLY_ADDED;
+            setFragment(null);
+        }
+    }
+
+    public void goToNonScraped() {
+        if(mSelectedItemId != ITEM_ID_NON_SCRAPED) {
+            mSelectedItemId = ITEM_ID_NON_SCRAPED;
             setFragment(null);
         }
     }
