@@ -65,6 +65,10 @@
     <string name="recently_added_videos">Recién añadido</string>
     <string name="recently_played">Recién visto</string>
     <string name="recently_played_videos">Recién visto</string>
+    <string name="new_and_unwatched">No visto</string>
+    <string name="new_and_unwatched_videos">No visto</string>
+    <string name="keep_watching">Seguir viendo</string>
+    <string name="keep_watching_videos">Seguir viendo</string>
     <string name="video_lists">Listas de reproducción</string>
     <!-- The string used in main storage list -->
     <string name="external_storage">Externo</string>
@@ -531,6 +535,9 @@
     <string name="preferences_force_passthrough_summary">Si la pasarela de audio (passthrough) está activa, fuerza su uso incluso si el receptor AV no asegura soportar el códec</string>
     <string name="preferences_playback_speed">Activar velocidad de reproducción</string>
     <string name="preferences_playback_speed_summary">Habilita la posibilidad de cambiar la velocidad de reproducción. ⚠ Experimental, puede estropear el vídeo</string>
+    <string name="preferences_audio_speed_audiotrack">Usar AudioTrack para velocidad de reproducción</string>
+    <string name="preferences_audio_speed_audiotrack_summary">Usar AudioTrack en lugar del filtro FFmpeg para controlar la velocidad de reproducción.
+Experimental: puede no funcionar en todas las configuraciones.</string>
     <string name="preferences_enable_dynamic_audio_delay_title">Estimación dinámica de retardo de audio/vídeo</string>
     <string name="preferences_enable_dynamic_audio_delay_summary">Usa estimaciones dinámicas de latencia para una mejor sincronización de audio/vídeo especialmente con auriculares bluetooth. Desactiva si experimentas problemas de sincronización.</string>
     <string name="preferences_disable_downmix_title">Desactivar reducción a estéreo</string>
@@ -545,6 +552,8 @@
     <string name="enable_android_frame_timing_summary">Delegar a Android la temporización de fotogramas para una reproducción más suave (experimental)</string>
     <string name="hide_watched_videos">Ocultar videos vistos</string>
     <string name="hide_watched_videos_summary">Ocultar vídeos de la Biblioteca de Medios si están marcados como vistos.</string>
+    <string name="enable_projector_mode">Activar modo proyector</string>
+    <string name="enable_projector_mode_summary">Reproduce vídeos en la parte superior de la pantalla para verlos en un proyector.</string>
     <string name="preference_tv_refreshrate_switch">Activar el cambio de tasa de refresco automático</string>
     <string name="preference_tv_refreshrate_switch_summary">Elimina el efecto judder adaptando la mejor frecuencia de actualización de pantalla a la velocidad de fotogramas de vídeo (la compatibilidad puede variar según el dispositivo)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Desactivado</string>
@@ -614,6 +623,10 @@
     <string name="format_optimized">Optimizado</string>
     <string name="format_original">Original</string>
     <string name="format_stretched">Estirado</string>
+    <string name="format_43">4:3</string>
+    <string name="format_169">16:9</string>
+    <string name="format_185">1,85:1</string>
+    <string name="format_239">2,39:1</string>
     <string name="stereo_dive_enable">Efecto de inmersión estéreo</string>
     <string name="stereo_dive_disable">Desactivar efecto de inmersión estéreo</string>
     <string name="rotation_unlock">Activar rotación automática de pantalla</string>
@@ -710,6 +723,8 @@
     <string name="preferences_display_resume_box">Mostrar cuadro de reanudación</string>
     <string name="reset_brightness_on_start">Recordar el brillo del vídeo.</string>
     <string name="reset_brightness_on_start_summary">Recuerda el último ajuste de brillo usado al abrir la aplicación. Desactiva para usar el brillo del sistema.</string>
+    <string name="hide_controls_on_pause">Ocultar controles al pausar.</string>
+    <string name="hide_controls_on_pause_summary">Oculta los controles del reproductor después de 5 segundos cuando el video está en pausa.</string>
     <string name="preferences_leanback_user_interface">Interfaz de usuario de TV</string>
     <string name="preferences_separate_animation_from_movies_summary">Marcar para separar vídeos de animación de películas y series añadiendo una fila de animación</string>
     <string name="preferences_separate_animation_from_movies">Separar animaciones de películas y series</string>
@@ -721,6 +736,8 @@
     <string name="preferences_show_last_played_row">Mostrar fila último visto</string>
     <string name="preferences_reset_last_played_row">Restablecer fila último visto</string>
     <string name="reset_last_played_row_in_progress">Restableciendo fila último visto</string>
+    <string name="pref_smart_recently_rows_title">Categorías inteligentes recientes</string>
+    <string name="pref_declutter_home_rows_summary">Mostrar sólo contenido no visto en Recien añadido y evitar duplicados en Recien visto</string>
     <string name="preferences_show_all_movies_row_summary">Marcar para mostrar una fila con todas tus películas en lugar de la fila de categorías de la película</string>
     <string name="preferences_show_all_movies_row">Mostrar fila Todas las películas</string>
     <string name="preferences_movie_sort_order_summary">Selecciona el orden de la fila Todas las películas</string>
@@ -840,6 +857,8 @@
     <string name="leanback_hint_long_press_on_back">Sugerencia: pulsación larga sobre la tecla ATRÁS cierra el explorador de archivos</string>
     <string name="leanback_archos_video_webview">Nova Video WebView</string>
     <string name="file_access_error">No se ha podido acceder al archivo</string>
+    <string name="always_leanback_on_tv">Iniciar siempre en la interfaz de usuario de TV</string>
+    <string name="always_leanback_on_tv_summary">Inicia siempre la aplicación en la interfaz de usuario de TV, desactivar si desea iniciar en la interfaz clásica de su televisor.</string>
     <string name="interface_size">Tamaño de la interfaz</string>
     <string name="interface_size_summary">Cambia esto en caso de que la interfaz de usuario sea demasiado pequeña o demasiado grande</string>
     <string name="interface_size_very_small">Muy pequeño (mdpi)</string>

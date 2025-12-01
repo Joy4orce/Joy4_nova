@@ -65,6 +65,10 @@
     <string name="recently_added_videos">Kürzlich hinzugefügt</string>
     <string name="recently_played">Kürzlich abgespielt</string>
     <string name="recently_played_videos">Kürzlich abgespielt</string>
+    <string name="new_and_unwatched">Neu zum Ansehen</string>
+    <string name="new_and_unwatched_videos">Neu zum Ansehen</string>
+    <string name="keep_watching">Weiter Ansehen</string>
+    <string name="keep_watching_videos">Weiter Ansehen</string>
     <string name="video_lists">Wiedergabelisten</string>
     <!-- The string used in main storage list -->
     <string name="external_storage">Extern</string>
@@ -531,6 +535,8 @@
     <string name="preferences_force_passthrough_summary">Wenn Passthrough aktiviert ist, wird es auch dann durchgesetzt, wenn der AV-Receiver angeblich keinen Audiocodec unterstützt, anstatt die Fähigkeiten des AV-Receivers zu prüfen</string>
     <string name="preferences_playback_speed">Wiedergabegeschwindigkeit aktivieren</string>
     <string name="preferences_playback_speed_summary">Möglichkeit aktivieren,  um Wiedergabegeschwindigkeit zu ändern. ⚠ Experimentell, kann in zerhackten Videos resultieren</string>
+    <string name="preferences_audio_speed_audiotrack">AudioTrack für Wiedergabegeschwindigkeit verwenden</string>
+    <string name="preferences_audio_speed_audiotrack_summary">Verwenden Sie AudioTrack anstelle des FFmpeg-atempo-Filters für die Wiedergabegeschwindigkeitssteuerung. Experimentell: Funktioniert möglichwerweise nicht in allen Konfigurationen.</string>
     <string name="preferences_enable_dynamic_audio_delay_title">Dynamische Schätzung der Audio-/Video-Verzögerung</string>
     <string name="preferences_enable_dynamic_audio_delay_summary">Verwende dynamische Latenzschätzungen für eine bessere Audio/Video-Synchronisation speziell mit Bluetooth-Kopfhörern. Deaktivieren bei Synchronisationsproblemen.</string>
     <string name="preferences_disable_downmix_title">Audio Stereo-Downmix deaktivieren</string>
@@ -544,6 +550,8 @@
     <string name="enable_android_frame_timing">Android-Frame-Timing aktivieren</string>
     <string name="enable_android_frame_timing_summary">\"Frame blit timing\" für eine ruckelfreiere Wiedergabe auf Android delegieren (experimentell)</string>
     <string name="hide_watched_videos">Gesehene Videos ausblenden</string>
+    <string name="enable_projector_mode">Projektor-Modus aktivieren</string>
+    <string name="enable_projector_mode_summary">Spiele Videos am oberen Bildschirmrand ab, um sie auf einem Projektor anzusehen.</string>
     <string name="preference_tv_refreshrate_switch">Automatische Aktualisierungsrate aktivieren</string>
     <string name="preference_tv_refreshrate_switch_summary">Judder-Effekt entfernen durch Anpassung der besten Bildschirmaktualisierungsrate an die Videobildrate (Geräteunterstützung kann variieren)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Deaktiviert</string>
@@ -613,6 +621,10 @@
     <string name="format_optimized">Optimiert</string>
     <string name="format_original">Original</string>
     <string name="format_stretched">Gestreckt</string>
+    <string name="format_43">4:3</string>
+    <string name="format_169">16:9</string>
+    <string name="format_185">1.85:1</string>
+    <string name="format_239">2.39:1</string>
     <string name="stereo_dive_enable">Stereo-Dive-Effekt</string>
     <string name="stereo_dive_disable">Stereo-Dive-Effekt deaktivieren</string>
     <string name="rotation_unlock">Automatische Bildschirmrotation aktivieren</string>
@@ -709,6 +721,8 @@
     <string name="preferences_display_resume_box">Wiederherstellungsfeld anzeigen</string>
     <string name="reset_brightness_on_start">Videohelligkeit merken.</string>
     <string name="reset_brightness_on_start_summary">Speichere die zuletzt verwendete Helligkeitseinstellung beim Öffnen der Anwendung. Deaktivieren um Systemhelligkeit zu verwenden.</string>
+    <string name="hide_controls_on_pause">Steuerelemente bei Pause ausblenden.</string>
+    <string name="hide_controls_on_pause_summary">Player-Steuerelemente nach 5 Sekunden ausblenden, wenn das Video angehalten wird.</string>
     <string name="preferences_leanback_user_interface">TV-Benutzeroberfläche</string>
     <string name="preferences_separate_animation_from_movies_summary">Prüfen Sie, ob Sie Animationsvideos aus Filmen und TV-Sendungen separieren können, indem Sie eine Animationszeile hinzufügen</string>
     <string name="preferences_separate_animation_from_movies">Animationen aus Filmen und TV-Sendungen separieren</string>
@@ -720,6 +734,8 @@
     <string name="preferences_show_last_played_row">Zuletzt abgespielte Zeile anzeigen</string>
     <string name="preferences_reset_last_played_row">Zuletzt abgespielte Zeile zurücksetzen</string>
     <string name="reset_last_played_row_in_progress">Zurücksetzung der zuletzt abgespielten Zeile</string>
+    <string name="pref_smart_recently_rows_title">Intelligente letzte Kategorien</string>
+    <string name="pref_declutter_home_rows_summary">Zeige nur ungesehene Inhalte in kürzlich hinzugefügten und vermeide Duplikate in kürzlich abgespielten Dateien</string>
     <string name="preferences_show_all_movies_row_summary">Aktivieren Sie dieses Kontrollkästchen, um eine Zeile mit allen Ihren Filmen anstelle der Zeile mit den Filmkategorien zu zeigen</string>
     <string name="preferences_show_all_movies_row">Zeile \"alle Filme\" zeigen</string>
     <string name="preferences_movie_sort_order_summary">Wählen Sie die Sortierreihenfolge der gesamten Zeile \"alle Filme\"</string>
@@ -839,6 +855,8 @@
     <string name="leanback_hint_long_press_on_back">TIPP: Langes Drücken der BACK-Taste schließt den Dateibrowser</string>
     <string name="leanback_archos_video_webview">Nova Video WebView</string>
     <string name="file_access_error">Es ist nicht gelungen, auf die Datei zuzugreifen</string>
+    <string name="always_leanback_on_tv">Immer in der TV-Benutzeroberfläche starten</string>
+    <string name="always_leanback_on_tv_summary">Anwendung immer in TV-Benutzeroberfläche starten - ausschalten, um in der klassischen Oberfläche auf dem Fernseher zu starten.</string>
     <string name="interface_size">Größe der Benutzeroberfläche</string>
     <string name="interface_size_summary">Ändern Sie dies, im Falle, dass die Benutzeroberfläche zu klein oder zu groß ist</string>
     <string name="interface_size_very_small">Sehr klein (mdpi)</string>

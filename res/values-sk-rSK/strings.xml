@@ -65,6 +65,10 @@
     <string name="recently_added_videos">Nedávno pridané</string>
     <string name="recently_played">Nedávno prehrávané</string>
     <string name="recently_played_videos">Nedávno prehrávané</string>
+    <string name="new_and_unwatched">Nové k sledovaniu</string>
+    <string name="new_and_unwatched_videos">Nové k sledovaniu</string>
+    <string name="keep_watching">Pokračovať v sledovaní</string>
+    <string name="keep_watching_videos">Pokračovať v sledovaní</string>
     <string name="video_lists">Zoznamy prehrávania</string>
     <!-- The string used in main storage list -->
     <string name="external_storage">Externé úložisko</string>
@@ -541,6 +545,8 @@
     <string name="preferences_force_passthrough_summary">Ak je povolená funkcia passthrough, vynúti ju aj v prípade, že zvukový kodek nie je deklarovaný ako podporovaný AV prijímačom namiesto kontroly možností AV prijímača</string>
     <string name="preferences_playback_speed">Povoliť rýchlosť prehrávania</string>
     <string name="preferences_playback_speed_summary">Povolenie možnosti zmeny rýchlosti prehrávania. ⚠ Experimentálne môže mať za následok sekanie videa</string>
+    <string name="preferences_audio_speed_audiotrack">Použiť AudioTrack pre nastavenie rýchlosti prehrávania</string>
+    <string name="preferences_audio_speed_audiotrack_summary">Na ovládanie rýchlosti prehrávania použite AudioTrack namiesto filtra FFmpeg atempo. Experimentálne: nemusí fungovať vo všetkých konfiguráciách.</string>
     <string name="preferences_enable_dynamic_audio_delay_title">Odhad dynamického oneskorenia zvuku/videa</string>
     <string name="preferences_enable_dynamic_audio_delay_summary">Použite dynamické odhadovanie latencie pre lepšiu synchronizáciu zvuku a videa, najmä pri bluetooth slúchadlách. Vypnite túto funkciu, ak máte problémy so synchronizáciou.</string>
     <string name="preferences_disable_downmix_title">Vypnutie stereo downmixu zvuku</string>
@@ -555,6 +561,8 @@
     <string name="enable_android_frame_timing_summary">Delegovať na Android časovanie prelínania snímok pre plynulejšie prehrávanie (experimentálne)</string>
     <string name="hide_watched_videos">Skryť sledované videá</string>
     <string name="hide_watched_videos_summary">Skryť videá z mediálnej knižnice, ak sú označené ako pozreté.</string>
+    <string name="enable_projector_mode">Aktivovať režim projektora</string>
+    <string name="enable_projector_mode_summary">Prehrať videá v hornej časti obrazovky pre premietanie na projektore.</string>
     <string name="preference_tv_refreshrate_switch">Povolenie automatického prepínania obnovovacej frekvencie</string>
     <string name="preference_tv_refreshrate_switch_summary">Odstránenie efektu trhania prispôsobením najlepšej obnovovacej frekvencie obrazovky snímkovej frekvencii videa (podpora zariadenia sa môže líšiť)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Vypnutý</string>
@@ -624,6 +632,10 @@
     <string name="format_optimized">Optimalizované</string>
     <string name="format_original">Pôvodný</string>
     <string name="format_stretched">Roztiahnuté</string>
+    <string name="format_43">4:3</string>
+    <string name="format_169">16:9</string>
+    <string name="format_185">1.85:1</string>
+    <string name="format_239">2.39:1</string>
     <string name="stereo_dive_enable">Efekt \"Stereo dive\"</string>
     <string name="stereo_dive_disable">Zakázať efekt \"Stereo dive\"</string>
     <string name="rotation_unlock">Zapnutie automatického otáčania obrazovky</string>
@@ -720,6 +732,8 @@
     <string name="preferences_display_resume_box">Zobrazenie panelu pre obnovenie</string>
     <string name="reset_brightness_on_start">Zapamätať si jas videa.</string>
     <string name="reset_brightness_on_start_summary">Pri otvorení aplikácie si zapamätaj posledné nastavenie jasu. Vypni, ak chceš používať jas systému.</string>
+    <string name="hide_controls_on_pause">Skryť ovládacie prvky pri pozastavení.</string>
+    <string name="hide_controls_on_pause_summary">Skryť ovládacie prvky prehrávača po 5 sekundách, keď je video pozastavené.</string>
     <string name="preferences_leanback_user_interface">Užívateľské rozhranie televízora</string>
     <string name="preferences_separate_animation_from_movies_summary">Oddelenie animovaných videí od filmov a seriálov pridaním riadku animácie</string>
     <string name="preferences_separate_animation_from_movies">Oddelenie animácií z filmov a seriálov</string>
@@ -731,6 +745,8 @@
     <string name="preferences_show_last_played_row">Zobraziť riadok s posledným prehrávaním</string>
     <string name="preferences_reset_last_played_row">Vynulovanie riadku s naposledý prehrávaného</string>
     <string name="reset_last_played_row_in_progress">Vynulovanie riadku s naposledy prehrávaného</string>
+    <string name="pref_smart_recently_rows_title">Chytré najnovšie kategórie</string>
+    <string name="pref_declutter_home_rows_summary">Zobraziť len nepozretý obsah v nedávno pridaných a vyhnúť sa duplicitám v nedávno prehrávaných</string>
     <string name="preferences_show_all_movies_row_summary">Začiarknite, ak chcete zobraziť riadok so všetkými filmami namiesto riadku s kategóriami filmov</string>
     <string name="preferences_show_all_movies_row">Zobraziť riadky so všetkými filmami</string>
     <string name="preferences_movie_sort_order_summary">Výber poradia zoradenia riadku všetkých filmov</string>
@@ -850,6 +866,8 @@
     <string name="leanback_hint_long_press_on_back">TIP: dlhým stlačením tlačidla BACK sa zatvorí prehliadač súborov</string>
     <string name="leanback_archos_video_webview">Nova Video WebView</string>
     <string name="file_access_error">Nepodarilo sa získať prístup k súboru</string>
+    <string name="always_leanback_on_tv">Vždy začať v používateľskom rozhraní televízie</string>
+    <string name="always_leanback_on_tv_summary">Aplikáciu vždy spustiť v používateľskom rozhraní televízora, ak ju chcete spustiť v klasickom používateľskom rozhraní televízora, vypnite ju.</string>
     <string name="interface_size">Veľkosť rozhrania</string>
     <string name="interface_size_summary">Zmeňte toto nastavenie v prípade, že je používateľské rozhranie príliš malé alebo príliš veľké</string>
     <string name="interface_size_very_small">Veľmi malé (mdpi)</string>

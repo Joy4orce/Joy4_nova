@@ -65,6 +65,10 @@
     <string name="recently_added_videos">最近添加</string>
     <string name="recently_played">最近播放</string>
     <string name="recently_played_videos">最近播放</string>
+    <string name="new_and_unwatched">新内容待看</string>
+    <string name="new_and_unwatched_videos">新内容待看</string>
+    <string name="keep_watching">继续观看</string>
+    <string name="keep_watching_videos">继续观看</string>
     <string name="video_lists">播放列表</string>
     <!-- The string used in main storage list -->
     <string name="external_storage">外置存储</string>
@@ -526,6 +530,8 @@
     <string name="preferences_force_passthrough_summary">如果启用了直通，即使 AV 接收器不支持音频编解码器，也强制执行它，而不检查 AV 接收器功能</string>
     <string name="preferences_playback_speed">启用播放速度</string>
     <string name="preferences_playback_speed_summary">允许更改播放速度。⚠ 实验性功能，可能导致视频卡顿</string>
+    <string name="preferences_audio_speed_audiotrack">使用 AudioTrack 控制播放速度</string>
+    <string name="preferences_audio_speed_audiotrack_summary">使用 AudioTrack 而非 FFmpeg 的 atempo 滤镜来控制播放速度。实验性功能：可能不适用于所有配置。</string>
     <string name="preferences_enable_dynamic_audio_delay_title">动态音频/视频延迟估算</string>
     <string name="preferences_enable_dynamic_audio_delay_summary">使用动态延迟估算可获得更佳的音频/视频同步效果，尤其是在使用蓝牙耳机时。如果遇到同步问题，请禁用此功能。</string>
     <string name="preferences_disable_downmix_title">禁用混音至立体声</string>
@@ -540,6 +546,8 @@
     <string name="enable_android_frame_timing_summary">将帧位块传送时序交由 Android 系统处理，以实现更流畅的播放效果 (实验性)</string>
     <string name="hide_watched_videos">隐藏已观看视频</string>
     <string name="hide_watched_videos_summary">如果视频标记为已观看，则将其从媒体库中隐藏。</string>
+    <string name="enable_projector_mode">启用投影仪模式</string>
+    <string name="enable_projector_mode_summary">将视频播放置于屏幕顶部，以便在投影仪上观看。</string>
     <string name="preference_tv_refreshrate_switch">启用自动刷新率切换</string>
     <string name="preference_tv_refreshrate_switch_summary">通过匹配最佳屏幕刷新率与视频帧率去除抖动效果(可能受设备支持限制)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">禁用</string>
@@ -609,6 +617,10 @@
     <string name="format_optimized">优化</string>
     <string name="format_original">原始比例</string>
     <string name="format_stretched">拉伸</string>
+    <string name="format_43">4:3</string>
+    <string name="format_169">16:9</string>
+    <string name="format_185">1.85:1</string>
+    <string name="format_239">2.39:1</string>
     <string name="stereo_dive_enable">立体声潜水效果</string>
     <string name="stereo_dive_disable">禁用立体声潜水效果</string>
     <string name="rotation_unlock">启用屏幕自动旋转</string>
@@ -705,6 +717,8 @@
     <string name="preferences_display_resume_box">显示恢复播放窗口</string>
     <string name="reset_brightness_on_start">记住视频亮度。</string>
     <string name="reset_brightness_on_start_summary">记住上次打开应用程序时使用的亮度设置。关闭此功能将使用系统亮度。</string>
+    <string name="hide_controls_on_pause">暂停时隐藏控件。</string>
+    <string name="hide_controls_on_pause_summary">视频暂停 5 秒后隐藏播放器控件。</string>
     <string name="preferences_leanback_user_interface">电视用户界面</string>
     <string name="preferences_separate_animation_from_movies_summary">选中以将动画视频与电影和电视节目分开添加一个动画行</string>
     <string name="preferences_separate_animation_from_movies">将动画与电影和电视节目分开。</string>
@@ -716,6 +730,8 @@
     <string name="preferences_show_last_played_row">显示“上次播放”栏</string>
     <string name="preferences_reset_last_played_row">重置“上次播放”栏</string>
     <string name="reset_last_played_row_in_progress">正在重置“上次播放”栏……</string>
+    <string name="pref_smart_recently_rows_title">智能最近分类</string>
+    <string name="pref_declutter_home_rows_summary">在“最近添加”中仅显示未观看内容，并在“最近播放”中避免重复项</string>
     <string name="preferences_show_all_movies_row_summary">选中以“所有电影”栏代替“电影类别”栏</string>
     <string name="preferences_show_all_movies_row">显示“所有电影”栏</string>
     <string name="preferences_movie_sort_order_summary">选择“所有电影”栏的排序方法</string>
@@ -835,6 +851,8 @@
     <string name="leanback_hint_long_press_on_back">提示：长按返回键关闭文件浏览器</string>
     <string name="leanback_archos_video_webview">Nova 视频 WebView</string>
     <string name="file_access_error">无法访问文件</string>
+    <string name="always_leanback_on_tv">始终以电视用户界面启动</string>
+    <string name="always_leanback_on_tv_summary">始终以电视用户界面启动应用程序；如果要在电视上以经典用户界面启动，请关闭此选项。</string>
     <string name="interface_size">界面尺寸</string>
     <string name="interface_size_summary">在用户界面太小或太大的情况下更改此选项</string>
     <string name="interface_size_very_small">非常小 (mdpi)</string>

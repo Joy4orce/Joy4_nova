@@ -622,6 +622,10 @@
     <string name="format_optimized">Optimisé</string>
     <string name="format_original">Original</string>
     <string name="format_stretched">Étiré</string>
+    <string name="format_43">4:3</string>
+    <string name="format_169">16:9</string>
+    <string name="format_185">1.85:1</string>
+    <string name="format_239">2.39:1</string>
     <string name="stereo_dive_enable">Effet stéréo immersive</string>
     <string name="stereo_dive_disable">Désactiver l\'effet d\'immersion stéréo</string>
     <string name="rotation_unlock">Rotation auto. de l\'écran</string>
@@ -718,6 +722,8 @@
     <string name="preferences_display_resume_box">Afficher le bouton de reprise de la vidéo</string>
     <string name="reset_brightness_on_start">Se souvenir de la luminosité vidéo.</string>
     <string name="reset_brightness_on_start_summary">Se souvenir de la dernière luminosité utilisée lors de l\'ouverture de l\'application. Désactivez pour utiliser la luminosité du système.</string>
+    <string name="hide_controls_on_pause">Masquer les contrôles en pause.</string>
+    <string name="hide_controls_on_pause_summary">Masquer les commandes du lecteur après 5 secondes lorsque la vidéo est en pause.</string>
     <string name="preferences_leanback_user_interface">Interface utilisateur TV</string>
     <string name="preferences_separate_animation_from_movies_summary">Cochez pour séparer les vidéos d\'animation des films et les séries télévisées en ajoutant une ligne d\'animation</string>
     <string name="preferences_separate_animation_from_movies">Séparer les animations des films et des séries TV</string>
@@ -729,6 +735,8 @@
     <string name="preferences_show_last_played_row">Afficher la ligne des dernières vidéos jouées</string>
     <string name="preferences_reset_last_played_row">Réinitialiser la ligne des vidéos récemment jouées</string>
     <string name="reset_last_played_row_in_progress">Réinitialisation de la ligne des vidéos récemment jouées</string>
+    <string name="pref_smart_recently_rows_title">Catégories récentes intelligentes</string>
+    <string name="pref_declutter_home_rows_summary">Afficher uniquement les contenus non vus dans les ajouts récents et éviter les doublons dans les joués récemment</string>
     <string name="preferences_show_all_movies_row_summary">Cochez pour afficher une ligne avec tous vos films au lieu de la ligne des catégories film</string>
     <string name="preferences_show_all_movies_row">Afficher la ligne regroupant tous les films</string>
     <string name="preferences_movie_sort_order_summary">Sélectionner l\'ordre de tri de la ligne \'tous les films\'</string>
@@ -848,6 +856,8 @@
     <string name="leanback_hint_long_press_on_back">ASTUCE: un appui long sur la touch RETOUR ferme l\'explorateur de fichier</string>
     <string name="leanback_archos_video_webview">Nova Video WebView basique</string>
     <string name="file_access_error">Échec de l\'accès au fichier</string>
+    <string name="always_leanback_on_tv">Toujours démarrer avec l\'interface utilisateur TV</string>
+    <string name="always_leanback_on_tv_summary">Toujours démarrer l\'application en interface utilisateur télé, désélectionner pour démarrer avec une interface tablette/téléphone.</string>
     <string name="interface_size">Taille de l\'interface utilisateur</string>
     <string name="interface_size_summary">À modifier si l\'interface utilisateur est trop petite ou trop grande sur votre appareil</string>
     <string name="interface_size_very_small">Très petit (mdpi)</string>
