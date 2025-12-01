@@ -305,7 +305,6 @@ public class BrowserCategoryVideo extends BrowserCategory implements androidx.ap
                 fragmentClass = BrowserPlaylists.class;
                 struc.title = R.string.video_lists;
                 break;
-                // TODO MARC WARNING
             case ITEM_ID_NON_PLAYED_YET:
                 fragmentClass = BrowserNeverPlayed.class;
                 struc.title = R.string.not_played_yet_videos;
