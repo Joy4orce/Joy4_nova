@@ -137,7 +137,7 @@ public class MovieScraper3 extends BaseScraper2 {
                 break; // first valid match wins, fallback to file name.
             }
         }
-        SearchMovieResult searchResult = SearchMovie2.search(searchQuery, language, searchInfo.getYear(), maxItems, searchService, adultScrape);
+        SearchMovieResult searchResult = SearchMovie2.search(searchQuery, language, searchInfo.getYear(), maxItems, getSearchService(), adultScrape);
 
         // TODO: this triggers scrape for all search results, is this intended?
         if (searchResult.status == ScrapeStatus.OKAY) {
