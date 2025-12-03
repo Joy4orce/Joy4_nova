@@ -48,6 +48,7 @@ public class IconItemPresenter extends Presenter {
         final public TextView mTitleView;
         final int mTextColorRegular;
         final int mTextColorDimmed;
+        boolean mIsFocused = false;
 
         public ViewHolder(ViewGroup parent) {
             super(new BaseCardView(parent.getContext()));
@@ -71,13 +72,21 @@ public class IconItemPresenter extends Presenter {
             // HACK: Allow us to get this ViewHolder while in IconItemRowPresenter, in order to apply dim effect with setDimmed
             shell.setTag(ViewHolder.this);
 
-            // init in non-selected state
-            mSelectionView.setAlpha(0);
-            // change selection visibility on focus
+            // hide selection circle
+            mSelectionView.setVisibility(View.GONE);
+            // track focus state and update styling accordingly
             view.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View view, boolean focus) {
-                    mSelectionView.animate().alpha(focus ? 1f : 0f).setDuration(200);
+                    mIsFocused = focus;
+                    // Update both image and text based on focus
+                    if (focus) {
+                        mImageView.clearColorFilter();
+                        mTitleView.setTextColor(mTextColorRegular);
+                    } else {
+                        mImageView.setColorFilter(mDimColorFilter);
+                        mTitleView.setTextColor(mTextColorDimmed);
+                    }
                 }
             });
 
@@ -91,12 +100,21 @@ public class IconItemPresenter extends Presenter {
          * @param dimmed
          */
         public void setDimmed(boolean dimmed) {
+            // Keep selection view hidden
+            mSelectionView.setVisibility(View.GONE);
+
             if (dimmed) {
                 mImageView.setColorFilter(mDimColorFilter);
                 mTitleView.setTextColor(mTextColorDimmed);
             } else {
-                mImageView.clearColorFilter();
-                mTitleView.setTextColor(mTextColorRegular);
+                // Row is focused, but keep dimming except for focused item
+                if (mIsFocused) {
+                    mImageView.clearColorFilter();
+                    mTitleView.setTextColor(mTextColorRegular);
+                } else {
+                    mImageView.setColorFilter(mDimColorFilter);
+                    mTitleView.setTextColor(mTextColorDimmed);
+                }
             }
         }
     }
