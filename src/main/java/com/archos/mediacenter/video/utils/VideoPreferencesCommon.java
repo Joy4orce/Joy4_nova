@@ -564,6 +564,8 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         mAudioSpeedAudiotrack = (CheckBoxPreference) findPreference(KEY_AUDIO_SPEED_AUDIOTRACK);
         mEnableDynamicAudioDelay = (CheckBoxPreference) findPreference(KEY_ENABLE_DYNAMIC_AUDIO_DELAY);
         mEnableAndroidFrameTiming = (CheckBoxPreference) findPreference("enable_android_frame_timing");
+        mDisableDownmix = (CheckBoxPreference) findPreference("disable_downmix");
+        mEnableDownmixATV = (CheckBoxPreference) findPreference("enable_downmix_androidtv");
         final ListPreference mForceAudioPassthroughMultiple = (ListPreference) findPreference("force_audio_passthrough_multiple");
         boolean isPassthroughSupported = CustomApplication.isPassthroughSupported();
         boolean isIecEncapsulationCapable = CustomApplication.isIecEncapsulationCapable();
@@ -631,8 +633,6 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         });
         mStreamBufferSize = (EditTextPreference) findPreference(KEY_STREAM_BUFFER_SIZE);
         mStreamMaxIFrameSize = (EditTextPreference) findPreference(KEY_STREAM_MAX_IFRAME_SIZE);
-        mDisableDownmix = (CheckBoxPreference) findPreference("disable_downmix");
-        mEnableDownmixATV = (CheckBoxPreference) findPreference("enable_downmix_androidtv");
         mActivate3DTVSwitch = (CheckBoxPreference) findPreference(KEY_ACTIVATE_3D_SWITCH);
         mEnableCutoutModeShortEdge = (CheckBoxPreference) findPreference("enable_cutout_mode_short_edges");
 
