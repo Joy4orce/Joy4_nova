@@ -196,6 +196,7 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
             saveDirtyState(true);
         }
         sIsScraping = false;
+        LoaderUtils.setScrapeInProgress(false);
         isForeground = false;
         // Note: isForceAfterNetworkScan is now managed by networkScanCount
         // Stop the scraping thread if it's running
@@ -220,7 +221,9 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
     @Override
     public void onCreate() {
         super.onCreate();
-        log.debug("onCreate() {}", this);
+        // Reset static scraping flags to ensure clean state on service creation
+        sIsScraping = false;
+        LoaderUtils.setScrapeInProgress(false);
 
         // need to do that early to avoid ANR on Android 26+
         nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -477,8 +480,9 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                 public void run() {
                     //Global Scrape in Progress, so the browser can skip thumbs in scrape and not waste space in storage
                     LoaderUtils.setScrapeInProgress(true);
-                    
+
                     sIsScraping = true;
+                    try {
                     boolean shouldRescrapAll = rescrapAlreadySearched;
                     log.debug("startScraping: startThread {}", (mThread==null || !mThread.isAlive()) );
                     if (log.isDebugEnabled()) {
@@ -535,10 +539,7 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                                     sNumberOfFilesRemainingToProcess = 0;
                                     log.debug("startScraping disconnected from network calling stopSelf");
                                     stopSelf();
-                    
-                                    //Global Scrape in Progress, so the browser can skip thumbs in scrape and not waste space in storage
-                                    LoaderUtils.setScrapeInProgress(false);                
-                                    return;
+                                    return; // Finally block will handle flag reset
                                 }
 
                                 String title = cursor.getString(cursor.getColumnIndex(VideoStore.MediaColumns.TITLE));
@@ -726,27 +727,27 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                         cursor.close();
                     } while(restartOnNextRound && (isForeground || isForceAfterNetworkScan) && !Thread.currentThread().isInterrupted()
                             &&PreferenceManager.getDefaultSharedPreferences(AutoScrapeService.this).getBoolean(AutoScrapeService.KEY_ENABLE_AUTO_SCRAP, true)); //if we had something to do, we look for new videos
-                    sIsScraping = false;
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            WrapperChannelManager.refreshChannels(AutoScrapeService.this);
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                WrapperChannelManager.refreshChannels(AutoScrapeService.this);
+                            }
+                        });
+                        if (totalNumberOfFilesScraped > 0) {
+                            // Save the last scraped timestamp in UTC seconds
+                            long utcSeconds = System.currentTimeMillis() / 1000L;
+                            PreferenceManager.getDefaultSharedPreferences(AutoScrapeService.this)
+                            .edit()
+                            .putLong(PREFERENCE_LAST_TIME_VIDEO_SCRAPED_UTC, utcSeconds).apply();
+                            TraktService.onNewVideo(AutoScrapeService.this); // should be done only at the end to not resync in loop
                         }
-                    });
-                    if (totalNumberOfFilesScraped > 0) {
-                        // Save the last scraped timestamp in UTC seconds
-                        long utcSeconds = System.currentTimeMillis() / 1000L;
-                        PreferenceManager.getDefaultSharedPreferences(AutoScrapeService.this)
-                        .edit()
-                        .putLong(PREFERENCE_LAST_TIME_VIDEO_SCRAPED_UTC, utcSeconds).apply();
-                        TraktService.onNewVideo(AutoScrapeService.this); // should be done only at the end to not resync in loop
+                    } finally {
+                        log.debug("THREAD FINALLY - BEFORE reset: sIsScraping={}, LoaderUtils.mScrapeInProgress={}", sIsScraping, LoaderUtils.getScrapeInProgress());
+                        sIsScraping = false;
+                        LoaderUtils.setScrapeInProgress(false);
+                        nm.cancel(NOTIFICATION_ID);
+                        log.debug("THREAD FINALLY - AFTER reset: sIsScraping={}, LoaderUtils.mScrapeInProgress={}", sIsScraping, LoaderUtils.getScrapeInProgress());
                     }
-                   
-                    //Kill notififaction.
-                    nm.cancel(NOTIFICATION_ID);
-                    
-                    //Global Scrape in Progress, so the browser can skip thumbs in scrape and not waste space in storage
-                    LoaderUtils.setScrapeInProgress(false);     
                 }
             };
             mThread.start();
