@@ -588,6 +588,8 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             mPlaybackSpeed.setSelectable(!passthroughEnabled);
             // Audio speed audiotrack should be non-selectable when playback speed is non-selectable
             mAudioSpeedAudiotrack.setSelectable(!passthroughEnabled);
+            // Disable downmix should be non-selectable when passthrough is enabled
+            mDisableDownmix.setSelectable(!passthroughEnabled);
             // Dynamic audio delay depends on both passthrough and frame timing
             updateDynamicAudioDelayState(passthroughEnabled, frameTimingEnabled);
             mForceAudioPassthroughMultiple.setOnPreferenceChangeListener((preference, newValue) -> {
@@ -597,6 +599,8 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
                 mPlaybackSpeed.setSelectable(!newPassthroughEnabled);
                 // Audio speed audiotrack should be non-selectable when playback speed is non-selectable
                 mAudioSpeedAudiotrack.setSelectable(!newPassthroughEnabled);
+                // Disable downmix should be non-selectable when passthrough is enabled
+                mDisableDownmix.setSelectable(!newPassthroughEnabled);
                 boolean currentFrameTimingEnabled = mEnableAndroidFrameTiming.isChecked();
                 updateDynamicAudioDelayState(newPassthroughEnabled, currentFrameTimingEnabled);
                 return true;
@@ -611,6 +615,8 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             mPlaybackSpeed.setSelectable(true);
             // Audio speed audiotrack is selectable when playback speed is selectable
             mAudioSpeedAudiotrack.setSelectable(true);
+            // Disable downmix is selectable when passthrough is not supported
+            mDisableDownmix.setSelectable(true);
             // Frame timing can still affect dynamic audio delay even without passthrough
             updateDynamicAudioDelayState(false, frameTimingEnabled);
         }
