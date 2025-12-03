@@ -839,17 +839,25 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             LibAvos.setAudioSpeed(audioSpeed); // set audio speed playback (does nothing if audio speed not enabled)
             LibAvos.setDynamicAudioDelay(mPreferences.getBoolean(VideoPreferencesCommon.KEY_ENABLE_DYNAMIC_AUDIO_DELAY, true)); // set dynamic audio delay estimation (default enabled)
             LibAvos.parserSyncMode(Integer.parseInt(mPreferences.getString(KEY_PARSER_SYNC_MODE,"0"))); // set lavc parser sync mode (0: PTS, 1 samples)
-            if (ArchosFeatures.isAndroidTV(this)) {
-                if (mPreferences.getBoolean("enable_downmix_androidtv", false))
-                    LibAvos.setDownmix(1);
-                else
-                    LibAvos.setDownmix(0);
+            // Check passthrough mode - downmix must be disabled when passthrough is active
+            int passthroughMode = Integer.parseInt(mPreferences.getString("force_audio_passthrough_multiple","0"));
+            if (passthroughMode > 0) {
+                // Passthrough is enabled - disable downmix as audio is sent raw to receiver
+                LibAvos.setDownmix(0);
             } else {
-                // Android is recent enough not to require downmix on phones/tablets if enabled
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && mPreferences.getBoolean("disable_downmix", false))
-                    LibAvos.setDownmix(0);
-                else
-                    LibAvos.setDownmix(1);
+                // Passthrough disabled - use user preference for downmix
+                if (ArchosFeatures.isAndroidTV(this)) {
+                    if (mPreferences.getBoolean("enable_downmix_androidtv", false))
+                        LibAvos.setDownmix(1);
+                    else
+                        LibAvos.setDownmix(0);
+                } else {
+                    // Android is recent enough not to require downmix on phones/tablets if enabled
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && mPreferences.getBoolean("disable_downmix", false))
+                        LibAvos.setDownmix(0);
+                    else
+                        LibAvos.setDownmix(1);
+                }
             }
         }
 
