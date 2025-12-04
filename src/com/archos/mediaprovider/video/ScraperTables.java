@@ -1383,5 +1383,55 @@ public final class ScraperTables {
                     "printf('%04d-01-01', " + ScraperStore.Movie.YEAR + ") WHERE " + ScraperStore.Movie.YEAR + " > 0");
             db.execSQL("CREATE INDEX IF NOT EXISTS idx_movie_release_date ON " + MOVIE_TABLE_NAME + "(" + ScraperStore.Movie.RELEASE_DATE + ")");
         }
+        if (toVersion == 51) {
+            log.debug("upgradeTo: {} - adding UNIQUE constraints to movie poster/backdrop tables to prevent duplicates", toVersion);
+
+            // Movie Posters - recreate with UNIQUE constraints
+            log.debug("upgradeTo: recreating movie_posters table with UNIQUE constraints");
+            db.execSQL("CREATE TABLE movie_posters_new ( \n" +
+                    "    _id             INTEGER PRIMARY KEY,\n" +
+                    "    movie_id        INTEGER REFERENCES movie ( _id ) ON DELETE CASCADE\n" +
+                    "                                                     ON UPDATE CASCADE,\n" +
+                    "    m_po_thumb_url  TEXT,\n" +
+                    "    m_po_thumb_file TEXT UNIQUE ON CONFLICT IGNORE,\n" +
+                    "    m_po_large_url  TEXT,\n" +
+                    "    m_po_large_file TEXT UNIQUE ON CONFLICT IGNORE\n" +
+                    ")");
+
+            // Copy data, automatically deduplicating via UNIQUE constraint
+            db.execSQL("INSERT OR IGNORE INTO movie_posters_new SELECT * FROM movie_posters");
+
+            // Drop old table and triggers
+            db.execSQL(DROP_MOVIE_POSTERS_DELETE_TRIGGER);
+            db.execSQL("DROP TABLE movie_posters");
+
+            // Rename new table
+            db.execSQL("ALTER TABLE movie_posters_new RENAME TO movie_posters");
+
+            // Recreate trigger and index
+            db.execSQL(CREATE_MOVIE_POSTERS_DELETE_TRIGGER);
+            db.execSQL("CREATE INDEX movie_posters_idx ON movie_posters(movie_id)");
+
+            // Movie Backdrops - same process
+            log.debug("upgradeTo: recreating movie_backdrops table with UNIQUE constraints");
+            db.execSQL("CREATE TABLE movie_backdrops_new ( \n" +
+                    "    _id             INTEGER PRIMARY KEY,\n" +
+                    "    movie_id        INTEGER REFERENCES movie ( _id ) ON DELETE CASCADE\n" +
+                    "                                                     ON UPDATE CASCADE,\n" +
+                    "    m_bd_thumb_url  TEXT,\n" +
+                    "    m_bd_thumb_file TEXT UNIQUE ON CONFLICT IGNORE,\n" +
+                    "    m_bd_large_url  TEXT,\n" +
+                    "    m_bd_large_file TEXT UNIQUE ON CONFLICT IGNORE\n" +
+                    ")");
+
+            db.execSQL("INSERT OR IGNORE INTO movie_backdrops_new SELECT * FROM movie_backdrops");
+            db.execSQL(DROP_MOVIE_BACKDROPS_DELETE_TRIGGER);
+            db.execSQL("DROP TABLE movie_backdrops");
+            db.execSQL("ALTER TABLE movie_backdrops_new RENAME TO movie_backdrops");
+            db.execSQL(CREATE_MOVIE_BACKDROPS_DELETE_TRIGGER);
+            db.execSQL("CREATE INDEX movie_backdrops_idx ON movie_backdrops(movie_id)");
+
+            log.debug("upgradeTo: {} - movie poster/backdrop tables successfully migrated", toVersion);
+        }
     }
 }
