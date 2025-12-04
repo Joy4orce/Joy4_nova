@@ -65,6 +65,10 @@
     <string name="recently_added_videos">Ostatnio dodane</string>
     <string name="recently_played">Ostatnio odtwarzane</string>
     <string name="recently_played_videos">Ostatnio odtwarzane</string>
+    <string name="new_and_unwatched">Nowości</string>
+    <string name="new_and_unwatched_videos">Nowości</string>
+    <string name="keep_watching">Oglądaj dalej</string>
+    <string name="keep_watching_videos">Oglądaj dalej</string>
     <string name="video_lists">Listy odtwarzania</string>
     <!-- The string used in main storage list -->
     <string name="external_storage">Pamięć zewnętrzna</string>
@@ -399,7 +403,7 @@
     <string name="player_plugin_purchase_google_play_msg">Możesz kupić dodatkowe wtyczki kodeków w Google Play.</string>
     <string name="player_plugin_purchase_google_play_button">Przejdź do Sklep Play</string>
     <string name="plugin_update_required_title">Wymagana aktualizacja kodeka</string>
-    <string name="plugin_update_required_message">Wygląda na to, że już masz dodatkowe kodeki zainstalowane dla Nova Video Player.\n\nThis Nowa wersja Nova Video Player wymaga aktualizacji tych kodeków.\n\nPrzejdź proszę do Google Play, aby zaktualizować i ponownie zainstalować kodeki</string>
+    <string name="plugin_update_required_message">Wygląda na to, że masz już zainstalowane dodatkowe kodeki dla programu Nova Video Player.\n\nTa nowa wersja programu Nova Video Player wymaga aktualizacji tych kodeków.\n\nPrzejdź do sklepu Google Play, aby zaktualizować i ponownie zainstalować kodeki.</string>
     <!-- Subtitles wizard -->
     <string name="get_subtitles_on_drive">Wybierz napisy z dysku</string>
     <string name="subtitles_wizard_no_files">Nie znaleziono napisów</string>
@@ -527,6 +531,7 @@
     <string name="preferences_force_audio_passthrough_disabled">Wyłączone (zalecane)</string>
     <string name="preferences_force_audio_passthrough_enable">Hermetyzacja Nova audio (eksperymentalna)</string>
     <string name="preferences_force_audio_passthrough_enable2">Hermetyzacja systemu audio</string>
+    <string name="preferences_force_audio_passthrough_ac3">Uniwersalne (przekodowanie AC3)</string>
     <string name="preferences_force_audio_passthrough_summary">Wysyłaj skompresowany dźwięk przez HDMI lub S/PDIF. ⚠️ Funkcja eksperymentalna, może powodować utratę synchronizacji dźwięku z obrazem</string>
     <string name="preferences_parser_sync_mode">Tryb synchronizacji parsera</string>
     <string name="preferences_parser_sync_mode_cdata">Oparte na PTS (zalecane)</string>
@@ -540,6 +545,10 @@
     <string name="preferences_force_passthrough_summary">Jeśli włączona jest funkcja przekazywania dźwięku, wymuś ją, nawet jeśli kodek audio nie jest obsługiwany przez odbiornik AV</string>
     <string name="preferences_playback_speed">Prędkość odtwarzania</string>
     <string name="preferences_playback_speed_summary">Włącz możliwość zmiany prędkości odtwarzania. ⚠️ Funkcja eksperymentalna, może powodować brak płynności odtwarzania wideo</string>
+    <string name="preferences_audio_speed_audiotrack">Użyj AudioTrack do kontroli prędkości odtwarzania</string>
+    <string name="preferences_audio_speed_audiotrack_summary">Użyj AudioTrack zamiast filtra atempo FFmpeg do kontroli prędkości odtwarzania. Eksperymentalne: może nie działać na wszystkich konfiguracjach.</string>
+    <string name="preferences_enable_dynamic_audio_delay_title">Dynamiczne szacowanie opóźnienia audio/wideo</string>
+    <string name="preferences_enable_dynamic_audio_delay_summary">Użyj dynamicznego szacowania opóźnienia dla lepszej synchronizacji audio/wideo, szczególnie ze słuchawkami Bluetooth. Wyłącz, jeśli występują problemy z synchronizacją.</string>
     <string name="preferences_disable_downmix_title">Wyłącz downmix dźwięku</string>
     <string name="preferences_disable_downmix_summary">Zawsze dekoduj wszystkie kanały i niech Android decyduje o sposobie miksowania (możliwa utrata kanałów dialogowych)</string>
     <string name="preferences_enable_downmix_androidtv_title">Wymuś downmix dźwięku</string>
@@ -550,6 +559,10 @@
     <string name="preference_tv_3d_automatic_switch_summary">Użyj tej funkcji tylko wtedy, gdy telewizor obsługuje 3D</string>
     <string name="enable_android_frame_timing">Włącz synchronizację ramek systemu Android</string>
     <string name="enable_android_frame_timing_summary">Delegowanie do Androida synchronizacji klatek w celu płynniejszego odtwarzania (eksperymentalne)</string>
+    <string name="hide_watched_videos">Ukryj obejrzane filmy</string>
+    <string name="hide_watched_videos_summary">Ukryj filmy z biblioteki mediów, jeśli są oznaczone jako obejrzane.</string>
+    <string name="enable_projector_mode">Włącz tryb projektora</string>
+    <string name="enable_projector_mode_summary">Odtwarzaj filmy u góry ekranu do oglądania na projektorze.</string>
     <string name="preference_tv_refreshrate_switch">Włącz automatyczne dostowanie częstotliwości odświeżania</string>
     <string name="preference_tv_refreshrate_switch_summary">Dostosowanie częstotliwości odświeżania ekranu do liczby ramek, aby wyelimować efekt szarpania obrazu (skuteczność zależy od telewizora)</string>
     <string name="preferences_tv_refreshrate_switch_disabled">Wyłączone</string>
@@ -619,6 +632,10 @@
     <string name="format_optimized">Zoptymalizowany</string>
     <string name="format_original">Oryginalny</string>
     <string name="format_stretched">Rozciągnięty</string>
+    <string name="format_43">4:3</string>
+    <string name="format_169">16:9</string>
+    <string name="format_185">1,85:1</string>
+    <string name="format_239">2,39:1</string>
     <string name="stereo_dive_enable">Efekt nurkowania stereo</string>
     <string name="stereo_dive_disable">Wyłącz efekt stereo dive</string>
     <string name="rotation_unlock">Automatyczna orientacja ekranu</string>
@@ -667,7 +684,7 @@
     <!--  Nfo File parsing -->
     <string name="network_nfo_parse">Przetwórz pliki \'nfo\'</string>
     <string name="network_nfo_parse_summary">Czytaj pliki Kodi \'.nfo\' podczas (ponownego) skanowania w celu zebrania informacji o mediach i plakatów</string>
-    <string name="ask_to_mail_media_DB">Czy chcesz wysłać swoją bazę danych wideo do zespołu programistów Nova, aby pomóc im sprawdzić błąd?\n\nPliki wideo nie są (kurs) obsługiwane, ale pełna lista nazw plików</string>
+    <string name="ask_to_mail_media_DB">Czy chcesz przesłać swoją bazę danych wideo do zespołu programistów Nova, aby pomóc im sprawdzić błąd?\n\nPliki wideo (oczywiście) nie są wysyłane, ale pełna lista nazw plików już tak.</string>
     <string name="no_email_installed">Nie odnaleziono klienta poczty e-mail</string>
     <string name="zipping_library_before_mailing">Zainicjowanie kopii biblioteki przed wysłaniem jej…</string>
     <string name="zipped_library_mail_subject">Zrzut Nova Video Database</string>
@@ -675,6 +692,7 @@
     <string name="sort_mode">Tryb sortowania</string>
     <string name="sort_by_name_asc">Sortuj po nazwie (a - z)</string>
     <string name="sort_by_name_desc">Sortuj po nazwie (z - a)</string>
+    <string name="sort_by_release_date_desc">Sortuj według daty premiery (najnowsze najpierw)</string>
     <string name="sort_by_year_asc">Sortuj po roku (najpierw najstarsze)</string>
     <string name="sort_by_year_desc">Sortuj po roku (najpierw najmłodsze)</string>
     <string name="sort_by_date_asc">Sortuj po dacie (najpierw najstarsze)</string>
@@ -712,6 +730,10 @@
     <string name="preferences_user_interface">Interfejs użytkownika</string>
     <string name="preferences_display_resume_box_summary">Wyświetl lub ukryj przycisk wznawiający najnowsze wideo na ekranie głównym</string>
     <string name="preferences_display_resume_box">Wyświetl pole wznowienia</string>
+    <string name="reset_brightness_on_start">Zapamiętaj jasność wideo.</string>
+    <string name="reset_brightness_on_start_summary">Zapamiętaj ostatnio używane ustawienie jasności podczas otwierania aplikacji. Wyłącz, aby użyć jasności systemowej.</string>
+    <string name="hide_controls_on_pause">Ukryj elementy sterujące podczas pauzy.</string>
+    <string name="hide_controls_on_pause_summary">Ukryj elementy sterujące odtwarzacza po 5 sekundach, gdy wideo jest wstrzymane.</string>
     <string name="preferences_leanback_user_interface">Interfejs użytkownika</string>
     <string name="preferences_separate_animation_from_movies_summary">Zaznacz, aby oddzielić animacje od filmów i seriali telewizyjnych dodając wiersz animacji</string>
     <string name="preferences_separate_animation_from_movies">Oddziel animacje od filmów i seriali</string>
@@ -723,6 +745,8 @@
     <string name="preferences_show_last_played_row">Pokaż ostatnio dodany wiersz</string>
     <string name="preferences_reset_last_played_row">Pokaż ostatnio dodany wiersz</string>
     <string name="reset_last_played_row_in_progress">Pokaż ostatnio dodany wiersz</string>
+    <string name="pref_smart_recently_rows_title">Inteligentne ostatnie kategorie</string>
+    <string name="pref_declutter_home_rows_summary">Pokaż tylko nieoglądane treści w ostatnio dodanych i unikaj duplikatów w ostatnio odtwarzanych</string>
     <string name="preferences_show_all_movies_row_summary">Zaznacz, aby pokazać wiersz ze wszystkimi filmami zamiast wiersza kategorii filmów</string>
     <string name="preferences_show_all_movies_row">Pokaż cały wiersz filmu</string>
     <string name="preferences_movie_sort_order_summary">Wybierz kolejność sortowania wszystkich filmów</string>
@@ -842,6 +866,8 @@
     <string name="leanback_hint_long_press_on_back">Wskazówka: długie naciśnięcie przycisku powrotu zamyka przeglądarkę plików</string>
     <string name="leanback_archos_video_webview">Nova Video WebView</string>
     <string name="file_access_error">Nie udało się uzyskać dostępu do pliku</string>
+    <string name="always_leanback_on_tv">Zawsze uruchamiaj się w interfejsie dla telewizora</string>
+    <string name="always_leanback_on_tv_summary">Zawsze uruchamiaj aplikację w interfejsie dla telewizora. Wyłącz tę opcję, jeśli chcesz uruchamiać ją w klasycznym interfejsie na telewizorze.</string>
     <string name="interface_size">Wielkość interfejsu</string>
     <string name="interface_size_summary">Zmień to w przypadku, gdy interfejs użytkownika jest zbyt mały lub zbyt duży</string>
     <string name="interface_size_very_small">Bardzo mały (mdpi)</string>
@@ -889,6 +915,23 @@
     <string name="db_export_manual_title">Eksportuj bazę multimediów</string>
     <string name="db_export_manual_summary">Eksportuj plik media.db do /sdcard dla celów debugowania</string>
     <string name="db_export_in_progress">Eksport bazy danych w toku</string>
+    <string name="media_library_export_title">Eksportuj bibliotekę multimediów + dane uwierzytelniające + skróty</string>
+    <string name="media_library_export_summary">Eksportuj media.db, dane uwierzytelniające sieci (SMB/FTP/SFTP), skróty sieciowe, i obrazy z pamięci podręcznej jako plik zip</string>
+    <string name="media_library_import_title">Importuj bibliotekę multimediów + dane uwierzytelniające + skróty</string>
+    <string name="media_library_import_summary">Importuj media.db, dane uwierzytelniające sieci, skróty sieciowe, i obrazy z pamięci podręcznej jako plik zip</string>
+    <string name="media_library_export_in_progress">Eksportuj bibliotekę multimediów, dane uwierzytelniające, i skróty</string>
+    <string name="media_library_import_in_progress">Importuj bibliotekę multimediów, dane uwierzytelniające, i skróty</string>
+    <string name="media_library_export_success">Biblioteka multimediów, dane uwierzytelniające, i skróty wyeksportowane pomyślnie do:\n%s</string>
+    <string name="media_library_import_success">Biblioteka multimediów, dane uwierzytelniające, i skróty zaimportowane pomyślnie. Trwa ponowne uruchamianie aplikacji...</string>
+    <string name="media_library_import_error">Błąd podczas importowania biblioteki multimediów</string>
+    <string name="media_library_export_error">Błąd podczas eksportowania biblioteki multimediów</string>
+    <string name="media_library_export_dir_not_found">Nie znaleziono katalogu eksportu</string>
+    <string name="media_library_no_backup_found">Nie znaleziono pliku kopii zapasowej. Najpierw wyeksportuj.</string>
+    <string name="media_library_backup_info">Znaleziono plik kopii zapasowej: backup.zip\nRozmiar: %d MB\n\n⚠️ Zawiera: metadane, dane uwierzytelniające, skróty, obrazy\n\nCzy kontynuować importowanie?</string>
+    <string name="media_library_import_dialog_title">Importuj bibliotekę multimediów + dane uwierzytelniające + skróty</string>
+    <string name="media_library_import_confirm_title">⚠️ ZATWIERDŹ PEŁNE ZASTĄPIENIE ZAWARTOŚCI</string>
+    <string name="media_library_import_warning">⚠️ UWAGA: PEŁNE ZASTĄPIENIE ZAWARTOŚCI ⚠️\n\nSpowoduje to CAŁKOWITE USUNIĘCIE bieżącej biblioteki multimediów i zastąpienie jej kopią zapasową.\n\nWSZYSTKIE bieżące dane zostaną TRWALE UTRACONE:\n• Wszystkie pobrane metadane filmów/seriali\n• Wszystkie zapisane w pamięci podręcznej plakaty i tła\n• Cały postęp i historia oglądania\n• Wszystkie dane uwierzytelniające sieci (SMB/FTP/SFTP/WebDAV)\n• Wszystkie skróty/zakładki sieciowe\n• Wszystkie własne poprawki i ustawienia\n\nTej operacji NIE MOŻNA COFNĄĆ!\n\nAplikacja uruchomi się ponownie automatycznie po imporcie.\n\nCzy na pewno chcesz kontynuować?</string>
+    <string name="media_library_import_button_confirm">TAK, USUŃ I ZAMIEŃ</string>
     <string name="system">System</string>
     <string name="keep_setting">Zapamiętaj to ustawienie</string>
     <string name="select_sub_file"><![CDATA[Nie znaleziono dokładnych napisów dla pliku <font color=#29b6f6><i>%s</i></font><br />Spróbuj skorzystać z tej listy:]]></string>
@@ -903,9 +946,9 @@
     <string name="cast_info">Informacje</string>
     <string name="troubleshoot_streammode_msg">Odtwarzacz Nova jest obecnie w trybie przesyłania strumieniowego.
         \nTryb daje dobrą jakość wideo, ale może powodować problemy z dźwiękiem i napisami.
-        Spróbuj przełączyć w tryb zdalnego ekranu</string>
+        Spróbuj przełączyć w tryb zdalnego ekranu.</string>
     <string name="troubleshoot_remotemode_msg">Odtwarzacz wideo Nova jest obecnie w trybie ekranu zdalnego.
-        \nW zależności od urządzenia i połączenia sieciowego, może wystąpić obniżenie jakości i problem z wydajnością</string>
+        \nW zależności od urządzenia i połączenia sieciowego, może wystąpić obniżenie jakości i problem z wydajnością. </string>
     <string name="picture_in_picture">Obraz w obrazie</string>
     <string name="cast">Przesyłaj</string>
     <string name="cast_warning">Obsługa przesyłania strumieniowego jest ograniczona ze względu na ograniczenia kodeka Chromecast. Aby złagodzić te ograniczenia, wdrożono 2 tryby przesyłania strumieniowego: Chromecast i Screencast (z automatycznym powrotem). Należy pamiętać, że problemy z wydajnością i jakością mogą również wynikać z ograniczeń sieci lub urządzenia</string>
@@ -934,9 +977,16 @@
     <string name="sponsor">Sponsoruj odtwarzacz Nova</string>
     <string name="enable_sponsor_title">Włącz link sponsora Nova</string>
     <string name="enable_sponsor_summary">Włącz link sponsora dla darowizn: każda pomoc jest ważna.</string>
+    <string name="hdr_capability">Funkcje ekranu HDR:</string>
+    <string name="hdmi_audio_capabilities">Funkcje audio odbiornika HDMI:</string>
+    <string name="max_audio_channels">Maksymalna liczba kanałów audio:</string>
+    <string name="supported_refresh_rates">Obsługiwane częstotliwości odświeżania:</string>
     <string name="upgrade_info">Informacje o aktualizacji</string>
     <string name="v5_v6_upgrade_info">OSTRZEŻENIE: ta główna aktualizacja oprogramowania Nova wymaga ponownego przeskanowania całej kolekcji wideo w celu ponownego uzyskania informacji multimedialnych.
-         Aby uniknąć problemów, zdecydowanie zaleca się ponowne uruchomienie systemu po czystej instalacji. Aby poznać szczegóły, sprawdź FAQ</string>
+         Aby uniknąć problemów, zdecydowanie zaleca się ponowne uruchomienie systemu od czystej instalacji. Aby poznać szczegóły, sprawdź FAQ.</string>
     <string name="networks">Sieć:</string>
     <string name="premiered">Premiera:</string>
+    <string name="external_player_service_title">Odtwarzanie w zewnętrznym odtwarzaczu</string>
+    <string name="external_player_service_description">Nova Video Player udostępnia treść zewnętrznemu odtwarzaczowi</string>
+    <string name="stop">Zatrzymaj</string>
 </resources>
