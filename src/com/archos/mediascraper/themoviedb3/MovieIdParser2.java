@@ -42,8 +42,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.archos.mediascraper.MovieTags.isCollectionAlreadyKnown;
@@ -167,6 +169,8 @@ public class MovieIdParser2 {
             if (movie.images.backdrops != null)
                 for (Image backdrop : movie.images.backdrops)
                     tempBackdrops.add(Pair.create(backdrop, backdrop.iso_639_1));
+
+            // Sort by rating (highest first)
             Collections.sort(tempPosters, new Comparator<Pair<Image, String>>() {
                 @Override
                 public int compare(Pair<Image, String> b1, Pair<Image, String> b2) {
@@ -179,6 +183,24 @@ public class MovieIdParser2 {
                     return - Double.compare(b1.first.vote_average, b2.first.vote_average);
                 }
             });
+
+            // Deduplicate by file_path: same image may appear with multiple language tags
+            // Keep the first occurrence (highest rated) for each unique file_path
+            Map<String, Pair<Image, String>> uniquePosters = new LinkedHashMap<>();
+            for (Pair<Image, String> poster : tempPosters) {
+                if (poster.first.file_path != null && !uniquePosters.containsKey(poster.first.file_path)) {
+                    uniquePosters.put(poster.first.file_path, poster);
+                }
+            }
+            tempPosters = new ArrayList<>(uniquePosters.values());
+
+            Map<String, Pair<Image, String>> uniqueBackdrops = new LinkedHashMap<>();
+            for (Pair<Image, String> backdrop : tempBackdrops) {
+                if (backdrop.first.file_path != null && !uniqueBackdrops.containsKey(backdrop.first.file_path)) {
+                    uniqueBackdrops.put(backdrop.first.file_path, backdrop);
+                }
+            }
+            tempBackdrops = new ArrayList<>(uniqueBackdrops.values());
             for(Pair<Image, String> poster : tempPosters) {
                 log.debug("getResult: generating ScraperImage for poster for {}, large={}{}", movie.title, ScraperImage.TMPL, poster.first.file_path);
                 posters.add(genPoster(movie.title, poster.first.file_path, poster.second, mContext));

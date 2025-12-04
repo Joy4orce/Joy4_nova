@@ -41,13 +41,15 @@ public class ShowIdSeasonSearch {
     private final static LruCache<String, ShowIdSeasonSearchResult> sShowCache = new LruCache<>(50);
 
     public static ShowIdSeasonSearchResult getSeasonShowResponse(int showId, int season, String language, final boolean adultScrape, MyTmdb tmdb) {
-        // specify image language include_image_language=en,null
+        // Build image language filter: current language + "en" + "null" (language-neutral)
+        // Avoid duplicates if current language is already "en"
+        final String imageLanguages = language.equals("en") ? "en,null" : language + ",en,null";
         final Map<String, String> options  = new HashMap<String, String>() {{
-            put("include_image_language", "en,null");
+            put("include_image_language", imageLanguages);
             put("include_adult", String.valueOf(adultScrape));
         }};
 
-        log.debug("getSeasonShowResponse: quering tmdb for showId {} season {} in {}", showId, season, language);
+        log.debug("getSeasonShowResponse: quering tmdb for showId {} season {} in {} with image languages: {}", showId, season, language, imageLanguages);
 
         String showKey = showId + "|" + "s" + season + "|" + language;
         ShowIdSeasonSearchResult myResult = sShowCache.get(showKey);

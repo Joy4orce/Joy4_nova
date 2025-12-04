@@ -39,18 +39,20 @@ import retrofit2.Response;
 public class MovieId2 {
     private static final Logger log = LoggerFactory.getLogger(MovieId2.class);
 
-    // specify image language include_image_language=en,null
-    private final static Map<String, String> options  = new HashMap<String, String>() {{
-        put("include_image_language", "en,null");
-    }};
-
     public static MovieIdResult getBaseInfo(long movieId, String language, MoviesService moviesService, Context context) {
         MovieIdResult myResult = new MovieIdResult();
         Response<Movie> movieResponse = null;
         Response<Credits> creditsResponse = null;
         MovieTags parserResult = null;
 
-        log.debug("getBaseInfo: quering tmdb for movieId {} in {}", movieId, language);
+        // Build image language filter: current language + "en" + "null" (language-neutral)
+        // Avoid duplicates if current language is already "en"
+        String imageLanguages = language.equals("en") ? "en,null" : language + ",en,null";
+        final Map<String, String> options = new HashMap<String, String>() {{
+            put("include_image_language", imageLanguages);
+        }};
+
+        log.debug("getBaseInfo: quering tmdb for movieId {} in {} with image languages: {}", movieId, language, imageLanguages);
         try {
             movieResponse = moviesService.summary((int) movieId, language, new AppendToResponse(AppendToResponseItem.EXTERNAL_IDS, AppendToResponseItem.IMAGES, AppendToResponseItem.CREDITS, AppendToResponseItem.RELEASE_DATES, AppendToResponseItem.VIDEOS), options).execute();
             switch (movieResponse.code()) {

@@ -42,10 +42,12 @@ public class ShowIdTvSearch {
 
 
     public static ShowIdTvSearchResult getTvShowResponse(int showId, String language, final boolean adultScrape, MyTmdb tmdb) {
-        log.debug("getTvShowResponse: quering tmdb for showId {} in {}", showId, language);
-        // specify image language include_image_language=en,null
+        // Build image language filter: current language + "en" + "null" (language-neutral)
+        // Avoid duplicates if current language is already "en"
+        final String imageLanguages = language.equals("en") ? "en,null" : language + ",en,null";
+        log.debug("getTvShowResponse: quering tmdb for showId {} in {} with image languages: {}", showId, language, imageLanguages);
         final Map<String, String> options  = new HashMap<String, String>() {{
-            put("include_image_language", "en,null");
+            put("include_image_language", imageLanguages);
             put("include_adult", String.valueOf(adultScrape));
         }};
         String showKey = showId + "|" + language;
