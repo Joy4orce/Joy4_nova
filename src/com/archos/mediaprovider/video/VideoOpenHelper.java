@@ -46,7 +46,7 @@ public class VideoOpenHelper extends DeleteOnDowngradeSQLiteOpenHelper {
     // that is what onCreate creates
     private static final int DATABASE_CREATE_VERSION = 36; // initial version for v1.0 of nova (archos was 10)
     // that is the current version
-    private static final int DATABASE_VERSION = 52;
+    private static final int DATABASE_VERSION = 53;
     private static final String DATABASE_NAME = "media.db";
 
     // (Integer.MAX_VALUE / 2) rounded to human readable form
@@ -1887,6 +1887,13 @@ public class VideoOpenHelper extends DeleteOnDowngradeSQLiteOpenHelper {
         if (oldVersion < 52) { // migrate UPNP/HTTP unique_id to new hash format
             log.debug("onUpgrade: {} - migrating UPNP/HTTP unique_id to new hash format", 52);
             migrateUniqueIdHashFormat(db);
+        }
+        if (oldVersion < 53) { // reset stale mini-thumb magic to allow regeneration
+            log.debug("onUpgrade: {} - resetting stale mini_thumb_magic to regenerate missing thumbnails", 53);
+            db.execSQL("UPDATE " + FILES_TABLE_NAME + " " +
+                    "SET mini_thumb_magic = 0, Archos_thumbTry = 0 " +
+                    "WHERE mini_thumb_magic IS NOT NULL AND mini_thumb_magic <> 0 " +
+                    "AND _id NOT IN (SELECT video_id FROM " + VIDEOTHUMBNAIL_TABLE_NAME + " WHERE _data IS NOT NULL AND trim(_data) != '')");
         }
     }
 

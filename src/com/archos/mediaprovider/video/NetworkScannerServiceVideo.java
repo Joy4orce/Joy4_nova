@@ -137,7 +137,7 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
             serviceIntent.setAction(action);
             serviceIntent.setData(data);
             // Set identifier to avoid StrictMode UnsafeIntentLaunchViolation
-            if (data != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (data != null && Build.VERSION.SDK_INT >= 29) { // setIdentifier added in API 29
                 serviceIntent.setIdentifier(data.toString());
             }
             if(broadcast.getExtras()!=null)
