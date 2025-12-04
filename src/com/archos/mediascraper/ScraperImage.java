@@ -335,9 +335,9 @@ public class ScraperImage {
     }
 
     private static String getFileName(String url, String nameSeed, boolean thumb) {
-        // goal is to generate a stable + unique filename
+        // goal is to generate a stable + unique filename based on URL only
+        // this ensures same URL = same filename = no duplicates across different titles
         int urlHash;
-        int seedHash;
 
         if (url != null) {
             urlHash = url.hashCode();
@@ -346,14 +346,8 @@ public class ScraperImage {
             urlHash = String.valueOf(System.currentTimeMillis()).hashCode();
         }
 
-        if (nameSeed != null) {
-            seedHash = nameSeed.hashCode();
-        } else {
-            log.warn("getFileName: nameSeed is null! for url {}", url);
-            seedHash = String.valueOf(System.currentTimeMillis()).hashCode();
-        }
-
-        String name = String.valueOf(seedHash) + String.valueOf(urlHash);
+        // Use only URL hash - nameSeed (title) is no longer included to prevent duplicates
+        String name = String.valueOf(urlHash);
         return name + (thumb ? "t.jpg" : "l.jpg");
     }
 
