@@ -115,6 +115,11 @@ public class SubtitleManager {
     private static final Pattern SSA_STRIKETHROUGH_TAG = Pattern.compile("\\{\\\\s1\\}(.*?)(?=\\{\\\\s0|$)");
     private static final String HTML_STRIKETHROUGH_TAG = "<s>$1</s>";
 
+    // WebVTT voice tag <v Voice Name>
+    private static final Pattern VTT_VOICE_TAG_OPEN = Pattern.compile("<v\\s+([^>]+)>");
+    private static final String HTML_VTT_VOICE_TAG_OPEN = "<b>$1:</b> ";
+    private static final Pattern VTT_VOICE_TAG_CLOSE = Pattern.compile("</v>");
+
     // alignment tag can contain a Word Joiner (WJ) \u2060 unicode character and be of the form \{{}\\u2060an8} or simply {\an8} or \{\\an8\}
     // 1 is BOTTOM_LEFT, 2 is BOTTOM_MID, 3 is BOTTOM_RIGHT, 4 is MID_LEFT, 5 is MID_MID, 6 is MID_RIGHT, 7 is TOP_LEFT, 8 is TOP_MID, 9 is TOP_RIGHT
     private static final Pattern SUBRIP_ALIGNMENT_TAG = Pattern.compile("\\\\?\\{(?:\\{\\})?\\\\?\\\\(?:\\u2060)?an([1-9])\\\\?\\}");
@@ -329,10 +334,15 @@ public class SubtitleManager {
         displayText = displayText.replaceAll("§NEWLINE§", "<br />");
 
         // check for .SSA subtitle tags {\ ... }
+        // check for WebVTT voice tags <v ...> and </v>
+        // Must be done before removing SSA_ANY_TAG, because { } could be inside <v> </v>
+        StringBuffer sb = new StringBuffer(displayText.length());
+        displayText = replaceAll(displayText, VTT_VOICE_TAG_OPEN, HTML_VTT_VOICE_TAG_OPEN, sb);
+        displayText = replaceAll(displayText, VTT_VOICE_TAG_CLOSE, "", sb);
         Matcher ssaTagMatch = SSA_ANY_TAG.matcher(displayText);
         if (ssaTagMatch.find()) {
             // convert color Tag = {\c&H0F0F0F&} ......{\ to html tag
-            StringBuffer sb = new StringBuffer(displayText.length());
+            sb.setLength(0);
             displayText = replaceAll(displayText, SSA_COLOR_TAG, HTML_COLOR_TAG, sb);
             displayText = replaceAll(displayText, SSA_ITALIC_TAG, HTML_ITALIC_TAG, sb);
             displayText = replaceAll(displayText, SSA_BOLD_TAG, HTML_BOLD_TAG, sb);
