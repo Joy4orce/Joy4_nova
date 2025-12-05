@@ -53,7 +53,7 @@ public abstract class LeanbackActivity extends FragmentActivity {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     TraktSigninDialogPreference dialog = new TraktSigninDialogPreference(LeanbackActivity.this, null);
-                                    dialog.onClick();
+                                    dialog.performDeviceAuth();
                                 }
                             })
                             .setNegativeButton(android.R.string.cancel, null);

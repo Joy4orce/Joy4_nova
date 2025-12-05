@@ -899,6 +899,13 @@
     <string name="trakt_sync_trakt_resume">Use trakt resume position when more advanced than local</string>
     <string name="trakt_sync_collection_summary">Automatically add all videos from your Nova library to your Trakt collection</string>
     <string name="trakt_toast_syncing">Syncing with Trakt&#8230;</string>
+    <string name="trakt_device_auth_step1">1. On your phone or computer, go to:</string>
+    <string name="trakt_device_auth_step2">2. Enter this code:</string>
+    <string name="trakt_device_auth_waiting">Waiting for authorization…</string>
+    <string name="trakt_device_auth_success">Connected successfully!</string>
+    <string name="trakt_device_auth_error">Authentication failed. Please try again.</string>
+    <string name="trakt_device_auth_timeout">Code expired. Please try again.</string>
+    <string name="connect_trakt">Connect to Trakt</string>
 
     <string name="show_all">All videos</string>
     <string name="hide_seen">Not watched</string>

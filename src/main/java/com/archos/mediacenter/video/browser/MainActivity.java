@@ -337,7 +337,7 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     TraktSigninDialogPreference dialog = new TraktSigninDialogPreference(MainActivity.this, null);
-                                    dialog.onClick();
+                                    dialog.performDeviceAuth();
                                 }
                             })
                             .setNegativeButton(android.R.string.cancel, null);

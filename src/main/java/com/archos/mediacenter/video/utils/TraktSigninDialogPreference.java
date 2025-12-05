@@ -15,36 +15,28 @@
 
 package com.archos.mediacenter.video.utils;
 
-import static com.archos.mediacenter.utils.trakt.Trakt.getAuthorizationRequest;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ContextWrapper;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.util.AttributeSet;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 
 import com.archos.mediacenter.utils.trakt.Trakt;
 import com.archos.mediacenter.video.R;
-import com.archos.mediacenter.video.ui.NovaProgressDialog;
-import com.archos.mediacenter.video.utils.oauth.OAuthCallback;
-import com.archos.mediacenter.video.utils.oauth.OAuthData;
-import com.archos.mediacenter.video.utils.oauth.OAuthDialog;
 
-import org.apache.oltu.oauth2.client.request.OAuthClientRequest;
-import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TraktSigninDialogPreference extends Preference {
 
     private static final Logger log = LoggerFactory.getLogger(TraktSigninDialogPreference.class);
+    private static final int REQUEST_CODE_DEVICE_AUTH = 1001;
 
-	OAuthDialog od=null;
     private DialogInterface.OnDismissListener mOnDismissListener;
 
     public TraktSigninDialogPreference(Context context, AttributeSet attrs) {
@@ -52,12 +44,8 @@ public class TraktSigninDialogPreference extends Preference {
     }
 
     public TraktSigninDialogPreference(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle); 
+        super(context, attrs, defStyle);
         this.setKey(Trakt.KEY_TRAKT_USER);
-    }
-
-    public boolean isDialogShowing(){
-    	return od!=null&&od.isShowing();
     }
 
     public SharedPreferences getSharedPreferences(){
@@ -68,123 +56,89 @@ public class TraktSigninDialogPreference extends Preference {
     }
 
     @Override
-    public void onClick() {
-        Context context = getContext();
-        if (context instanceof Activity) {
-            Activity activity = (Activity) context;
-            if (activity.isFinishing() || activity.isDestroyed()) {
-                // Activity is not in a state to show dialogs, so return early
-                return;
-            }
-        }
-        try {
-            log.debug("onClick: TraktSigninDialogPreference");
-            OAuthClientRequest t = getAuthorizationRequest(getSharedPreferences());
-            log.debug("onClick: t={}", t.getLocationUri());
-            final OAuthData oa = new OAuthData();
-            OAuthCallback codeCallBack = data -> {
-                // TODO Auto-generated method stub
-                if (data.code != null) {
-                   log.debug("onClick: data.code is not null");
-                    if (context instanceof Activity) {
-                        Activity activity = (Activity) context;
-                        if (activity.isFinishing() || activity.isDestroyed()) {
-                            // check again before displaying dialog
-                            return;
-                        }
-                    }
-                    NovaProgressDialog mProgress = NovaProgressDialog.show(getContext(), "", getContext().getResources().getString(R.string.connecting), true, true);
-                    AsyncTask t1 = new AsyncTask() {
-                        @Override
-                        protected void onPreExecute() {
-                            log.debug("OAuthCallback.onPreExecute: show dialog");
-                            // Check again before showing the dialog
-                            if (context instanceof Activity) {
-                                Activity activity = (Activity) context;
-                                if (activity.isFinishing() || activity.isDestroyed()) {
-                                    cancel(true);
-                                    return;
-                                }
-                            }
-                            mProgress.show();
-                        }
-
-                        @Override
-                        protected Object doInBackground(Object... params) {
-                            log.debug("OAuthCallback.doInBackground: get trakt accessToken");
-                            return Trakt.getAccessToken(oa.code);
-                        }
-
-                        @Override
-                        protected void onPostExecute(Object result) {
-                            log.debug("OAuthCallback.onPostExecute: store trakt accessToken and notify change");
-                            if (mProgress.isShowing()) {
-                                mProgress.dismiss();
-                            }
-                            if (result != null && result instanceof Trakt.accessToken) {
-                                Trakt.accessToken res = (Trakt.accessToken) result;
-                                if (res.access_token != null) {
-                                    log.debug("onClick: trakt access token is {}", res.access_token);
-                                    Trakt.setAccessToken(getSharedPreferences(), res.access_token);
-                                    Trakt.setRefreshToken(getSharedPreferences(), res.refresh_token);
-                                    // Clear account locked flag on successful re-authentication
-                                    Trakt.setAccountLocked(getSharedPreferences(), false);
-                                    TraktSigninDialogPreference.this.notifyChanged();
-                                }
-                            }
-                        }
-                    };
-                    t1.execute();
-                } else {
-                    log.debug("onClick: data.code null!");
-                    if (!(context instanceof Activity) || ((Activity) context).isFinishing() || ((Activity) context).isDestroyed()) {
-                        return;
-                    }
-                    new AlertDialog.Builder(getContext())
-                            .setNegativeButton(android.R.string.ok, null)
-                            .setMessage(R.string.dialog_subloader_nonetwork_title)
-                            .setIcon(android.R.drawable.ic_dialog_alert)
-                            .show();
-                }
-            };
-
-            od = new OAuthDialog(getContext(), codeCallBack, oa, t);
-            od.setCancelable(true);
-            od.setCanceledOnTouchOutside(false);
-            od.show();
-            if (mOnDismissListener != null) {
-                od.setOnDismissListener(mOnDismissListener);
-                od.setOnCancelListener(dialogInterface -> {
-                    mOnDismissListener.onDismiss(dialogInterface);
-                });
-            } else {
-                od.setOnCancelListener(DialogInterface::cancel);
-                od.setOnDismissListener(DialogInterface::dismiss);
-            }
-        } catch (OAuthSystemException e) {
-            // TODO Auto-generated catch block
-            log.error("onClick: caught OAuthSystemException", e);
-        }
-        
+    protected void onClick() {
+        performDeviceAuth();
     }
-	public void dismissDialog() {
-		if(od != null)
-			od.dismiss();
-	}
 
-	public void setOnDismissListener(DialogInterface.OnDismissListener onDismissListener){
+    /**
+     * Public method to trigger device authentication (called by other activities)
+     */
+    public void performDeviceAuth() {
+        log.debug("performDeviceAuth: TraktSigninDialogPreference clicked!");
+
+        Activity activity = getActivityFromContext(getContext());
+        if (activity == null) {
+            log.error("performDeviceAuth: could not resolve Activity from context type {}", getContext() != null ? getContext().getClass().getName() : "null");
+            return;
+        }
+
+        if (activity.isFinishing() || activity.isDestroyed()) {
+            log.debug("performDeviceAuth: activity is finishing or destroyed");
+            return;
+        }
+
+        log.debug("performDeviceAuth: launching TraktDeviceAuthActivity for device flow authentication");
+
+        // Launch device authentication activity
+        Intent intent = new Intent(activity, TraktDeviceAuthActivity.class);
+        activity.startActivityForResult(intent, REQUEST_CODE_DEVICE_AUTH);
+    }
+
+    /**
+     * Call this method from the parent Activity's onActivityResult to handle auth completion
+     */
+    public void onActivityResult(int requestCode, int resultCode) {
+        if (requestCode == REQUEST_CODE_DEVICE_AUTH) {
+            if (resultCode == Activity.RESULT_OK) {
+                log.debug("onActivityResult: device auth successful");
+                // Notify that the preference has changed so UI updates
+                notifyChanged();
+                if (mOnDismissListener != null) {
+                    mOnDismissListener.onDismiss(null);
+                }
+            } else {
+                log.debug("onActivityResult: device auth cancelled or failed");
+            }
+        }
+    }
+
+    public void setOnDismissListener(DialogInterface.OnDismissListener onDismissListener){
         mOnDismissListener = onDismissListener;
     }
 
-	public void showDialog(boolean boolean1) {
-		// TODO Auto-generated method stub
-		if(boolean1) {
+    public void showDialog(boolean show) {
+        if(show) {
             log.debug("showDialog: trigger onClick");
             this.onClick();
-        } else {
-            log.debug("showDialog: dismiss dialog");
-            dismissDialog();
         }
-	}
+    }
+
+    /**
+     * Legacy method for dialog management - no-op since we now use Activity
+     * @deprecated Device flow uses Activity instead of Dialog
+     */
+    @Deprecated
+    public boolean isDialogShowing() {
+        return false;
+    }
+
+    /**
+     * Legacy method for dialog management - no-op since we now use Activity
+     * @deprecated Device flow uses Activity instead of Dialog
+     */
+    @Deprecated
+    public void dismissDialog() {
+        // No-op: Activity lifecycle is managed by Android system
+    }
+
+    private Activity getActivityFromContext(Context context) {
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                return (Activity) context;
+            }
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        return null;
+    }
 
 }

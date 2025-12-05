@@ -1108,6 +1108,11 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".utils.TraktDeviceAuthActivity"
+            android:label="@string/connect_trakt"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:exported="false" />
+        <activity
             android:name=".utils.VideoPreferencesLicencesActivity"
             android:configChanges="orientation|screenLayout"
             android:excludeFromRecents="true"
