@@ -1037,6 +1037,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         if (mTraktClient != null) {
             mTraktError = false;
             mTraktLiveScrobblingEnabled = Trakt.isLiveScrobblingEnabled(mPreferences);
+            final boolean traktSyncResumeEnabled = Trakt.getSyncPlaybackPreference(mPreferences);
             if (mTraktLiveScrobblingEnabled) {
                 if (mVideoInfo == null) {
                     log.error("startTrakt: mVideoInfo is null, cannot start Trakt!");
@@ -1049,6 +1050,10 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
                 mTraktClient.watching(mVideoInfo, progress);
                 mHandler.postDelayed(mTraktWatchingRunnable, Trakt.WATCHING_DELAY_MS);
                 mTraktWatching = true;
+            } else if (traktSyncResumeEnabled && mVideoInfo != null) {
+                // Live scrobbling off: only keep local resume marker, send on pause/stop
+                mVideoInfo.traktResume = -getPlayerProgress();
+                mVideoInfo.duration = Player.sPlayer != null ? Player.sPlayer.getDuration() : mVideoInfo.duration;
             }
         }
     }
@@ -1057,6 +1062,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         log.debug("stopTrakt");
         if (mTraktClient != null) {
             log.debug("stopTrakt: mTraktClient != null, mTraktWatching={}", mTraktWatching);
+            final boolean traktSyncResumeEnabled = Trakt.getSyncPlaybackPreference(mPreferences);
             if (mTraktWatching) {
                 mHandler.removeCallbacks(mTraktWatchingRunnable);
                 int progress = getPlayerProgress();
@@ -1067,8 +1073,15 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
                 }
                 log.debug("stopTrakt: progress negative not doing anything, progress={}", progress);
                 mTraktWatching = false;
+            } else if (!mTraktError && (mTraktLiveScrobblingEnabled || traktSyncResumeEnabled)) {
+                final int progress = getPlayerProgress();
+                log.debug("stopTrakt: one-shot trakt sync progress={} liveScrobble={} syncResume={}", progress, mTraktLiveScrobblingEnabled, traktSyncResumeEnabled);
+                if (progress >= 0 && mVideoInfo != null) {
+                    mVideoInfo.traktResume = - progress;
+                    mTraktClient.watchingStop(mVideoInfo, progress);
+                }
             } else if (!mTraktError && Trakt.shouldMarkAsSeen(getPlayerProgress())) {
-                log.debug("stopTrakt: Trakt.ACTION_SEEN");
+                log.debug("stopTrakt: Trakt.ACTION_SEEN (fallback)");
                 mTraktClient.markAs(mVideoInfo, Trakt.ACTION_SEEN);
             } else {
                 log.debug("stopTrakt: mTraktWatching=false and should not mark as seend, doing nothing!!!");
@@ -1106,6 +1119,13 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
                 }
                 // consider that in pause we are still watching it is only on stop that it is the end
                 //mTraktWatching = false;
+            } else if (Trakt.getSyncPlaybackPreference(mPreferences)) {
+                int progress = getPlayerProgress();
+                if (progress > 0 && mVideoInfo != null) {
+                    mVideoInfo.traktResume = - progress;
+                    log.debug("pauseTrakt: one-shot watchingPause progress={} (live scrobble off)", progress);
+                    mTraktClient.watchingPause(mVideoInfo, progress);
+                }
             }
         }
     }
