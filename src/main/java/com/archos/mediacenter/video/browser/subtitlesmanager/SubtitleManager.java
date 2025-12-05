@@ -51,6 +51,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -250,6 +251,17 @@ public class SubtitleManager {
         log.debug("invalidateCache: cleared cache for {}", uriKey);
     }
 
+    private static String encodeFileName(String fileName) {
+        if (fileName == null) return null;
+        try {
+            String encoded = URLEncoder.encode(fileName, "UTF-8");
+            return encoded.isEmpty() ? fileName : encoded;
+        } catch (Exception e) {
+            log.warn("encodeFileName: failed for {}", fileName, e);
+            return fileName;
+        }
+    }
+
     public void preFetchHTTPSubtitlesAndPrepareUpnpSubs(final Uri upnpNiceUri, final Uri fileUri){
         log.debug("preFetchHTTPSubtitlesAndPrepareUpnpSubs on {}, {}", upnpNiceUri, fileUri);
         Thread mainThread = new Thread() {
@@ -322,7 +334,7 @@ public class SubtitleManager {
                                     break;
                                 }
                                 in = con.getInputStream();
-                                File subFile = new File(MediaUtils.getSubsDir(mContext), name);
+                                File subFile = new File(MediaUtils.getSubsDir(mContext), encodeFileName(name));
                                 log.trace("preFetchHTTPSubtitlesAndPrepareUpnpSubs: copy {} -> {}", name, subFile.getPath());
                                 prefetchedListOfSubs.add(subFile.getPath());
                                 fos = new FileOutputStream(subFile);
@@ -487,8 +499,10 @@ public class SubtitleManager {
                 });
                 //force prefixing with video name before copy if this is not the case i.e. Subs/en.srt -> videoName.en.srt,
                 // /!\ it will cause subs duplicates because detection is based on fileName
-                log.debug("privatePrefetchSub: setAllTargetFilesShouldStartWithString {}.", stripExtension(videoUri));
-                engine.setAllTargetFilesShouldStartWithString(stripExtension(videoUri) + ".");
+                String prefix = stripExtension(videoUri) + ".";
+                String encodedPrefix = encodeFileName(prefix);
+                log.debug("privatePrefetchSub: setAllTargetFilesShouldStartWithString {} (encoded={}).", prefix, encodedPrefix);
+                engine.setAllTargetFilesShouldStartWithString(encodedPrefix);
                 //engine.setAllTargetFilesShouldStartWithString(stripExtension(videoUri));
                 engine.copy(subs, target, true);
 
