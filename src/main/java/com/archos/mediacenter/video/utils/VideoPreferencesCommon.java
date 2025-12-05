@@ -215,7 +215,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
     public static final boolean SHOW_BY_RATING_DEFAULT = false;
 
     public static final boolean TRAKT_SYNC_COLLECTION_DEFAULT = false;
-    public static final boolean TRAKT_LIVE_SCROBBLING_DEFAULT = true;
+    public static final boolean TRAKT_LIVE_SCROBBLING_DEFAULT = false;
     public static final boolean ENABLE_SPONSOR_DEFAULT = false;
 
     public static final String LOGIN_DIALOG = "login_dialog";
@@ -970,17 +970,8 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
 
         mTraktWipePreference = findPreference(KEY_TRAKT_WIPE);
         mTraktLiveScrobblingPreference = (CheckBoxPreference) findPreference(KEY_TRAKT_LIVE_SCROBBLING);
-        //trakt resume must be disabled when no scrobbling
-        mTraktSyncProgressPreference.setEnabled(mTraktLiveScrobblingPreference.isChecked() && mTraktLiveScrobblingPreference.isEnabled());
-        mTraktLiveScrobblingPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object o) {
-                mTraktSyncProgressPreference.setEnabled((Boolean) o && mTraktLiveScrobblingPreference.isEnabled());
-                if (!(Boolean) o)
-                    mTraktSyncProgressPreference.setChecked(false);
-                return true;
-            }
-        });
+        // trakt resume can be toggled independently from live scrobbling
+        mTraktSyncProgressPreference.setEnabled(mTraktLiveScrobblingPreference.isEnabled());
         mTraktSyncCollectionPreference = (CheckBoxPreference) findPreference(KEY_TRAKT_SYNC_COLLECTION);
 
         mTraktStatus = Trakt.Status.SUCCESS;

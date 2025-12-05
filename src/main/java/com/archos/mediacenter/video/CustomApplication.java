@@ -1001,6 +1001,11 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                     .putBoolean(PlayerActivity.KEY_ENABLE_ANDROID_FRAME_TIMING, true)
                     .apply();
         }
+        // Disable live scrobbling on upgrade to avoid unexpected background traffic
+        PreferenceManager.getDefaultSharedPreferences(context)
+                .edit()
+                .putBoolean(VideoPreferencesCommon.KEY_TRAKT_LIVE_SCROBBLING, false)
+                .apply();
         // do not replace lastPlayed row with watchingUpNext one since it is still a little slow on shield
         /*
         if (novaPreviousVersionArray[0] == 6 && novaPreviousVersionArray[1] == 4 && novaPreviousVersionArray[2] < 7) {
