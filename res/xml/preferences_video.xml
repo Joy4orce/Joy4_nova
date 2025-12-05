@@ -431,6 +431,16 @@
             android:summary="@string/trakt_sync_trakt_resume"
             android:title="@string/trakt_sync_trakt_resume_title"
             app:iconSpaceReserved="false"/>
+        <Preference
+            android:key="trakt_force_push"
+            android:title="@string/trakt_force_push_title"
+            android:summary="@string/trakt_force_push_summary"
+            app:iconSpaceReserved="false"/>
+        <Preference
+            android:key="trakt_force_pull"
+            android:title="@string/trakt_force_pull_title"
+            android:summary="@string/trakt_force_pull_summary"
+            app:iconSpaceReserved="false"/>
 
         <com.archos.mediacenter.video.utils.TraktWipeDialogPreference
             android:key="trakt_wipe"

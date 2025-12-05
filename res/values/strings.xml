@@ -897,6 +897,10 @@
     <string name="trakt_sync_collection_title">Synchronize TV show and movie collections</string>
     <string name="trakt_sync_trakt_resume_title">Sync trakt resume position</string>
     <string name="trakt_sync_trakt_resume">Use trakt resume position when more advanced than local</string>
+    <string name="trakt_force_push_title">Force re-upload to Trakt</string>
+    <string name="trakt_force_push_summary">One-time upload of watched and resume to Trakt (may duplicate if Trakt is not empty)</string>
+    <string name="trakt_force_pull_title">Force re-import from Trakt</string>
+    <string name="trakt_force_pull_summary">One-time import of watched and resume from Trakt (may overwrite local state)</string>
     <string name="trakt_sync_collection_summary">Automatically add all videos from your Nova library to your Trakt collection</string>
     <string name="trakt_toast_syncing">Syncing with Trakt&#8230;</string>
     <string name="trakt_device_auth_step1">1. On your phone or computer, go to:</string>

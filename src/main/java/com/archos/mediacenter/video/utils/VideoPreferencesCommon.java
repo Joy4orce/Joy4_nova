@@ -266,6 +266,8 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
     private CheckBoxPreference mTraktLiveScrobblingPreference = null;
     private CheckBoxPreference mTraktSyncCollectionPreference = null;
     private CheckBoxPreference mTraktSyncProgressPreference = null;
+    private Preference mTraktForcePushPreference = null;
+    private Preference mTraktForcePullPreference = null;
     private CheckBoxPreference mAutoScrapPreference = null;
 
     private CheckBoxPreference mSeparateAnimeMoviePreference = null;
@@ -973,6 +975,22 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         // trakt resume can be toggled independently from live scrobbling
         mTraktSyncProgressPreference.setEnabled(mTraktLiveScrobblingPreference.isEnabled());
         mTraktSyncCollectionPreference = (CheckBoxPreference) findPreference(KEY_TRAKT_SYNC_COLLECTION);
+        mTraktForcePushPreference = findPreference("trakt_force_push");
+        mTraktForcePullPreference = findPreference("trakt_force_pull");
+        if (mTraktForcePushPreference != null) {
+            mTraktForcePushPreference.setOnPreferenceClickListener(preference -> {
+                if (Trakt.getAccessTokenFromPreferences(mSharedPreferences) == null) return false;
+                new TraktService.Client(getActivity(), null, false).forcePush();
+                return true;
+            });
+        }
+        if (mTraktForcePullPreference != null) {
+            mTraktForcePullPreference.setOnPreferenceClickListener(preference -> {
+                if (Trakt.getAccessTokenFromPreferences(mSharedPreferences) == null) return false;
+                new TraktService.Client(getActivity(), null, false).forcePull();
+                return true;
+            });
+        }
 
         mTraktStatus = Trakt.Status.SUCCESS;
 
@@ -1372,6 +1390,14 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         // Keep bookmark/resume sync available even if live scrobbling is disabled
         mTraktSyncProgressPreference.setEnabled(enabled);
         mTraktSyncProgressPreference.setSelectable(enabled);
+        if (mTraktForcePushPreference != null) {
+            mTraktForcePushPreference.setEnabled(enabled);
+            mTraktForcePushPreference.setSelectable(enabled);
+        }
+        if (mTraktForcePullPreference != null) {
+            mTraktForcePullPreference.setEnabled(enabled);
+            mTraktForcePullPreference.setSelectable(enabled);
+        }
         mTraktSigninPreference.setEnabled(!enabled);
         mTraktSigninPreference.setSelectable(!enabled);
     }
