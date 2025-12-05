@@ -1253,7 +1253,8 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
 
         Cursor c = cr.query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI,
                 MOVIE_ONLINE_ID_PROJECTION,
-                getVideoToMarkSelection(library, com.archos.mediascraper.BaseTags.MOVIE, toMark),
+                getVideoToMarkSelection(library, com.archos.mediascraper.BaseTags.MOVIE, toMark)
+                        + " AND " + VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED + " > 0",
                 null,
                 null);
         if (c != null) {
@@ -1271,7 +1272,7 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
                     final String mOnlineId = c.getString(mOnlineIdIdx);
                     final long lastTimePlayed = c.getLong(lastPlayedIdx);
                     final int id = c.getInt(idIdx);
-                    if (mOnlineId != null) {
+                    if (mOnlineId != null && lastTimePlayed > 0) {
                         TraktAPI.Movie movie = new TraktAPI.Movie();
                         movie.tmdb_id = mOnlineId;
                         movie.last_played = Trakt.getDateFormat(lastTimePlayed);
@@ -1321,7 +1322,8 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
 
         Cursor c = cr.query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI,
                 SHOW_ONLINE_ID_PROJECTION,
-                getVideoToMarkSelection(library, com.archos.mediascraper.BaseTags.TV_SHOW, toMark),
+                getVideoToMarkSelection(library, com.archos.mediascraper.BaseTags.TV_SHOW, toMark)
+                        + " AND " + VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED + " > 0",
                 null,
                 VideoStore.Video.VideoColumns.SCRAPER_S_ONLINE_ID);
         if (c != null) {
@@ -1346,7 +1348,7 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
                     final long lastTimePlayed = c.getLong(lastPlayedIdx);
                     final int id = c.getInt(idIdx);
 
-                    if (sOnlineId != null && eSeasonNr >= 0 && eEpisodeNr >= 0) {
+                    if (sOnlineId != null && eSeasonNr >= 0 && eEpisodeNr >= 0 && lastTimePlayed > 0) {
                         if (sOnlineIdPrev == null || !sOnlineIdPrev.equals(sOnlineId)) {
                             Trakt.Status status = syncFlushEpisodeList(library, param, episodeList, cr, inBuilder != null ? inBuilder.get() : null, toMark);
                             if (status == Trakt.Status.ERROR_NETWORK) {
