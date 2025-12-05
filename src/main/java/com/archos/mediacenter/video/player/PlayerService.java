@@ -196,6 +196,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
     public boolean mNightModeOn;
     private static final String KEY_AUDIO_FILT = "pref_audio_filt_int_key"; // used to be "pref_audio_filt_key", containing a string
     private static final String KEY_AUDIO_FILT_NIGHT = "pref_audio_filt_night_int_key";
+    private static final String[] GENERIC_TEXT_SUBTITLE_FORMATS = {"srt", "vtt"};
     private boolean mCallOnDataUriOKWhenVideoInfoIsSet;
     private boolean mIsPreparingSubs;
     private String mSubsFavoriteLanguage;
@@ -1569,7 +1570,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         // /!\ IMPORTANT: this is only for the player part, setting the UI subtitle track is done in PlayerActivity thus the two must be in sync
 
         int nbTrack = vMetadata.getSubtitleTrackNb(); // this contains the number of subtitlesTracks not including the none track
-        Integer srtTrack = null; // track for video.srt with no language provided
+        Integer fallbackTextTrack = null; // track for external text subs with no language provided
         log.debug("onSubtitleMetadataUpdated: nbTrack={} newSubtitleTrack={} mVideoInfo.subtitleTrack={} mHideSubtitles={} mSubsFavoriteLanguage={} firstTimeSubCalled={} mIsPreparingSubs={}", nbTrack, newSubtitleTrack, mVideoInfo.subtitleTrack, mHideSubtitles, mSubsFavoriteLanguage, firstTimeSubCalled, mIsPreparingSubs);
         // selection logic
         if (nbTrack != 0) {
@@ -1607,7 +1608,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
                         trackName = vMetadata.getSubtitleTrack(i).name;
                         // select default locale and avoid forced subs
                         if (vMetadata.getSubtitleTrack(i).isExternal) {
-                            // this returns lang = "SRT" if subFileName is video.srt and videoFileName is video.mkv
+                            // this returns the subtitle format (e.g. SRT/VTT) if subFileName is video.<ext> and videoFileName is video.mkv
                             lang = getSubLanguageFromSubPathAndVideoPath(getApplicationContext(), vMetadata.getSubtitleTrack(i).path, vMetadata.getFile().getPath());
                             log.debug("onSubtitleMetadataUpdated: subtrack {}, ext sub found lang={} ({})", i, lang, vMetadata.getSubtitleTrack(i).path);
                         } else {
@@ -1630,22 +1631,22 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
                                 }
                             }
                         }
-                        if (vMetadata.getSubtitleTrack(i).isExternal && lang.equalsIgnoreCase("srt")) {
-                            log.debug("onSubtitleMetadataUpdated: found srt track {} -> setting srtTrack={}", i, i);
-                            srtTrack = i;
+                        if (vMetadata.getSubtitleTrack(i).isExternal && isGenericTextSubtitleFormat(lang)) {
+                            log.debug("onSubtitleMetadataUpdated: found external text track {} ({}) -> setting fallbackTextTrack={}", i, lang, i);
+                            fallbackTextTrack = i;
                         }
                     }
                     if (!mHideSubtitles && mVideoInfo.subtitleTrack == -1) { // selects newSubtitleTrack (could be noneTrack) if language not found
                         int newTrack = 0;
                         String revertTrackName = "";
                         if (USE_NONETRACK_IF_SUB_LANG_NOT_FOUND) {
-                            newTrack = Objects.requireNonNullElse(srtTrack, noneTrack); // strategy to put no subs if lang not found
+                            newTrack = Objects.requireNonNullElse(fallbackTextTrack, noneTrack); // strategy to put no subs if lang not found
                             revertTrackName = "noneTrack";
                         } else {
-                            newTrack = Objects.requireNonNullElse(srtTrack, newSubtitleTrack); // strategy to revert to newSubtitleTrack if lang not found (legacy)
+                            newTrack = Objects.requireNonNullElse(fallbackTextTrack, newSubtitleTrack); // strategy to revert to newSubtitleTrack if lang not found (legacy)
                             revertTrackName = "newSubtitleTrack";
                         }
-                        log.debug("onSubtitleMetadataUpdated: no default sub found mVideoInfo.subtitleTrack: {} -> setting {} or external srt ({}) track if exists -> videoInfo.subtitleTrack={}", mVideoInfo.subtitleTrack, revertTrackName, srtTrack, newTrack);
+                        log.debug("onSubtitleMetadataUpdated: no default sub found mVideoInfo.subtitleTrack: {} -> setting {} or external text ({}) track if exists -> videoInfo.subtitleTrack={}", mVideoInfo.subtitleTrack, revertTrackName, fallbackTextTrack, newTrack);
                         mVideoInfo.subtitleTrack = newTrack;
                     }
                     if (mHideSubtitles || mVideoInfo.subtitleTrack == noneTrack) { // if none track selected, player gets -1 track
@@ -1717,6 +1718,16 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         log.debug("onSubtitleMetadataUpdated: cached AVOS metadata for {}", mUri);
     }
 
+    private static boolean isGenericTextSubtitleFormat(String lang) {
+        if (lang == null) return false;
+        for (String format : GENERIC_TEXT_SUBTITLE_FORMATS) {
+            if (format.equalsIgnoreCase(lang)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Extract 2-letter ISO 639-1 language code from a language name or code string.
      * Uses ISO639codes utility to handle conversions from full names or different code formats.
@@ -1726,9 +1737,9 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         if (languageStr == null || languageStr.isEmpty()) {
             return "";
         }
-        // Handle special case for SRT files
-        if (languageStr.toLowerCase().contains("srt")) {
-            return "srt";
+        // Handle special cases for known subtitle formats (e.g. SRT, VTT)
+        if (isGenericTextSubtitleFormat(languageStr)) {
+            return languageStr.toLowerCase();
         }
         // Use ISO639codes utility to convert any format (2-letter, 3-letter, or full name) to 2-letter code
         String code = com.archos.mediacenter.utils.ISO639codes.getISO6391ForLetterCode(languageStr);

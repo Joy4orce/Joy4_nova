@@ -245,6 +245,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     private static final String ACTION_HDMI_PLUGGED = "android.intent.action.HDMI_PLUGGED";
     private static final String EXTRA_HDMI_PLUGGED_STATE = "state";
     private static final int SUBTITLE_REQUEST = 0;
+    private static final String[] GENERIC_TEXT_SUBTITLE_FORMATS = {"srt", "vtt"};
 
     private boolean mHasAskedFloatingPermission;
     private boolean mIsInfoActivityDisplayed;
@@ -3598,6 +3599,16 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         startActivityForResult(subIntent, SUBTITLE_REQUEST);
     }
 
+    private static boolean isGenericTextSubtitleFormat(String lang) {
+        if (lang == null) return false;
+        for (String format : GENERIC_TEXT_SUBTITLE_FORMATS) {
+            if (format.equalsIgnoreCase(lang)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Extract 2-letter ISO 639-1 language code from a language name or code string.
      * Uses ISO639codes utility to handle conversions from full names or different code formats.
@@ -3607,9 +3618,9 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         if (languageStr == null || languageStr.isEmpty()) {
             return "";
         }
-        // Handle special case for SRT files
-        if (languageStr.toLowerCase().contains("srt")) {
-            return "srt";
+        // Handle special cases for known subtitle formats (e.g. SRT, VTT)
+        if (isGenericTextSubtitleFormat(languageStr)) {
+            return languageStr.toLowerCase();
         }
         // Use ISO639codes utility to convert any format (2-letter, 3-letter, or full name) to 2-letter code
         String code = com.archos.mediacenter.utils.ISO639codes.getISO6391ForLetterCode(languageStr);
@@ -3941,7 +3952,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 mVideoInfo.nbSubtitles = nbTrack; // nbSubtitles does not capture none track
                 String lang = null;
                 for (int i = 0; i < nbTrack; ++i) {
-                    // name comes from IMediaPlayer (avos) and if not internal it says SRT thus if name="SRT" infer the name from path
+                    // name comes from IMediaPlayer (avos) and if not internal it says SRT/VTT generic, infer the name from path
                     // infer language from path if path is provided
                     if (vMetadata.getSubtitleTrack(i).isExternal) {
                         // external subtitle get name from file

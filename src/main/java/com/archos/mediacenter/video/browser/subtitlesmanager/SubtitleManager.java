@@ -690,7 +690,10 @@ public class SubtitleManager {
                     if (SubtitleExtensions.contains(fileExtension.toLowerCase(Locale.US))&&(!fileExtension.toLowerCase(Locale.US).equals("idx") || includeIdx)) {
                         subtitleFileName = stripExtensionFromName(getName(file.getName()));
                         subtitleName = getSubLanguageFromSubPathAndVideoPath(mContext, file.getUri().getPath(), video.getPath());
-                        if (subtitleFileName.equals(subtitleName)) subtitleName = "SRT";
+                        if (subtitleFileName.equals(subtitleName)) {
+                            String defaultFormatName = fileExtension != null ? fileExtension.toUpperCase(Locale.US) : "SRT";
+                            subtitleName = defaultFormatName;
+                        }
                         subList.add(new SubtitleFile(file, subtitleName));
                         log.trace("listLocalAndRemotesSubtitles: add external {} ({})", file.getUri().toString(), subtitleName);
                     }
@@ -756,8 +759,10 @@ public class SubtitleManager {
         String subFilenameWithoutExtension = stripExtensionFromName(getName(subPath));
         String videoFilenameWithoutExtension = stripExtensionFromName(getName(videoPath));
         if (subFilenameWithoutExtension.equals(videoFilenameWithoutExtension)) {
-            log.debug("getSubLanguageFromSubPathAndVideoPath: video and sub have same name {} -> SRT", subFilenameWithoutExtension);
-            return "SRT";
+            String extension = MimeUtils.getExtension(getName(subPath));
+            String formatName = extension != null ? extension.toUpperCase(Locale.US) : "SRT";
+            log.debug("getSubLanguageFromSubPathAndVideoPath: video and sub have same name {} -> {}", subFilenameWithoutExtension, formatName);
+            return formatName;
         }
         // subtract video name from sub name if they start the same (they should) but there could be Subs/en.srt too
         String lastPart = null;
