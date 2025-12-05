@@ -500,10 +500,9 @@ public class SubtitleManager {
                 //force prefixing with video name before copy if this is not the case i.e. Subs/en.srt -> videoName.en.srt,
                 // /!\ it will cause subs duplicates because detection is based on fileName
                 String prefix = stripExtension(videoUri) + ".";
-                String encodedPrefix = encodeFileName(prefix);
-                log.debug("privatePrefetchSub: setAllTargetFilesShouldStartWithString {} (encoded={}).", prefix, encodedPrefix);
-                engine.setAllTargetFilesShouldStartWithString(encodedPrefix);
-                //engine.setAllTargetFilesShouldStartWithString(stripExtension(videoUri));
+                // Use the raw prefix so we don't double-prefix when files already carry encoded names (spaces -> '+')
+                log.debug("privatePrefetchSub: setAllTargetFilesShouldStartWithString {}", prefix);
+                engine.setAllTargetFilesShouldStartWithString(prefix);
                 engine.copy(subs, target, true);
 
                 latch.await(); // Wait for the latch to reach zero
@@ -664,7 +663,10 @@ public class SubtitleManager {
                     List<MetaFile2> files = RawListerFactoryWithUpnp.getRawListerForUrl(localSubsDirUri).getFileList();
                     for (MetaFile2 file : files) {
                         // ensures that we have a file with the same name as the video
-                        if (file.getName().startsWith(filenameWithoutExtension + ".") || addAllSubs) {
+                        String encodedFilenameWithoutExtension = encodeFileName(filenameWithoutExtension);
+                        if (file.getName().startsWith(filenameWithoutExtension + ".") ||
+                                (encodedFilenameWithoutExtension != null && file.getName().startsWith(encodedFilenameWithoutExtension + ".")) ||
+                                addAllSubs) {
                             allFiles.add(file);
                             log.trace("listLocalAndRemotesSubtitles: cache add {}", file.getName());
                         }
