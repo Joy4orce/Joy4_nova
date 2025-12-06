@@ -59,6 +59,7 @@ import com.archos.filecorelibrary.smbj.SmbjUtils;
 import com.archos.filecorelibrary.sshj.SshjUtils;
 import com.archos.filecorelibrary.webdav.WebdavUtils;
 import com.archos.mediacenter.utils.trakt.Trakt;
+import com.archos.mediacenter.utils.trakt.TraktService;
 import com.archos.mediacenter.video.browser.BootupRecommandationService;
 import com.archos.mediacenter.video.picasso.SmbRequestHandler;
 import com.archos.mediacenter.video.picasso.ThumbnailRequestHandler;
@@ -424,6 +425,8 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         }).start();
 
         Trakt.initApiKeys(this);
+        // Start TraktService to enable lifecycle callbacks and automatic syncing
+        TraktService.syncAtStart(this);
         new Thread() {
             public void run() {
                 this.setPriority(Thread.MIN_PRIORITY);
