@@ -413,7 +413,7 @@
             app:iconSpaceReserved="false"/>
 
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="trakt_live_scrobbling"
             android:summary="@string/trakt_live_scrobbling_summary"
             android:title="@string/trakt_live_scrobbling_title"
