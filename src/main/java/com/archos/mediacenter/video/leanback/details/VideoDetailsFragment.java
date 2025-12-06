@@ -533,10 +533,6 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
                 task.cancel(true);
             }
         }
-        // Stop receiving DB updates while the player is in front to avoid logcat spam and useless work
-        if (mResumeFromPlayer) {
-            LoaderManager.getInstance(this).destroyLoader(1);
-        }
         //do not update remote resume
         log.debug("removeParseListener");
         XmlDb.getInstance().removeParseListener(mRemoteDbObserver);
