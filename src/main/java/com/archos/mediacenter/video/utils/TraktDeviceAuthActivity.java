@@ -14,25 +14,30 @@
 
 package com.archos.mediacenter.video.utils;
 
-import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
 import com.archos.mediacenter.utils.trakt.Trakt;
 import com.archos.mediacenter.video.R;
+import com.archos.mediacenter.video.utils.MiscUtils;
+import com.archos.mediacenter.video.utils.oauth.OAuthCallback;
+import com.archos.mediacenter.video.utils.oauth.OAuthData;
+import com.archos.mediacenter.video.utils.oauth.OAuthDialog;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TraktDeviceAuthActivity extends Activity {
+public class TraktDeviceAuthActivity extends AppCompatActivity {
 
     private static final Logger log = LoggerFactory.getLogger(TraktDeviceAuthActivity.class);
 
@@ -47,10 +52,19 @@ public class TraktDeviceAuthActivity extends Activity {
     private Runnable mPollRunnable;
     private long mExpirationTime;
     private boolean mIsPolling = false;
+    private boolean mIsTv = false;
+    private OAuthDialog mOAuthDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mIsTv = MiscUtils.isAndroidTV(this);
+        if (!mIsTv) {
+            // Phone/tablet: use embedded OAuth dialog
+            startPhoneAuth();
+            return;
+        }
         setContentView(R.layout.activity_trakt_device_auth);
 
         // Bind views
@@ -75,6 +89,9 @@ public class TraktDeviceAuthActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         stopPolling();
+        if (mOAuthDialog != null && mOAuthDialog.isShowing()) {
+            mOAuthDialog.dismiss();
+        }
     }
 
     private void stopPolling() {
@@ -125,6 +142,17 @@ public class TraktDeviceAuthActivity extends Activity {
         Trakt.setAccessToken(PreferenceManager.getDefaultSharedPreferences(this), token.access_token);
         Trakt.setRefreshToken(PreferenceManager.getDefaultSharedPreferences(this), token.refresh_token);
         Trakt.setAccountLocked(PreferenceManager.getDefaultSharedPreferences(this), false);
+        // Disable collection sync to avoid hitting Trakt library limits
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .edit()
+                .putBoolean(VideoPreferencesCommon.KEY_TRAKT_SYNC_COLLECTION, false)
+                .apply();
+
+        if (!mIsTv) {
+            setResult(RESULT_OK);
+            finish();
+            return;
+        }
 
         // Update UI
         mStatusText.setText(R.string.trakt_device_auth_success);
@@ -140,6 +168,12 @@ public class TraktDeviceAuthActivity extends Activity {
     private void onAuthenticationFailed(String message) {
         log.debug("onAuthenticationFailed: {}", message);
         stopPolling();
+
+        if (!mIsTv) {
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
 
         mStatusText.setText(message);
         mProgressBar.setVisibility(View.GONE);
@@ -160,13 +194,44 @@ public class TraktDeviceAuthActivity extends Activity {
         });
     }
 
+    private void startPhoneAuth() {
+        log.debug("startPhoneAuth: showing OAuth dialog");
+        try {
+            OAuthData oauthData = new OAuthData();
+            mOAuthDialog = new OAuthDialog(this, new OAuthCallback() {
+                @Override
+                public void onFinished(OAuthData data) {
+                    if (data != null && data.code != null) {
+                        log.debug("startPhoneAuth: received auth code, exchanging");
+                        new ExchangeAuthCodeTask().execute(data.code);
+                    } else {
+                        log.warn("startPhoneAuth: auth cancelled or no code returned");
+                        Toast.makeText(TraktDeviceAuthActivity.this, R.string.trakt_device_auth_error, Toast.LENGTH_LONG).show();
+                        finish();
+                    }
+                }
+            }, oauthData, Trakt.getAuthorizationRequest(PreferenceManager.getDefaultSharedPreferences(this)));
+            mOAuthDialog.show();
+        } catch (Exception e) {
+            log.error("startPhoneAuth: failed to start auth dialog", e);
+            Toast.makeText(this, R.string.trakt_device_auth_error, Toast.LENGTH_LONG).show();
+            finish();
+        }
+    }
+
     /**
      * AsyncTask to generate device code in background
      */
     private class GenerateDeviceCodeTask extends AsyncTask<Void, Void, Trakt.deviceCode> {
+        private boolean mAccountLocked = false;
         @Override
         protected Trakt.deviceCode doInBackground(Void... params) {
-            return Trakt.generateDeviceCode();
+            try {
+                return Trakt.generateDeviceCode();
+            } catch (Trakt.AccountLockedError e) {
+                mAccountLocked = true;
+                return null;
+            }
         }
 
         @Override
@@ -183,7 +248,11 @@ public class TraktDeviceAuthActivity extends Activity {
                 startPolling();
             } else {
                 log.error("Failed to generate device code");
-                onAuthenticationFailed(getString(R.string.trakt_device_auth_error));
+                if (mAccountLocked) {
+                    onAuthenticationFailed(getString(R.string.trakt_account_locked));
+                } else {
+                    onAuthenticationFailed(getString(R.string.trakt_device_auth_error));
+                }
             }
         }
     }
@@ -192,10 +261,16 @@ public class TraktDeviceAuthActivity extends Activity {
      * AsyncTask to exchange device code for access token
      */
     private class ExchangeDeviceCodeTask extends AsyncTask<String, Void, Trakt.accessToken> {
+        private boolean mAccountLocked = false;
         @Override
         protected Trakt.accessToken doInBackground(String... params) {
             String deviceCode = params[0];
-            return Trakt.exchangeDeviceCodeForAccessToken(deviceCode);
+            try {
+                return Trakt.exchangeDeviceCodeForAccessToken(deviceCode);
+            } catch (Trakt.AccountLockedError e) {
+                mAccountLocked = true;
+                return null;
+            }
         }
 
         @Override
@@ -206,14 +281,53 @@ public class TraktDeviceAuthActivity extends Activity {
                 onAuthenticationSuccess(result);
             } else {
                 // Still pending or error - continue polling if not expired
-                if (mIsPolling && System.currentTimeMillis() < mExpirationTime) {
+                if (mAccountLocked) {
+                    onAuthenticationFailed(getString(R.string.trakt_account_locked));
+                } else if (mIsPolling && System.currentTimeMillis() < mExpirationTime) {
                     mPollHandler.postDelayed(mPollRunnable, mDeviceCode.interval * 1000L);
                 } else if (!mIsPolling) {
                     log.debug("Polling stopped");
                 } else {
                     log.debug("Code expired during polling");
-                    onAuthenticationFailed(getString(R.string.trakt_device_auth_timeout));
+                    if (mAccountLocked) {
+                        onAuthenticationFailed(getString(R.string.trakt_account_locked));
+                    } else {
+                        onAuthenticationFailed(getString(R.string.trakt_device_auth_timeout));
+                    }
                 }
+            }
+        }
+    }
+
+    /**
+     * AsyncTask to exchange OAuth authorization code (phone/tablet flow)
+     */
+    private class ExchangeAuthCodeTask extends AsyncTask<String, Void, Trakt.accessToken> {
+        private boolean mAccountLocked = false;
+        @Override
+        protected Trakt.accessToken doInBackground(String... params) {
+            String code = params[0];
+            try {
+                return Trakt.getAccessToken(code);
+            } catch (Trakt.AccountLockedError e) {
+                mAccountLocked = true;
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Trakt.accessToken result) {
+            if (result != null) {
+                log.debug("ExchangeAuthCodeTask: access token received");
+                onAuthenticationSuccess(result);
+            } else {
+                log.warn("ExchangeAuthCodeTask: token exchange failed");
+                if (mAccountLocked) {
+                    Toast.makeText(TraktDeviceAuthActivity.this, R.string.trakt_account_locked, Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(TraktDeviceAuthActivity.this, R.string.trakt_device_auth_error, Toast.LENGTH_LONG).show();
+                }
+                finish();
             }
         }
     }

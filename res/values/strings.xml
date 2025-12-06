@@ -909,6 +909,7 @@
     <string name="trakt_device_auth_success">Connected successfully!</string>
     <string name="trakt_device_auth_error">Authentication failed. Please try again.</string>
     <string name="trakt_device_auth_timeout">Code expired. Please try again.</string>
+    <string name="trakt_account_locked">Trakt account locked. Unlock on trakt.tv or try later.</string>
     <string name="connect_trakt">Connect to Trakt</string>
 
     <string name="show_all">All videos</string>

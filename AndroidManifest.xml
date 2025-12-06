@@ -1110,8 +1110,28 @@
         <activity
             android:name=".utils.TraktDeviceAuthActivity"
             android:label="@string/connect_trakt"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:exported="false" />
+            android:theme="@style/ArchosThemeBlue"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <!-- Handle browser redirect for OAuth phone/tablet flow (legacy localhost) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="http"
+                    android:host="localhost" />
+            </intent-filter>
+            <!-- Handle browser redirect for OAuth phone/tablet flow (custom scheme) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="nova.trakt"
+                    android:host="auth" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".utils.VideoPreferencesLicencesActivity"
             android:configChanges="orientation|screenLayout"

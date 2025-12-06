@@ -192,16 +192,16 @@ public class OAuthDialog extends Dialog {
 				log.warn("OAuthWebViewClient:shouldOverrideUrlLoading: caught UnsupportedEncodingException");
 			}
 			Uri uri = Uri.parse(urldecode);
-			if (!"localhost".equals(uri.getHost()) || !urldecode.contains("code=")) {
-				// Enhanced validation for OAuth callback - allow only Trakt domain and localhost
-				if (uri.getHost() != null && (uri.getHost().endsWith("trakt.tv") || uri.getHost().equals("localhost"))) {
-					log.debug("shouldOverrideUrlLoading API21-23: allowing Trakt domain or localhost: {}", uri.getHost());
-					return false; // Continue loading
-				} else {
-					log.warn("shouldOverrideUrlLoading API21-23: blocking non-Trakt domain: {}", uri.getHost());
-					return true; // Block navigation to non-Trakt domains
-				}
-			}
+            if (!"localhost".equals(uri.getHost()) && !"auth".equals(uri.getHost())) {
+                // Enhanced validation for OAuth callback - allow only Trakt domain, localhost, or nova.trakt://auth
+                if (uri.getHost() != null && (uri.getHost().endsWith("trakt.tv") || uri.getHost().equals("localhost") || uri.getHost().equals("auth"))) {
+                    log.debug("shouldOverrideUrlLoading API21-23: allowing Trakt domain or custom auth host: {}", uri.getHost());
+                    return false; // Continue loading
+                } else {
+                    log.warn("shouldOverrideUrlLoading API21-23: blocking non-Trakt domain: {}", uri.getHost());
+                    return true; // Block navigation to non-Trakt domains
+                }
+            }
 			mdata.code = uri.getQueryParameter("code");
 			OAuthDialog.this.dismiss();
 			mListener.onFinished(mdata);
@@ -218,20 +218,20 @@ public class OAuthDialog extends Dialog {
 			String urldecode = null;
 			try {
 				urldecode = URLDecoder.decode(url, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				log.warn("OAuthWebViewClient:shouldOverrideUrlLoading: caught UnsupportedEncodingException");
-			}
-			Uri uri = Uri.parse(urldecode);
-			if (!"localhost".equals(uri.getHost()) || !urldecode.contains("code=")) {
-				// Enhanced validation for OAuth callback - allow only Trakt domain and localhost
-				if (uri.getHost() != null && (uri.getHost().endsWith("trakt.tv") || uri.getHost().equals("localhost"))) {
-					log.debug("shouldOverrideUrlLoading API24+: allowing Trakt domain or localhost: {}", uri.getHost());
-					return false; // Continue loading
-				} else {
-					log.warn("shouldOverrideUrlLoading API24+: blocking non-Trakt domain: {}", uri.getHost());
-					return true; // Block navigation to non-Trakt domains
-				}
-			}
+        } catch (UnsupportedEncodingException e) {
+            log.warn("OAuthWebViewClient:shouldOverrideUrlLoading: caught UnsupportedEncodingException");
+        }
+        Uri uri = Uri.parse(urldecode);
+        if (!"localhost".equals(uri.getHost()) && !"auth".equals(uri.getHost())) {
+            // Enhanced validation for OAuth callback - allow only Trakt domain, localhost, or nova.trakt://auth
+            if (uri.getHost() != null && (uri.getHost().endsWith("trakt.tv") || uri.getHost().equals("localhost") || uri.getHost().equals("auth"))) {
+                log.debug("shouldOverrideUrlLoading API24+: allowing Trakt domain or custom auth host: {}", uri.getHost());
+                return false; // Continue loading
+            } else {
+                log.warn("shouldOverrideUrlLoading API24+: blocking non-Trakt domain: {}", uri.getHost());
+                return true; // Block navigation to non-Trakt domains
+            }
+        }
 			mdata.code = uri.getQueryParameter("code");
 			OAuthDialog.this.dismiss();
 			mListener.onFinished(mdata);

@@ -1385,8 +1385,11 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         mTraktWipePreference.setSelectable(enabled);
         mTraktLiveScrobblingPreference.setEnabled(enabled);
         mTraktLiveScrobblingPreference.setSelectable(enabled);
-        mTraktSyncCollectionPreference.setEnabled(enabled);
-        mTraktSyncCollectionPreference.setSelectable(enabled);
+        if (mTraktSyncCollectionPreference != null) {
+            mTraktSyncCollectionPreference.setEnabled(false);
+            mTraktSyncCollectionPreference.setSelectable(false);
+            mTraktSyncCollectionPreference.setVisible(false);
+        }
         // Keep bookmark/resume sync available even if live scrobbling is disabled
         mTraktSyncProgressPreference.setEnabled(enabled);
         mTraktSyncProgressPreference.setSelectable(enabled);
@@ -1431,8 +1434,12 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
                 new TraktService.Client(getActivity(), null, false).wipe();
             }
             mTraktSigninPreference.setSummary(R.string.trakt_signin_summary);
-            mTraktSyncCollectionPreference.setChecked(TRAKT_SYNC_COLLECTION_DEFAULT);
-            mTraktLiveScrobblingPreference.setChecked(TRAKT_LIVE_SCROBBLING_DEFAULT);
+            if (mTraktSyncCollectionPreference != null) {
+                mTraktSyncCollectionPreference.setChecked(TRAKT_SYNC_COLLECTION_DEFAULT);
+            }
+            if (mTraktLiveScrobblingPreference != null) {
+                mTraktLiveScrobblingPreference.setChecked(TRAKT_LIVE_SCROBBLING_DEFAULT);
+            }
             setTraktPreferencesEnabled(false);
         }
         mLastTraktUser = traktUser;

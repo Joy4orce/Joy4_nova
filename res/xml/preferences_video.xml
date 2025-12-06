@@ -418,12 +418,15 @@
             android:summary="@string/trakt_live_scrobbling_summary"
             android:title="@string/trakt_live_scrobbling_title"
             app:iconSpaceReserved="false"/>
+        <!-- Temporarily disabled to avoid hitting Trakt library limits -->
+        <!--
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="trakt_sync_collection"
             android:summary="@string/trakt_sync_collection_summary"
             android:title="@string/trakt_sync_collection_title"
             app:iconSpaceReserved="false"/>
+        -->
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="trakt_sync_resume"
