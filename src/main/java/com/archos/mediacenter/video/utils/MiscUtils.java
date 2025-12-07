@@ -167,7 +167,7 @@ public class MiscUtils {
         // check if navigation bar is displayed because chromeos reports a navigation_bar_height of 84 but there is none displayed
         if (resourceIdNavBarHeight > 0 && hasNavigationBar(resources))
             navigationBarHeight = resources.getDimensionPixelSize(resourceIdNavBarHeight);
-        log.debug("getNavigationBarHeight: navigationBarHeight={}", navigationBarHeight);
+        if (log.isDebugEnabled()) log.debug("getNavigationBarHeight: navigationBarHeight={}", navigationBarHeight);
         return navigationBarHeight;
     }
 
@@ -205,7 +205,7 @@ public class MiscUtils {
 
     private static boolean hasNavigationBar(Resources resources) {
         int navBarId = resources.getIdentifier("config_showNavigationBar", "bool", "android");
-        log.debug("hasNavigationBar: navBarId={}, hasNavBar={}", navBarId, resources.getBoolean(navBarId));
+        if (log.isDebugEnabled()) log.debug("hasNavigationBar: navBarId={}, hasNavBar={}", navBarId, resources.getBoolean(navBarId));
         return navBarId > 0 && resources.getBoolean(navBarId);
     }
 
@@ -213,7 +213,7 @@ public class MiscUtils {
         // detect navigation bar orientation https://stackoverflow.com/questions/21057035/detect-android-navigation-bar-orientation
         final boolean isNavAtBottom = (context.getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE)
                 || (context.getResources().getConfiguration().smallestScreenWidthDp >= 600);
-        log.debug("isNavBarAtBottom: NavBarAtBottom={}", isNavAtBottom);
+        if (log.isDebugEnabled()) log.debug("isNavBarAtBottom: NavBarAtBottom={}", isNavAtBottom);
         return isNavAtBottom;
     }
 
@@ -365,21 +365,21 @@ public class MiscUtils {
         // alreadyAppliedBottomMargin is the margin already applied to the bottom of the view (captures the vertical position of subtitleView set in subtitles settings)
         // globalShiftLeft and globalShiftUp are to shift the view globally in the screen and needed for subtitleGfxView to match the videoView (surfaceControllerView) that can be larger than the screen size
         if (Player.sPlayer == null) {
-            log.debug("adjustViewLayoutForInsets: {} Player.sPlayer is null, aborting", viewName);
+            if (log.isDebugEnabled()) log.debug("adjustViewLayoutForInsets: {} Player.sPlayer is null, aborting", viewName);
             return;
         }
         if (viewLayout == null || rootView == null) {
-            log.debug("adjustViewLayoutForInsets: {} viewLayout or rootView is null, aborting", viewName);
+            if (log.isDebugEnabled()) log.debug("adjustViewLayoutForInsets: {} viewLayout or rootView is null, aborting", viewName);
             return;
         }
-        log.debug("adjustViewLayoutForInsets: {} navigationBarShowing={}, systemBarShowing={}, actionBarShowing={}, controlBarShowing={}, isNavBarOnBottom={}, isGestureAreaShowing={}, additionalBottomMargin={}, alreadyAppliedBottomMargin={}",
+        if (log.isDebugEnabled()) log.debug("adjustViewLayoutForInsets: {} navigationBarShowing={}, systemBarShowing={}, actionBarShowing={}, controlBarShowing={}, isNavBarOnBottom={}, isGestureAreaShowing={}, additionalBottomMargin={}, alreadyAppliedBottomMargin={}",
                 viewName, navigationBarShowing, systemBarShowing, actionBarShowing, controlBarShowing, isNavBarOnBottom, isGestureAreaShowing, additionalBottomMargin, alreadyAppliedBottomMargin);
-        log.debug("adjustViewLayoutForInsets: {} getNavigationBarHeight()={}, getGestureAreaHeight()={}, getStatusBarHeight()={}, getActionBarHeight()={}, getSystemBarHeight()={}",
+        if (log.isDebugEnabled()) log.debug("adjustViewLayoutForInsets: {} getNavigationBarHeight()={}, getGestureAreaHeight()={}, getStatusBarHeight()={}, getActionBarHeight()={}, getSystemBarHeight()={}",
                 viewName, MiscUtils.getNavigationBarHeight(context), MiscUtils.getGestureAreaHeight(context), MiscUtils.getStatusBarHeight(context), MiscUtils.getActionBarHeight(context), MiscUtils.getSystemBarHeight(context.getResources()));
-        log.debug("adjustViewLayoutForInsets: {} additionalBottomMargin={}, alreadyAppliedBottomMargin={}", viewName, additionalBottomMargin, alreadyAppliedBottomMargin);
-        log.debug("adjustViewLayoutForInsets: {} adjust=({},{},{},{}), avoidCutout=({},{},{},{}), avoidRoundEdges={}, applyGlobalShift={}",
+        if (log.isDebugEnabled()) log.debug("adjustViewLayoutForInsets: {} additionalBottomMargin={}, alreadyAppliedBottomMargin={}", viewName, additionalBottomMargin, alreadyAppliedBottomMargin);
+        if (log.isDebugEnabled()) log.debug("adjustViewLayoutForInsets: {} adjust=({},{},{},{}), avoidCutout=({},{},{},{}), avoidRoundEdges={}, applyGlobalShift={}",
                 viewName, adjustLeft, adjustTop, adjustRight, adjustBottom, avoidCutoutLeft, avoidCutoutTop, avoidCutoutRight, avoidCutoutBottom, avoidRoundEdges, applyGlobalShift);
-        log.debug("adjustViewLayoutForInsets: videoSurface=({},{}), ar={}, screen=({},{})", Player.sPlayer.getVideoWidth(), Player.sPlayer.getVideoHeight(), Player.sPlayer.getVideoAspect(), PlayerActivity.getScreenWidth(), PlayerActivity.getScreenHeight());
+        if (log.isDebugEnabled()) log.debug("adjustViewLayoutForInsets: videoSurface=({},{}), ar={}, screen=({},{})", Player.sPlayer.getVideoWidth(), Player.sPlayer.getVideoHeight(), Player.sPlayer.getVideoAspect(), PlayerActivity.getScreenWidth(), PlayerActivity.getScreenHeight());
         int left, top, right, bottom;
         left = top = right = bottom = 0;
         int systemBarLeft, systemBarTop, systemBarRight, systemBarBottom;
@@ -396,7 +396,7 @@ public class MiscUtils {
         int screenVideoAvailableWidth = PlayerActivity.getScreenWidth() - left - right; // screen width minus cutout insets if applied which provides width of area for videoView
         int screenVideoAvailableHeight = PlayerActivity.getScreenHeight() - top - bottom; // screen height minus cutout insets if applied which provides height of area for videoView
         if (Player.sPlayer.getSurfaceControllerWidth() == 0 || Player.sPlayer.getSurfaceControllerHeight() == 0) {
-            log.debug("adjustViewLayoutForInsets: {} Player.sPlayer.getSurfaceControllerWidth() or getSurfaceControllerHeight() is 0, aborting", viewName);
+            if (log.isDebugEnabled()) log.debug("adjustViewLayoutForInsets: {} Player.sPlayer.getSurfaceControllerWidth() or getSurfaceControllerHeight() is 0, aborting", viewName);
             return;
         }
         // when not null this is the shift to apply to recenter the subtitleView when larger then the screen
@@ -413,7 +413,7 @@ public class MiscUtils {
             Insets navigationBarInsets = insets.getInsets(WindowInsets.Type.navigationBars());
             Insets statusBarInsets = insets.getInsets(WindowInsets.Type.statusBars());
             radius = getRoundCornersRadius(insets);
-            log.debug("adjustViewLayoutForInsets: {} LTRB systemBarsInsets=({},{},{},{}), navigationBarInsets=({},{},{},{}), statusBarInsets=({},{},{},{}), cutout=({},{},{},{}), roundedCornerRadius={}",
+            if (log.isDebugEnabled()) log.debug("adjustViewLayoutForInsets: {} LTRB systemBarsInsets=({},{},{},{}), navigationBarInsets=({},{},{},{}), statusBarInsets=({},{},{},{}), cutout=({},{},{},{}), roundedCornerRadius={}",
                     viewName, systemBarsInsets.left, systemBarsInsets.top, systemBarsInsets.right, systemBarsInsets.bottom,
                     navigationBarInsets.left, navigationBarInsets.top, navigationBarInsets.right, navigationBarInsets.bottom,
                     statusBarInsets.left, statusBarInsets.top, statusBarInsets.right, statusBarInsets.bottom,
@@ -423,7 +423,7 @@ public class MiscUtils {
             systemBarRight = systemBarsInsets.right;
             systemBarBottom = systemBarsInsets.bottom;
         } else {
-            log.debug("adjustViewLayoutForInsets: {} LTRB insets=({},{},{},{}), cutout=({},{},{},{})", viewName, insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(), insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom(),
+            if (log.isDebugEnabled()) log.debug("adjustViewLayoutForInsets: {} LTRB insets=({},{},{},{}), cutout=({},{},{},{})", viewName, insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(), insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom(),
                     mCutoutLeft, mCutoutTop, mCutoutRight, mCutoutBottom);
             radius = 0;
             systemBarLeft = insets.getSystemWindowInsetLeft();
@@ -453,19 +453,19 @@ public class MiscUtils {
             prevLeft -= globalShiftLeft + centerLeftMargin;
             prevTop -= globalShiftUp + centerTopMargin;
         }
-        log.debug("adjustViewLayoutForInsets, {} orientation is {}({}), isRotationLocked={}", viewName, PlayerActivity.getHumanReadableRotation(rotation), rotation, PlayerActivity.isRotationLocked());
+        if (log.isDebugEnabled()) log.debug("adjustViewLayoutForInsets, {} orientation is {}({}), isRotationLocked={}", viewName, PlayerActivity.getHumanReadableRotation(rotation), rotation, PlayerActivity.isRotationLocked());
         // extra logic for subtitles handling that need to be shifted up above controlBar of playerController if the subtitleVposPixel is not shifting them already above
         // Whether Subtitle minimum Vertical Position should be above the StatusBar or not. Only changes the Vertical Position if it is too low.
         int shiftBottom = Math.max(bottom + additionalBottomMargin - alreadyAppliedBottomMargin, 0);
-        log.debug("adjustViewLayoutForInsets: {} layoutParams ({},{},{},{})->({},{},{},{}), applyGlobalShift={}, globalShift=({},{}), centerShift=({},{})",
+        if (log.isDebugEnabled()) log.debug("adjustViewLayoutForInsets: {} layoutParams ({},{},{},{})->({},{},{},{}), applyGlobalShift={}, globalShift=({},{}), centerShift=({},{})",
                 viewName, prevLeft, prevTop, prevRight, prevBottom,
                 left, top, right, shiftBottom, applyGlobalShift, globalShiftLeft, globalShiftUp, centerLeftMargin, centerTopMargin);
         // do not delay when having a gfx subtitle or floating player hence ! applyGlobalShift
         if (! applyGlobalShift && prevBottom > uncompressibleBottom && shiftBottom == uncompressibleBottom && navAreaPresentOnBottom) {
-            log.debug("adjustViewLayoutForInsets: Delaying relayout due to give time to navigation bar to fade out");
+            if (log.isDebugEnabled()) log.debug("adjustViewLayoutForInsets: Delaying relayout due to give time to navigation bar to fade out");
             // Schedule the delayed relayout
             if (relayoutRunnable != null) {
-                log.debug("adjustViewLayoutForInsets: Cancel previous delayed relayout");
+                if (log.isDebugEnabled()) log.debug("adjustViewLayoutForInsets: Cancel previous delayed relayout");
                 getHandler().removeCallbacks(relayoutRunnable);
             }
             final int finalLeft, finalTop, finalRight, finalShiftBottom;
@@ -484,7 +484,7 @@ public class MiscUtils {
                 viewLayout.setLayoutParams(layoutParams);
                 viewLayout.forceLayout();
                 viewLayout.requestLayout();
-                log.debug("adjustViewLayoutForInsets: Delayed relayout applied");
+                if (log.isDebugEnabled()) log.debug("adjustViewLayoutForInsets: Delayed relayout applied");
             };
             int delay = 0;
             if (isGestureAreaShowing) {
@@ -509,9 +509,9 @@ public class MiscUtils {
             viewLayout.setLayoutParams(layoutParams);
             viewLayout.forceLayout();
             viewLayout.requestLayout();
-            log.debug("adjustViewLayoutForInsets: Immediate relayout applied");
+            if (log.isDebugEnabled()) log.debug("adjustViewLayoutForInsets: Immediate relayout applied");
         }
-        log.debug("adjustViewLayoutForInsets: {} finalLayoutMargins=({},{},{},{}), wh=({},{})", viewName, layoutParams.leftMargin, layoutParams.topMargin, layoutParams.rightMargin, layoutParams.bottomMargin, layoutParams.width, layoutParams.height);
+        if (log.isDebugEnabled()) log.debug("adjustViewLayoutForInsets: {} finalLayoutMargins=({},{},{},{}), wh=({},{})", viewName, layoutParams.leftMargin, layoutParams.topMargin, layoutParams.rightMargin, layoutParams.bottomMargin, layoutParams.width, layoutParams.height);
     }
 
     public interface CutoutMetricsSetter {

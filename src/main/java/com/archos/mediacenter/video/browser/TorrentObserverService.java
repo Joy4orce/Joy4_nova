@@ -126,7 +126,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
     public int onStartCommand(Intent i, int flags, int id) {
         if(i==null)
             return START_STICKY;
-        log.debug("Got intent {}", i.getAction());
+        if (log.isDebugEnabled()) log.debug("Got intent {}", i.getAction());
         if(i.getAction().equals(intentPaused)) {
             _paused();
         } else if(i.getAction().equals(intentResumed)) {
@@ -136,13 +136,13 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
     }
 
     static public void paused(Context ctxt) {
-        log.debug("Sending paused intent");
+        if (log.isDebugEnabled()) log.debug("Sending paused intent");
         Intent i = new Intent(intentPaused, Uri.EMPTY, ctxt.getApplicationContext(), TorrentObserverService.class);
         ctxt.getApplicationContext().startService(i);
     }
 
     static public void resumed(Context ctxt) {
-        log.debug("Sending resumed intent");
+        if (log.isDebugEnabled()) log.debug("Sending resumed intent");
         Intent i = new Intent(intentResumed, Uri.EMPTY, ctxt.getApplicationContext(), TorrentObserverService.class);
         ctxt.getApplicationContext().startService(i);
     }
@@ -205,10 +205,10 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
                         String nativeLibDir = mContext.getApplicationInfo().nativeLibraryDir;
                         String torrentBinary = nativeLibDir + "/libtorrentd.so";
 
-                        log.debug("Using torrent binary: {}", torrentBinary);
-                        log.debug("Native library dir: {}", nativeLibDir);
-                        log.debug("Binary exists: {}", new File(torrentBinary).exists());
-                        log.debug("Binary executable: {}", new File(torrentBinary).canExecute());
+                        if (log.isDebugEnabled()) log.debug("Using torrent binary: {}", torrentBinary);
+                        if (log.isDebugEnabled()) log.debug("Native library dir: {}", nativeLibDir);
+                        if (log.isDebugEnabled()) log.debug("Binary exists: {}", new File(torrentBinary).exists());
+                        if (log.isDebugEnabled()) log.debug("Binary executable: {}", new File(torrentBinary).canExecute());
 
                         String [] cmdArray = new String[4];
                         cmdArray[0] = torrentBinary;
@@ -216,7 +216,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
                         cmdArray[2] = mBlockList;
                         cmdArray[3] = torrentDownloadPath; //Pass download path as argument to torrent daemon
 
-                        log.debug("starting url {} with download path {} working dir {}", mTorrent, torrentDownloadPath, torrentWorkingDir.getAbsolutePath());
+                        if (log.isDebugEnabled()) log.debug("starting url {} with download path {} working dir {}", mTorrent, torrentDownloadPath, torrentWorkingDir.getAbsolutePath());
 
                         sProcess = Runtime.getRuntime().exec(cmdArray,null, torrentWorkingDir);
                         isDaemonRunning = true;
@@ -235,12 +235,12 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
                                 String line = "";
                                 try {
                                     while (readerError!=null&&(line = readerError.readLine ()) != null&&!hasToStop && !Thread.currentThread().isInterrupted()) {
-                                        log.debug("Stderr: {}", line);
+                                        if (log.isDebugEnabled()) log.debug("Stderr: {}", line);
                                     }
                                 } catch (IOException e) {
                                     log.error("Error reading stderr", e);
                                 }
-                                log.debug("end of error lines");
+                                if (log.isDebugEnabled()) log.debug("end of error lines");
                             }
                         }.start();
 
@@ -249,7 +249,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
                         if(sProcess!=null)
                             sProcess.waitFor();
 
-                        log.debug("daemon has finished");
+                        if (log.isDebugEnabled()) log.debug("daemon has finished");
                         isDaemonRunning=false;
                         mHasSetFiles  =false;
                     } catch(IOException io){
@@ -279,20 +279,20 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
         String line;
 
         try {
-            log.debug("observeStdout: Starting to read stdout");
+            if (log.isDebugEnabled()) log.debug("observeStdout: Starting to read stdout");
             while ((line = mReader.readLine ()) != null&&!hasToStop) {
-                log.debug("observeStdout: Read line: '{}'", line);
+                if (log.isDebugEnabled()) log.debug("observeStdout: Read line: '{}'", line);
                 if(line.isEmpty()) {
-                    log.debug("observeStdout: Empty line received, setting files list (count: {})", files.size());
+                    if (log.isDebugEnabled()) log.debug("observeStdout: Empty line received, setting files list (count: {})", files.size());
                     mObserver.setFilesList(files);
                     break;
                 }
                 files.add(line);
-                log.debug("observeStdout: Added file: {} (total files: {})", line, files.size());
+                if (log.isDebugEnabled()) log.debug("observeStdout: Added file: {} (total files: {})", line, files.size());
             }
 
             if(line == null) {
-                log.debug("observeStdout: Reached end of stdout (line == null)");
+                if (log.isDebugEnabled()) log.debug("observeStdout: Reached end of stdout (line == null)");
             }
             if(mSelectedFile >= 0)
                 selectFile(mSelectedFile);
@@ -320,10 +320,10 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
                 }
                 if(mObserver != null)
                     mObserver.notifyObserver(line);
-                log.debug("Stdout: {}{}", line, String.valueOf(mHasSetFiles));
+                if (log.isDebugEnabled()) log.debug("Stdout: {}{}", line, String.valueOf(mHasSetFiles));
             }
         } catch (InterruptedIOException e) {
-            log.debug("observeStdout: read interrupted by close() on another thread (normal cleanup)");
+            if (log.isDebugEnabled()) log.debug("observeStdout: read interrupted by close() on another thread (normal cleanup)");
             Thread.currentThread().interrupt(); // Restore the interrupted status
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -340,7 +340,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
     }
 
     public void exitProcess(){
-        log.debug("exitProcess");
+        if (log.isDebugEnabled()) log.debug("exitProcess");
         hasToStop=true;
         try {
             Runtime.getRuntime().exec("killall -2 libtorrentd.so").waitFor();
@@ -364,7 +364,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
     }
 
     public static void staticExitProcess(){
-        log.debug("staticExitProcess");
+        if (log.isDebugEnabled()) log.debug("staticExitProcess");
         try {
             if (isDaemonRunning) Runtime.getRuntime().exec("killall -2 libtorrentd.so").waitFor();
         } catch (Exception e) {
@@ -384,7 +384,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
     }
 
     public static void killProcess(){
-        log.debug("killProcess");
+        if (log.isDebugEnabled()) log.debug("killProcess");
 
         try {
             if (isDaemonRunning) Runtime.getRuntime().exec("killall -9 libtorrentd.so").waitFor();
@@ -420,13 +420,13 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
         public void handleMessage(android.os.Message msg) {
             switch(msg.what) {
                 case MSG_QUIT:
-                    log.debug("Quitting");
+                    if (log.isDebugEnabled()) log.debug("Quitting");
                     exitProcess();
                     //Give .5s to save state
                     mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_KILL), 500);
                     break;
                 case MSG_KILL:
-                    log.debug("Killing");
+                    if (log.isDebugEnabled()) log.debug("Killing");
                     killProcess();
                     break;
                 default:
@@ -440,7 +440,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
 
     private void _paused() {
         nPause++;
-        log.debug("_paused = {}, nResume = {}", nPause, nResume );
+        if (log.isDebugEnabled()) log.debug("_paused = {}, nResume = {}", nPause, nResume );
         if(nPause >= nResume) {
             //Give 2s grace period
             mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_QUIT), 2000);
@@ -449,7 +449,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
 
     private void _resumed() {
         nResume++;
-        log.debug("_resumed = {}, nPause = {}", nResume, nPause);
+        if (log.isDebugEnabled()) log.debug("_resumed = {}, nPause = {}", nResume, nPause);
         if(nResume > nPause) {
             mHandler.removeMessages(MSG_QUIT);
         }
@@ -458,7 +458,7 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
     @Override
     public void onStop(LifecycleOwner owner) {
         // App in background
-        log.debug("onStop: LifecycleOwner app in background, stopSelf");
+        if (log.isDebugEnabled()) log.debug("onStop: LifecycleOwner app in background, stopSelf");
         cleanup();
         stopSelf();
     }
@@ -466,18 +466,18 @@ public class TorrentObserverService extends Service implements DefaultLifecycleO
     @Override
     public void onStart(LifecycleOwner owner) {
         // App in foreground
-        log.debug("onStart: LifecycleOwner app in foreground");
+        if (log.isDebugEnabled()) log.debug("onStart: LifecycleOwner app in foreground");
     }
 
     @Override
     public void onDestroy() {
-        log.debug("onDestroy()");
+        if (log.isDebugEnabled()) log.debug("onDestroy()");
         cleanup(); // Call cleanup here
         super.onDestroy();
     }
 
     private void cleanup() {
-        log.debug("cleanup");
+        if (log.isDebugEnabled()) log.debug("cleanup");
         // Stop the torrent thread if it's running
         if (mTorrentThread != null) {
             mTorrentThread.interrupt();

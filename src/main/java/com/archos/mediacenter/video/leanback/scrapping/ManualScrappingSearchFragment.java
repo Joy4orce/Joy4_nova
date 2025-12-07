@@ -154,7 +154,7 @@ public abstract class ManualScrappingSearchFragment extends SafeSearchSupportFra
 
     @Override
     public ObjectAdapter getResultsAdapter() {
-        log.debug("getResultsAdapter()");
+        if (log.isDebugEnabled()) log.debug("getResultsAdapter()");
         return mRowsAdapter;
     }
     @Override
@@ -167,7 +167,7 @@ public abstract class ManualScrappingSearchFragment extends SafeSearchSupportFra
     }
 
     private boolean onQueryText(String text) {
-        log.debug("onQueryText() {}", text);
+        if (log.isDebugEnabled()) log.debug("onQueryText() {}", text);
 
         // Makes no sens to search for one character
         if(text.length()==0){

@@ -34,7 +34,7 @@ public class ExternalPlayerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        log.debug("onCreate()");
+        if (log.isDebugEnabled()) log.debug("onCreate()");
 
         IntentFilter intentFilter = new IntentFilter(ACTION_STOP_SERVICE);
         registerReceiver(stopServiceBroadcastReceiver, intentFilter, Context.RECEIVER_NOT_EXPORTED);
@@ -44,14 +44,14 @@ public class ExternalPlayerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        log.debug("onStartCommand({})", intent);
+        if (log.isDebugEnabled()) log.debug("onStartCommand({})", intent);
         return START_NOT_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        log.debug("onDestroy()");
+        if (log.isDebugEnabled()) log.debug("onDestroy()");
         unregisterReceiver(stopServiceBroadcastReceiver);
     }
 

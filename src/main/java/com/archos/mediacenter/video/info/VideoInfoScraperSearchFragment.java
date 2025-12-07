@@ -134,7 +134,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
-    	log.debug("onCreate this={}  savedInstanceState={}", this, savedInstanceState);
+    	if (log.isDebugEnabled()) log.debug("onCreate this={}  savedInstanceState={}", this, savedInstanceState);
         setInfo((Video) getActivity().getIntent().getExtras().get(VideoInfoScraperActivity.EXTRA_VIDEO));
         setRetainInstance(false); // keep fragment instance when rotating screen
     }
@@ -163,7 +163,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
     	// The activity was destroyed while the selection thread was running => now that
         // the data are restored  we can tell the thread that the activity has changed
     	if (mSelectionThread != null) {
-            log.debug("onActivityCreated: unpause mSelectionThread");
+            if (log.isDebugEnabled()) log.debug("onActivityCreated: unpause mSelectionThread");
     		mSelectionThread.unpause();
     	}
     }
@@ -223,7 +223,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
     	// search result list click listener
     	mList.setOnItemClickListener(new OnItemClickListener() {
     		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                log.debug("onClick : select item {} (items already processed={})", position, mSelectionItemsProcessed);
+                if (log.isDebugEnabled()) log.debug("onClick : select item {} (items already processed={})", position, mSelectionItemsProcessed);
 
                 if (mSelectionThread != null && mSelectionThread.isAlive()) {
                     //----------------------------------------------------------------
@@ -235,7 +235,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
                         // => the infos for this item are already available so we only
                         // need to stop the thread and the scraper service
                         mSelectionThread.interrupt(ACTION_STOP_SERVICE);
-                        log.debug("onClick : user selected an item already processed");
+                        if (log.isDebugEnabled()) log.debug("onClick : user selected an item already processed");
                         // Validate the selected item
                         BaseTags itemTags = mSelectionTags.get(position);
                         mHandler.obtainMessage(MESSAGE_WRITE_TAGS_TO_DB, itemTags).sendToTarget();
@@ -245,7 +245,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
                         // => stop the processing thread but keep connected to the scraper service
                         // because we must still get the infos for the selected item
                         mSelectionThread.interrupt(ACTION_NONE);
-                        log.debug("onClick : user selected an item not already processed: stop processing thread but keep connected to scraper and reask the details for item");
+                        if (log.isDebugEnabled()) log.debug("onClick : user selected an item not already processed: stop processing thread but keep connected to scraper and reask the details for item");
                         // Start the thread which will retrieve the infos for the selected item
                         mResIndex = position;
                         new ScraperDetailsThread().start();
@@ -259,7 +259,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
                         // processing the current item so we just need to wait until
                         // it finishes to retrieve the item data
                         mSelectionThread.interrupt(ACTION_STOP_SERVICE | ACTION_VALIDATE_LAST_ITEM);
-                        log.debug("onClick : user selected the item being processed, stop processing thread that will finish the current item");
+                        if (log.isDebugEnabled()) log.debug("onClick : user selected the item being processed, stop processing thread that will finish the current item");
                     }
                      */
                 }
@@ -290,7 +290,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
 
     public void setInfo(Video video) {
         mUri = Uri.parse(video.getFilePath());
-        log.debug("setInfo: video Uri{}", mUri);
+        if (log.isDebugEnabled()) log.debug("setInfo: video Uri{}", mUri);
         mTitle = video.getName();
 
         // Check if everything is ready to setup the fragment
@@ -306,7 +306,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
             (mView!=null) &&       // View has been created
             (getActivity()!=null)) // is Attached to an activity
         {
-        	log.debug("setupIfReady: READY!");
+        	if (log.isDebugEnabled()) log.debug("setupIfReady: READY!");
 
             mSearchInfo = SearchPreprocessor.instance().parseFileBased(mUri, mTitle!=null&&!mTitle.isEmpty()?Uri.parse("/"+mTitle):mUri);
             String searchText = mSearchInfo.getSearchSuggestion();
@@ -318,7 +318,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
             mCustomSearchContainer.setVisibility(mDisableOnlineUpdate ? View.GONE : View.VISIBLE);
         }
         else {
-            log.debug("setupIfReady: not ready");
+            if (log.isDebugEnabled()) log.debug("setupIfReady: not ready");
         }
     }
 
@@ -341,7 +341,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
     		return;
     	}
 
-        log.debug("search: start a new search");
+        if (log.isDebugEnabled()) log.debug("search: start a new search");
 
     	// update UI visibility
     	mMessage.setVisibility(View.GONE);
@@ -462,9 +462,9 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
             try {
                 mNfoTag = null;
                 if (NfoParser.isNetworkNfoParseEnabled(getActivity())) {
-                    log.debug("ScraperMatchesThread:run NFO enabled {}", mUri);
+                    if (log.isDebugEnabled()) log.debug("ScraperMatchesThread:run NFO enabled {}", mUri);
                     mNfoTag = NfoParser.getTagForFile(mUri, getActivity());
-                    log.debug("ScraperMatchesThread:run NFO tag is null ? {}", String.valueOf(mNfoTag==null));
+                    if (log.isDebugEnabled()) log.debug("ScraperMatchesThread:run NFO tag is null ? {}", String.valueOf(mNfoTag==null));
                 }
 
                 String search = mCustomSearchEditText.getText().toString();
@@ -491,7 +491,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
                 }
                 if (log.isDebugEnabled()) {
                     int resultsSize = (mResults != null) ? mResults.size() : 0;
-                    log.debug("ScraperMatchesThread: getBestMatches returns {} results", resultsSize);
+                    if (log.isDebugEnabled()) log.debug("ScraperMatchesThread: getBestMatches returns {} results", resultsSize);
                 }
             } finally {
                 if (!isInterrupted()) {
@@ -518,7 +518,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
             mSelectionItemsProcessed = mFirstItem;
             mPaused = false;
 
-            log.debug("ScraperSelectionThread : start processing items from {} to {}", mFirstItem, (itemsCount - 1));
+            if (log.isDebugEnabled()) log.debug("ScraperSelectionThread : start processing items from {} to {}", mFirstItem, (itemsCount - 1));
 
             // Get the details for this match
 
@@ -533,7 +533,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
             }
 
             if(mNfoTag!=null) {
-                log.debug("ScraperSelectionThread: Found NFO tag");
+                if (log.isDebugEnabled()) log.debug("ScraperSelectionThread: Found NFO tag");
                 offset=1;
                 // Update the dialog adapter data
                 if (mNfoTag instanceof MovieTags) {
@@ -555,7 +555,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
 
                 // Exit the loop if the activity wants to abort the thread
                 if (isInterrupted()) {
-                    log.debug("ScraperSelectionThread interrupted");
+                    if (log.isDebugEnabled()) log.debug("ScraperSelectionThread interrupted");
 
                     if (mSaveLastItem) {
                         // Validate the last item processed and force a redraw of the info dialog
@@ -569,7 +569,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
             for (position = mFirstItem; position < itemsCount; position++) {
                 BaseTags tags = null;
                 boolean searchMovies = true;
-                log.debug("ScraperSelectionThread : processing item {}", position);
+                if (log.isDebugEnabled()) log.debug("ScraperSelectionThread : processing item {}", position);
 
                 SearchResult result = mResults.get(position);
                 // NOTE: this provides the right poster for the given season but perhaps season does not exist in getBestMatches
@@ -646,7 +646,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
 
                 // Exit the loop if the activity wants to abort the thread
                 if (isInterrupted()) {
-                    log.debug("ScraperSelectionThread interrupted");
+                    if (log.isDebugEnabled()) log.debug("ScraperSelectionThread interrupted");
 
                     if (mSaveLastItem) {
                         // Validate the last item processed and force a redraw of the info dialog
@@ -659,12 +659,12 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
         }
 
         public void pause() {
-            log.debug("ScraperSelectionThread paused");
+            if (log.isDebugEnabled()) log.debug("ScraperSelectionThread paused");
             mPaused = true;
         }
 
         public void unpause() {
-            log.debug("ScraperSelectionThread unpaused");
+            if (log.isDebugEnabled()) log.debug("ScraperSelectionThread unpaused");
             mPaused = false;
         }
 
@@ -681,7 +681,7 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
     private final class ScraperDetailsThread extends Thread {
         @Override
         public void run() {
-            log.debug("ScraperDetailsThread");
+            if (log.isDebugEnabled()) log.debug("ScraperDetailsThread");
                 BaseTags tags = null;
                 boolean searchMovies = true;
                 if(mNfoTag==null) {

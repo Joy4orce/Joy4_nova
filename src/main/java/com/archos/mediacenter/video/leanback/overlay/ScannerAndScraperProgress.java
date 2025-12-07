@@ -55,18 +55,18 @@ public class ScannerAndScraperProgress {
         mProgressGroup = overlayContainer.findViewById(R.id.progress_group);
         mProgressWheel = (ProgressBar) mProgressGroup.findViewById(R.id.progress);
         mCount = (TextView) mProgressGroup.findViewById(R.id.count);
-        log.debug("ScannerAndScraperProgress: creation");
+        if (log.isDebugEnabled()) log.debug("ScannerAndScraperProgress: creation");
         mInitialScanMessage = context.getString(R.string.initial_scan);
         mRepeatHandler.post(mRepeatRunnable);
     }
 
     public void destroy() {
-        log.debug("destroy");
+        if (log.isDebugEnabled()) log.debug("destroy");
         // all things that need to be stopped are stopped in pause() already
     }
 
     public void resume() {
-        log.debug("resume: view visible");
+        if (log.isDebugEnabled()) log.debug("resume: view visible");
         mGeneralVisibility = View.VISIBLE;
         updateCount();
         updateVisibility();
@@ -74,7 +74,7 @@ public class ScannerAndScraperProgress {
     }
 
     public void pause() {
-        log.debug("pause: view gone");
+        if (log.isDebugEnabled()) log.debug("pause: view gone");
         mGeneralVisibility = View.GONE;
         updateVisibility();
         mRepeatHandler.removeCallbacks(mRepeatRunnable);
@@ -85,7 +85,7 @@ public class ScannerAndScraperProgress {
         public void run() {
             boolean scanningOnGoing = NetworkScannerReceiver.isScannerWorking() || AutoScrapeService.isScraping() || ImportState.VIDEO.isInitialImport() || ImportState.VIDEO.isRegularImport();
             mStatusVisibility = scanningOnGoing ? View.VISIBLE : View.GONE;
-            log.trace("mRepeatRunnable: visibility {} because scanningOngoing {} due to networkScanner {} due to autoScrapeService {} due to isInitialImport {} due to isRegularImport {}", mStatusVisibility, scanningOnGoing, NetworkScannerReceiver.isScannerWorking(), AutoScrapeService.isScraping(), ImportState.VIDEO.isInitialImport(), ImportState.VIDEO.isRegularImport());
+            if (log.isTraceEnabled()) log.trace("mRepeatRunnable: visibility {} because scanningOngoing {} due to networkScanner {} due to autoScrapeService {} due to isInitialImport {} due to isRegularImport {}", mStatusVisibility, scanningOnGoing, NetworkScannerReceiver.isScannerWorking(), AutoScrapeService.isScraping(), ImportState.VIDEO.isInitialImport(), ImportState.VIDEO.isRegularImport());
             updateCount();
             updateVisibility();
             mRepeatHandler.postDelayed(this, REPEAT_PERIOD_MS);
@@ -95,7 +95,7 @@ public class ScannerAndScraperProgress {
 
     /** Compute the visibility of the progress group. Both mGeneralVisibility and mStatusVisibility must be VISIBLE for the view to be visible */
     private void updateVisibility() {
-        log.trace("updateVisibility: (0 visible, 8 gone) mGeneralVisibility {}, mStatusVisibility {}", mGeneralVisibility, mStatusVisibility);
+        if (log.isTraceEnabled()) log.trace("updateVisibility: (0 visible, 8 gone) mGeneralVisibility {}, mStatusVisibility {}", mGeneralVisibility, mStatusVisibility);
         if ((mGeneralVisibility == View.VISIBLE) && (mStatusVisibility == View.VISIBLE)) {
             mProgressGroup.setVisibility(View.VISIBLE);
         } else {
@@ -112,21 +112,21 @@ public class ScannerAndScraperProgress {
         if (ImportState.VIDEO.isInitialImport()) {
             msg = mInitialScanMessage+"\n";
             count = ImportState.VIDEO.getNumberOfFilesRemainingToImport();
-            log.trace("updateCount: initial import count {}", count);
+            if (log.isTraceEnabled()) log.trace("updateCount: initial import count {}", count);
         }
         // If not initial import count, check autoscraper count
         if (count==0) {
             count = AutoScrapeService.getNumberOfFilesRemainingToProcess();
-            log.trace("updateCount: not initial import count {}", count);
+            if (log.isTraceEnabled()) log.trace("updateCount: not initial import count {}", count);
         }
 
         // Display count only if greater than zero
         if (count > 0) {
-            log.trace("updateCount: visible {}", count);
+            if (log.isTraceEnabled()) log.trace("updateCount: visible {}", count);
             mCount.setText(msg+Integer.toString(count));
             mCount.setVisibility(View.VISIBLE);
         } else {
-            log.trace("updateCount: invisible");
+            if (log.isTraceEnabled()) log.trace("updateCount: invisible");
             mCount.setVisibility(View.INVISIBLE);
         }
     }

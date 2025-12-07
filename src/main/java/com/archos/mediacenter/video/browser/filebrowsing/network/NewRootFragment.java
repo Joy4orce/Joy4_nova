@@ -113,7 +113,7 @@ public abstract class NewRootFragment extends Fragment implements WorkgroupShort
             public void onClick(View v) {
                 // Rescan the contents of the folder
                 NetworkScanner.scanVideos(getActivity(), uri);
-                log.debug("onRefreshClickListener: scanVideos {}", uri);
+                if (log.isDebugEnabled()) log.debug("onRefreshClickListener: scanVideos {}", uri);
                 if(ShortcutDbAdapter.VIDEO.isShortcut(getActivity(), uri.toString())<0){
                     //if not a shortcut = indexed folder, add as indexed folder and remove static shortcut
                     if(ShortcutDb.STATIC.isShortcut(getContext(), uri.toString()) != -1)
@@ -138,7 +138,7 @@ public abstract class NewRootFragment extends Fragment implements WorkgroupShort
     }
 
     public NewRootFragment() {
-        log.debug("SambaDiscoveryFragment() constructor {}", this);
+        if (log.isDebugEnabled()) log.debug("SambaDiscoveryFragment() constructor {}", this);
         setRetainInstance(false);
 
     }
@@ -233,20 +233,20 @@ public abstract class NewRootFragment extends Fragment implements WorkgroupShort
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        log.debug("onCreate");
+        if (log.isDebugEnabled()) log.debug("onCreate");
         setHasOptionsMenu(true);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        log.debug("onDestroy");
+        if (log.isDebugEnabled()) log.debug("onDestroy");
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        log.debug("onDetach");
+        if (log.isDebugEnabled()) log.debug("onDetach");
         NetworkScannerServiceVideo.removeListener(this);
 
     }
@@ -260,7 +260,7 @@ public abstract class NewRootFragment extends Fragment implements WorkgroupShort
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        log.debug("onCreateView");
+        if (log.isDebugEnabled()) log.debug("onCreateView");
         View v = inflater.inflate(R.layout.samba_discovery_fragment, container, false);
 
         mDiscoveryList = (RecyclerView)v.findViewById(R.id.discovery_list);
@@ -281,13 +281,13 @@ public abstract class NewRootFragment extends Fragment implements WorkgroupShort
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        log.debug("onDestroyView");
+        if (log.isDebugEnabled()) log.debug("onDestroyView");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        log.debug("onResume");
+        if (log.isDebugEnabled()) log.debug("onResume");
         loadIndexedShortcuts();
     }
 
@@ -296,7 +296,7 @@ public abstract class NewRootFragment extends Fragment implements WorkgroupShort
     @Override
     public void onPause() {
         super.onPause();
-        log.debug("onPause");
+        if (log.isDebugEnabled()) log.debug("onPause");
     }
 
 }

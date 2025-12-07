@@ -73,9 +73,9 @@ public class UnavailablePosterBroadcastReceiver extends BroadcastReceiver{
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        log.debug("onReceive");
+        if (log.isDebugEnabled()) log.debug("onReceive");
         if(ACTION_CHECK_POSTER.equals(intent.getAction())&&intent.getLongExtra("VIDEO_ID",-1)!=-1){
-            log.debug("onReceive2");
+            if (log.isDebugEnabled()) log.debug("onReceive2");
             StringBuilder sb = new StringBuilder();
             if (LoaderUtils.mustHideUserHiddenObjects()) {
                 sb.append(LoaderUtils.HIDE_USER_HIDDEN_FILTER);
@@ -138,12 +138,12 @@ public class UnavailablePosterBroadcastReceiver extends BroadcastReceiver{
                                     path, c.getString(titleColumn), intent.getLongExtra("VIDEO_ID",-1), scraperId, reason);
                         }
                         int n = context.getContentResolver().update(uri,cv,null,null);
-                        log.debug("{} DB records updated for {}, poster cleared to trigger re-download", n, (scraperType == BaseTags.TV_SHOW ? "episode" : "movie"));
+                        if (log.isDebugEnabled()) log.debug("{} DB records updated for {}, poster cleared to trigger re-download", n, (scraperType == BaseTags.TV_SHOW ? "episode" : "movie"));
 
                     }
                 }
                 else {
-                    log.debug("Video has no poster path in DB: title={}, videoId={}", c.getString(titleColumn), intent.getLongExtra("VIDEO_ID",-1));
+                    if (log.isDebugEnabled()) log.debug("Video has no poster path in DB: title={}, videoId={}", c.getString(titleColumn), intent.getLongExtra("VIDEO_ID",-1));
                 }
             }
             if (c!=null)

@@ -117,7 +117,7 @@ public class PlayUtils implements IndexHelper.Listener {
             Toast.makeText(context, "Error video is null", Toast.LENGTH_SHORT).show();
             return;
         } else {
-            log.debug("startVideo from resume={}, streamingUri {}", resume, (video.getStreamingUri() == null ? "null" : video.getStreamingUri()));
+            if (log.isDebugEnabled()) log.debug("startVideo from resume={}, streamingUri {}", resume, (video.getStreamingUri() == null ? "null" : video.getStreamingUri()));
         }
         // try to find extension when none has been set
         String mimeType = video.getMimeType();
@@ -179,7 +179,7 @@ public class PlayUtils implements IndexHelper.Listener {
         if (allow3rdPartyPlayer(context)) {
             // prepare subs only for external player to provide list to 3rd party player
             // subs are fetched in /storage/emulated/0/Android/data/org.courville.nova/cache/subtitles/ during preFetchHTTPSubtitlesAndPrepareUpnpSubs
-            log.debug("startPlayer: prepareSubs");
+            if (log.isDebugEnabled()) log.debug("startPlayer: prepareSubs");
             prepareSubs();
             /*
             if(mIndexHelper==null)
@@ -189,24 +189,24 @@ public class PlayUtils implements IndexHelper.Listener {
         } else {
             if (resume == PlayerService.RESUME_NO)
                 resumePosition = 0;
-            log.debug("startPlayer: send onResumeReady");
+            if (log.isDebugEnabled()) log.debug("startPlayer: send onResumeReady");
             onResumeReady(context, mVideo, mimeType, resume, legacyPlayer, resumePosition, externalPlayerWithResultStarter, playlistId);
         }
     }
 
     public void requestVideoDb() {
-        log.debug("requestVideoDb: list subtitles for {}", mVideo.getFileUri());
+        if (log.isDebugEnabled()) log.debug("requestVideoDb: list subtitles for {}", mVideo.getFileUri());
         if (FileUtils.isLocal(mVideo.getFileUri())) {
             // provide local list of subs
-            log.debug("requestVideoDb: local list of subs");
+            if (log.isDebugEnabled()) log.debug("requestVideoDb: local list of subs");
             listOfSubtitles = SubtitleManager.getListOfLocalSubs();
         } else {
-            log.debug("requestVideoDb: remote prefetched list of subs");
+            if (log.isDebugEnabled()) log.debug("requestVideoDb: remote prefetched list of subs");
             // provide prefetched list of subs for remote shares
             listOfSubtitles = SubtitleManager.getPreFetchedListOfSubs();
         }
-        if (listOfSubtitles != null) log.debug("requestVideoDb: listOfSubtitles {}", Arrays.toString(listOfSubtitles.toArray()));
-        else log.debug("requestVideoDb: listOfSubtitles is null");
+        if (listOfSubtitles != null) if (log.isDebugEnabled()) log.debug("requestVideoDb: listOfSubtitles {}", Arrays.toString(listOfSubtitles.toArray()));
+        else if (log.isDebugEnabled()) log.debug("requestVideoDb: listOfSubtitles is null");
         if(mIndexHelper==null)
             mIndexHelper = new IndexHelper(mContext, null, 0);
         mIndexHelper.requestVideoDb(mVideo.getUri(), -1,null, this, false, true);
@@ -214,7 +214,7 @@ public class PlayUtils implements IndexHelper.Listener {
 
     private Boolean mIsPreparingSubs = false;
     private void prepareSubs() {
-        log.debug("prepareSubs");
+        if (log.isDebugEnabled()) log.debug("prepareSubs");
         if(!mIsPreparingSubs) {
             mIsPreparingSubs = true;
             com.archos.mediacenter.video.browser.subtitlesmanager.SubtitleManager subtitleManager =
@@ -231,7 +231,7 @@ public class PlayUtils implements IndexHelper.Listener {
                         }
                         @Override
                         public void onSuccess(Uri uri) {
-                            log.debug("prepareSubs.onSuccess {}", uri);
+                            if (log.isDebugEnabled()) log.debug("prepareSubs.onSuccess {}", uri);
                             mIsPreparingSubs = false;
                             requestVideoDb();
                         }
@@ -241,7 +241,7 @@ public class PlayUtils implements IndexHelper.Listener {
                             requestVideoDb();
                         }
                     });
-            log.debug("prepareSubs: launch preFetchHTTPSubtitlesAndPrepareUpnpSubs {} -> {}", mVideo.getFileUri(), mVideo.getFileUri());
+            if (log.isDebugEnabled()) log.debug("prepareSubs: launch preFetchHTTPSubtitlesAndPrepareUpnpSubs {} -> {}", mVideo.getFileUri(), mVideo.getFileUri());
             // this copies subs locally to /storage/emulated/0/Android/data/org.courville.nova/cache/subtitles/
             subtitleManager.preFetchHTTPSubtitlesAndPrepareUpnpSubs(mVideo.getFileUri(), mVideo.getFileUri());
         }
@@ -265,7 +265,7 @@ public class PlayUtils implements IndexHelper.Listener {
                 }
             }
         }
-        log.debug("onVideoDb: send onResumeReady");
+        if (log.isDebugEnabled()) log.debug("onVideoDb: send onResumeReady");
         onResumeReady(mContext, mVideo, mMimeType,
                 mResume, mLegacyPlayer, resumePos, mExternalPlayerWithResultStarter, mPlaylistId);
     }
@@ -289,7 +289,7 @@ public class PlayUtils implements IndexHelper.Listener {
         Uri dataUri = video.getUri();
         Uri fileUri = null;
         if (!allow3rdPartyPlayer(context)) {
-            log.debug("onResumeReady: nova player");
+            if (log.isDebugEnabled()) log.debug("onResumeReady: nova player");
             intent.putExtra(PlayerService.VIDEO, video);
             intent.setClass(context, PlayerActivity.class);
             intent.setDataAndType(dataUri, mimeType);
@@ -300,7 +300,7 @@ public class PlayUtils implements IndexHelper.Listener {
                 if (!"upnp".equals(video.getFileUri().getScheme())) {
                     // Http proxy to allow 3rd party players to play remote files
                     try {
-                        log.debug("onResumeReady: 3rd party player, non local file, file uri:{}", video.getFileUri());
+                        if (log.isDebugEnabled()) log.debug("onResumeReady: 3rd party player, non local file, file uri:{}", video.getFileUri());
                         StreamOverHttp stream = new StreamOverHttp(video.getFileUri(), mimeType);
                         dataUri = stream.getEncodedUri(FileUtils.getName(video.getFileUri()));
                     } catch (IOException e) {
@@ -309,13 +309,13 @@ public class PlayUtils implements IndexHelper.Listener {
                 } else if (video.getStreamingUri() != null && !"upnp".equals(video.getStreamingUri().getScheme())) { //when upnp, try to open streamingUri
                     dataUri = video.getStreamingUri();
                 }
-                log.debug("onResumeReady: 3rd party player, non local file, streaming uri:{}", dataUri);
+                if (log.isDebugEnabled()) log.debug("onResumeReady: 3rd party player, non local file, streaming uri:{}", dataUri);
                 intent.setDataAndType(dataUri, mimeType);
             } else {
                 // in case of a local file, need to rely on FileProvider since API24+ to avoid android.os.FileUriExposedException
                 File localFile = new File(video.getFileUri().getPath());
                 fileUri = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".provider", localFile);
-                log.debug("onResumeReady: 3rd party player, local file, file uri:{}", fileUri);
+                if (log.isDebugEnabled()) log.debug("onResumeReady: 3rd party player, local file, file uri:{}", fileUri);
                 intent.setDataAndType(fileUri, mimeType);
             }
             // add support for 3rd party player subs both for local and remote
@@ -331,12 +331,12 @@ public class PlayUtils implements IndexHelper.Listener {
             List<String> MxSubFileList = new ArrayList<>();
             Uri subUri;
             if (listOfSubtitles != null) {
-                log.debug("onResumeReady: listOfSubtitles {}", Arrays.toString(listOfSubtitles.toArray()));
+                if (log.isDebugEnabled()) log.debug("onResumeReady: listOfSubtitles {}", Arrays.toString(listOfSubtitles.toArray()));
             } else {
-                log.debug("onResumeReady: listOfSubtitles is null");
+                if (log.isDebugEnabled()) log.debug("onResumeReady: listOfSubtitles is null");
             }
             if (listOfSubtitles != null) {
-                log.debug("onResumeReady: videoMetadata not null, number of sub files to inspect:{}", listOfSubtitles.size());
+                if (log.isDebugEnabled()) log.debug("onResumeReady: videoMetadata not null, number of sub files to inspect:{}", listOfSubtitles.size());
                 // find first external subtitle file and pass it to vlc
                 while (n < listOfSubtitles.size()) {
                     subPath = listOfSubtitles.get(n);
@@ -353,7 +353,7 @@ public class PlayUtils implements IndexHelper.Listener {
                             subFound = true;
                             // mxplayer/justplayer
                             MxSubPaths.add(dataUri);
-                            log.debug("onResumeReady: adding external subtitle {}", dataUri);
+                            if (log.isDebugEnabled()) log.debug("onResumeReady: adding external subtitle {}", dataUri);
                         } catch (IOException e) {
                             log.error("onResumeReady: failed to start {}{}", subUri, e);
                         }
@@ -363,11 +363,11 @@ public class PlayUtils implements IndexHelper.Listener {
                         subUri = FileProvider.getUriForFile(context, "org.courville.nova.provider", subFile);
                         MxSubPaths.add(subUri);
                     }
-                    log.debug("onResumeReady: subPath {} -> subUri {}-> subLanguage {}", subPath, subUri, subLanguage);
+                    if (log.isDebugEnabled()) log.debug("onResumeReady: subPath {} -> subUri {}-> subLanguage {}", subPath, subUri, subLanguage);
                     n++;
                 }
                 Parcelable[] MxSubPathsParcelableArray = MxSubPaths.toArray(new Parcelable[0]);
-                log.trace("onResumeReady: subs passed to 3rd party player {}", Arrays.toString(MxSubPathsParcelableArray));
+                if (log.isTraceEnabled()) log.trace("onResumeReady: subs passed to 3rd party player {}", Arrays.toString(MxSubPathsParcelableArray));
                 if (! MxSubPaths.isEmpty()) {
                     intent.putExtra("subs", MxSubPathsParcelableArray);
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -375,7 +375,7 @@ public class PlayUtils implements IndexHelper.Listener {
                     intent.putExtra("subs.file", MxSubFileList.toArray(new String[0]));
                 }
             } else {
-                log.debug("onResumeReady: no sub files to inspect");
+                if (log.isDebugEnabled()) log.debug("onResumeReady: no sub files to inspect");
 
             }
         }
@@ -431,8 +431,8 @@ public class PlayUtils implements IndexHelper.Listener {
             fileUri = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".provider", localFile);
             intent.setDataAndType(fileUri, mimeType);
         }
-        log.debug("openAnyFile: data={}", uri);
-        log.debug("openAnyFile: type={}", mimeType);
+        if (log.isDebugEnabled()) log.debug("openAnyFile: data={}", uri);
+        if (log.isDebugEnabled()) log.debug("openAnyFile: type={}", mimeType);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         try {
             context.startActivity(intent);

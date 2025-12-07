@@ -177,7 +177,7 @@ public class FtpServerCredentialsDialog extends DialogFragment {
 
                 // username can be empty with samba guest shares (UriUtils.requiresDomain(type))
                 if (username.equals("") && ! UriUtils.requiresDomain(type)) {
-                    log.debug("onClick: invalid credential, username empty and not smb protocol");
+                    if (log.isDebugEnabled()) log.debug("onClick: invalid credential, username empty and not smb protocol");
                     validUri = false;
                 }
 
@@ -195,7 +195,7 @@ public class FtpServerCredentialsDialog extends DialogFragment {
                     validUri = false;
                 }
 
-                log.debug("onClick: scheme= {}, username={}, port={}, remote={}, path={}; type={}, validUri={}", scheme, username, port, address, path, type, validUri);
+                if (log.isDebugEnabled()) log.debug("onClick: scheme= {}, username={}, port={}, remote={}, path={}; type={}, validUri={}", scheme, username, port, address, path, type, validUri);
 
                 if (validUri) {
 

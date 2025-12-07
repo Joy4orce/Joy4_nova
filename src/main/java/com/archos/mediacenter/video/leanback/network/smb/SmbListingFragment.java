@@ -63,7 +63,7 @@ public class SmbListingFragment extends NetworkListingFragment {
 
     @Override
     public void onCredentialRequired(Exception e) {
-        log.debug("onCredentialRequired: ask for credentials");
+        if (log.isDebugEnabled()) log.debug("onCredentialRequired: ask for credentials");
         askForCredentials();
     }
 

@@ -226,12 +226,12 @@ public class AutoScraperActivity extends AppCompatActivity implements AbsListVie
             mFolderMode = true;
             // FIXME: this is broken for smb:// files
             mFolderPath = folderUri.getPath();
-            log.debug("onCreate : search in folder {}", mFolderPath);
+            if (log.isDebugEnabled()) log.debug("onCreate : search in folder {}", mFolderPath);
         }
         else {
             mFolderMode = false;
             mFolderPath = null;
-            log.debug("onCreate : search in the full database");
+            if (log.isDebugEnabled()) log.debug("onCreate : search in the full database");
         }
 
         setContentView(R.layout.auto_scraper_main);
@@ -319,7 +319,7 @@ public class AutoScraperActivity extends AppCompatActivity implements AbsListVie
 
     @Override
     public void onDestroy() {
-        log.debug("onDestroy");
+        if (log.isDebugEnabled()) log.debug("onDestroy");
 
         if (mFilesProcessed > 0)
             TraktService.onNewVideo(this);
@@ -513,7 +513,7 @@ public class AutoScraperActivity extends AppCompatActivity implements AbsListVie
     //*****************************************************************************
 
     private void startStatusbarNotification() {
-        log.debug("startStatusbarNotification");
+        if (log.isDebugEnabled()) log.debug("startStatusbarNotification");
 
         Context context = AutoScraperActivity.this;
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -548,7 +548,7 @@ public class AutoScraperActivity extends AppCompatActivity implements AbsListVie
     }
 
     protected void updateStatusbarNotification() {
-        log.debug("updateStatusbarNotification");
+        if (log.isDebugEnabled()) log.debug("updateStatusbarNotification");
 
         if (mNotificationBuilder != null) {
             Context context = AutoScraperActivity.this;
@@ -565,7 +565,7 @@ public class AutoScraperActivity extends AppCompatActivity implements AbsListVie
     }
 
     protected void removeStatusbarNotification() {
-        log.debug("removeStatusbarNotification");
+        if (log.isDebugEnabled()) log.debug("removeStatusbarNotification");
 
         mNotificationManager.cancel(NOTIFICATION_ID);
         mNotification = null;
@@ -1110,7 +1110,7 @@ public class AutoScraperActivity extends AppCompatActivity implements AbsListVie
         */
         public void onClick(View view) {
             int position = mActivity.mListView.getPositionForView(view);
-            log.debug("onClick : position={}", position);
+            if (log.isDebugEnabled()) log.debug("onClick : position={}", position);
             rejectScraperInfos(position);
         }
     }
@@ -1138,10 +1138,10 @@ public class AutoScraperActivity extends AppCompatActivity implements AbsListVie
             }
 
             int fileIndex;
-            log.debug("ScraperResultTask : starting scraper automation process");
+            if (log.isDebugEnabled()) log.debug("ScraperResultTask : starting scraper automation process");
             for (fileIndex = 0; fileIndex < mFileCount; fileIndex++) {
                 String path = mFileList.get(fileIndex);
-                log.debug("processing file {} = {}", fileIndex, path);
+                if (log.isDebugEnabled()) log.debug("processing file {} = {}", fileIndex, path);
 
                 // Display the status of the file to process as "busy"
                 FileProperties itemProperties = mFileProperties.get(path);
@@ -1264,7 +1264,7 @@ public class AutoScraperActivity extends AppCompatActivity implements AbsListVie
                 else {
                     // Failed => set the scraper fields to -1 so that we will be able
                     // to skip this file when launching the automated process again
-                    log.debug("failed => update medialib with scraperId=-1");
+                    if (log.isDebugEnabled()) log.debug("failed => update medialib with scraperId=-1");
                     itemProperties.status = ITEM_STATUS_FAILED;
                     mActivity.updateScraperInfoInMediaLib(path, -1, -1);
                 }
@@ -1274,12 +1274,12 @@ public class AutoScraperActivity extends AppCompatActivity implements AbsListVie
 
                 if (isCancelled()) {
                     // Exit the task
-                    log.debug("ScraperResultTask : task aborted");
+                    if (log.isDebugEnabled()) log.debug("ScraperResultTask : task aborted");
                     return Integer.valueOf(0);
                 }
             }
 
-            log.debug("ScraperResultTask : all files processed");
+            if (log.isDebugEnabled()) log.debug("ScraperResultTask : all files processed");
             return Integer.valueOf(1);
         }
 
@@ -1287,7 +1287,7 @@ public class AutoScraperActivity extends AppCompatActivity implements AbsListVie
         protected void onProgressUpdate(Integer... progress) {
             int fileIndex = progress[0].intValue();
             int status = progress[1].intValue();
-            log.debug("onProgressUpdate : updating item {}", fileIndex);
+            if (log.isDebugEnabled()) log.debug("onProgressUpdate : updating item {}", fileIndex);
 
             // Update the display with the retrieved poster and infos
             mActivity.invalidateItem(fileIndex);

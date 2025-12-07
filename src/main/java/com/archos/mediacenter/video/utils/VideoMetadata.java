@@ -123,7 +123,7 @@ public class VideoMetadata implements Serializable {
             vbr = getMetadataBool(data, gapKey + IMediaPlayer.METADATA_KEY_AUDIO_TRACK_VBR);
             supported = getMetadataBool(data, gapKey + IMediaPlayer.METADATA_KEY_AUDIO_TRACK_SUPPORTED);
             language = getMetadataString(data, gapKey + IMediaPlayer.METADATA_KEY_AUDIO_TRACK_LANGUAGE);
-            log.debug("AudioTrack name={}, format={}, language{}", name, format, language);
+            if (log.isDebugEnabled()) log.debug("AudioTrack name={}, format={}, language{}", name, format, language);
         }
         
         AudioTrack(IMediaMetadataRetriever retriever, int idx) {
@@ -137,7 +137,7 @@ public class VideoMetadata implements Serializable {
             vbr = getMetadataRetrieverBool(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_AUDIO_TRACK_VBR);
             supported = getMetadataRetrieverBool(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_AUDIO_TRACK_SUPPORTED);
             language = getMetadataRetrieverString(retriever, gapKey + IMediaMetadataRetriever.METADATA_KEY_AUDIO_TRACK_LANGUAGE);
-            log.debug("AudioTrack name={}, format={}", name, format);
+            if (log.isDebugEnabled()) log.debug("AudioTrack name={}, format={}", name, format);
         }
 
         public final String  name;
@@ -258,7 +258,7 @@ public class VideoMetadata implements Serializable {
                 retriever.setDataSource(mRemotePath);
             mFileSize = getMetadataRetrieverLong(retriever, IMediaMetadataRetriever.METADATA_KEY_FILE_SIZE);
             nbTrack = getMetadataRetrieverInt(retriever, IMediaMetadataRetriever.METADATA_KEY_NB_VIDEO_TRACK);
-            log.debug("fillFromRetriever: nbTrack={}", nbTrack);
+            if (log.isDebugEnabled()) log.debug("fillFromRetriever: nbTrack={}", nbTrack);
             if (nbTrack > 0)
                 mVideoTrack = new VideoTrack(retriever);
             nbTrack = getMetadataRetrieverInt(retriever, IMediaMetadataRetriever.METADATA_KEY_NB_AUDIO_TRACK);

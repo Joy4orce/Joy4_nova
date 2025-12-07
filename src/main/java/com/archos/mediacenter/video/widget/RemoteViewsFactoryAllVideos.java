@@ -29,11 +29,11 @@ class RemoteViewsFactoryAllVideos extends RemoteViewsFactoryBase {
 
     public RemoteViewsFactoryAllVideos(Context context, Intent intent) {
         super(context, intent);
-        log.debug("Create AllVideos service for the video widget");
+        if (log.isDebugEnabled()) log.debug("Create AllVideos service for the video widget");
     }
 
     protected boolean loadData(Context context, int maxItemCount) {
-        log.debug("loadData()");
+        if (log.isDebugEnabled()) log.debug("loadData()");
     	String sortOrder = VideoStore.Video.Media.DEFAULT_SORT_ORDER + " LIMIT " + maxItemCount;
         ContentResolver resolver = context.getContentResolver();
         mCursor = resolver.query(MEDIA_DB_CONTENT_URI, VIDEO_FILES_COLUMNS, WHERE_NOT_HIDDEN, null, sortOrder);

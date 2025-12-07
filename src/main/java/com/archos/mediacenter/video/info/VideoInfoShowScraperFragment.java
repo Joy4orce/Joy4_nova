@@ -103,7 +103,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
     private SearchInfo mSearchInfo;
 
     public VideoInfoShowScraperFragment() {
-        log.debug("CTOR");
+        if (log.isDebugEnabled()) log.debug("CTOR");
         mResultsList = new ArrayList<ProgressItem>();
     }
 
@@ -117,7 +117,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        log.debug("onCreate savedInstanceState={}", savedInstanceState);
+        if (log.isDebugEnabled()) log.debug("onCreate savedInstanceState={}", savedInstanceState);
         super.onCreate(savedInstanceState);
 
         // we'd like to keep this instance when rotating
@@ -137,7 +137,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        log.debug("onViewCreated");
+        if (log.isDebugEnabled()) log.debug("onViewCreated");
         mListView = (ListView) mView.findViewById(R.id.list);
         mListView.setOnItemClickListener(this);
         mListView.setAdapter(mAdapter);
@@ -169,7 +169,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
 
     @Override
     public void onStart() {
-        log.debug("onStart");
+        if (log.isDebugEnabled()) log.debug("onStart");
         resumeCurrentTask();
         super.onStart();
     }
@@ -191,14 +191,14 @@ public class VideoInfoShowScraperFragment extends Fragment implements
 
     @Override
     public void onStop() {
-        log.debug("onStop");
+        if (log.isDebugEnabled()) log.debug("onStop");
         pauseCurrentTask();
         super.onStop();
     }
 
     @Override
     public void onDestroyView() {
-        log.debug("onDestroyView");
+        if (log.isDebugEnabled()) log.debug("onDestroyView");
         super.onDestroyView();
         // null references to views
         mSearchContainer = null;
@@ -212,25 +212,25 @@ public class VideoInfoShowScraperFragment extends Fragment implements
 
     @Override
     public void onDestroy() {
-        log.debug("onDestroy");
+        if (log.isDebugEnabled()) log.debug("onDestroy");
         cancelCurrentTask();
         super.onDestroy();
     }
 
     @Override
     public void onDetach() {
-        log.debug("onDetach");
+        if (log.isDebugEnabled()) log.debug("onDetach");
         super.onDetach();
         mScraper = null;
     }
 
     public void setInfoItem(Base item) {
-        log.debug("setInfoItem");
+        if (log.isDebugEnabled()) log.debug("setInfoItem");
 
         ShowTags newTag = (ShowTags) item.getFullScraperTags(getActivity());
         long oldId = mShowTag != null ? mShowTag.getId() : 0;
         long newId = newTag != null ? newTag.getId() : 0;
-        log.debug("setInfoItem: old:{} new:{}", oldId, newId);
+        if (log.isDebugEnabled()) log.debug("setInfoItem: old:{} new:{}", oldId, newId);
         if (oldId != newId) {
             mShowTag = newTag;
         }
@@ -257,10 +257,10 @@ public class VideoInfoShowScraperFragment extends Fragment implements
 
     // ---------------------- IMPLEMENTS OnItemClickListener ---------------- //
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        log.debug("onItemClick");
+        if (log.isDebugEnabled()) log.debug("onItemClick");
         HashMap<String,EpisodeTags> map = position < mResultsList.size() ? mResultsList.get(position).epMap : null;
         if (map != null) {
-            log.debug("onItemClick: map not null");
+            if (log.isDebugEnabled()) log.debug("onItemClick: map not null");
             SaveItem item = new SaveItem();
             item.source = map;
             item.target = mShowTag;
@@ -268,7 +268,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
             cancelCurrentTask();
             EpSaveTask.createAndRun(getActivity(), item);
         } else if (mCurrentSearchTask != null) {
-            log.debug("onItemClick: requestSave");
+            if (log.isDebugEnabled()) log.debug("onItemClick: requestSave");
             mCurrentSearchTask.requestSave(position, mShowTag, getActivity(), mHandler.obtainMessage());
         } else {
             log.error("onItemClick: failed to save, no task & no result available");
@@ -278,7 +278,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
 
     // ---------------------- IMPLEMENTS OnClickListener -------------------- //
     public void onClick(View v) {
-        log.debug("onClick");
+        if (log.isDebugEnabled()) log.debug("onClick");
 
         switch (v.getId()) {
             case R.id.cancel:
@@ -298,7 +298,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
 
     // ---------------------- IMPLEMENTS OnEditorActionListener ------------- //
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        log.debug("onEditorAction");
+        if (log.isDebugEnabled()) log.debug("onEditorAction");
         mSearchButton.callOnClick();
         return true;
     }
@@ -313,7 +313,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
     }
 
     private void setDisplayState(DisplayState state) {
-        log.debug("setDisplayState:{}", state.name());
+        if (log.isDebugEnabled()) log.debug("setDisplayState:{}", state.name());
         mDisplayState = state;
         switch (state) {
             case SEARCH_INITIAL:
@@ -375,21 +375,21 @@ public class VideoInfoShowScraperFragment extends Fragment implements
     }
 
     private void pauseCurrentTask() {
-        log.debug("pauseCurrentTask");
+        if (log.isDebugEnabled()) log.debug("pauseCurrentTask");
         if (mCurrentSearchTask != null) {
             mCurrentSearchTask.pause();
         }
     }
 
     private void resumeCurrentTask() {
-        log.debug("resumeCurrentTask");
+        if (log.isDebugEnabled()) log.debug("resumeCurrentTask");
         if (mCurrentSearchTask != null) {
             mCurrentSearchTask.resume();
         }
     }
 
     private void cancelCurrentTask() {
-        log.debug("cancelCurrentTask");
+        if (log.isDebugEnabled()) log.debug("cancelCurrentTask");
         if (mCurrentSearchTask != null) {
             // cancel before resume so it exists after waiting
             mCurrentSearchTask.cancel(false);
@@ -400,7 +400,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
     }
 
     private void startSearch() {
-        log.debug("startSearch");
+        if (log.isDebugEnabled()) log.debug("startSearch");
         // make sure there is no old task
         cancelCurrentTask();
         // start searching
@@ -410,7 +410,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
     }
 
     protected void onUpdateProgress(ProgressItem item) {
-        log.debug("onUpdateProgress:{}", item);
+        if (log.isDebugEnabled()) log.debug("onUpdateProgress:{}", item);
         if (item.position < 0) {
             mResultsList.clear();
             mAdapter = new ScraperResultsAdapter(getActivity(),null, item.list);
@@ -441,7 +441,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
 
     // ---------------------- SEARCH VIA SCRAPER SERVICE -------------------- //
     protected void onSearchFinished() {
-        log.debug("onSearchFinished");
+        if (log.isDebugEnabled()) log.debug("onSearchFinished");
         mCurrentSearchTask = null;
     }
 
@@ -480,7 +480,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
         public SearchTask() { /* empty */ }
 
         public void requestSave(int resultId, ShowTags saveTarget, Context saveContext, Message message) {
-            log.debug("SearchTask.requestSave: {}", resultId);
+            if (log.isDebugEnabled()) log.debug("SearchTask.requestSave: {}", resultId);
             mSaveRequestId = resultId;
             mSaveContext = saveContext.getApplicationContext();
             mSaveTarget = saveTarget;
@@ -506,11 +506,11 @@ public class VideoInfoShowScraperFragment extends Fragment implements
             if (!mPause) return;
             synchronized (mWaitObject) {
                 while (mPause) {
-                    log.debug("checkPause - Paused");
+                    if (log.isDebugEnabled()) log.debug("checkPause - Paused");
                     try {
                         mWaitObject.wait();
                     } catch (InterruptedException e) {
-                        log.debug("checkPause - InterruptedException");
+                        if (log.isDebugEnabled()) log.debug("checkPause - InterruptedException");
                         // expected
                     }
                 }
@@ -542,7 +542,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                         HashMap<String, EpisodeTags> epMap = null;
                         if (mSaveRequested) {
                             current = mSaveRequestId;
-                            log.debug("fetching / saving item: {}", current);
+                            if (log.isDebugEnabled()) log.debug("fetching / saving item: {}", current);
                             ScrapeDetailResult detail = Scraper.getDetails(matches.get(current), b);
                             if (detail.isOkay()) {
                                 tag = detail.tag;
@@ -559,7 +559,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                             }
                             return null;
                         }
-                        log.debug("mScraperService.getDetailsSpecial - {}", current);
+                        if (log.isDebugEnabled()) log.debug("mScraperService.getDetailsSpecial - {}", current);
                         ScrapeDetailResult detail = Scraper.getDetails(matches.get(current), b);
 
                         if (detail.isOkay()) {
@@ -601,7 +601,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                 return;
 
             if (values != null && values.length > 0) {
-                log.debug("onProgressUpdate got {} items", values.length);
+                if (log.isDebugEnabled()) log.debug("onProgressUpdate got {} items", values.length);
                 onUpdateProgress(values[0]);
             }
         }
@@ -639,7 +639,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                 long showID = handleSave(params[0], episodeList);
                 Message m = params[0].sendOnSuccess;
                 m.arg1 = (int) showID;
-                log.debug("EpSaveTask.doInBackground: save finished, sending message");
+                if (log.isDebugEnabled()) log.debug("EpSaveTask.doInBackground: save finished, sending message");
                 if (m != null)
                     m.sendToTarget();
             }
@@ -649,7 +649,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
         private List<EpisodeTags> getEpisodeList(ShowTags sTag) {
             ArrayList<EpisodeTags> result = new ArrayList<EpisodeTags>();
             if (sTag != null) {
-                log.debug("EpSaveTask.getEpisodeList: {}", sTag.getTitle());
+                if (log.isDebugEnabled()) log.debug("EpSaveTask.getEpisodeList: {}", sTag.getTitle());
                 // get EpisodeTags by ShowId
                 long sId = sTag.getId();
                 ContentResolver cr = mContext.getContentResolver();
@@ -698,7 +698,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                 ArrayList<ContentProviderOperation> opList = new ArrayList<ContentProviderOperation>();
                 Map<String, Long> poster2IdMap = createPosterIdMap(mContext, targetShowId);
                 for (EpisodeTags epTag : targetList) {
-                    log.debug("handleSave: saving {} of {} episodes.", (i++), size);
+                    if (log.isDebugEnabled()) log.debug("handleSave: saving {} of {} episodes.", (i++), size);
                     EpisodeTags targetEpTag = getEpisode(item.source, epTag.getEpisode(), epTag.getSeason(), targetShow);
                     targetEpTag.setVideoId(epTag.getVideoId());
                     targetEpTag.setShowId(targetShowId);
@@ -716,7 +716,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                         }
                     }
                 }
-                log.debug("preparations took:{}", t.step());
+                if (log.isDebugEnabled()) log.debug("preparations took:{}", t.step());
                 if (opList.size() > 0) {
                     try {
                         mContext.getContentResolver().applyBatch(ScraperStore.AUTHORITY, opList);
@@ -727,7 +727,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                     }
                 }
                 TraktService.onNewVideo(mContext);
-                log.debug("handleSave: saving in the end:{} thats:{}", t.step(), t.total());
+                if (log.isDebugEnabled()) log.debug("handleSave: saving in the end:{} thats:{}", t.step(), t.total());
                 return targetShowId;
             }
             return -1;
@@ -754,15 +754,15 @@ public class VideoInfoShowScraperFragment extends Fragment implements
         }
 
         private EpisodeTags getEpisode(Map<String, EpisodeTags> allEpisodes, int epnum, int season, ShowTags showTags) {
-            log.debug("buildTag allEpisodes.size={} epnum={}, season={}, showId={}", allEpisodes.size(), epnum, season, showTags.getId());
+            if (log.isDebugEnabled()) log.debug("buildTag allEpisodes.size={} epnum={}, season={}, showId={}", allEpisodes.size(), epnum, season, showTags.getId());
             EpisodeTags episodeTag = null;
             if (!allEpisodes.isEmpty()) {
                 String key = season + "|" + epnum;
-                log.debug("buildTag: allEpisodes not empty trying to find {}", key);
+                if (log.isDebugEnabled()) log.debug("buildTag: allEpisodes not empty trying to find {}", key);
                 episodeTag = allEpisodes.get(key);
             }
             if (episodeTag == null) {
-                log.debug("buildTag: shoot episode not in allEpisodes");
+                if (log.isDebugEnabled()) log.debug("buildTag: shoot episode not in allEpisodes");
                 episodeTag = new EpisodeTags();
                 // assume episode / season of request
                 episodeTag.setSeason(season);
@@ -771,10 +771,10 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                 // also check if there is a poster
                 List<ScraperImage> posters = showTags.getPosters();
                 if (posters != null) {
-                    log.debug("buildTag: posters not null");
+                    if (log.isDebugEnabled()) log.debug("buildTag: posters not null");
                     for (ScraperImage image : posters) {
                         if (image.getSeason() == season) {
-                            log.debug("buildTag: {} season poster s{} {}", showTags.getTitle(), season, image.getLargeUrl());
+                            if (log.isDebugEnabled()) log.debug("buildTag: {} season poster s{} {}", showTags.getTitle(), season, image.getLargeUrl());
                             episodeTag.setPosters(image.asList());
                             episodeTag.downloadPoster(mContext);
                             break;
@@ -782,7 +782,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                     }
                 }
             } else {
-                log.debug("buildTag: episodeTag not null");
+                if (log.isDebugEnabled()) log.debug("buildTag: episodeTag not null");
                 if (episodeTag.getPosters() == null) {
                     log.warn("buildTag: {} has null posters!", episodeTag.getTitle());
                 } else if (episodeTag.getPosters().isEmpty()) {
@@ -798,7 +798,7 @@ public class VideoInfoShowScraperFragment extends Fragment implements
                 episodeTag.downloadPicture(mContext);
                 episodeTag.downloadPoster(mContext);
             }
-            log.debug("buildTag: {} {} {}", episodeTag.getShowTitle(), episodeTag.getShowId(), episodeTag.getTitle());
+            if (log.isDebugEnabled()) log.debug("buildTag: {} {} {}", episodeTag.getShowTitle(), episodeTag.getShowId(), episodeTag.getTitle());
             return episodeTag;
         }
     }

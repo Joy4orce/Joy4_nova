@@ -81,19 +81,19 @@ public class WidgetProviderVideo extends AppWidgetProvider {
 
     @Override
     public void onEnabled(Context context) {
-        log.debug("onEnabled");
+        if (log.isDebugEnabled()) log.debug("onEnabled");
         super.onEnabled(context);
     }
 
     @Override
     public void onDisabled(Context context) {
-        log.debug("onDisabled");
+        if (log.isDebugEnabled()) log.debug("onDisabled");
         super.onDisabled(context);
     }
 
     @Override
     public void onDeleted(Context context, int[] appWidgetIds) {
-        log.debug("onDeleted");
+        if (log.isDebugEnabled()) log.debug("onDeleted");
         super.onDeleted(context, appWidgetIds);
 
         // Delete the configuration settings corresponding to the provided widget ids
@@ -107,7 +107,7 @@ public class WidgetProviderVideo extends AppWidgetProvider {
      */
     @Override
     public void onReceive(Context context, Intent intent) {
-        log.debug("onReceive intent={}", intent);
+        if (log.isDebugEnabled()) log.debug("onReceive intent={}", intent);
 
         dumpBundle(intent.getExtras(), this.getClass().getSimpleName() + ":onReceive", log.isDebugEnabled());
 
@@ -121,7 +121,7 @@ public class WidgetProviderVideo extends AppWidgetProvider {
         if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
             // A specific id is provided => build a dummy list with only this id
             appWidgetIds = new int[] { appWidgetId };
-            log.debug("onReceive : process a single widget id={}", appWidgetId);
+            if (log.isDebugEnabled()) log.debug("onReceive : process a single widget id={}", appWidgetId);
         }
         else {
             // No id provided => retrieve the list of all the widget ids handled by the AppWidgetManager
@@ -147,7 +147,7 @@ public class WidgetProviderVideo extends AppWidgetProvider {
             long videoId = intent.getLongExtra(EXTRA_VIDEO_ID, -1);
             long showId = intent.getLongExtra(EXTRA_SHOW_ID, -1);
 
-            log.debug("onReceive: position={}, videoId={}, showId={}", position, videoId, showId);
+            if (log.isDebugEnabled()) log.debug("onReceive: position={}, videoId={}, showId={}", position, videoId, showId);
 
             // case 1: Open a TVShow in the browser
             if (showId >= 0) {
@@ -162,7 +162,7 @@ public class WidgetProviderVideo extends AppWidgetProvider {
                 VideoInfoActivity.startInstance(context, null, null, videoId);
             }
             else {
-                log.debug("Cannot play item {}", position);
+                if (log.isDebugEnabled()) log.debug("Cannot play item {}", position);
                 String toastMsg = context.getString(R.string.cant_play_video);
                 Toast.makeText(context, toastMsg, Toast.LENGTH_SHORT).show();
             }
@@ -171,7 +171,7 @@ public class WidgetProviderVideo extends AppWidgetProvider {
             //---------------------------------------------------
             // Handle a request to reload the widget data
             //---------------------------------------------------
-            log.debug("received RELOAD_ACTION at {}", SystemClock.elapsedRealtime());
+            if (log.isDebugEnabled()) log.debug("received RELOAD_ACTION at {}", SystemClock.elapsedRealtime());
 
             // Force the widget service to reload its data (onDataSetChanged will be called)
             appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.gridview);
@@ -180,7 +180,7 @@ public class WidgetProviderVideo extends AppWidgetProvider {
             //------------------------------------------------------------------
             // Handle a request to update a widget after it has been configured
             //------------------------------------------------------------------
-            log.debug("received INITIAL_UPDATE_ACTION at {}", SystemClock.elapsedRealtime());
+            if (log.isDebugEnabled()) log.debug("received INITIAL_UPDATE_ACTION at {}", SystemClock.elapsedRealtime());
 
             // We only need to force the service to be created and bound
             update(context, appWidgetManager, appWidgetIds, true, false, false);
@@ -189,7 +189,7 @@ public class WidgetProviderVideo extends AppWidgetProvider {
             //---------------------------------------------------
             // Handle a request to update the widget(s)
             //---------------------------------------------------
-            log.debug("received UPDATE_ACTION at {}", SystemClock.elapsedRealtime());
+            if (log.isDebugEnabled()) log.debug("received UPDATE_ACTION at {}", SystemClock.elapsedRealtime());
 
             // Hide the loading data spinbar and restore the normal view
             boolean contentChanged = intent.getBooleanExtra(EXTRA_CONTENT_CHANGED, false);
@@ -199,7 +199,7 @@ public class WidgetProviderVideo extends AppWidgetProvider {
             //------------------------------------------------------------------
             // Handle a request to update a widget when no data are available
             //------------------------------------------------------------------
-            log.debug("received EMPTY_DATA_ACTION at {}", SystemClock.elapsedRealtime());
+            if (log.isDebugEnabled()) log.debug("received EMPTY_DATA_ACTION at {}", SystemClock.elapsedRealtime());
 
             // Update the empty view, hide the loading data spinbar and restore the normal view
             update(context, appWidgetManager, appWidgetIds, false, true, false);
@@ -208,7 +208,7 @@ public class WidgetProviderVideo extends AppWidgetProvider {
             //--------------------------------------------------------------------
             // Handle a request to show the loading spinbar
             //--------------------------------------------------------------------
-            log.debug("received SHOW_UPDATE_SPINBAR_ACTION at {}", SystemClock.elapsedRealtime());
+            if (log.isDebugEnabled()) log.debug("received SHOW_UPDATE_SPINBAR_ACTION at {}", SystemClock.elapsedRealtime());
 
             // Show the loading data spinbar and hide the normal view
             update(context, appWidgetManager, appWidgetIds, false, false, true);
@@ -218,7 +218,7 @@ public class WidgetProviderVideo extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        log.debug("onUpdate : {} widgets to update", appWidgetIds.length);
+        if (log.isDebugEnabled()) log.debug("onUpdate : {} widgets to update", appWidgetIds.length);
         super.onUpdate(context, appWidgetManager, appWidgetIds);
 
         // Normal update of the widget
@@ -241,14 +241,14 @@ public class WidgetProviderVideo extends AppWidgetProvider {
 
     private void update(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds,
                         boolean updateRemoteAdapter, boolean showEmptyViewText, boolean showDataLoadingSpinBar) {
-        log.debug("update: updateRemoteAdapter={} showEmptyViewText={} showDataLoadingSpinBar={}", updateRemoteAdapter, showEmptyViewText, showDataLoadingSpinBar);
+        if (log.isDebugEnabled()) log.debug("update: updateRemoteAdapter={} showEmptyViewText={} showDataLoadingSpinBar={}", updateRemoteAdapter, showEmptyViewText, showDataLoadingSpinBar);
         
         // update each of the widgets with the remote adapter
         for (int i = 0; i < appWidgetIds.length; ++i) {
             WidgetConfiguration config = loadConfiguration(context, appWidgetIds[i]);
 
             if (config.mode != MODE_UNKNOWN) {
-                log.debug("update: mode known");
+                if (log.isDebugEnabled()) log.debug("update: mode known");
                 // Here we setup the intent which points to the ViewService which will
                 // provide the views for this collection.
                 Intent intent = getServiceIntent(context, config.mode);
@@ -336,7 +336,7 @@ public class WidgetProviderVideo extends AppWidgetProvider {
     }
 
     private static void saveConfiguration(Context context, int appWidgetId, int mode) {
-        log.debug("saveConfiguration for id={} mode={}", appWidgetId, mode);
+        if (log.isDebugEnabled()) log.debug("saveConfiguration for id={} mode={}", appWidgetId, mode);
         Editor ed = PreferenceManager.getDefaultSharedPreferences(context).edit();
 
         // Save a specific configuration for this widget id
@@ -350,7 +350,7 @@ public class WidgetProviderVideo extends AppWidgetProvider {
 
         // Load the specific configuration for this widget id
         int mode = PreferenceManager.getDefaultSharedPreferences(context).getInt(getSharedPreferencesKeyMode(appWidgetId), MODE_UNKNOWN);
-        log.debug("loadConfiguration for id={} mode={}", appWidgetId, mode);
+        if (log.isDebugEnabled()) log.debug("loadConfiguration for id={} mode={}", appWidgetId, mode);
 
         return new WidgetConfiguration(mode);
     }
@@ -360,7 +360,7 @@ public class WidgetProviderVideo extends AppWidgetProvider {
 
         // Delete the settings corresponding to the provided widget id(s)
         for (int appWidgetId:appWidgetIds) {
-            log.debug("deleteConfiguration for id={}", appWidgetId);
+            if (log.isDebugEnabled()) log.debug("deleteConfiguration for id={}", appWidgetId);
             ed.remove(getSharedPreferencesKeyMode(appWidgetId));
         }
 

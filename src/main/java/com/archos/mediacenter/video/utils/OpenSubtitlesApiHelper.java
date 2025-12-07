@@ -89,7 +89,7 @@ public class OpenSubtitlesApiHelper {
 
     public OpenSubtitlesApiHelper() {
         USER_AGENT_VALUE = "novavideoplayer " + CustomApplication.getNovaShortVersion();
-        log.debug("OpenSubtitlesApiHelper: USER_AGENT_VALUE = {}", USER_AGENT_VALUE);
+        if (log.isDebugEnabled()) log.debug("OpenSubtitlesApiHelper: USER_AGENT_VALUE = {}", USER_AGENT_VALUE);
         if (log.isTraceEnabled()) {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
             logging.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -118,7 +118,7 @@ public class OpenSubtitlesApiHelper {
     }
 
     public static void setBaseUrl(String url) {
-        log.debug("setBaseUrl: {}", url);
+        if (log.isDebugEnabled()) log.debug("setBaseUrl: {}", url);
         baseUrl = url;
     }
 
@@ -189,7 +189,7 @@ public class OpenSubtitlesApiHelper {
                     invalidToken();
                     return false;
                 } else {
-                    log.debug("login: response successful, error code={}, error message={}", LAST_QUERY_RESULT, LAST_QUERY_MESSAGE);
+                    if (log.isDebugEnabled()) log.debug("login: response successful, error code={}, error message={}", LAST_QUERY_RESULT, LAST_QUERY_MESSAGE);
                     // Authentication successful
                     String responseBody = response.body().string();
                     JSONObject jsonResponse = new JSONObject(responseBody);
@@ -199,7 +199,7 @@ public class OpenSubtitlesApiHelper {
                         invalidToken();
                         return false;
                     }
-                    log.debug("login: token = {}", authToken);
+                    if (log.isDebugEnabled()) log.debug("login: token = {}", authToken);
                     // Check if "base_url" is present in the response
                     setBaseUrl(jsonResponse.optString("https://"+"base_url", API_BASE_URL));
                     // Check if "user" object is present in the response
@@ -211,10 +211,10 @@ public class OpenSubtitlesApiHelper {
                         vip = userObject.optBoolean("vip", false);
                         userId = userObject.optInt("user_id", 0);
                         extInstalled = userObject.optBoolean("ext_installed", false);
-                        log.debug("auth: allowed_downloads={}, level={}, vip={}", allowedDownloads, level, vip);
+                        if (log.isDebugEnabled()) log.debug("auth: allowed_downloads={}, level={}, vip={}", allowedDownloads, level, vip);
                     }
                     if (authToken != null) {
-                        log.debug("auth: authentication successful token={}", authToken);
+                        if (log.isDebugEnabled()) log.debug("auth: authentication successful token={}", authToken);
                         setAuthToken(authToken);
                         authenticated = true;
                         return true;
@@ -248,7 +248,7 @@ public class OpenSubtitlesApiHelper {
                     if (! response.isSuccessful()) {
                         log.error("logout: response is not successful, error code={}, error message={}", LAST_QUERY_RESULT, LAST_QUERY_MESSAGE);
                     } else {
-                        log.debug("logout: status={}, message={}", LAST_QUERY_RESULT, LAST_QUERY_MESSAGE);
+                        if (log.isDebugEnabled()) log.debug("logout: status={}, message={}", LAST_QUERY_RESULT, LAST_QUERY_MESSAGE);
                     }
                 }
             } catch (JSONException e) {
@@ -268,7 +268,7 @@ public class OpenSubtitlesApiHelper {
         int status = response.code();
         LAST_QUERY_MESSAGE = response.message();
         if (status != 200) log.warn("parseResult: status={}, message={}", status, LAST_QUERY_MESSAGE);
-        else log.trace("parseResult: status={}, message={}", status, LAST_QUERY_MESSAGE);
+        else if (log.isTraceEnabled()) log.trace("parseResult: status={}, message={}", status, LAST_QUERY_MESSAGE);
         switch (status) {
             case 200 -> {
                 LAST_QUERY_RESULT = RESULT_CODE_OK;
@@ -325,7 +325,7 @@ public class OpenSubtitlesApiHelper {
         Integer status = jsonResponse.optInt("status", 200);
         LAST_QUERY_MESSAGE = jsonResponse.optString("message", LAST_QUERY_MESSAGE);
         if (status != 200) log.warn("parseResult: status={}, message={}", status, LAST_QUERY_MESSAGE);
-        else log.debug("parseResult: status={}, message={}", status, LAST_QUERY_MESSAGE);
+        else if (log.isDebugEnabled()) log.debug("parseResult: status={}, message={}", status, LAST_QUERY_MESSAGE);
         // refine 406 error sub-cases
         if (LAST_QUERY_MESSAGE.equals("invalid token")) {
             invalidToken();
@@ -339,7 +339,7 @@ public class OpenSubtitlesApiHelper {
             return LAST_QUERY_RESULT;
         }
         remainingDownloads = jsonResponse.optInt("remaining", remainingDownloads);
-        log.debug("parseResult: remaining downloads={}", remainingDownloads);
+        if (log.isDebugEnabled()) log.debug("parseResult: remaining downloads={}", remainingDownloads);
         if (LAST_QUERY_RESULT == RESULT_CODE_UNACCEPTABLE && remainingDownloads <= 0) {
             LAST_QUERY_RESULT = RESULT_CODE_QUOTA_EXCEEDED;
             log.warn("parseResult: quota exceeded");
@@ -352,7 +352,7 @@ public class OpenSubtitlesApiHelper {
         // Note: only the first result page is queried because it is assumed that it should be enough with order_by criteria
         // input: languages is a comma separated list of languages (e.g. "en,fr")
         // output: an arrayList of OpenSubtitlesSearchResult for each subtitle found
-        log.debug("searchSubtitle: baseUrl={}, languages={}, fileInfo={}", baseUrl, languages, ((fileInfo != null) ? fileInfo.getFileName() : "null"));
+        if (log.isDebugEnabled()) log.debug("searchSubtitle: baseUrl={}, languages={}, fileInfo={}", baseUrl, languages, ((fileInfo != null) ? fileInfo.getFileName() : "null"));
         HttpUrl.Builder urlBuilder = HttpUrl.parse(baseUrl + "subtitles").newBuilder();
         urlBuilder.addQueryParameter("languages", languages);
         urlBuilder.addQueryParameter("order_by", "from_trusted,ratings,download_count");
@@ -393,13 +393,13 @@ public class OpenSubtitlesApiHelper {
                 if (!response.isSuccessful())
                     log.error("searchSubtitle: response is not successful, error code={}, error message={}", LAST_QUERY_RESULT, LAST_QUERY_MESSAGE);
                 else
-                    log.debug("searchSubtitle: status={}, message={}", LAST_QUERY_RESULT, LAST_QUERY_MESSAGE);
+                    if (log.isDebugEnabled()) log.debug("searchSubtitle: status={}, message={}", LAST_QUERY_RESULT, LAST_QUERY_MESSAGE);
                 switch (LAST_QUERY_RESULT) {
                     case RESULT_CODE_OK -> {
                         JSONArray dataArray = jsonResponse.getJSONArray("data");
                         int numSubtitles = dataArray.length();
                         ArrayList<OpenSubtitlesSearchResult> subtitleRefs = new ArrayList<>();
-                        log.debug("searchSubtitle: found {} subtitles", numSubtitles);
+                        if (log.isDebugEnabled()) log.debug("searchSubtitle: found {} subtitles", numSubtitles);
                         for (int i = 0; i < numSubtitles; i++) {
                             JSONObject subtitleInfo = dataArray.getJSONObject(i);
                             OpenSubtitlesSearchResult subtitleResult = new OpenSubtitlesSearchResult();
@@ -410,7 +410,7 @@ public class OpenSubtitlesApiHelper {
                                 subtitleResult.setLanguage(subtitleAttribute.optString("language", ""));
                                 subtitleResult.setMoviehashMatch(subtitleAttribute.optBoolean("moviehash_match", false));
                                 if (subtitleAttribute.has("features")) {
-                                    log.debug("searchSubtitle: it has features");
+                                    if (log.isDebugEnabled()) log.debug("searchSubtitle: it has features");
                                     JSONObject subtitleFeatures = subtitleAttribute.getJSONObject("feature");
                                     subtitleResult.setRelease(subtitleFeatures.optString("release", ""));
                                     subtitleResult.setMovieName(subtitleFeatures.optString("movie_name", ""));
@@ -420,23 +420,23 @@ public class OpenSubtitlesApiHelper {
                                     subtitleResult.setParentTitle(subtitleFeatures.optString("parent_title", ""));
                                 }
                                 if (subtitleAttribute.has("files")) {
-                                    log.debug("searchSubtitle: it has files");
+                                    if (log.isDebugEnabled()) log.debug("searchSubtitle: it has files");
                                     JSONArray subtitleFilesArray = subtitleAttribute.getJSONArray("files");
                                     if (subtitleFilesArray.length() > 0) { // Check if the JSONArray is not empty
                                         JSONObject subtitleFiles = subtitleFilesArray.getJSONObject(0);
                                         subtitleResult.setFileId(subtitleFiles.optString("file_id", ""));
                                         subtitleResult.setFileName(subtitleFiles.optString("file_name", ""));
-                                        log.debug("searchSubtitle: file_id={}, file_name={}", subtitleResult.getFileId(), subtitleResult.getFileName());
+                                        if (log.isDebugEnabled()) log.debug("searchSubtitle: file_id={}, file_name={}", subtitleResult.getFileId(), subtitleResult.getFileName());
                                     } else {
-                                        log.debug("searchSubtitle: no files found");
+                                        if (log.isDebugEnabled()) log.debug("searchSubtitle: no files found");
                                     }
                                 }
                             }
                             if (subtitleResult.getFileId() != null) subtitleRefs.add(subtitleResult);
-                            log.debug("searchSubtitle: found {}", subtitleResult);
+                            if (log.isDebugEnabled()) log.debug("searchSubtitle: found {}", subtitleResult);
                             // only return one best match if hash match and single language
                             if (subtitleResult.getMoviehashMatch() && languages.split(",").length == 1) {
-                                log.debug("searchSubtitle: hash match, focus on first match as single result");
+                                if (log.isDebugEnabled()) log.debug("searchSubtitle: hash match, focus on first match as single result");
                                 return new ArrayList<>(Arrays.asList(subtitleResult));
                             }
                         }
@@ -464,7 +464,7 @@ public class OpenSubtitlesApiHelper {
     }
 
     public static String getDownloadSubtitleLink(String file_id) throws IOException {
-        log.debug("getDownloadSubtitleLink: file_id={}", file_id);
+        if (log.isDebugEnabled()) log.debug("getDownloadSubtitleLink: file_id={}", file_id);
         // do not attempt to download subtitle if quota is 0 and we are not past reset time
         if (remainingDownloads <= 0 && !isCurrentTimeAfterResetTime()) {
             log.warn("getDownloadSubtitleLink: quota exceeded, remaining downloads={}, reset time={}", remainingDownloads, resetTimeRemaining);
@@ -507,12 +507,12 @@ public class OpenSubtitlesApiHelper {
                 if (!response.isSuccessful())
                     log.error("searchSubtitle: response is not successful, error code={}, error message={}", LAST_QUERY_RESULT, LAST_QUERY_MESSAGE);
                 else
-                    log.debug("searchSubtitle: status={}, message={}", LAST_QUERY_RESULT, LAST_QUERY_MESSAGE);
+                    if (log.isDebugEnabled()) log.debug("searchSubtitle: status={}, message={}", LAST_QUERY_RESULT, LAST_QUERY_MESSAGE);
                 switch (LAST_QUERY_RESULT) {
                     case RESULT_CODE_OK -> {
-                        log.debug("getDownloadSubtitleLink: remaining downloads={}, number of downloads={}", remainingDownloads, numberDownloads);
+                        if (log.isDebugEnabled()) log.debug("getDownloadSubtitleLink: remaining downloads={}, number of downloads={}", remainingDownloads, numberDownloads);
                         String subtitleLink = jsonResponse.optString("link", null);
-                        log.debug("getDownloadSubtitleLink: found link {}", subtitleLink);
+                        if (log.isDebugEnabled()) log.debug("getDownloadSubtitleLink: found link {}", subtitleLink);
                         return subtitleLink;
                     }
                     case RESULT_CODE_TOKEN_EXPIRED -> {

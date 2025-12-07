@@ -86,7 +86,7 @@ public class NetworkListingFragment extends ListingFragment {
         mAnAncestorIsShortcut = ShortcutDbAdapter.VIDEO.isHimselfOrAncestorShortcut(getActivity(), currentUri);
         isHimselfIndexedFolder = ShortcutDbAdapter.VIDEO.isShortcut(getActivity(), currentUri) > 0;
         isCurrentDirectoryShortcut = (ShortcutDb.STATIC.isShortcut(getContext(), currentUri) != -1);
-        log.debug("updateShortcutState: mUri={} -> mShortcutId={}, isCurrentDirectoryIndexed={}, mAnAncestorIsShortcut={}, isCurrentDirectoryShortcut={}", currentUri, mShortcutId, isCurrentDirectoryIndexed, mAnAncestorIsShortcut, isCurrentDirectoryShortcut);
+        if (log.isDebugEnabled()) log.debug("updateShortcutState: mUri={} -> mShortcutId={}, isCurrentDirectoryIndexed={}, mAnAncestorIsShortcut={}, isCurrentDirectoryShortcut={}", currentUri, mShortcutId, isCurrentDirectoryIndexed, mAnAncestorIsShortcut, isCurrentDirectoryShortcut);
     }
 
     /**
@@ -148,7 +148,7 @@ public class NetworkListingFragment extends ListingFragment {
      * @return
      */
     protected boolean canBeIndexed() {
-        log.debug("canBeIndexed: mAnAncestorIsShortcut={}->{}", mAnAncestorIsShortcut, (!isEmpty() && !mAnAncestorIsShortcut));
+        if (log.isDebugEnabled()) log.debug("canBeIndexed: mAnAncestorIsShortcut={}->{}", mAnAncestorIsShortcut, (!isEmpty() && !mAnAncestorIsShortcut));
         return (!isEmpty() && !mAnAncestorIsShortcut);
     }
 
@@ -167,9 +167,9 @@ public class NetworkListingFragment extends ListingFragment {
         }
         // only proposed for not a shortcut and not indexed folder (perhaps ancestor indexed but it will not propose to index)
         // thus only add STATIC shortcut and then propose to index in askForIndexing
-        log.debug("createShortcut: ARG_TITLE={}, argument ARG_TITLE={}", ARG_TITLE, getArguments().getString(ARG_TITLE));
+        if (log.isDebugEnabled()) log.debug("createShortcut: ARG_TITLE={}, argument ARG_TITLE={}", ARG_TITLE, getArguments().getString(ARG_TITLE));
         String shortcutName = getArguments().getString(ARG_TITLE)!=null?getArguments().getString(ARG_TITLE):FileUtils.getName(mUri); //to avoid name like "33" in upnp
-        log.debug("createShortcut: shorcutName={}, shortcutPath={}, lastPathSegment={}, friendlyUri={}", shortcutName, mUri.toString(), FileUtils.getName(mUri), getFriendlyUri());
+        if (log.isDebugEnabled()) log.debug("createShortcut: shorcutName={}, shortcutPath={}, lastPathSegment={}, friendlyUri={}", shortcutName, mUri.toString(), FileUtils.getName(mUri), getFriendlyUri());
         boolean result = ShortcutDb.STATIC.insertShortcut(getContext(), mUri, shortcutName, getFriendlyUri());
         if (result) {
             Toast.makeText(getActivity(), getString(R.string.shortcut_folder_added, shortcutName), Toast.LENGTH_SHORT).show();
@@ -182,7 +182,7 @@ public class NetworkListingFragment extends ListingFragment {
     }
 
     protected String getFriendlyUri() {
-        log.debug("getFriendlyUri={}", mUri.toString());
+        if (log.isDebugEnabled()) log.debug("getFriendlyUri={}", mUri.toString());
         return mUri.toString();
     }
 

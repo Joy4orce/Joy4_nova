@@ -34,7 +34,7 @@ public class SMBServerCredentialsDialog extends ServerCredentialsDialog {
     public SMBServerCredentialsDialog(){ }
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        log.debug("onCreateDialog");
+        if (log.isDebugEnabled()) log.debug("onCreateDialog");
         mDialog = super.onCreateDialog(savedInstanceState);
         mTypeSp.setVisibility(View.GONE);
         mAddressEt.setVisibility(View.GONE);

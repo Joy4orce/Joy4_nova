@@ -63,7 +63,7 @@ public class MainActivityLeanback extends LeanbackActivity {
     }
     @Override
     public void onResumeFragments(){
-        log.debug("onResumeFragments");
+        if (log.isDebugEnabled()) log.debug("onResumeFragments");
         super.onResumeFragments();
         CustomApplication.loadLocale(getResources());
 
@@ -79,7 +79,7 @@ public class MainActivityLeanback extends LeanbackActivity {
 
         // Check if user disabled "Always start in TV interface" - if so, redirect to phone UI
         if (!UiChoiceDialog.applicationIsInLeanbackMode(this)) {
-            log.debug("onCreate: User disabled leanback mode, redirecting to MainActivity");
+            if (log.isDebugEnabled()) log.debug("onCreate: User disabled leanback mode, redirecting to MainActivity");
             Intent i = new Intent(this, com.archos.mediacenter.video.browser.MainActivity.class);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             if (getIntent().getData() != null) {

@@ -91,7 +91,7 @@ public class PermissionChecker {
 
         mActivity= activity;
 
-        log.debug("checkAndRequestPermission: hasManageExternalStoragePermission={}, isDialogDisplayed={}", hasManageExternalStoragePermission, isDialogDisplayed);
+        if (log.isDebugEnabled()) log.debug("checkAndRequestPermission: hasManageExternalStoragePermission={}, isDialogDisplayed={}", hasManageExternalStoragePermission, isDialogDisplayed);
 
         // MANAGE_EXTERNAL_STORAGE is supported for API>=30, needs to be granted by user on API>=31 via android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION that does not exist on Android TV until API>=34
         // WRITE_EXTERNAL_STORAGE is maxSdkVersion 29, auto-granted API<=22, requires explicit user permission 23<=API<=32, i.e. not required to be in manifest 30<=API<=32 but programmatically requested
@@ -103,12 +103,12 @@ public class PermissionChecker {
 
         Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:" + mActivity.getPackageName()));
         activityToRequestManageStorageExists = intent.resolveActivity(mActivity.getPackageManager()) != null;
-        log.debug("checkAndRequestPermission: hasManageExternalStoragePermissionactivityToRequestManageStorageExists={}", activityToRequestManageStorageExists);
+        if (log.isDebugEnabled()) log.debug("checkAndRequestPermission: hasManageExternalStoragePermissionactivityToRequestManageStorageExists={}", activityToRequestManageStorageExists);
 
         if(Build.VERSION.SDK_INT >= 30 && hasManageExternalStoragePermission && activityToRequestManageStorageExists) { // MANAGE_EXTERNAL_STORAGE has it all and is introduced in API>=31 except for TV
-            log.debug("checkAndRequestPermission: is MANAGE_EXTERNAL_STORAGE granted? {}", Environment.isExternalStorageManager());
+            if (log.isDebugEnabled()) log.debug("checkAndRequestPermission: is MANAGE_EXTERNAL_STORAGE granted? {}", Environment.isExternalStorageManager());
             if (!isDialogDisplayed && !Environment.isExternalStorageManager()) {
-                log.debug("checkAndRequestPermission: requesting MANAGE_EXTERNAL_STORAGE");
+                if (log.isDebugEnabled()) log.debug("checkAndRequestPermission: requesting MANAGE_EXTERNAL_STORAGE");
                 if(Build.VERSION.SDK_INT >= 34) { // Need FOREGROUND_SERVICE_DATA_* too
                     ActivityCompat.requestPermissions(
                             activity,
@@ -151,7 +151,7 @@ public class PermissionChecker {
 
             if (Build.VERSION.SDK_INT >= 34) { // API>=33 no WRITE_EXTERNAL_STORAGE and READ_EXTERNAL_STORAGE needs extra media granularity
                 if (!isDialogDisplayed && ContextCompat.checkSelfPermission(mActivity, android.Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED) {
-                    log.debug("checkAndRequestPermission: API>=33 requesting READ_MEDIA_VIDEO");
+                    if (log.isDebugEnabled()) log.debug("checkAndRequestPermission: API>=33 requesting READ_MEDIA_VIDEO");
                     ActivityCompat.requestPermissions(
                             activity,
                             new String[]{
@@ -169,7 +169,7 @@ public class PermissionChecker {
             } else {
                 if (Build.VERSION.SDK_INT >= 33) { // API>=33 no WRITE_EXTERNAL_STORAGE and READ_EXTERNAL_STORAGE needs extra media granularity
                     if (!isDialogDisplayed && ContextCompat.checkSelfPermission(mActivity, android.Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED) {
-                        log.debug("checkAndRequestPermission: API>=33 requesting READ_MEDIA_VIDEO");
+                        if (log.isDebugEnabled()) log.debug("checkAndRequestPermission: API>=33 requesting READ_MEDIA_VIDEO");
                         ActivityCompat.requestPermissions(
                                 activity,
                                 new String[]{
@@ -185,7 +185,7 @@ public class PermissionChecker {
                 } else {
                     if (Build.VERSION.SDK_INT <= 29) { // 23<=API<=29 WRITE_EXTERNAL_STORAGE and READ_EXTERNAL_STORAGE auto-granted (READ should be auto-granted via WRITE)
                         if (!isDialogDisplayed && ContextCompat.checkSelfPermission(mActivity, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                            log.debug("checkAndRequestPermission: 23<=API<30 requesting (READ|WRITE)_EXTERNAL_STORAGE");
+                            if (log.isDebugEnabled()) log.debug("checkAndRequestPermission: 23<=API<30 requesting (READ|WRITE)_EXTERNAL_STORAGE");
                             ActivityCompat.requestPermissions(
                                     activity,
                                     new String[]{
@@ -199,7 +199,7 @@ public class PermissionChecker {
                         }
                     } else { // 30<=API<33 WRITE_EXTERNAL_STORAGE does nothing and is not in manifest thus only READ_EXTERNAL_STORAGE
                         if (!isDialogDisplayed && ContextCompat.checkSelfPermission(mActivity, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                            log.debug("checkAndRequestPermission: 30<=API<33 requesting READ_EXTERNAL_STORAGE");
+                            if (log.isDebugEnabled()) log.debug("checkAndRequestPermission: 30<=API<33 requesting READ_EXTERNAL_STORAGE");
                             ActivityCompat.requestPermissions(
                                     activity,
                                     new String[]{
@@ -220,27 +220,27 @@ public class PermissionChecker {
           mActivity = activity;
         boolean result = false;
         if(Build.VERSION.SDK_INT <= 22) { // API<=22
-            log.debug("hasExternalPermission: API<=22 -> true");
+            if (log.isDebugEnabled()) log.debug("hasExternalPermission: API<=22 -> true");
             return true;
         } else {
             if (Build.VERSION.SDK_INT >= 30 && hasManageExternalStoragePermission && activityToRequestManageStorageExists) { // this is already the case
                 result = Environment.isExternalStorageManager();
-                log.debug("hasExternalPermission: API>=30 and hasManagedExternalStoragePermission -> {}", result);
+                if (log.isDebugEnabled()) log.debug("hasExternalPermission: API>=30 and hasManagedExternalStoragePermission -> {}", result);
                 return result;
             } else {
                 // Good reading https://stackoverflow.com/questions/64221188/write-external-storage-when-targeting-android-10
                 if (Build.VERSION.SDK_INT >= 33) { // API>=33
                     result = ContextCompat.checkSelfPermission(mActivity, Manifest.permission.READ_MEDIA_VIDEO) == PackageManager.PERMISSION_GRANTED;
-                    log.debug("hasExternalPermission: API>=33 READ_MEDIA_VIDEO -> {}", result);
+                    if (log.isDebugEnabled()) log.debug("hasExternalPermission: API>=33 READ_MEDIA_VIDEO -> {}", result);
                     return result;
                 } else {
                     if (Build.VERSION.SDK_INT <= 29) { // 23<=API<=29
                         result = ContextCompat.checkSelfPermission(mActivity, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-                        log.debug("hasExternalPermission: 23<=API<=29 WRITE_EXTERNAL_STORAGE -> {}", result);
+                        if (log.isDebugEnabled()) log.debug("hasExternalPermission: 23<=API<=29 WRITE_EXTERNAL_STORAGE -> {}", result);
                         return result;
                     } else { // API 30<=API<=32
                         result = ContextCompat.checkSelfPermission(mActivity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-                        log.debug("hasExternalPermission: 30<=API<=32 READ_EXTERNAL_STORAGE -> {}", result);
+                        if (log.isDebugEnabled()) log.debug("hasExternalPermission: 30<=API<=32 READ_EXTERNAL_STORAGE -> {}", result);
                         return result;
                     }
                 }
@@ -255,7 +255,7 @@ public class PermissionChecker {
     @TargetApi(Build.VERSION_CODES.M)
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults, Activity activity) {
         // grantResults 0 for granted -1 for denied
-        log.debug("onRequestPermissionsResult: requestCode {}, permissions {}, grantResults {}", requestCode, Arrays.toString(permissions), Arrays.toString(grantResults));
+        if (log.isDebugEnabled()) log.debug("onRequestPermissionsResult: requestCode {}, permissions {}, grantResults {}", requestCode, Arrays.toString(permissions), Arrays.toString(grantResults));
         mActivity = activity;
         if(Build.VERSION.SDK_INT<Build.VERSION_CODES.M)
             return;
@@ -269,27 +269,27 @@ public class PermissionChecker {
             if (grantResults[i] == PackageManager.PERMISSION_DENIED)
                 log.warn("onRequestPermissionsResult: permission {} not granted", permissions[i]);
             if (grantResults[i] == PackageManager.PERMISSION_GRANTED)
-                log.debug("onRequestPermissionsResult: permission {} granted", permissions[i]);
+                if (log.isDebugEnabled()) log.debug("onRequestPermissionsResult: permission {} granted", permissions[i]);
         }
-        log.debug("onRequestPermissionsResult: isGranted {}", isGranted);
+        if (log.isDebugEnabled()) log.debug("onRequestPermissionsResult: isGranted {}", isGranted);
         errorMessage = R.string.error; // be sure it is initialized
         switch (requestCode) {
             case PERM_REQ_RW:
                 if (Build.VERSION.SDK_INT >= 33) { // API>=33
-                    log.debug("onRequestPermissionsResult: PERM_REQ_RW API>=33 request READ_MEDIA_VIDEO");
+                    if (log.isDebugEnabled()) log.debug("onRequestPermissionsResult: PERM_REQ_RW API>=33 request READ_MEDIA_VIDEO");
                     permissionToRequest = Manifest.permission.READ_MEDIA_VIDEO;
                     action = "android.intent.action.MANAGE_APP_PERMISSIONS";
                     errorMessage = R.string.error_permission_storage;
                 } else {
                     if (Build.VERSION.SDK_INT <= 29) { // API<=29
                         // between 23<=API<=29 WRITE_EXTERNAL_STORAGE grants READ_EXTERNAL_STORAGE
-                        log.debug("onRequestPermissionsResult: PERM_REQ_RW 23<=API<30 request WRITE_EXTERNAL_STORAGE");
+                        if (log.isDebugEnabled()) log.debug("onRequestPermissionsResult: PERM_REQ_RW 23<=API<30 request WRITE_EXTERNAL_STORAGE");
                         permissionToRequest = android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
                         action = "android.intent.action.MANAGE_APP_PERMISSIONS";
                         errorMessage = R.string.error_permission_storage;
                     } else { // 30<=API<=32
                         // between 30<=API<=32 only READ_EXTERNAL_STORAGE is possible
-                        log.debug("onRequestPermissionsResult: PERM_REQ_RW 30<=API<33 request READ_EXTERNAL_STORAGE");
+                        if (log.isDebugEnabled()) log.debug("onRequestPermissionsResult: PERM_REQ_RW 30<=API<33 request READ_EXTERNAL_STORAGE");
                         permissionToRequest = android.Manifest.permission.READ_EXTERNAL_STORAGE;
                         action = "android.intent.action.MANAGE_APP_PERMISSIONS";
                         errorMessage = R.string.error_permission_storage;
@@ -297,7 +297,7 @@ public class PermissionChecker {
                 }
                 break;
             case PERM_REQ_MANAGE:
-                log.debug("configuring PERM_REQ_MANAGE");
+                if (log.isDebugEnabled()) log.debug("configuring PERM_REQ_MANAGE");
                 if(Build.VERSION.SDK_INT>=30 && hasManageExternalStoragePermission && activityToRequestManageStorageExists) { // no need to request MANAGE_EXTERNAL_STORAGE on API=30 it is auto-granted when declared in AndroidManifest but do it for consistency
                     permissionToRequest = android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
                     action = Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION;
@@ -312,9 +312,9 @@ public class PermissionChecker {
                         public void onClick(DialogInterface dialogInterface, int i) {
                             // finish();
                             isDialogDisplayed = false;
-                            log.debug("onRequestPermissionsResult: requesting permission {} with intent action {}", permissionToRequest, action);
+                            if (log.isDebugEnabled()) log.debug("onRequestPermissionsResult: requesting permission {} with intent action {}", permissionToRequest, action);
                             if (!ActivityCompat.shouldShowRequestPermissionRationale(mActivity, permissionToRequest)) {
-                                log.debug("onRequestPermissionsResult: packageName={}", mActivity.getPackageName());
+                                if (log.isDebugEnabled()) log.debug("onRequestPermissionsResult: packageName={}", mActivity.getPackageName());
                                 // try/catch dance: android dev documentation says these intents/activities are there since dawn of age but
                                 // "In some cases, a matching Activity may not exist, so ensure you safeguard against this."
                                 try {
@@ -359,17 +359,17 @@ public class PermissionChecker {
                     }
             ).setCancelable(false).show();
         } else {
-            log.debug("onRequestPermissionsResult: permission granted, launch scan");
+            if (log.isDebugEnabled()) log.debug("onRequestPermissionsResult: permission granted, launch scan");
             launchScan();
         }
     }
 
     public void launchScan() {
-        log.debug("launchScan: launching scan");
+        if (log.isDebugEnabled()) log.debug("launchScan: launching scan");
         // inform import service about the event
         Intent serviceIntent = new Intent(mActivity, VideoStoreImportService.class);
         ArchosUtils.addBreadcrumb(SentryLevel.INFO, "PermissionChecker.launchScan", "intent VideoStoreImportService action ACTION_VIDEO_SCANNER_STORAGE_PERMISSION_GRANTED");
-        log.debug("launchScan: PermissionChecker.launchScan intent VideoStoreImportService action ACTION_VIDEO_SCANNER_STORAGE_PERMISSION_GRANTED");
+        if (log.isDebugEnabled()) log.debug("launchScan: PermissionChecker.launchScan intent VideoStoreImportService action ACTION_VIDEO_SCANNER_STORAGE_PERMISSION_GRANTED");
         serviceIntent.setAction(ArchosMediaIntent.ACTION_VIDEO_SCANNER_STORAGE_PERMISSION_GRANTED);
         mActivity.startService(serviceIntent);
         if (mListener != null)

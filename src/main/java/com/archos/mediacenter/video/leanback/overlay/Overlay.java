@@ -50,7 +50,7 @@ public class Overlay {
      * @param fragment
      */
     public Overlay(Fragment fragment) {
-        log.debug("Overlay: creation");
+        if (log.isDebugEnabled()) log.debug("Overlay: creation");
         if (!fragment.isAdded()) {
             throw new IllegalStateException("Overlay must be created once the fragment is added!");
         }
@@ -89,7 +89,7 @@ public class Overlay {
      * MUST be called in the fragment onResume method
      */
     public void destroy() {
-        log.debug("destroy");
+        if (log.isDebugEnabled()) log.debug("destroy");
         mScanProgress.destroy();
         mClock.destroy();
     }
@@ -98,7 +98,7 @@ public class Overlay {
      * MUST be called in the fragment onDestroyView method
      */
     public void resume() {
-        log.debug("resume");
+        if (log.isDebugEnabled()) log.debug("resume");
         mScanProgress.resume();
         mClock.resume();
     }
@@ -107,7 +107,7 @@ public class Overlay {
      * MUST be called in the fragment onPause method
      */
     public void pause() {
-        log.debug("pause");
+        if (log.isDebugEnabled()) log.debug("pause");
         mScanProgress.pause();
         mClock.pause();
     }
@@ -116,12 +116,12 @@ public class Overlay {
      * To be called whenever you want to hide the overlay widgets
      */
     public void hide() {
-        log.debug("hide");
+        if (log.isDebugEnabled()) log.debug("hide");
         mOverlayRoot.setVisibility(View.GONE);
     }
 
     public void show() {
-        log.debug("show");
+        if (log.isDebugEnabled()) log.debug("show");
         mOverlayRoot.setVisibility(View.VISIBLE);
     }
 }

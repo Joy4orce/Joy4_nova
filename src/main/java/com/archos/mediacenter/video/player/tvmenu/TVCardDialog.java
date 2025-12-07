@@ -142,7 +142,7 @@ public class TVCardDialog extends FrameLayout implements TVSlaveView  {
     }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        log.debug("onKeyDown keyCode:{}", keyCode);
+        if (log.isDebugEnabled()) log.debug("onKeyDown keyCode:{}", keyCode);
         //click mapping
         if (keyCode==KeyEvent.KEYCODE_DPAD_CENTER && ocl != null) {
             this.ocl.onClick(this);
@@ -219,7 +219,7 @@ public class TVCardDialog extends FrameLayout implements TVSlaveView  {
         super.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                log.debug("onFocusChange hasFocus:{}", hasFocus);
+                if (log.isDebugEnabled()) log.debug("onFocusChange hasFocus:{}", hasFocus);
                 ofcl.onFocusChange(v, hasFocus);
                 if (ocl == null && others.size() > 0)
                     others.get(0).requestFocus();

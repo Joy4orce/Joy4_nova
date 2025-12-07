@@ -75,7 +75,7 @@ public class MediaLibraryBackupService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        log.debug("onCreate");
+        if (log.isDebugEnabled()) log.debug("onCreate");
 
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -98,7 +98,7 @@ public class MediaLibraryBackupService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        log.debug("onStartCommand: intent={}", intent);
+        if (log.isDebugEnabled()) log.debug("onStartCommand: intent={}", intent);
 
         //startForeground(NOTIFICATION_ID, nb.build());
         if (intent != null) {
@@ -162,7 +162,7 @@ public class MediaLibraryBackupService extends Service {
                 showToast(getString(R.string.media_library_import_success));
 
                 // Wait 2 seconds for user to see success message, then restart app
-                log.debug("startImport: waiting 2 seconds before restarting app");
+                if (log.isDebugEnabled()) log.debug("startImport: waiting 2 seconds before restarting app");
                 Thread.sleep(2000);
 
                 restartApplication();
@@ -178,7 +178,7 @@ public class MediaLibraryBackupService extends Service {
     }
 
     private String exportMediaLibrary() throws IOException {
-        log.debug("exportMediaLibrary: starting full library export");
+        if (log.isDebugEnabled()) log.debug("exportMediaLibrary: starting full library export");
 
         // Get export directory
         File exportDir = getExternalFilesDir(null);
@@ -187,7 +187,7 @@ public class MediaLibraryBackupService extends Service {
         }
 
         // Flush database WAL to ensure consistency
-        log.debug("exportMediaLibrary: flushing database WAL");
+        if (log.isDebugEnabled()) log.debug("exportMediaLibrary: flushing database WAL");
         flushDatabaseWAL();
 
         // Create export zip file (fixed name, will overwrite previous backup)
@@ -195,24 +195,24 @@ public class MediaLibraryBackupService extends Service {
 
         // Delete old backup if it exists
         if (zipFile.exists()) {
-            log.debug("exportMediaLibrary: deleting existing backup file: {}", zipFile.getAbsolutePath());
+            if (log.isDebugEnabled()) log.debug("exportMediaLibrary: deleting existing backup file: {}", zipFile.getAbsolutePath());
             if (!zipFile.delete()) {
                 log.warn("exportMediaLibrary: failed to delete existing backup file");
             }
         }
 
-        log.debug("exportMediaLibrary: creating new backup file: {}", zipFile.getAbsolutePath());
+        if (log.isDebugEnabled()) log.debug("exportMediaLibrary: creating new backup file: {}", zipFile.getAbsolutePath());
 
         try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFile))) {
             // Export database version first
             int dbVersion = VideoOpenHelper.getDatabaseVersion();
-            log.debug("exportMediaLibrary: adding database version={}", dbVersion);
+            if (log.isDebugEnabled()) log.debug("exportMediaLibrary: adding database version={}", dbVersion);
             addVersionToZip(zos, dbVersion);
 
             // Export media database
             File dbFile = getDatabasePath(DATABASE_NAME);
             if (dbFile.exists()) {
-                log.debug("exportMediaLibrary: exporting media database");
+                if (log.isDebugEnabled()) log.debug("exportMediaLibrary: exporting media database");
                 addFileToZip(zos, dbFile, DATABASE_NAME);
             } else {
                 log.warn("exportMediaLibrary: media database file not found: {}", dbFile.getAbsolutePath());
@@ -221,28 +221,28 @@ public class MediaLibraryBackupService extends Service {
             // Export credentials database (SMB/FTP/SFTP/WebDAV credentials)
             File credentialsDbFile = getDatabasePath(CREDENTIALS_DB_NAME);
             if (credentialsDbFile.exists()) {
-                log.debug("exportMediaLibrary: exporting credentials database");
+                if (log.isDebugEnabled()) log.debug("exportMediaLibrary: exporting credentials database");
                 addFileToZip(zos, credentialsDbFile, CREDENTIALS_DB_NAME);
             } else {
-                log.debug("exportMediaLibrary: credentials database not found (no saved credentials)");
+                if (log.isDebugEnabled()) log.debug("exportMediaLibrary: credentials database not found (no saved credentials)");
             }
 
             // Export shortcuts database (network shortcuts/bookmarks)
             File shortcutsDbFile = getDatabasePath(SHORTCUTS_DB_NAME);
             if (shortcutsDbFile.exists()) {
-                log.debug("exportMediaLibrary: exporting shortcuts database");
+                if (log.isDebugEnabled()) log.debug("exportMediaLibrary: exporting shortcuts database");
                 addFileToZip(zos, shortcutsDbFile, SHORTCUTS_DB_NAME);
             } else {
-                log.debug("exportMediaLibrary: shortcuts database not found (no saved shortcuts)");
+                if (log.isDebugEnabled()) log.debug("exportMediaLibrary: shortcuts database not found (no saved shortcuts)");
             }
 
             // Export shortcuts2 database (newer network shortcuts/bookmarks)
             File shortcuts2DbFile = getDatabasePath(SHORTCUTS2_DB_NAME);
             if (shortcuts2DbFile.exists()) {
-                log.debug("exportMediaLibrary: exporting shortcuts2 database");
+                if (log.isDebugEnabled()) log.debug("exportMediaLibrary: exporting shortcuts2 database");
                 addFileToZip(zos, shortcuts2DbFile, SHORTCUTS2_DB_NAME);
             } else {
-                log.debug("exportMediaLibrary: shortcuts2 database not found (no saved shortcuts)");
+                if (log.isDebugEnabled()) log.debug("exportMediaLibrary: shortcuts2 database not found (no saved shortcuts)");
             }
 
             // Export poster directory
@@ -264,12 +264,12 @@ public class MediaLibraryBackupService extends Service {
             }
         }
 
-        log.debug("exportMediaLibrary: export completed to {}", zipFile.getAbsolutePath());
+        if (log.isDebugEnabled()) log.debug("exportMediaLibrary: export completed to {}", zipFile.getAbsolutePath());
         return zipFile.getAbsolutePath();
     }
 
     private void importMediaLibrary(String importFilePath) throws IOException {
-        log.debug("importMediaLibrary: starting FULL REPLACEMENT import from {}", importFilePath);
+        if (log.isDebugEnabled()) log.debug("importMediaLibrary: starting FULL REPLACEMENT import from {}", importFilePath);
 
         if (importFilePath == null || importFilePath.isEmpty()) {
             throw new IOException("Import file path is null or empty");
@@ -281,7 +281,7 @@ public class MediaLibraryBackupService extends Service {
         }
 
         // STEP 1: Check database version compatibility
-        log.debug("importMediaLibrary: checking database version compatibility");
+        if (log.isDebugEnabled()) log.debug("importMediaLibrary: checking database version compatibility");
         int backupDbVersion = -1;
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
             ZipEntry entry;
@@ -301,7 +301,7 @@ public class MediaLibraryBackupService extends Service {
         }
 
         int currentDbVersion = VideoOpenHelper.getDatabaseVersion();
-        log.debug("importMediaLibrary: backup DB version={}, current DB version={}", backupDbVersion, currentDbVersion);
+        if (log.isDebugEnabled()) log.debug("importMediaLibrary: backup DB version={}, current DB version={}", backupDbVersion, currentDbVersion);
 
         if (backupDbVersion == -1) {
             throw new IOException("Backup file does not contain version information");
@@ -313,18 +313,18 @@ public class MediaLibraryBackupService extends Service {
         }
 
         // STEP 2: FULL CLEANUP - Delete all existing data
-        log.debug("importMediaLibrary: performing FULL CLEANUP of existing data");
+        if (log.isDebugEnabled()) log.debug("importMediaLibrary: performing FULL CLEANUP of existing data");
         cleanupExistingData();
 
         // STEP 3: Extract all files from backup
-        log.debug("importMediaLibrary: extracting files from backup");
+        if (log.isDebugEnabled()) log.debug("importMediaLibrary: extracting files from backup");
         try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile))) {
             ZipEntry entry;
             byte[] buffer = new byte[BUFFER_SIZE];
 
             while ((entry = zis.getNextEntry()) != null) {
                 String fileName = entry.getName();
-                log.debug("importMediaLibrary: extracting {}", fileName);
+                if (log.isDebugEnabled()) log.debug("importMediaLibrary: extracting {}", fileName);
 
                 // Skip version file
                 if (fileName.equals(VERSION_FILE)) {
@@ -373,21 +373,21 @@ public class MediaLibraryBackupService extends Service {
             }
         }
 
-        log.debug("importMediaLibrary: FULL REPLACEMENT import completed successfully");
+        if (log.isDebugEnabled()) log.debug("importMediaLibrary: FULL REPLACEMENT import completed successfully");
     }
 
     private void flushDatabaseWAL() {
         try {
             File dbFile = getDatabasePath(DATABASE_NAME);
             if (dbFile.exists()) {
-                log.debug("flushDatabaseWAL: opening database for WAL checkpoint");
+                if (log.isDebugEnabled()) log.debug("flushDatabaseWAL: opening database for WAL checkpoint");
                 SQLiteDatabase db = SQLiteDatabase.openDatabase(dbFile.getAbsolutePath(), null,
                         SQLiteDatabase.OPEN_READWRITE);
                 // Checkpoint WAL to main database file
-                log.debug("flushDatabaseWAL: executing PRAGMA wal_checkpoint(FULL)");
+                if (log.isDebugEnabled()) log.debug("flushDatabaseWAL: executing PRAGMA wal_checkpoint(FULL)");
                 db.rawQuery("PRAGMA wal_checkpoint(FULL)", null).close();
                 db.close();
-                log.debug("flushDatabaseWAL: database WAL flushed successfully");
+                if (log.isDebugEnabled()) log.debug("flushDatabaseWAL: database WAL flushed successfully");
             }
         } catch (Exception e) {
             log.warn("flushDatabaseWAL: failed to flush WAL, continuing anyway", e);
@@ -395,7 +395,7 @@ public class MediaLibraryBackupService extends Service {
     }
 
     private void addVersionToZip(ZipOutputStream zos, int version) throws IOException {
-        log.debug("addVersionToZip: adding version={}", version);
+        if (log.isDebugEnabled()) log.debug("addVersionToZip: adding version={}", version);
 
         ZipEntry zipEntry = new ZipEntry(VERSION_FILE);
         zos.putNextEntry(zipEntry);
@@ -409,7 +409,7 @@ public class MediaLibraryBackupService extends Service {
     }
 
     private void cleanupExistingData() {
-        log.debug("cleanupExistingData: DELETING all existing media library data");
+        if (log.isDebugEnabled()) log.debug("cleanupExistingData: DELETING all existing media library data");
 
         // Delete media database files
         File dbFile = getDatabasePath(DATABASE_NAME);
@@ -417,15 +417,15 @@ public class MediaLibraryBackupService extends Service {
         File dbShmFile = new File(dbFile.getAbsolutePath() + "-shm");
 
         if (dbFile.exists()) {
-            log.debug("cleanupExistingData: deleting {}", dbFile.getAbsolutePath());
+            if (log.isDebugEnabled()) log.debug("cleanupExistingData: deleting {}", dbFile.getAbsolutePath());
             dbFile.delete();
         }
         if (dbWalFile.exists()) {
-            log.debug("cleanupExistingData: deleting {}", dbWalFile.getAbsolutePath());
+            if (log.isDebugEnabled()) log.debug("cleanupExistingData: deleting {}", dbWalFile.getAbsolutePath());
             dbWalFile.delete();
         }
         if (dbShmFile.exists()) {
-            log.debug("cleanupExistingData: deleting {}", dbShmFile.getAbsolutePath());
+            if (log.isDebugEnabled()) log.debug("cleanupExistingData: deleting {}", dbShmFile.getAbsolutePath());
             dbShmFile.delete();
         }
 
@@ -435,15 +435,15 @@ public class MediaLibraryBackupService extends Service {
         File credentialsDbShmFile = new File(credentialsDbFile.getAbsolutePath() + "-shm");
 
         if (credentialsDbFile.exists()) {
-            log.debug("cleanupExistingData: deleting {}", credentialsDbFile.getAbsolutePath());
+            if (log.isDebugEnabled()) log.debug("cleanupExistingData: deleting {}", credentialsDbFile.getAbsolutePath());
             credentialsDbFile.delete();
         }
         if (credentialsDbWalFile.exists()) {
-            log.debug("cleanupExistingData: deleting {}", credentialsDbWalFile.getAbsolutePath());
+            if (log.isDebugEnabled()) log.debug("cleanupExistingData: deleting {}", credentialsDbWalFile.getAbsolutePath());
             credentialsDbWalFile.delete();
         }
         if (credentialsDbShmFile.exists()) {
-            log.debug("cleanupExistingData: deleting {}", credentialsDbShmFile.getAbsolutePath());
+            if (log.isDebugEnabled()) log.debug("cleanupExistingData: deleting {}", credentialsDbShmFile.getAbsolutePath());
             credentialsDbShmFile.delete();
         }
 
@@ -453,15 +453,15 @@ public class MediaLibraryBackupService extends Service {
         File shortcutsDbShmFile = new File(shortcutsDbFile.getAbsolutePath() + "-shm");
 
         if (shortcutsDbFile.exists()) {
-            log.debug("cleanupExistingData: deleting {}", shortcutsDbFile.getAbsolutePath());
+            if (log.isDebugEnabled()) log.debug("cleanupExistingData: deleting {}", shortcutsDbFile.getAbsolutePath());
             shortcutsDbFile.delete();
         }
         if (shortcutsDbWalFile.exists()) {
-            log.debug("cleanupExistingData: deleting {}", shortcutsDbWalFile.getAbsolutePath());
+            if (log.isDebugEnabled()) log.debug("cleanupExistingData: deleting {}", shortcutsDbWalFile.getAbsolutePath());
             shortcutsDbWalFile.delete();
         }
         if (shortcutsDbShmFile.exists()) {
-            log.debug("cleanupExistingData: deleting {}", shortcutsDbShmFile.getAbsolutePath());
+            if (log.isDebugEnabled()) log.debug("cleanupExistingData: deleting {}", shortcutsDbShmFile.getAbsolutePath());
             shortcutsDbShmFile.delete();
         }
 
@@ -471,40 +471,40 @@ public class MediaLibraryBackupService extends Service {
         File shortcuts2DbShmFile = new File(shortcuts2DbFile.getAbsolutePath() + "-shm");
 
         if (shortcuts2DbFile.exists()) {
-            log.debug("cleanupExistingData: deleting {}", shortcuts2DbFile.getAbsolutePath());
+            if (log.isDebugEnabled()) log.debug("cleanupExistingData: deleting {}", shortcuts2DbFile.getAbsolutePath());
             shortcuts2DbFile.delete();
         }
         if (shortcuts2DbWalFile.exists()) {
-            log.debug("cleanupExistingData: deleting {}", shortcuts2DbWalFile.getAbsolutePath());
+            if (log.isDebugEnabled()) log.debug("cleanupExistingData: deleting {}", shortcuts2DbWalFile.getAbsolutePath());
             shortcuts2DbWalFile.delete();
         }
         if (shortcuts2DbShmFile.exists()) {
-            log.debug("cleanupExistingData: deleting {}", shortcuts2DbShmFile.getAbsolutePath());
+            if (log.isDebugEnabled()) log.debug("cleanupExistingData: deleting {}", shortcuts2DbShmFile.getAbsolutePath());
             shortcuts2DbShmFile.delete();
         }
 
         // Delete all poster files
         File posterDir = MediaScraper.getPosterDirectory(this);
         if (posterDir.exists()) {
-            log.debug("cleanupExistingData: deleting all files in {}", posterDir.getAbsolutePath());
+            if (log.isDebugEnabled()) log.debug("cleanupExistingData: deleting all files in {}", posterDir.getAbsolutePath());
             deleteDirectoryContents(posterDir);
         }
 
         // Delete all backdrop files
         File backdropDir = MediaScraper.getBackdropDirectory(this);
         if (backdropDir.exists()) {
-            log.debug("cleanupExistingData: deleting all files in {}", backdropDir.getAbsolutePath());
+            if (log.isDebugEnabled()) log.debug("cleanupExistingData: deleting all files in {}", backdropDir.getAbsolutePath());
             deleteDirectoryContents(backdropDir);
         }
 
         // Delete all picture files
         File pictureDir = MediaScraper.getPictureDirectory(this);
         if (pictureDir.exists()) {
-            log.debug("cleanupExistingData: deleting all files in {}", pictureDir.getAbsolutePath());
+            if (log.isDebugEnabled()) log.debug("cleanupExistingData: deleting all files in {}", pictureDir.getAbsolutePath());
             deleteDirectoryContents(pictureDir);
         }
 
-        log.debug("cleanupExistingData: cleanup completed");
+        if (log.isDebugEnabled()) log.debug("cleanupExistingData: cleanup completed");
     }
 
     private void deleteDirectoryContents(File dir) {
@@ -524,7 +524,7 @@ public class MediaLibraryBackupService extends Service {
     }
 
     private void addFileToZip(ZipOutputStream zos, File file, String zipEntryName) throws IOException {
-        log.debug("addFileToZip: {}", zipEntryName);
+        if (log.isDebugEnabled()) log.debug("addFileToZip: {}", zipEntryName);
 
         ZipEntry zipEntry = new ZipEntry(zipEntryName);
         zos.putNextEntry(zipEntry);
@@ -541,7 +541,7 @@ public class MediaLibraryBackupService extends Service {
     }
 
     private void addDirectoryToZip(ZipOutputStream zos, File dir, String zipDirName) throws IOException {
-        log.debug("addDirectoryToZip: {}", zipDirName);
+        if (log.isDebugEnabled()) log.debug("addDirectoryToZip: {}", zipDirName);
 
         File[] files = dir.listFiles();
         if (files == null) {
@@ -566,7 +566,7 @@ public class MediaLibraryBackupService extends Service {
     }
 
     private void restartApplication() {
-        log.debug("restartApplication: restarting app after import");
+        if (log.isDebugEnabled()) log.debug("restartApplication: restarting app after import");
 
         try {
             // Get the main activity intent
@@ -595,7 +595,7 @@ public class MediaLibraryBackupService extends Service {
                     );
                 }
 
-                log.debug("restartApplication: app restart scheduled, exiting process");
+                if (log.isDebugEnabled()) log.debug("restartApplication: app restart scheduled, exiting process");
 
                 // Exit the current process
                 System.exit(0);
@@ -607,7 +607,7 @@ public class MediaLibraryBackupService extends Service {
 
     @Override
     public void onDestroy() {
-        log.debug("onDestroy");
+        if (log.isDebugEnabled()) log.debug("onDestroy");
         super.onDestroy();
     }
 }

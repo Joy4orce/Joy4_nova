@@ -72,11 +72,11 @@ public class AudioDelayTVPicker extends AudioDelayPickerAbstract implements TVSl
     private final AudioDelayHandler mHandler = new AudioDelayHandler(this);
 
     private void handleMessageInternal(Message msg) {
-        log.debug("handleMessage: {}", msg.what);
+        if (log.isDebugEnabled()) log.debug("handleMessage: {}", msg.what);
         switch(msg.what) {
             case CHANGE_DELAY:
                 if (mOnDelayChangedListener != null) {
-                    log.debug("handleMessage: apply delay change {}", getDelay());
+                    if (log.isDebugEnabled()) log.debug("handleMessage: apply delay change {}", getDelay());
                     mOnDelayChangedListener.onAudioDelayChanged(this, getDelay());
                 } else {
                     log.error("handleMessage: mOnDelayChangedListener is null");
@@ -106,7 +106,7 @@ public class AudioDelayTVPicker extends AudioDelayPickerAbstract implements TVSl
     }
 
     public void init() {
-        log.debug("init");
+        if (log.isDebugEnabled()) log.debug("init");
         setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -119,7 +119,7 @@ public class AudioDelayTVPicker extends AudioDelayPickerAbstract implements TVSl
     }
 
     public void setFocus(boolean hasFocus) {
-        log.debug("setFocus: {}", hasFocus);
+        if (log.isDebugEnabled()) log.debug("setFocus: {}", hasFocus);
         if (hasFocus) {
             this.setBackgroundResource(R.color.video_info_next_prev_button_focused);
         } else {
@@ -151,11 +151,11 @@ public class AudioDelayTVPicker extends AudioDelayPickerAbstract implements TVSl
     }
 
     public void handleMessage(Message msg) {
-        log.debug("handleMessage: {}", msg.what);
+        if (log.isDebugEnabled()) log.debug("handleMessage: {}", msg.what);
         switch(msg.what) {
             case CHANGE_DELAY:
                 if (mOnDelayChangedListener != null) {
-                    log.debug("handleMessage: apply delay change {}", getDelay());
+                    if (log.isDebugEnabled()) log.debug("handleMessage: apply delay change {}", getDelay());
                     mOnDelayChangedListener.onAudioDelayChanged(this, getDelay());
                 } else {
                     log.error("handleMessage: mOnDelayChangedListener is null");
@@ -166,7 +166,7 @@ public class AudioDelayTVPicker extends AudioDelayPickerAbstract implements TVSl
 
     @Override
     public void onDetachedFromWindow() {
-        log.debug("onDetachedFromWindow");
+        if (log.isDebugEnabled()) log.debug("onDetachedFromWindow");
         mHandler.removeCallbacksAndMessages(null);
         if (mOnDelayChangedListener != null) {
             mOnDelayChangedListener.onAudioDelayChanged(this, getDelay());
@@ -184,7 +184,7 @@ public class AudioDelayTVPicker extends AudioDelayPickerAbstract implements TVSl
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch(keyCode) {
             case KeyEvent.KEYCODE_DPAD_RIGHT:
-                log.debug("onKeyDown: right key");
+                if (log.isDebugEnabled()) log.debug("onKeyDown: right key");
                 int delay = (int) (getDelay() + mStep - (getDelay() + mStep) % mStep);
                 updateNextDrawable(hasMax && delay >= mMax ? -1 : R.drawable.arrow_right_pressed);
                 updatePreviousDrawable(hasMin && delay < mMin ? -1 : R.drawable.arrow_left);
@@ -192,7 +192,7 @@ public class AudioDelayTVPicker extends AudioDelayPickerAbstract implements TVSl
                 changeAudioDelay();
                 return true;
             case KeyEvent.KEYCODE_DPAD_LEFT:
-                log.debug("onKeyDown: left key");
+                if (log.isDebugEnabled()) log.debug("onKeyDown: left key");
                 delay = (int) (getDelay() - mStep - (getDelay() - mStep) % mStep);
                 updatePreviousDrawable(hasMin && delay <= mMin ? -1 : R.drawable.arrow_left_pressed);
                 updateNextDrawable(hasMax && delay > mMax ? -1 : R.drawable.arrow_right);
@@ -201,7 +201,7 @@ public class AudioDelayTVPicker extends AudioDelayPickerAbstract implements TVSl
                 return true;
         }
         if (TVUtils.isOKKey(keyCode)) {
-            log.debug("onKeyDown: OK key");
+            if (log.isDebugEnabled()) log.debug("onKeyDown: OK key");
             if (!(hasMax && -getDelay() > mMax || hasMin && -getDelay() < mMin)) {
                 updateDelay(-getDelay());
                 changeAudioDelay();
@@ -210,21 +210,21 @@ public class AudioDelayTVPicker extends AudioDelayPickerAbstract implements TVSl
         }
 
         // else, we send it to parent
-        log.debug("onKeyDown: send to parent for keycode {}", keyCode);
+        if (log.isDebugEnabled()) log.debug("onKeyDown: send to parent for keycode {}", keyCode);
         ViewParent p;
         View v = this;
         while ((p = v.getParent()) != null) {
             if (p instanceof TVCardView) {
-                log.debug("onKeyDown: send to TVCardView");
+                if (log.isDebugEnabled()) log.debug("onKeyDown: send to TVCardView");
                 return ((TVCardView) p).onKeyDown(keyCode, event);
             } else if (p instanceof TVCardDialog) {
-                log.debug("onKeyDown: send to TVCardDialog");
+                if (log.isDebugEnabled()) log.debug("onKeyDown: send to TVCardDialog");
                 return ((TVCardDialog) p).onKeyDown(keyCode, event);
             } else if (p instanceof View) {
-                log.debug("onKeyDown: send to parent view");
+                if (log.isDebugEnabled()) log.debug("onKeyDown: send to parent view");
                 v = (View) p;
             } else {
-                log.debug("onKeyDown: break");
+                if (log.isDebugEnabled()) log.debug("onKeyDown: break");
                 break;
             }
         }
@@ -307,7 +307,7 @@ public class AudioDelayTVPicker extends AudioDelayPickerAbstract implements TVSl
 
     @Override
     public void setSlaveView(View v) {
-        log.debug("setSlaveView");
+        if (log.isDebugEnabled()) log.debug("setSlaveView");
         // TODO Auto-generated method stub
         if(v instanceof AudioDelayTVPicker){
             slaveView = (AudioDelayTVPicker) v;
@@ -336,7 +336,7 @@ public class AudioDelayTVPicker extends AudioDelayPickerAbstract implements TVSl
 
     @Override
     public void init(int delay, OnAudioDelayChangedListener onDelayChangedListener) {
-        log.debug("init: delay={}", delay);
+        if (log.isDebugEnabled()) log.debug("init: delay={}", delay);
         super.init(delay, onDelayChangedListener);
         updateNextDrawable((getDelay() != mMax || !hasMax) ? R.drawable.arrow_right : -1);
         updatePreviousDrawable((getDelay() != mMin || !hasMin) ? R.drawable.arrow_left : -1);

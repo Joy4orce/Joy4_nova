@@ -208,7 +208,7 @@ public abstract class ServerCredentialsDialog extends DialogFragment {
 
                 // username can be empty with samba guest shares (UriUtils.requiresDomain(type))
                 if (username.equals("") && ! UriUtils.requiresDomain(type)) {
-                    log.debug("onClick: invalid credential, username empty and not smb protocol");
+                    if (log.isDebugEnabled()) log.debug("onClick: invalid credential, username empty and not smb protocol");
                     validUri = false;
                 }
 
@@ -230,7 +230,7 @@ public abstract class ServerCredentialsDialog extends DialogFragment {
                     validUri = false;
                 }
 
-                log.debug("onClick: scheme={}, username={}, domain={}, port={}, remote={}, path={}; type={}, validUri={}", scheme, username, domain, port, address, path, type, validUri);
+                if (log.isDebugEnabled()) log.debug("onClick: scheme={}, username={}, domain={}, port={}, remote={}, path={}; type={}, validUri={}", scheme, username, domain, port, address, path, type, validUri);
 
                 if(validUri){
 

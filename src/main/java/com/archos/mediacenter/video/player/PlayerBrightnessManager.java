@@ -72,7 +72,7 @@ public class PlayerBrightnessManager implements DefaultLifecycleObserver {
     }
 
     public static float getBrightness(Window window) { // get screen brightness float value between 0 and 1
-        log.debug("getBrightness: {}", window.getAttributes().screenBrightness);
+        if (log.isDebugEnabled()) log.debug("getBrightness: {}", window.getAttributes().screenBrightness);
         return window.getAttributes().screenBrightness;
     }
 
@@ -85,7 +85,7 @@ public class PlayerBrightnessManager implements DefaultLifecycleObserver {
     public static void setLinearBrightness(int level, boolean direction, Window window) {
         float newBrightness = levelToBrightnessGamma(level);
         float curBrightness = getBrightness(window);
-        log.debug("setLinearBrightness: level={}, direction={}, curBrightness={}, newBrightness={}", level, direction, curBrightness, newBrightness);
+        if (log.isDebugEnabled()) log.debug("setLinearBrightness: level={}, direction={}, curBrightness={}, newBrightness={}", level, direction, curBrightness, newBrightness);
         WindowManager.LayoutParams layoutParams = window.getAttributes();
         // only apply change is it goes into the right increase/decrease direction to avoid glitch
         if (direction) {
@@ -97,7 +97,7 @@ public class PlayerBrightnessManager implements DefaultLifecycleObserver {
                 saveCurrentBrightness((Activity) window.getContext(),(int) (newBrightness * 255f));
                 mBrightness = level;
             } else {
-                log.debug("setLinearBrightness: not applying change, because increasing newBrightness={} < curBrightness={}", newBrightness, curBrightness);
+                if (log.isDebugEnabled()) log.debug("setLinearBrightness: not applying change, because increasing newBrightness={} < curBrightness={}", newBrightness, curBrightness);
             }
         } else {
             if (newBrightness < curBrightness) {
@@ -107,7 +107,7 @@ public class PlayerBrightnessManager implements DefaultLifecycleObserver {
                 saveCurrentBrightness((Activity) window.getContext(),(int) (newBrightness * 255f));
                 mBrightness = level;
             } else {
-                log.debug("setLinearBrightness: not applying change, because decreasing newBrightness={} > curBrightness={}", newBrightness, curBrightness);
+                if (log.isDebugEnabled()) log.debug("setLinearBrightness: not applying change, because decreasing newBrightness={} > curBrightness={}", newBrightness, curBrightness);
             }
         }
     }

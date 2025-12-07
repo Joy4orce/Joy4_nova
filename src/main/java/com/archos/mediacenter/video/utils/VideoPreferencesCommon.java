@@ -439,7 +439,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         }
         if(Integer.parseInt(preferences.getString("force_audio_passthrough_multiple","-1"))>0){ // passthrough is set, reset audio_speed
             // if passthrough is set audio_speed is reset to 1.0f
-            log.debug("resetPassthroughPref: audio_speed to 1.0f since passthrough is {}", Integer.parseInt(preferences.getString("force_audio_passthrough_multiple","-1")));
+            if (log.isDebugEnabled()) log.debug("resetPassthroughPref: audio_speed to 1.0f since passthrough is {}", Integer.parseInt(preferences.getString("force_audio_passthrough_multiple","-1")));
             preferences.edit().putFloat("save_audio_speed_setting_pref_key", 1.0f).apply();
         }
     }
@@ -518,7 +518,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             mSharedPreferences.edit().putString("force_audio_passthrough_multiple", "0").apply();
             log.info("removeMode1FromPassthroughOptions: Mode 1 was selected but not supported, resetting to mode 0");
         } else {
-            log.debug("removeMode1FromPassthroughOptions: Mode 1 removed from options (mode 2 and 3 preserved with original values)");
+            if (log.isDebugEnabled()) log.debug("removeMode1FromPassthroughOptions: Mode 1 removed from options (mode 2 and 3 preserved with original values)");
         }
     }
 
@@ -897,7 +897,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             Set<String> newValues = new HashSet<>(currentValues);
             newValues.add(Locale.getDefault().getLanguage());
             mSubtitlesDownloadLanguagePreferences.setValues(newValues);
-            log.debug("onCreatePreferences: getValues {}", mSubtitlesDownloadLanguagePreferences.getValues());
+            if (log.isDebugEnabled()) log.debug("onCreatePreferences: getValues {}", mSubtitlesDownloadLanguagePreferences.getValues());
         }
         mSubtitlesFavLangPreferences.setEntries(listEntries);
         mSubtitlesFavLangPreferences.setEntryValues(listEntriesValues);
@@ -930,17 +930,17 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         // set default value of the ListPreference to the System first entry
         UiSystemLanguageIndex = findLanguageIndex(UiLanguageListEntryValues, getPreferenceManager().getSharedPreferences().getString(KEY_UI_LANG, KEY_UI_LANG_SYSTEM));
         if (UiSystemLanguageIndex>=0) mUiLang.setValueIndex(UiSystemLanguageIndex);
-        log.debug("onCreatePreferences: mUiLang UiSystemLanguageIndex {}", UiSystemLanguageIndex);
+        if (log.isDebugEnabled()) log.debug("onCreatePreferences: mUiLang UiSystemLanguageIndex {}", UiSystemLanguageIndex);
 
         // Update summary to reflect the current setting
         String selectedLocale = getPreferenceManager().getSharedPreferences().getString(KEY_UI_LANG, KEY_UI_LANG_SYSTEM);
-        log.debug("onCreatePreferences: mUiLang selectedLocale {}", selectedLocale);
+        if (log.isDebugEnabled()) log.debug("onCreatePreferences: mUiLang selectedLocale {}", selectedLocale);
         mUiLang.setSummary(getLocaleDisplayName(selectedLocale));
         mUiLang.setOnPreferenceChangeListener((preference, newValue) -> {
             String newLocale = (String) newValue;
             // modify mUiLang summary to concatenate getLocaleDisplayName(newLocale)
             mUiLang.setSummary(getLocaleDisplayName(newLocale));
-            log.debug("onCreatePreferences: mUiLang newLocale {}", newLocale);
+            if (log.isDebugEnabled()) log.debug("onCreatePreferences: mUiLang newLocale {}", newLocale);
             CustomApplication.setLocale(newLocale, getResources());
             // commit all the settings changes before restarting the activity
             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getContext()).edit();
@@ -965,7 +965,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         mHanlder = new Handler();
         mTraktSigninPreference = (TraktSigninDialogPreference) findPreference(KEY_TRAKT_SIGNIN);
         if(mTraktSigninPreference!= null && savedInstanceState!=null) {
-            log.debug("onCreatePreferences: closing mTraktSigninPreference dialog to prevent leaked window");
+            if (log.isDebugEnabled()) log.debug("onCreatePreferences: closing mTraktSigninPreference dialog to prevent leaked window");
             // close dialog to prevent leaked window
             mTraktSigninPreference.showDialog(savedInstanceState.getBoolean(LOGIN_DIALOG, false));
         }

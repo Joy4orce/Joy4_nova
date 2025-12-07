@@ -99,7 +99,7 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        log.debug("onViewCreated");
+        if (log.isDebugEnabled()) log.debug("onViewCreated");
         super.onViewCreated(view, savedInstanceState);
         mOverlay = new Overlay(this);
 
@@ -122,28 +122,28 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
 
     @Override
     public void onDestroyView() {
-        log.debug("onDestroyView");
+        if (log.isDebugEnabled()) log.debug("onDestroyView");
         mOverlay.destroy();
         super.onDestroyView();
     }
 
     @Override
     public void onResume() {
-        log.debug("onResume");
+        if (log.isDebugEnabled()) log.debug("onResume");
         super.onResume();
         mOverlay.resume();
     }
 
     @Override
     public void onPause() {
-        log.debug("onPause");
+        if (log.isDebugEnabled()) log.debug("onPause");
         super.onPause();
         mOverlay.pause();
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        log.debug("onActivityCreated");
+        if (log.isDebugEnabled()) log.debug("onActivityCreated");
         super.onActivityCreated(savedInstanceState);
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -199,7 +199,7 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        log.debug("onCreateLoader id=", id);
+        if (log.isDebugEnabled()) log.debug("onCreateLoader id=", id);
         if (id == -1) {
             // List of categories with video ids per category
             return getSubsetLoader(getActivity());
@@ -211,9 +211,9 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor c) {
-        log.debug("onLoadFinished id=", cursorLoader.getId());
+        if (log.isDebugEnabled()) log.debug("onLoadFinished id=", cursorLoader.getId());
         if (getActivity() == null) {
-            log.debug("onLoadFinished: activity null exiting");
+            if (log.isDebugEnabled()) log.debug("onLoadFinished: activity null exiting");
             return;
         }
         // List of categories
@@ -244,14 +244,14 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        log.debug("onLoaderReset");
+        if (log.isDebugEnabled()) log.debug("onLoaderReset");
     }
 
     private boolean isCategoriesListModified(Cursor oldCursor, Cursor newCursor) {
 
         // Modified for sure if has different length
         if (oldCursor.getCount() != newCursor.getCount()) {
-            log.debug("Difference found in the category list (size changed)");
+            if (log.isDebugEnabled()) log.debug("Difference found in the category list (size changed)");
             return true;
         }
 
@@ -267,20 +267,20 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
             final String newName = newCursor.getString(newSubsetNameColumn);
             if (oldName != null && !oldName.equals(newName)) {
                 // difference found
-                log.debug("Difference found in the category list ({} vs {})", oldName, newName);
+                if (log.isDebugEnabled()) log.debug("Difference found in the category list ({} vs {})", oldName, newName);
                 return true;
             }
             oldCursor.moveToNext();
             newCursor.moveToNext();
         }
         // no difference found
-        log.debug("No difference found in the category list");
+        if (log.isDebugEnabled()) log.debug("No difference found in the category list");
         return false;
     }
 
     private void loadCategoriesRows(Cursor c) {
         if (c == null) {
-            log.debug("loadCategoriesRows: cursor null exiting");
+            if (log.isDebugEnabled()) log.debug("loadCategoriesRows: cursor null exiting");
             return;
         }
         int subsetIdColumn = c.getColumnIndex(MoviesByLoader.COLUMN_SUBSET_ID);
@@ -333,7 +333,7 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
     }
 
     private void updateBackground() {
-        log.debug("updateBackground");
+        if (log.isDebugEnabled()) log.debug("updateBackground");
         bgMngr = BackgroundManager.getInstance(getActivity());
         if(!bgMngr.isAttached())
             bgMngr.attach(getActivity().getWindow());

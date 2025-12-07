@@ -94,7 +94,7 @@ public abstract class BrowserWithShowHeader extends CursorBrowserByVideo  {
     private boolean mPlotIsFullyDisplayed;
 
     public BrowserWithShowHeader() {
-        log.debug("BrowserBySeason()");
+        if (log.isDebugEnabled()) log.debug("BrowserBySeason()");
     }
     
     private void setContentInfoVisibility(boolean visible){
@@ -259,7 +259,7 @@ public abstract class BrowserWithShowHeader extends CursorBrowserByVideo  {
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        log.debug("onLoadFinished");
+        if (log.isDebugEnabled()) log.debug("onLoadFinished");
         super.onLoadFinished(loader, cursor);
         if (getActivity() == null) return;
         if(loader.getId()==SHOW_LOADER_ID) {
@@ -276,11 +276,11 @@ public abstract class BrowserWithShowHeader extends CursorBrowserByVideo  {
                 // calls at the end BrowserWithShowHeaders for no apparent reason (tried to determine code path)
                 // since this happens when getActivity() == null avoid doing UI stuff hides the issue that still remains to be fixed properly
                 if (getActivity() != null) {
-                    log.debug("onLoadFinished: activity not null");
+                    if (log.isDebugEnabled()) log.debug("onLoadFinished: activity not null");
                     mTvShowAsyncTask = new TvShowAsyncTask().executeOnExecutor(mSerialExecutor,getPosterUri(),mShow);
                     getActivity().invalidateOptionsMenu();
                 } else {
-                    log.debug("onLoadFinished: FIXME onLoadFinished getActivity is null");
+                    if (log.isDebugEnabled()) log.debug("onLoadFinished: FIXME onLoadFinished getActivity is null");
                 }
             }
 
@@ -288,11 +288,11 @@ public abstract class BrowserWithShowHeader extends CursorBrowserByVideo  {
     }
 
     private boolean needToReload(Tvshow oldShow, Tvshow newShow) {
-        if (oldShow==null || newShow==null) {log.debug("foundDifferencesRequiringDetailsUpdate null"); return true;}
-        if (oldShow.getClass() != newShow.getClass()) {log.debug("foundDifferencesRequiringDetailsUpdate class"); return true;}
-        if (oldShow.getTvshowId() != newShow.getTvshowId()) {log.debug("foundDifferencesRequiringDetailsUpdate getTvshowId"); return true;}
-        if (oldShow.isTraktSeen() != newShow.isTraktSeen()) {log.debug("foundDifferencesRequiringDetailsUpdate isTraktSeen"); return true;}
-        if (oldShow.getPosterUri()!=null&&!oldShow.getPosterUri().equals(newShow.getPosterUri())||newShow.getPosterUri()!=null&&newShow.getPosterUri().equals(oldShow.getPosterUri())) {log.debug("foundDifferencesRequiringDetailsUpdate getPosterUri"); return true;}
+        if (oldShow==null || newShow==null) { if (log.isDebugEnabled()) log.debug("foundDifferencesRequiringDetailsUpdate null"); return true;}
+        if (oldShow.getClass() != newShow.getClass()) { if (log.isDebugEnabled()) log.debug("foundDifferencesRequiringDetailsUpdate class"); return true;}
+        if (oldShow.getTvshowId() != newShow.getTvshowId()) { if (log.isDebugEnabled()) log.debug("foundDifferencesRequiringDetailsUpdate getTvshowId"); return true;}
+        if (oldShow.isTraktSeen() != newShow.isTraktSeen()) { if (log.isDebugEnabled()) log.debug("foundDifferencesRequiringDetailsUpdate isTraktSeen"); return true;}
+        if (oldShow.getPosterUri()!=null&&!oldShow.getPosterUri().equals(newShow.getPosterUri())||newShow.getPosterUri()!=null&&newShow.getPosterUri().equals(oldShow.getPosterUri())) { if (log.isDebugEnabled()) log.debug("foundDifferencesRequiringDetailsUpdate getPosterUri"); return true;}
         return false;
     }
 
@@ -323,14 +323,14 @@ public abstract class BrowserWithShowHeader extends CursorBrowserByVideo  {
             Uri posterUri = (Uri) postersUri[0];
             Bitmap bitmap = null;
             try {
-                log.debug("TvShowAsyncTask.Result show {} postersUri {}", show.getName(), posterUri);
+                if (log.isDebugEnabled()) log.debug("TvShowAsyncTask.Result show {} postersUri {}", show.getName(), posterUri);
                 if (posterUri != null) {
                     bitmap = Picasso.get()
                             .load(posterUri)
                             .resizeDimen(R.dimen.video_details_poster_width,R.dimen.video_details_poster_height)
                             .noFade() // no fade since we are using activity transition anyway
                             .get();
-                    log.debug("TvShowAsyncTask.Result: {}x{} ---- {}", bitmap.getWidth(), bitmap.getHeight(), posterUri);
+                    if (log.isDebugEnabled()) log.debug("TvShowAsyncTask.Result: {}x{} ---- {}", bitmap.getWidth(), bitmap.getHeight(), posterUri);
                     if(bitmap!=null) {
                         Palette palette = Palette.from(bitmap).generate();
                         mColor = palette.getDarkVibrantColor(ContextCompat.getColor(getActivity(), R.color.leanback_details_background));

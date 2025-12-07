@@ -46,7 +46,7 @@ public class EntryActivity extends AppCompatActivity {
         ((CustomApplication) getApplication()).loadLocale();
         super.onCreate(savedInstanceState);
 
-        log.debug("onCreate");
+        if (log.isDebugEnabled()) log.debug("onCreate");
 
         Class activityToLaunch = null;
         if (UiChoiceDialog.applicationIsInLeanbackMode(this)) {

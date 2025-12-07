@@ -17,7 +17,7 @@ public class NovaWebView extends WebView {
     static boolean doItOnce = false;
 
     public void resetDoItOnce() {
-        log.debug("resetDoItOnce");
+        if (log.isDebugEnabled()) log.debug("resetDoItOnce");
         doItOnce = false;
     }
 
@@ -44,7 +44,7 @@ public class NovaWebView extends WebView {
                         event.getKeyCode() == KeyEvent.KEYCODE_DPAD_DOWN ||
                         event.getKeyCode() == KeyEvent.KEYCODE_DPAD_LEFT ||
                         event.getKeyCode() == KeyEvent.KEYCODE_DPAD_RIGHT)) {
-            log.debug("dpad hasFocus()={}", hasFocus());
+            if (log.isDebugEnabled()) log.debug("dpad hasFocus()={}", hasFocus());
             // TOFIX: hack to avoid "scroll focus"
             if (!doItOnce) {
                 clearFocus();

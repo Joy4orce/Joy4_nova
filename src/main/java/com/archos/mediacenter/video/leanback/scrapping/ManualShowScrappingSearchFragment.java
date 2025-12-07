@@ -144,7 +144,7 @@ public class ManualShowScrappingSearchFragment extends ManualScrappingSearchFrag
             buildNewShowTags(result.getTitle());
         }
 
-        log.debug("put in mTagsToSearchResultMap: {}", tags);
+        if (log.isDebugEnabled()) log.debug("put in mTagsToSearchResultMap: {}", tags);
         mTagsToSearchResultMap.put(tags, result);
 
         return tags;
@@ -175,7 +175,7 @@ public class ManualShowScrappingSearchFragment extends ManualScrappingSearchFrag
                     .show();
         }
         else {
-            log.debug("saveTags error should not get a {}", newTags.getClass().getCanonicalName());
+            if (log.isDebugEnabled()) log.debug("saveTags error should not get a {}", newTags.getClass().getCanonicalName());
             Toast.makeText(getActivity(), R.string.error, Toast.LENGTH_SHORT).show();
         }
     }
@@ -218,14 +218,14 @@ public class ManualShowScrappingSearchFragment extends ManualScrappingSearchFrag
             if (log.isDebugEnabled()) {
                 log.debug("--------------------\nAll episodes in database that belong to the old show:");
                 for (EpisodeTags et : episodeList) {
-                    log.debug("      S{} E{} {}", et.getSeason(), et.getEpisode(), et.getTitle());
+                    if (log.isDebugEnabled()) log.debug("      S{} E{} {}", et.getSeason(), et.getEpisode(), et.getTitle());
                 }
-                log.debug("--------------------");
+                if (log.isDebugEnabled()) log.debug("--------------------");
 
             }
             // step 2: save new show / episode info for those
             ShowTags newShow = handleSave(params[0], episodeList);
-            log.debug("save finished");
+            if (log.isDebugEnabled()) log.debug("save finished");
             return newShow;
         }
 
@@ -327,9 +327,9 @@ public class ManualShowScrappingSearchFragment extends ManualScrappingSearchFrag
             if (log.isDebugEnabled()) {
                 log.debug("--------------------\nAll episodes for the new show:");
                 for (String key : epMap.keySet()) {
-                    log.debug("epMap {} -> {} {} {}", key, epMap.get(key).getShowTitle(), epMap.get(key).getSeason(), epMap.get(key).getEpisode());
+                    if (log.isDebugEnabled()) log.debug("epMap {} -> {} {} {}", key, epMap.get(key).getShowTitle(), epMap.get(key).getSeason(), epMap.get(key).getEpisode());
                 }
-                log.debug("--------------------");
+                if (log.isDebugEnabled()) log.debug("--------------------");
             }
 
             // Update all episodes
@@ -410,17 +410,17 @@ public class ManualShowScrappingSearchFragment extends ManualScrappingSearchFrag
                 // also check if there is a poster
                 List<ScraperImage> posters = show.getPosters();
                 if (posters != null) {
-                    log.debug( "getEpisode: posters not null");
+                    if (log.isDebugEnabled()) log.debug( "getEpisode: posters not null");
                     for (ScraperImage image : posters) {
                         if (image.getSeason() == season) {
-                            log.debug( "getEpisode: posters download poster:{}", image.getLargeUrl());
+                            if (log.isDebugEnabled()) log.debug( "getEpisode: posters download poster:{}", image.getLargeUrl());
                             newEpTag.setPosters(image.asList());
                             newEpTag.downloadPoster(mContext);
                             break;
                         }
                     }
                 } else {
-                    log.debug( "getEpisode: posters is null!");
+                    if (log.isDebugEnabled()) log.debug( "getEpisode: posters is null!");
                 }
             }
             return newEpTag;

@@ -105,14 +105,14 @@ public class FileManagerService extends Service implements OperationEngineListen
 
     public FileManagerService() {
         super();
-        log.debug("FileManagerService: setting fileManagerService not to null");
+        if (log.isDebugEnabled()) log.debug("FileManagerService: setting fileManagerService not to null");
         fileManagerService = this;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        log.debug("onCreate: creating notification channel first");
+        if (log.isDebugEnabled()) log.debug("onCreate: creating notification channel first");
 
         // need to do that early to avoid ANR on Android 26+
         nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -158,7 +158,7 @@ public class FileManagerService extends Service implements OperationEngineListen
 
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        log.debug("onStartCommand");
+        if (log.isDebugEnabled()) log.debug("onStartCommand");
         return START_NOT_STICKY;
     }
 
@@ -243,7 +243,7 @@ public class FileManagerService extends Service implements OperationEngineListen
 
     @Override
     public void onDestroy() {
-        log.debug("onDestroy: removing Foreground notif and stopping self");
+        if (log.isDebugEnabled()) log.debug("onDestroy: removing Foreground notif and stopping self");
         cleanup();
         super.onDestroy();
     }
@@ -336,7 +336,7 @@ public class FileManagerService extends Service implements OperationEngineListen
     }
 
     public void stopPasting() {
-        log.debug("stopPasting");
+        if (log.isDebugEnabled()) log.debug("stopPasting");
         if (mIsActionRunning) {
             if (mCopyCutEngine != null) {
                 mCopyCutEngine.stop();
@@ -371,19 +371,19 @@ public class FileManagerService extends Service implements OperationEngineListen
 
     private void acquireWakeLock() {
         releaseWakeLock();
-        log.debug("acquireWakeLock");
+        if (log.isDebugEnabled()) log.debug("acquireWakeLock");
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Nova:FileManagerWakeLock");
         mWakeLock.acquire();
     }
     private void releaseWakeLock(){
-        log.debug("releaseWakeLock");
+        if (log.isDebugEnabled()) log.debug("releaseWakeLock");
         if(mWakeLock!=null&&mWakeLock.isHeld())
             mWakeLock.release();
     }
     @Override
     public void onEnd() {
-        log.debug("onEnd: releasing wakelock, removing Foreground notif and stopping self");
+        if (log.isDebugEnabled()) log.debug("onEnd: releasing wakelock, removing Foreground notif and stopping self");
         releaseWakeLock();
         mLastStatus = ActionStatusEnum.STOP;
         mIsActionRunning = false;
@@ -413,7 +413,7 @@ public class FileManagerService extends Service implements OperationEngineListen
 
     @Override
     public void onFatalError(Exception e) {
-        log.debug("onFatalError: releasing wakelock, removing Foreground notif and stopping self");
+        if (log.isDebugEnabled()) log.debug("onFatalError: releasing wakelock, removing Foreground notif and stopping self");
         releaseWakeLock();
         Toast.makeText(this, com.archos.filecorelibrary.R.string.copy_file_failed_one, Toast.LENGTH_LONG).show();
         mLastStatus = ActionStatusEnum.ERROR;
@@ -451,7 +451,7 @@ public class FileManagerService extends Service implements OperationEngineListen
 
     @Override
     public void onFilesListUpdate(List<MetaFile2> copyingMetaFiles,List<MetaFile2> rootFiles) {
-        log.debug("onFilesListUpdate");
+        if (log.isDebugEnabled()) log.debug("onFilesListUpdate");
         mProcessedFiles.clear();
         mProcessedFiles.addAll(copyingMetaFiles);
         mProgress.clear();
@@ -471,7 +471,7 @@ public class FileManagerService extends Service implements OperationEngineListen
     /* Notification */
 
     public void startStatusbarNotification() {
-        log.debug("startStatusbarNotification: stopping OPEN_NOTIFICATION_ID notif and doing PASTE_NOTIFICATION_ID");
+        if (log.isDebugEnabled()) log.debug("startStatusbarNotification: stopping OPEN_NOTIFICATION_ID notif and doing PASTE_NOTIFICATION_ID");
         nm.cancel(OPEN_NOTIFICATION_ID);
 
         // Build the intent to send when the user clicks on the notification in the notification panel
@@ -489,7 +489,7 @@ public class FileManagerService extends Service implements OperationEngineListen
     }
 
     private void displayOpenFileNotification() {
-        log.debug("displayOpenFileNotification");
+        if (log.isDebugEnabled()) log.debug("displayOpenFileNotification");
         nb.setContentTitle(getText(R.string.open_file))
                 .setContentText(mProcessedFiles.get(0).getName())
                 .setWhen(System.currentTimeMillis());
@@ -497,7 +497,7 @@ public class FileManagerService extends Service implements OperationEngineListen
     }
 
     private void updateStatusbarNotification(long currentSize, long totalSize, int currentFiles, int totalFiles) {
-        log.debug("updateStatusbarNotification");
+        if (log.isDebugEnabled()) log.debug("updateStatusbarNotification");
         if (nb != null) {
             String formattedCurrentSize = Formatter.formatShortFileSize(this, currentSize);
             String formattedTotalSize = Formatter.formatShortFileSize(this, totalSize);
@@ -519,7 +519,7 @@ public class FileManagerService extends Service implements OperationEngineListen
         }
     }
     private void setCanceledStatus(){
-        log.debug("setCanceledStatus");
+        if (log.isDebugEnabled()) log.debug("setCanceledStatus");
         mLastStatus = ActionStatusEnum.CANCELED;
         mIsActionRunning = false;
         removeStatusbarNotification();
@@ -531,7 +531,7 @@ public class FileManagerService extends Service implements OperationEngineListen
     }
     @Override
     public void onCanceled() {
-        log.debug("onCanceled");
+        if (log.isDebugEnabled()) log.debug("onCanceled");
         releaseWakeLock();
         Toast.makeText(this, com.archos.filecorelibrary.R.string.copy_file_failed_one, Toast.LENGTH_LONG).show();
         setCanceledStatus();
@@ -543,18 +543,18 @@ public class FileManagerService extends Service implements OperationEngineListen
     @Override
     public void onStop(LifecycleOwner owner) {
         // App in background
-        log.debug("onStop: LifecycleOwner app in background, stopSelf");
+        if (log.isDebugEnabled()) log.debug("onStop: LifecycleOwner app in background, stopSelf");
         cleanup();
         stopSelf();
     }
 
     @Override
     public void onStart(LifecycleOwner owner) {
-        log.debug("onStart: app in foreground");
+        if (log.isDebugEnabled()) log.debug("onStart: app in foreground");
     }
 
     public void cleanup() {
-        log.debug("cleanup");
+        if (log.isDebugEnabled()) log.debug("cleanup");
         stopPasting();
         setCanceledStatus();
         // Stop the CopyCutEngine

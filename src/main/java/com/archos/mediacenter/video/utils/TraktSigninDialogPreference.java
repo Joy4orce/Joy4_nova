@@ -64,7 +64,7 @@ public class TraktSigninDialogPreference extends Preference {
      * Public method to trigger device authentication (called by other activities)
      */
     public void performDeviceAuth() {
-        log.debug("performDeviceAuth: TraktSigninDialogPreference clicked!");
+        if (log.isDebugEnabled()) log.debug("performDeviceAuth: TraktSigninDialogPreference clicked!");
 
         Activity activity = getActivityFromContext(getContext());
         if (activity == null) {
@@ -73,11 +73,11 @@ public class TraktSigninDialogPreference extends Preference {
         }
 
         if (activity.isFinishing() || activity.isDestroyed()) {
-            log.debug("performDeviceAuth: activity is finishing or destroyed");
+            if (log.isDebugEnabled()) log.debug("performDeviceAuth: activity is finishing or destroyed");
             return;
         }
 
-        log.debug("performDeviceAuth: launching TraktDeviceAuthActivity for device flow authentication");
+        if (log.isDebugEnabled()) log.debug("performDeviceAuth: launching TraktDeviceAuthActivity for device flow authentication");
 
         // Launch device authentication activity
         Intent intent = new Intent(activity, TraktDeviceAuthActivity.class);
@@ -90,14 +90,14 @@ public class TraktSigninDialogPreference extends Preference {
     public void onActivityResult(int requestCode, int resultCode) {
         if (requestCode == REQUEST_CODE_DEVICE_AUTH) {
             if (resultCode == Activity.RESULT_OK) {
-                log.debug("onActivityResult: device auth successful");
+                if (log.isDebugEnabled()) log.debug("onActivityResult: device auth successful");
                 // Notify that the preference has changed so UI updates
                 notifyChanged();
                 if (mOnDismissListener != null) {
                     mOnDismissListener.onDismiss(null);
                 }
             } else {
-                log.debug("onActivityResult: device auth cancelled or failed");
+                if (log.isDebugEnabled()) log.debug("onActivityResult: device auth cancelled or failed");
             }
         }
     }
@@ -108,7 +108,7 @@ public class TraktSigninDialogPreference extends Preference {
 
     public void showDialog(boolean show) {
         if(show) {
-            log.debug("showDialog: trigger onClick");
+            if (log.isDebugEnabled()) log.debug("showDialog: trigger onClick");
             this.onClick();
         }
     }

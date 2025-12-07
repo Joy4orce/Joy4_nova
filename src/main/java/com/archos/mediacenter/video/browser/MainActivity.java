@@ -277,10 +277,10 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         DisplayCutout cutout = getWindow().getDecorView().getRootWindowInsets().getDisplayCutout();
                         if (cutout != null) {
-                            log.debug("device with cutout");
+                            if (log.isDebugEnabled()) log.debug("device with cutout");
                             MiscUtils.hasCutout = true;
                         } else
-                            log.debug("device without cutout");
+                            if (log.isDebugEnabled()) log.debug("device without cutout");
                     }
                     getWindow().getDecorView().setOnApplyWindowInsetsListener(null);
                     return view.onApplyWindowInsets(insets);
@@ -1025,7 +1025,7 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
             case InputDevice.SOURCE_GAMEPAD:
             case InputDevice.SOURCE_JOYSTICK:
             case InputDevice.SOURCE_HDMI:
-                log.debug("event source = {} -> probably TV", event.getSource());
+                if (log.isDebugEnabled()) log.debug("event source = {} -> probably TV", event.getSource());
                 probablyTv = true;
                 break;
             case InputDevice.SOURCE_STYLUS:
@@ -1033,7 +1033,7 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
             case InputDevice.SOURCE_TRACKBALL:
             case InputDevice.SOURCE_MOUSE:
             default:
-                log.debug("event source = {} -> probably not TV", event.getSource());
+                if (log.isDebugEnabled()) log.debug("event source = {} -> probably not TV", event.getSource());
                 probablyTv = false;
                 break;
         }

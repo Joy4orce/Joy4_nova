@@ -155,15 +155,15 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
             new ActivityResultContracts.StartIntentSenderForResult(),
             result -> { // result can be RESULT_OK, RESULT_CANCELED
                 Context context = getActivity();
-                log.debug("ActivityResultLauncher deleteLauncher: result {}", result.toString());
+                if (log.isDebugEnabled()) log.debug("ActivityResultLauncher deleteLauncher: result {}", result.toString());
                 if (result.getResultCode() == Activity.RESULT_OK) {
-                    log.debug("ActivityResultLauncher deleteLauncher: OK, deleteUris {}", ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
+                    if (log.isDebugEnabled()) log.debug("ActivityResultLauncher deleteLauncher: OK, deleteUris {}", ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
                     if (delete != null && deleteUrisList != null && deleteUrisList.size() >= 1) {
-                        log.debug("ActivityResultLauncher deleteLauncher: calling delete.deleteOK on {}", deleteUrisList.get(0));
+                        if (log.isDebugEnabled()) log.debug("ActivityResultLauncher deleteLauncher: calling delete.deleteOK on {}", deleteUrisList.get(0));
                         delete.deleteOK(deleteUrisList.get(0));
                     }
                 } else {
-                    log.debug("ActivityResultLauncher deleteLauncher: NO, deleteUris {}", ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
+                    if (log.isDebugEnabled()) log.debug("ActivityResultLauncher deleteLauncher: NO, deleteUris {}", ((deleteUrisList != null) ? Arrays.toString(deleteUrisList.toArray()) : null));
                     if (delete != null && deleteUrisList != null && deleteUrisList.size() > 1)
                         delete.deleteNOK(deleteUrisList.get(0));
                 }
@@ -171,7 +171,7 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        log.debug("onCreate");
+        if (log.isDebugEnabled()) log.debug("onCreate");
         super.onCreate(savedInstanceState);
         // pass the right deleteLauncher linked to activity
         FileUtilsQ.setDeleteLauncher(deleteLauncher);
@@ -199,7 +199,7 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
 
         refreshCollection();
 
-        log.debug("onCreate: {}", mCollection.getName());
+        if (log.isDebugEnabled()) log.debug("onCreate: {}", mCollection.getName());
 
         mColor = ContextCompat.getColor(getActivity(), R.color.leanback_details_background);
         mHandler = new Handler();
@@ -218,7 +218,7 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
                     playMovie();
                 }
                 else if (action.getId() == CollectionActionAdapter.ACTION_MARK_COLLECTION_AS_WATCHED) {
-                    log.debug("mOverviewRowPresenter.setOnActionClickedListener: action watched, collection watched ? {}", mCollection.isWatched());
+                    if (log.isDebugEnabled()) log.debug("mOverviewRowPresenter.setOnActionClickedListener: action watched, collection watched ? {}", mCollection.isWatched());
                     if (!mCollection.isWatched()) {
                         DbUtils.markAsRead(getActivity(), mCollection);
                         refreshCollection();
@@ -228,7 +228,7 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
                     }
                 }
                 else if (action.getId() == CollectionActionAdapter.ACTION_MARK_COLLECTION_AS_NOT_WATCHED) {
-                    log.debug("mOverviewRowPresenter.setOnActionClickedListener: action not watched, collection watched ? {}", mCollection.isWatched());
+                    if (log.isDebugEnabled()) log.debug("mOverviewRowPresenter.setOnActionClickedListener: action not watched, collection watched ? {}", mCollection.isWatched());
                     if (mCollection.isWatched()) {
                         DbUtils.markAsNotRead(getActivity(), mCollection);
                         refreshCollection();
@@ -339,7 +339,7 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
     }
 
     private void playMovie() {
-        log.debug("playMovie");
+        if (log.isDebugEnabled()) log.debug("playMovie");
         if (mMovieCollectionAdapter != null) {
             Movie resumeMovie = null;
             Movie firstMovie = null;
@@ -396,21 +396,21 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        log.debug("onViewCreated");
+        if (log.isDebugEnabled()) log.debug("onViewCreated");
         super.onViewCreated(view, savedInstanceState);
         mOverlay = new Overlay(this);
     }
 
     @Override
     public void onDestroyView() {
-        log.debug("onDestroyView");
+        if (log.isDebugEnabled()) log.debug("onDestroyView");
         mOverlay.destroy();
         super.onDestroyView();
     }
 
     @Override
     public void onStop() {
-        log.debug("onStop");
+        if (log.isDebugEnabled()) log.debug("onStop");
         mBackdropTask.cancel(true);
         if (mDetailRowBuilderTask!=null) {
             mDetailRowBuilderTask.cancel(true);
@@ -420,7 +420,7 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
 
     @Override
     public void onResume() {
-        log.debug("onResume");
+        if (log.isDebugEnabled()) log.debug("onResume");
         super.onResume();
         mOverlay.resume();
 
@@ -443,7 +443,7 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
 
     @Override
     public void onPause() {
-        log.debug("onPause");
+        if (log.isDebugEnabled()) log.debug("onPause");
         super.onPause();
         mOverlay.pause();
     }
@@ -456,26 +456,26 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        log.debug("onActivityResult requestCode {}", requestCode);
+        if (log.isDebugEnabled()) log.debug("onActivityResult requestCode {}", requestCode);
         if ((requestCode == REQUEST_CODE_MARK_WATCHED || requestCode == REQUEST_CODE_VIDEO) && resultCode == Activity.RESULT_OK) {
-            log.debug("onActivityResult processing requestCode, first refreshCollection");
+            if (log.isDebugEnabled()) log.debug("onActivityResult processing requestCode, first refreshCollection");
             refreshCollection();
             refreshActivity();
         } else {
-            log.debug("onActivityResult NOT processing requestCode");
+            if (log.isDebugEnabled()) log.debug("onActivityResult NOT processing requestCode");
         }
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle bundle) {
-        log.debug("onCreateLoader");
+        if (log.isDebugEnabled()) log.debug("onCreateLoader");
         return new MovieCollectionLoader(getActivity(), mCollection.getCollectionId());
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         if (getActivity() == null) return;
-        log.debug("onLoadFinished: mRowsAdapter size {}", mRowsAdapter.size());
+        if (log.isDebugEnabled()) log.debug("onLoadFinished: mRowsAdapter size {}", mRowsAdapter.size());
 
         CursorObjectAdapter movieCollectionAdapter = new CursorObjectAdapter(new PosterImageCardPresenter(getActivity(), PosterImageCardPresenter.EpisodeDisplayMode.FOR_SEASON_LIST));
         movieCollectionAdapter.setMapper(new CompatibleCursorMapperConverter(new VideoCursorMapper()));
@@ -490,7 +490,7 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
         if (movieCollectionAdapter != null) movieCollectionAdapter.changeCursor(cursor);
 
         mMovieCollectionAdapter = new MovieCollectionAdapter(getContext(), cursor);
-        log.debug("onLoadFinished: movie collection cursor size {}", cursor.getCount());
+        if (log.isDebugEnabled()) log.debug("onLoadFinished: movie collection cursor size {}", cursor.getCount());
         if (cursor.getCount() == 0) // no more movies in collection
             getActivity().finish();
     }
@@ -503,9 +503,9 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
 
         @Override
         protected Pair<Collection, Bitmap> doInBackground(Collection... collections) {
-            log.debug("DetailRowBuilderTask.doInBackground collectionS length {}", collections.length);
+            if (log.isDebugEnabled()) log.debug("DetailRowBuilderTask.doInBackground collectionS length {}", collections.length);
             Collection collection = collections[0];
-            log.debug("DetailRowBuilderTask.doInBackground collection {}", collection.getName());
+            if (log.isDebugEnabled()) log.debug("DetailRowBuilderTask.doInBackground collection {}", collection.getName());
             Bitmap bitmap = generateCollectionBitmap(collection.getPosterUri(), collection.isWatched());
             return new Pair<>(collection, bitmap);
         }
@@ -535,9 +535,9 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
                 mDetailsOverviewRow.setImageScaleUpAllowed(false);
             }
 
-            log.debug("mHasDetailRow = {}", mHasDetailRow);
+            if (log.isDebugEnabled()) log.debug("mHasDetailRow = {}", mHasDetailRow);
             if (!mHasDetailRow) {
-                log.debug("mHasDetailRow is false adding detailOverviewRow");
+                if (log.isDebugEnabled()) log.debug("mHasDetailRow is false adding detailOverviewRow");
                 BackgroundManager.getInstance(getActivity()).setDrawable(new ColorDrawable(VideoInfoCommonClass.getDarkerColor(mColor)));
                 mRowsAdapter.add(INDEX_DETAILS, mDetailsOverviewRow);
                 setAdapter(mRowsAdapter);
@@ -637,7 +637,7 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
             CollectionLoader collectionLoader = new CollectionLoader(getActivity(), mCollectionId);
             Cursor cursor = collectionLoader.loadInBackground();
             if(cursor != null && cursor.getCount()>0) {
-                log.debug("refreshCollection DatabaseUtils.dumpCursorToString(cursor)");
+                if (log.isDebugEnabled()) log.debug("refreshCollection DatabaseUtils.dumpCursorToString(cursor)");
                 cursor.moveToFirst();
                 CollectionCursorMapper collectionCursorMapper = new CollectionCursorMapper();
                 collectionCursorMapper.bindColumns(cursor);
@@ -651,11 +651,11 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
 
     private void refreshActivity() {
         if (mCollection != null) {
-            log.debug("refreshActivity: collection is not empty {}", mCollection.getMovieCollectionCount());
+            if (log.isDebugEnabled()) log.debug("refreshActivity: collection is not empty {}", mCollection.getMovieCollectionCount());
             ((CollectionActionAdapter)mDetailsOverviewRow.getActionsAdapter()).update(mCollection, mShouldDisplayConfirmDelete);
             mDetailsOverviewRow.setItem(mCollection);
         } else {
-            log.debug("refreshActivity: collection is null exit!");
+            if (log.isDebugEnabled()) log.debug("refreshActivity: collection is null exit!");
             getActivity().finish();
         }
     }
@@ -670,7 +670,7 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
                             .resize(getResources().getDimensionPixelSize(R.dimen.poster_width), getResources().getDimensionPixelSize(R.dimen.poster_height))
                             .centerCrop()
                             .get();
-                    log.debug("generateCollectionBitmap: {}x{} {}", bitmap.getWidth(), bitmap.getHeight(), posterUri);
+                    if (log.isDebugEnabled()) log.debug("generateCollectionBitmap: {}x{} {}", bitmap.getWidth(), bitmap.getHeight(), posterUri);
                 }
             } catch (IOException e) {
                 log.error("generateCollectionBitmap Picasso load exception", e);
@@ -696,7 +696,7 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
         @Override
         protected Bitmap doInBackground(Collection... collections) {
             Collection collection = collections[0];
-            log.debug("RefreshCollectionBitmapTask.doInBackground collection {}", collection.getName());
+            if (log.isDebugEnabled()) log.debug("RefreshCollectionBitmapTask.doInBackground collection {}", collection.getName());
             Bitmap bitmap = generateCollectionBitmap(collection.getPosterUri(), collection.isWatched());
             return bitmap;
         }

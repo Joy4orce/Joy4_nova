@@ -261,14 +261,14 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private static void getDefaultLocale(Context context) {
         // Get the locales from the locales_config.xml
         List<Locale> locales = LocaleConfigParser.getLocales(context);
-        log.debug("getDefaultLocale: locales={}", locales);
+        if (log.isDebugEnabled()) log.debug("getDefaultLocale: locales={}", locales);
         // Assuming the first locale in the list is the one configured for the application
         if (!locales.isEmpty()) {
             defaultLocale = locales.get(0);
         } else {
             defaultLocale = Locale.getDefault();
         }
-        log.debug("getDefaultLocale: systemLocale={}, defaultLocale={}", systemLocale, defaultLocale);
+        if (log.isDebugEnabled()) log.debug("getDefaultLocale: systemLocale={}, defaultLocale={}", systemLocale, defaultLocale);
     }
 
     /**
@@ -278,7 +278,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private void updateIecEncapsulationCapability() {
         final int AVOS_ENCODING_IEC61937 = 13;
         isIecEncapsulationCapable = (hdmiAudioEncodingFlag & (1L << AVOS_ENCODING_IEC61937)) != 0;
-        log.debug("updateIecEncapsulationCapability: isIecEncapsulationCapable={}", isIecEncapsulationCapable);
+        if (log.isDebugEnabled()) log.debug("updateIecEncapsulationCapability: isIecEncapsulationCapable={}", isIecEncapsulationCapable);
     }
 
     /**
@@ -290,7 +290,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private void updateDirectPcmMultichannelCapability() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || mAudioManager == null || !hasHdmi) {
             isDirectPcmMultichannelCapable = false;
-            log.debug("updateDirectPcmMultichannelCapability: API<29 or no HDMI, setting false");
+            if (log.isDebugEnabled()) log.debug("updateDirectPcmMultichannelCapability: API<29 or no HDMI, setting false");
             return;
         }
 
@@ -322,9 +322,9 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                         int support = AudioManager.getDirectPlaybackSupport(format, attrs);
                         // Compare with DIRECT_PLAYBACK_SUPPORTED constant (API 31+) via reflection
                         isSupported = (support == 1); // DIRECT_PLAYBACK_SUPPORTED = 1
-                        log.debug("updateDirectPcmMultichannelCapability (API 33+): getDirectPlaybackSupport for mask=0x{} returned {}", Integer.toHexString(mask), support);
+                        if (log.isDebugEnabled()) log.debug("updateDirectPcmMultichannelCapability (API 33+): getDirectPlaybackSupport for mask=0x{} returned {}", Integer.toHexString(mask), support);
                     } catch (NoSuchMethodError e) {
-                        log.debug("updateDirectPcmMultichannelCapability: getDirectPlaybackSupport not available, skipping");
+                        if (log.isDebugEnabled()) log.debug("updateDirectPcmMultichannelCapability: getDirectPlaybackSupport not available, skipping");
                     }
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     // API 29-32: Use isDirectPlaybackSupported() via reflection
@@ -332,7 +332,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                         java.lang.reflect.Method method = AudioManager.class.getMethod("isDirectPlaybackSupported", AudioFormat.class, AudioAttributes.class);
                         isSupported = (Boolean) method.invoke(mAudioManager, format, attrs);
                     } catch (Exception e) {
-                        log.debug("updateDirectPcmMultichannelCapability: isDirectPlaybackSupported not available, skipping: {}", e.getMessage());
+                        if (log.isDebugEnabled()) log.debug("updateDirectPcmMultichannelCapability: isDirectPlaybackSupported not available, skipping: {}", e.getMessage());
                     }
                 }
 
@@ -412,7 +412,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         systemLocale = Locale.getDefault();
         getDefaultLocale();
         loadLocale();
-        log.debug("onCreate: systemLocale={}, defaultLocale={}", systemLocale, defaultLocale);
+        if (log.isDebugEnabled()) log.debug("onCreate: systemLocale={}, defaultLocale={}", systemLocale, defaultLocale);
 
         // must be done before sambaDiscovery otherwise no context for jcifs
         new Thread(() -> {
@@ -464,7 +464,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         if (propertyChangeListener == null)
             propertyChangeListener = evt -> {
                 if (evt.getOldValue() != evt.getNewValue()) {
-                    log.trace("NetworkState for {} changed:{} -> {}", evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+                    if (log.isTraceEnabled()) log.trace("NetworkState for {} changed:{} -> {}", evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
                     launchSambaDiscovery();
                 }
             };
@@ -485,9 +485,9 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         if(ArchosFeatures.isAndroidTV(this) && Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
             BootupRecommandationService.init(this);
 
-        log.trace("onCreate: manifest permissions {}", Arrays.toString(getPermissions(mContext)));
+        if (log.isTraceEnabled()) log.trace("onCreate: manifest permissions {}", Arrays.toString(getPermissions(mContext)));
         hasManageExternalStoragePermissionInManifest = hasPermission("android.permission.MANAGE_EXTERNAL_STORAGE", mContext);
-        log.trace("onCreate: has permission android.permission.MANAGE_EXTERNAL_STORAGE {}", hasManageExternalStoragePermissionInManifest);
+        if (log.isTraceEnabled()) log.trace("onCreate: has permission android.permission.MANAGE_EXTERNAL_STORAGE {}", hasManageExternalStoragePermissionInManifest);
 
         updateVersionState(this);
         if (openSubtitlesApiHelper == null) openSubtitlesApiHelper = OpenSubtitlesApiHelper.getInstance();
@@ -513,20 +513,20 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             // Detect initial audio devices
             AudioDeviceInfo[] devices = mAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
             for (AudioDeviceInfo device : devices) {
-                log.debug("onCreate: initial audio device {} {} capabilities {}", device.getType(), device.getProductName(), getSupportedAudioCodecs(getEncodingFlags(device.getEncodings())));
+                if (log.isDebugEnabled()) log.debug("onCreate: initial audio device {} {} capabilities {}", device.getType(), device.getProductName(), getSupportedAudioCodecs(getEncodingFlags(device.getEncodings())));
                 if (device.getType() == AudioDeviceInfo.TYPE_HDMI) {
                     hasHdmi = true;
                     hdmiAudioEncodingsFlags = device.getEncodings();
                     hdmiAudioEncodingFlag = getEncodingFlags(hdmiAudioEncodingsFlags);
                     updateIecEncapsulationCapability();
                     updateDirectPcmMultichannelCapability();
-                    log.debug("onCreate: hdmi initial audio device");
+                    if (log.isDebugEnabled()) log.debug("onCreate: hdmi initial audio device");
                 }
                 if (device.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
                     hasSpdif = true;
                     spdifAudioEncodingsFlags = device.getEncodings();
                     spdifAudioEncodingFlag = getEncodingFlags(spdifAudioEncodingsFlags);
-                    log.debug("onCreate: spdif initial audio device");
+                    if (log.isDebugEnabled()) log.debug("onCreate: spdif initial audio device");
                 }
                 break;
             }
@@ -538,7 +538,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
 
     private void launchSambaDiscovery() {
         if (networkState.hasLocalConnection()) {
-            log.debug("launchSambaDiscovery: local connection, launching samba discovery");
+            if (log.isDebugEnabled()) log.debug("launchSambaDiscovery: local connection, launching samba discovery");
             // samba discovery should not be running at this stage, but better safe than sorry
             if (mSambaDiscovery != null) {
                 mSambaDiscovery.abort();
@@ -556,7 +556,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                 mSambaDiscovery = null;
             }
         } else
-            log.debug("launchSambaDiscovery: no local connection, doing nothing");
+            if (log.isDebugEnabled()) log.debug("launchSambaDiscovery: no local connection, doing nothing");
     }
 
     public static SambaDiscovery getSambaDiscovery() {
@@ -564,13 +564,13 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     }
 
     protected void handleForeGround(boolean foreground) {
-        log.debug("handleForeGround: is app foreground {}", foreground);
+        if (log.isDebugEnabled()) log.debug("handleForeGround: is app foreground {}", foreground);
         if (networkState == null ) networkState = NetworkState.instance(mContext);
         if (foreground) {
             registerHdmiAudioPlugReceiver();
             registerAudioDeviceCallback();
             if (!isVideStoreImportReceiverRegistered) {
-                log.debug("handleForeGround: app now in ForeGround registerReceiver for videoStoreImportReceiver");
+                if (log.isDebugEnabled()) log.debug("handleForeGround: app now in ForeGround registerReceiver for videoStoreImportReceiver");
                 ArchosUtils.addBreadcrumb(SentryLevel.INFO, "CustomApplication.handleForeGround", "app now in ForeGround registerReceiver for videoStoreImportReceiver");
                 // programmatically register android scanner finished, lifecycle is handled in handleForeGround
                 final IntentFilter intentFilter = new IntentFilter();
@@ -584,11 +584,11 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                 isVideStoreImportReceiverRegistered = true;
                 ArchosUtils.addBreadcrumb(SentryLevel.INFO, "CustomApplication.handleForeGround", "app now in ForeGround register videoStoreImportReceiver");
             } else {
-                log.debug("handleForeGround: app now in ForeGround registerReceiver videoStoreImportReceiver already registered");
+                if (log.isDebugEnabled()) log.debug("handleForeGround: app now in ForeGround registerReceiver videoStoreImportReceiver already registered");
                 ArchosUtils.addBreadcrumb(SentryLevel.INFO, "CustomApplication.handleForeGround", "app now in ForeGround videoStoreImportReceiver already registered");
             }
             if (!isNetworkStateRegistered) {
-                log.debug("handleForeGround: app now in ForeGround NetworkState.registerNetworkCallback");
+                if (log.isDebugEnabled()) log.debug("handleForeGround: app now in ForeGround NetworkState.registerNetworkCallback");
                 networkState.registerNetworkCallback();
                 isNetworkStateRegistered = true;
             }
@@ -602,16 +602,16 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             unRegisterHdmiAudioPlugReceiver();
             unRegisterAudioDeviceCallback();
             if (isVideStoreImportReceiverRegistered) {
-                log.debug("handleForeGround: app now in BackGround unregisterReceiver for videoStoreImportReceiver");
+                if (log.isDebugEnabled()) log.debug("handleForeGround: app now in BackGround unregisterReceiver for videoStoreImportReceiver");
                 ArchosUtils.addBreadcrumb(SentryLevel.INFO, "CustomApplication.handleForeGround", "app now in Background unregister videoStoreImportReceiver");
                 unregisterReceiver(videoStoreImportReceiver);
                 isVideStoreImportReceiverRegistered = false;
             } else {
-                log.debug("handleForeGround: app now in BackGround, videoStoreImportReceiver already unregistered");
+                if (log.isDebugEnabled()) log.debug("handleForeGround: app now in BackGround, videoStoreImportReceiver already unregistered");
                 ArchosUtils.addBreadcrumb(SentryLevel.INFO, "CustomApplication.handleForeGround", "app now in Background videoStoreImportReceiver already unregistered");
             }
             if (isNetworkStateRegistered) {
-                log.debug("handleForeGround: app now in BackGround NetworkState.unRegisterNetworkCallback");
+                if (log.isDebugEnabled()) log.debug("handleForeGround: app now in BackGround NetworkState.unRegisterNetworkCallback");
                 networkState.unRegisterNetworkCallback();
                 isNetworkStateRegistered = false;
             }
@@ -621,7 +621,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
 
     private void registerHdmiAudioPlugReceiver() {
         final IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_HDMI_AUDIO_PLUG);
-        log.debug("registerHdmiAudioPlugReceiver: registerReceiver for ACTION_HDMI_AUDIO_PLUG");
+        if (log.isDebugEnabled()) log.debug("registerHdmiAudioPlugReceiver: registerReceiver for ACTION_HDMI_AUDIO_PLUG");
         registerReceiver(mHdmiAudioPlugReceiver, intentFilter);
         isHDMIPlugReceiverRegistered = true;
     }
@@ -643,13 +643,13 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                             hdmiAudioEncodingFlag = getEncodingFlags(hdmiAudioEncodingsFlags);
                             updateIecEncapsulationCapability();
                             updateDirectPcmMultichannelCapability();
-                            log.debug("registerAudioDeviceCallback: hdmi detected capabilities {}", getSupportedAudioCodecs(hdmiAudioEncodingFlag));
+                            if (log.isDebugEnabled()) log.debug("registerAudioDeviceCallback: hdmi detected capabilities {}", getSupportedAudioCodecs(hdmiAudioEncodingFlag));
                         }
                         if (device.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
                             hasSpdif = true;
                             spdifAudioEncodingsFlags = device.getEncodings();
                             spdifAudioEncodingFlag = getEncodingFlags(spdifAudioEncodingsFlags);
-                            log.debug("registerAudioDeviceCallback: spdif detected capabilities {}", getSupportedAudioCodecs(spdifAudioEncodingFlag));
+                            if (log.isDebugEnabled()) log.debug("registerAudioDeviceCallback: spdif detected capabilities {}", getSupportedAudioCodecs(spdifAudioEncodingFlag));
                         }
                         break;
                     }
@@ -689,7 +689,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private final BroadcastReceiver mHdmiAudioPlugReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            log.debug("mHdmiAudioPlugReceiver:onReceive: {}", intent);
+            if (log.isDebugEnabled()) log.debug("mHdmiAudioPlugReceiver:onReceive: {}", intent);
             final String action = intent.getAction();
             if (action == null)
                 return;
@@ -706,7 +706,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                     }
                 }
 
-                log.debug("mHdmiAudioPlugReceiver: received ACTION_HDMI_AUDIO_PLUG, isAudioPlugged={}, hasHdmi={}, maxAudioChannelCount={}, hdmiAudioEncodingFlag={}, iecCapable={}", isAudioPlugged, hasHdmi, maxAudioChannelCount, hdmiAudioEncodingFlag, isIecEncapsulationCapable);
+                if (log.isDebugEnabled()) log.debug("mHdmiAudioPlugReceiver: received ACTION_HDMI_AUDIO_PLUG, isAudioPlugged={}, hasHdmi={}, maxAudioChannelCount={}, hdmiAudioEncodingFlag={}, iecCapable={}", isAudioPlugged, hasHdmi, maxAudioChannelCount, hdmiAudioEncodingFlag, isIecEncapsulationCapable);
             }
         }
     };
@@ -735,12 +735,12 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         for (int encoding : encodings) {
             if (encoding <= AVOS_ENCODING_MAX) {
                 encodingFlags |= 1L << encoding;
-                log.debug("getEncodingFlags: hdmi RX supports {}", audioEncodings[encoding]);
+                if (log.isDebugEnabled()) log.debug("getEncodingFlags: hdmi RX supports {}", audioEncodings[encoding]);
             } else {
                 log.warn("getEncodingFlags: audio encoding {} not identified!!!", encoding);
             }
         }
-        log.debug("getEncodingFlags: encodings={}, encodingFlags={}, allHdmiAudioCodecs={}", allHdmiAudioCodecs, Arrays.toString(encodings), encodingFlags);
+        if (log.isDebugEnabled()) log.debug("getEncodingFlags: encodings={}, encodingFlags={}, allHdmiAudioCodecs={}", allHdmiAudioCodecs, Arrays.toString(encodings), encodingFlags);
         return encodingFlags;
     }
 
@@ -750,7 +750,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
 
     public static String getSupportedAudioCodecs(long audioEncodingFlag) {
         StringBuilder supportedCodecs = new StringBuilder();
-        log.debug("getSupportedAudioCodecs: audioEncodingFlag={}", audioEncodingFlag);
+        if (log.isDebugEnabled()) log.debug("getSupportedAudioCodecs: audioEncodingFlag={}", audioEncodingFlag);
         for (int i = 2; i < audioEncodings.length; i++) {
             if ((audioEncodingFlag & (1L << i)) != 0) {
                 supportedCodecs.append(audioEncodings[i]).append(", ");
@@ -781,14 +781,14 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
      */
     public static int getEffectiveMaxPcmChannels() {
         if (!hasHdmi) {
-            log.debug("getEffectiveMaxPcmChannels: No HDMI, returning 0");
+            if (log.isDebugEnabled()) log.debug("getEffectiveMaxPcmChannels: No HDMI, returning 0");
             return 0;
         }
 
         // If device advertises IEC61937, passthrough will be used for compressed formats.
         // Keep PCM cap to the advertised channel count to avoid guessing.
         if (isIecEncapsulationCapable && maxAudioChannelCount > 0) {
-            log.debug("getEffectiveMaxPcmChannels: IEC capable, using reported maxAudioChannelCount={} for PCM", maxAudioChannelCount);
+            if (log.isDebugEnabled()) log.debug("getEffectiveMaxPcmChannels: IEC capable, using reported maxAudioChannelCount={} for PCM", maxAudioChannelCount);
             return (int) maxAudioChannelCount;
         }
 
@@ -815,7 +815,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private void addNetworkListener() {
         if (networkState == null) networkState = NetworkState.instance(mContext);
         if (!isNetworkStateListenerAdded && propertyChangeListener != null) {
-            log.trace("addNetworkListener: networkState.addPropertyChangeListener");
+            if (log.isTraceEnabled()) log.trace("addNetworkListener: networkState.addPropertyChangeListener");
             networkState.addPropertyChangeListener(propertyChangeListener);
             isNetworkStateListenerAdded = true;
         }
@@ -824,7 +824,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private void removeNetworkListener() {
         if (networkState == null) networkState = NetworkState.instance(mContext);
         if (isNetworkStateListenerAdded && propertyChangeListener != null) {
-            log.trace("removeListener: networkState.removePropertyChangeListener");
+            if (log.isTraceEnabled()) log.trace("removeListener: networkState.removePropertyChangeListener");
             networkState.removePropertyChangeListener(propertyChangeListener);
             isNetworkStateListenerAdded = false;
         }
@@ -871,11 +871,11 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                     sharedPreferences.edit().putBoolean("app_updated", true).commit();
                     sharedPreferences.edit().putString("current_versionName", novaVersionName).commit();
                     sharedPreferences.edit().putString("previous_versionName", previousVersionName).commit();
-                    log.debug("updateVersionState: update from {}({}) to {}({})", previousVersionName, previousVersion, novaVersionName, novaVersionCode);
+                    if (log.isDebugEnabled()) log.debug("updateVersionState: update from {}({}) to {}({})", previousVersionName, previousVersion, novaVersionName, novaVersionCode);
                 }
             } else {
                 // save first app version
-                log.debug("updateVersionState: save first version {}", novaVersionCode);
+                if (log.isDebugEnabled()) log.debug("updateVersionState: save first version {}", novaVersionCode);
                 sharedPreferences.edit().putInt("current_versionCode", novaVersionCode).commit();
                 sharedPreferences.edit().putInt("previous_versionCode", -1).commit();
                 sharedPreferences.edit().putString("current_versionName", novaVersionName).commit();
@@ -904,7 +904,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     }
 
     public static String getChangelog(Context context) {
-        log.debug("getChangelog: {}->{}", novaPreviousVersionArray[0], novaVersionArray[0]);
+        if (log.isDebugEnabled()) log.debug("getChangelog: {}->{}", novaPreviousVersionArray[0], novaVersionArray[0]);
         if (novaPreviousVersionArray[0] > 0 && novaPreviousVersionArray[0] <= 5 && novaVersionArray[0] > 5)
             return context.getResources().getString(R.string.v5_v6_upgrade_info);
         else return null;
@@ -915,7 +915,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             clearUpdatedFlag(activity);
             return;
         } else {
-            log.debug("showChangelogDialog: changelog is null, nothing to do.");
+            if (log.isDebugEnabled()) log.debug("showChangelogDialog: changelog is null, nothing to do.");
         }
         AlertDialog dialog = new AlertDialog.Builder(activity)
             .setTitle(R.string.upgrade_info)
@@ -1035,7 +1035,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     public void onStart(@NonNull LifecycleOwner owner) {
         isForeground = true;
         // Handle foreground state
-        log.debug("onStart: lifecycle app now in ForeGround");
+        if (log.isDebugEnabled()) log.debug("onStart: lifecycle app now in ForeGround");
         handleForeGround(true);
     }
 
@@ -1043,7 +1043,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     public void onStop(@NonNull LifecycleOwner owner) {
         // Handle background state
         isForeground = false;
-        log.debug("onStop: lifecycle app now in BackGround");
+        if (log.isDebugEnabled()) log.debug("onStop: lifecycle app now in BackGround");
         handleForeGround(false);
     }
 }

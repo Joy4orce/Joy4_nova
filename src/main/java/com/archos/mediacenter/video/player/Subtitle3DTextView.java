@@ -70,7 +70,7 @@ public class Subtitle3DTextView extends LinearLayout {
     }
 
     public void setGravity3D(int positionGravity, int textJustification) {
-        log.debug("setGravity3D: positionGravity={}, textJustification={}", positionGravity, textJustification);
+        if (log.isDebugEnabled()) log.debug("setGravity3D: positionGravity={}, textJustification={}", positionGravity, textJustification);
 
         // Get FrameLayout.LayoutParams since the parent is a FrameLayout
         FrameLayout.LayoutParams primaryParams = (FrameLayout.LayoutParams) mPrimaryTV.getLayoutParams();
@@ -88,7 +88,7 @@ public class Subtitle3DTextView extends LinearLayout {
         mPrimaryTV.setGravity(textGravity);
         mSecondaryTV.setGravity(textGravity);
 
-        log.debug("setGravity3D: final textGravity={}", textGravity);
+        if (log.isDebugEnabled()) log.debug("setGravity3D: final textGravity={}", textGravity);
 
         // Request layout updates
         mPrimaryTV.requestLayout();
@@ -97,7 +97,7 @@ public class Subtitle3DTextView extends LinearLayout {
     
     @Override
     public void setVisibility(int visibility) {
-        log.debug("setVisibility: visibility={}", visibility);
+        if (log.isDebugEnabled()) log.debug("setVisibility: visibility={}", visibility);
         super.setVisibility(visibility);
         if (mExternalSurface != null)  {
             try {
@@ -119,7 +119,7 @@ public class Subtitle3DTextView extends LinearLayout {
 
 
     public void setText(String s) {
-        log.debug("setText: text={}", s);
+        if (log.isDebugEnabled()) log.debug("setText: text={}", s);
         mPrimaryTV.setText(s);
         if(mNeed3d)
             mSecondaryTV.setText(s);
@@ -147,7 +147,7 @@ public class Subtitle3DTextView extends LinearLayout {
     }
 
     public void setUIMode(int uiMode) {
-        log.debug("setUIMode: uiMode={}", uiMode);
+        if (log.isDebugEnabled()) log.debug("setUIMode: uiMode={}", uiMode);
         getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
         if(uiMode== VideoEffect.SBS_MODE||uiMode==VideoEffect.TB_MODE){
             mNeed3d = true;
@@ -171,7 +171,7 @@ public class Subtitle3DTextView extends LinearLayout {
     }
 
     public void setScreenSize(int displayWidth, int displayHeight) {
-        log.debug("setScreenSize: displayWidth={}, displayHeight={}", displayWidth, displayHeight);
+        if (log.isDebugEnabled()) log.debug("setScreenSize: displayWidth={}, displayHeight={}", displayWidth, displayHeight);
         getLayoutParams().height = displayHeight;
     }
 }

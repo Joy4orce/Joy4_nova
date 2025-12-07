@@ -106,10 +106,10 @@ public abstract class ScraperImagePresenter extends Presenter {
         public void loadImage() {
             Context c = view.getContext();
             String adjustedImageUrl = getAdjustedImageUrl(mImage);
-            log.debug("loadImage: picasso loads {}", adjustedImageUrl);
+            if (log.isDebugEnabled()) log.debug("loadImage: picasso loads {}", adjustedImageUrl);
             File imgFile = mImage.getLargeFileF();
             if (! imgFile.exists()) { // download via picasso
-                log.debug("loadImage: {} does not exist (could be for size reason)", mImage.getLargeFile());
+                if (log.isDebugEnabled()) log.debug("loadImage: {} does not exist (could be for size reason)", mImage.getLargeFile());
                 Picasso.get()
                         .load(adjustedImageUrl)
                         .resize(getAdjustedWidth(c), getAdjustedHeight(c)) // better resize to card size, since backdrop files are pretty large

@@ -109,9 +109,9 @@ public class ManualVideoScrappingSearchFragment extends ManualScrappingSearchFra
         }
         ScrapeDetailResult detail = mScraper.getDetails(result, b);
         BaseTags tags = detail.tag;
-        log.debug("getTagFromSearchResult: found tag {}", tags);
+        if (log.isDebugEnabled()) log.debug("getTagFromSearchResult: found tag {}", tags);
         if (tags instanceof EpisodeTags) {
-            log.debug("getTagFromSearchResult: found EpisodeTags");
+            if (log.isDebugEnabled()) log.debug("getTagFromSearchResult: found EpisodeTags");
             if (((EpisodeTags)tags).getShowTags() != null) ((EpisodeTags)tags).getShowTags().setTitle(result.getTitle());
         }
 
@@ -126,7 +126,7 @@ public class ManualVideoScrappingSearchFragment extends ManualScrappingSearchFra
             }
         }
 
-        log.trace("getTagFromSearchResult: put in mTagsToSearchResultMap {}", tags);
+        if (log.isTraceEnabled()) log.trace("getTagFromSearchResult: put in mTagsToSearchResultMap {}", tags);
         mTagsToSearchResultMap.put(tags, result);
 
         return tags;
@@ -139,7 +139,7 @@ public class ManualVideoScrappingSearchFragment extends ManualScrappingSearchFra
     @Override
     protected void saveTagsAndFinish(final BaseTags fTags) {
 
-        log.debug("saveTagsAndFinish");
+        if (log.isDebugEnabled()) log.debug("saveTagsAndFinish");
 
         final NovaProgressDialog progressDialog = new NovaProgressDialog(getActivity());
         progressDialog.setTitle(R.string.scrap_get_title);
@@ -169,8 +169,8 @@ public class ManualVideoScrappingSearchFragment extends ManualScrappingSearchFra
                         tags = detail.tag;
                 }
 
-                log.trace("saveTagsAndFinish: found this tag {}", tags);
-                log.debug("saveTagsAndFinish: downloadPoster");
+                if (log.isTraceEnabled()) log.trace("saveTagsAndFinish: found this tag {}", tags);
+                if (log.isDebugEnabled()) log.debug("saveTagsAndFinish: downloadPoster");
 
                 // since poster can be deleted again we refresh it here
                 //tags.downloadPoster(getActivity());

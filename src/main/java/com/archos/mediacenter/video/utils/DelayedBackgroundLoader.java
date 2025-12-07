@@ -44,7 +44,7 @@ public class DelayedBackgroundLoader extends ImageProcessor {
 
     @Override
     public void loadBitmap(LoadTaskItem taskItem) {
-        log.debug("background:loadBitmap");
+        if (log.isDebugEnabled()) log.debug("background:loadBitmap");
         long time = System.currentTimeMillis();
         if (taskItem.loadObject instanceof ScraperImage) {
             ScraperImage image = (ScraperImage) taskItem.loadObject;
@@ -53,7 +53,7 @@ public class DelayedBackgroundLoader extends ImageProcessor {
                 image.download(mContext);
                 try {
                     taskItem.result.bitmap = BitmapFactory.decodeFile(file);
-                    log.debug("background:loadBitmap - loaded.");
+                    if (log.isDebugEnabled()) log.debug("background:loadBitmap - loaded.");
                 } catch (OutOfMemoryError e) {
                     log.error("background:loadBitmap - No more memory!", e);
                 }
@@ -62,10 +62,10 @@ public class DelayedBackgroundLoader extends ImageProcessor {
                 if (needSleep && taskItem.result.bitmap != null) {
                     long sleep = mSleep - (System.currentTimeMillis() - time);
                     if (sleep > 0) try {
-                        log.debug("background:loadBitmap - extra sleep of {}", sleep);
+                        if (log.isDebugEnabled()) log.debug("background:loadBitmap - extra sleep of {}", sleep);
                         Thread.sleep(sleep);
                     } catch (InterruptedException e) {
-                        log.debug("DelayedBackgroundLoader interrupted in sleep()");
+                        if (log.isDebugEnabled()) log.debug("DelayedBackgroundLoader interrupted in sleep()");
                     }
                 }
             }
@@ -95,32 +95,32 @@ public class DelayedBackgroundLoader extends ImageProcessor {
 
     @Override
     public void setResult(ImageView imageView, LoadTaskItem taskItem) {
-        log.debug("setResult");
+        if (log.isDebugEnabled()) log.debug("setResult");
         boolean animate = true;
         if (taskItem.loadObject instanceof ScraperImage) {
             ScraperImage image = (ScraperImage) taskItem.loadObject;
             String file = image.getLargeFile();
             if (file != null && file.equals(lastLoaded)) {
                 //!!!animate = false;
-                log.debug("setResult animate false");
+                if (log.isDebugEnabled()) log.debug("setResult animate false");
             }
             lastLoaded = file;
         }
 
         imageView.setImageBitmap(taskItem.result.bitmap);
         if (animate) {
-            log.debug("   animate backdrop alpha {}", mBackgroundAlpha);
+            if (log.isDebugEnabled()) log.debug("   animate backdrop alpha {}", mBackgroundAlpha);
             imageView.animate().alpha(mBackgroundAlpha).setDuration(600);
         }
         else {
-            log.debug("   set backdrop alpha {}", mBackgroundAlpha);
+            if (log.isDebugEnabled()) log.debug("   set backdrop alpha {}", mBackgroundAlpha);
             imageView.setAlpha(mBackgroundAlpha);
         }
     }
 
     @Override
     public boolean handleLoadError(ImageView imageView, LoadTaskItem taskItem) {
-        log.debug("set Null animated");
+        if (log.isDebugEnabled()) log.debug("set Null animated");
         if (imageView.getAlpha() > 0f)
             imageView.animate().alpha(0f).setDuration(300);
         lastLoaded = null;

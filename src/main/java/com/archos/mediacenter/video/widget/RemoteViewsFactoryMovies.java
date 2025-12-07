@@ -31,11 +31,11 @@ class RemoteViewsFactoryMovies extends RemoteViewsFactoryBase {
 
 	public RemoteViewsFactoryMovies(Context context, Intent intent) {
 		super(context, intent);
-		log.debug("RemoteViewsFactoryMovies contructor");
+		if (log.isDebugEnabled()) log.debug("RemoteViewsFactoryMovies contructor");
 	}
 
 	protected boolean loadData(Context context, int maxItemCount) {
-		log.debug("loadData()");
+		if (log.isDebugEnabled()) log.debug("loadData()");
 		String sortOrder = BrowserByVideoSelection.DEFAULT_SORT + " LIMIT " + maxItemCount;
 		String selection = BrowserByVideoSelection.SELECTION_ALL_MOVIES;
 		ContentResolver resolver = context.getContentResolver();

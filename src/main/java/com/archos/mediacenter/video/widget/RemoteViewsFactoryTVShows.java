@@ -29,11 +29,11 @@ class RemoteViewsFactoryTVShows extends RemoteViewsFactoryBase {
 
     public RemoteViewsFactoryTVShows(Context context, Intent intent) {
         super(context, intent);
-        log.debug("Create TVShows service for the video widget");
+        if (log.isDebugEnabled()) log.debug("Create TVShows service for the video widget");
     }
 
     protected boolean loadData(Context context, int maxItemCount) {
-        log.debug("loadData()");
+        if (log.isDebugEnabled()) log.debug("loadData()");
 		String sortOrder = BrowserAllTvShows.DEFAULT_SORT + " LIMIT " + maxItemCount;
 		String selection = BrowserAllTvShows.SELECTION;
 		ContentResolver resolver = context.getContentResolver();

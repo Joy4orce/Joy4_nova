@@ -118,7 +118,7 @@ public class SmbRootFragment extends UpnpSmbCommonRootFragment implements SambaD
     public void onAttach(Context context) {
         super.onAttach(context);
         Activity activity = getActivity();
-        log.debug("onAttach mSambaDiscovery");
+        if (log.isDebugEnabled()) log.debug("onAttach mSambaDiscovery");
         // Instantiate the SMB discovery as soon as we get the activity context
         mSambaDiscovery = new SambaDiscovery(activity);
         mSambaDiscovery.setMinimumUpdatePeriodInMs(100);
@@ -133,23 +133,23 @@ public class SmbRootFragment extends UpnpSmbCommonRootFragment implements SambaD
     @Override
     public void onDestroy() {
         super.onDestroy();
-        log.debug("onDestroy");
+        if (log.isDebugEnabled()) log.debug("onDestroy");
         mSambaDiscovery.removeListener(this);
         if(mCheckShortcutAvailabilityTask!=null) {
-            log.debug("onDestroy: cancel mCheckShortcutAvailabilityTask");
+            if (log.isDebugEnabled()) log.debug("onDestroy: cancel mCheckShortcutAvailabilityTask");
             mCheckShortcutAvailabilityTask.cancel(true);
         }
     }
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        log.debug("onDestroyView");
+        if (log.isDebugEnabled()) log.debug("onDestroyView");
         mSambaDiscovery.abort();
     }
     @Override
     public void onDetach() {
         super.onDetach();
-        log.debug("onDetach");
+        if (log.isDebugEnabled()) log.debug("onDetach");
         mSambaDiscovery.abort();
     }
     /**
@@ -182,13 +182,13 @@ public class SmbRootFragment extends UpnpSmbCommonRootFragment implements SambaD
     // SambaDiscovery.Listener implementation
     @Override
     public void onDiscoveryFatalError() {
-        log.debug("onDiscoveryFatalError");
+        if (log.isDebugEnabled()) log.debug("onDiscoveryFatalError");
         ((WorkgroupShortcutAndServerAdapter)mAdapter).setIsLoadingWorkgroups(false);
     }
 
     private void checkShortcutAvailability(){
         if(mCheckShortcutAvailabilityTask!=null) {
-            log.debug("checkShortcutAvailability: cancel non null mCheckShortcutAvailabilityTask before launching one");
+            if (log.isDebugEnabled()) log.debug("checkShortcutAvailability: cancel non null mCheckShortcutAvailabilityTask before launching one");
             mCheckShortcutAvailabilityTask.cancel(true);
         }
         mCheckShortcutAvailabilityTask = new AsyncTask<Void, Void, Void>() {
@@ -204,17 +204,17 @@ public class SmbRootFragment extends UpnpSmbCommonRootFragment implements SambaD
                 // re-enable since otherwise stunnel smb://127.0.0.1:xxxx links are marked non available
                 for (ShortcutDbAdapter.Shortcut shortcut : shortcuts) {
                     Uri uri = Uri.parse(shortcut.getUri());
-                    log.debug("checkShortcutAvailability.doInBackground: checking {}", shortcut.getUri());
+                    if (log.isDebugEnabled()) log.debug("checkShortcutAvailability.doInBackground: checking {}", shortcut.getUri());
                     if ((shares == null || !shares.contains(uri.getHost().toLowerCase())) // share not listed yet...
                             &&!forcedShortcuts.contains(shortcut.getUri()) // it is not a forced shortcut
                             && FileEditorFactory.getFileEditorForUrl(uri, getActivity()).exists()) { // shortcut exists
-                        log.debug("checkShortcutAvailability.doInBackground: shortcut {} is available, display it!", shortcut.getUri());
+                        if (log.isDebugEnabled()) log.debug("checkShortcutAvailability.doInBackground: shortcut {} is available, display it!", shortcut.getUri());
                         mAdapter.forceShortcutDisplay(shortcut.getUri());
                     } else {
-                        log.debug("checkShortcutAvailability.doInBackground: it is there, no need to check {}", shortcut.getUri());
+                        if (log.isDebugEnabled()) log.debug("checkShortcutAvailability.doInBackground: it is there, no need to check {}", shortcut.getUri());
                     }
                 }
-                log.debug("checkShortcutAvailability.doInBackground: check finished");
+                if (log.isDebugEnabled()) log.debug("checkShortcutAvailability.doInBackground: check finished");
                 return null;
             }
             @Override

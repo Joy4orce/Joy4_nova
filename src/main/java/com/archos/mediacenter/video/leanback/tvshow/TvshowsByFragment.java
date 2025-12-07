@@ -145,7 +145,7 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mSeparateAnimeFromShowMovie = mPrefs.getBoolean(VideoPreferencesCommon.KEY_SEPARATE_ANIME_MOVIE_SHOW, VideoPreferencesCommon.SEPARATE_ANIME_MOVIE_SHOW_DEFAULT);
-        log.debug("onActivityCreated: mSeparateAnimeFromShowMovie={}", mSeparateAnimeFromShowMovie);
+        if (log.isDebugEnabled()) log.debug("onActivityCreated: mSeparateAnimeFromShowMovie={}", mSeparateAnimeFromShowMovie);
 
         mSortOrder = mPrefs.getString(getSortOrderParamKey(), mDefaultSort);
 
@@ -245,7 +245,7 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
 
         // Modified for sure if has different length
         if (oldCursor.getCount() != newCursor.getCount()) {
-            log.debug("Difference found in the category list (size changed)");
+            if (log.isDebugEnabled()) log.debug("Difference found in the category list (size changed)");
             return true;
         }
 
@@ -261,14 +261,14 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
             final String newName = newCursor.getString(newSubsetNameColumn);
             if (oldName != null && !oldName.equals(newName)) {
                 // difference found
-                log.debug("Difference found in the category list ({} vs {})", oldName, newName);
+                if (log.isDebugEnabled()) log.debug("Difference found in the category list ({} vs {})", oldName, newName);
                 return true;
             }
             oldCursor.moveToNext();
             newCursor.moveToNext();
         }
         // no difference found
-        log.debug("No difference found in the category list");
+        if (log.isDebugEnabled()) log.debug("No difference found in the category list");
         return false;
     }
 

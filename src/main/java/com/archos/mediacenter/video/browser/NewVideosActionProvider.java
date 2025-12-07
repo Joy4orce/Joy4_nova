@@ -122,7 +122,7 @@ public class NewVideosActionProvider extends ActionProvider implements
 
     @Override
     public View onCreateActionView() {
-        log.debug("onCreateActionView");
+        if (log.isDebugEnabled()) log.debug("onCreateActionView");
 
         View view = LayoutInflater.from(mContext).inflate(R.layout.new_videos_action_item, null);
         view.setOnClickListener(this);
@@ -169,7 +169,7 @@ public class NewVideosActionProvider extends ActionProvider implements
 
     @Override
     public boolean onPerformDefaultAction() {
-        log.debug("onPerformDefaultAction");
+        if (log.isDebugEnabled()) log.debug("onPerformDefaultAction");
         // Search all the videos in the database
         Intent as = new Intent(mContext, AutoScraperActivity.class);
         as.setAction(Intent.ACTION_MAIN);
@@ -179,24 +179,24 @@ public class NewVideosActionProvider extends ActionProvider implements
 
     @Override
     public void onPrepareSubMenu(SubMenu subMenu) {
-        log.debug("onPrepareSubMenu");
+        if (log.isDebugEnabled()) log.debug("onPrepareSubMenu");
     }
 
     @Override
     public boolean hasSubMenu() {
-        log.debug("hasSubMenu");
+        if (log.isDebugEnabled()) log.debug("hasSubMenu");
         return false;
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        log.debug("onCreateLoader");
+        if (log.isDebugEnabled()) log.debug("onCreateLoader");
         return new CursorLoader(mContext, URI, PROJECTION, SELECTION, SELECTION_ARGS, null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        log.debug("onLoadFinished");
+        if (log.isDebugEnabled()) log.debug("onLoadFinished");
         if (cursor != null && cursor.moveToFirst()) {
             updateCount(cursor.getInt(0));
         }
@@ -204,7 +204,7 @@ public class NewVideosActionProvider extends ActionProvider implements
 
     @Override
     public void onLoaderReset(Loader<Cursor> arg0) {
-        log.debug("onLoaderReset");
+        if (log.isDebugEnabled()) log.debug("onLoaderReset");
         // nothing
     }
 
@@ -235,12 +235,12 @@ public class NewVideosActionProvider extends ActionProvider implements
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == MSG_START_HELP_OVERLAY && mItemView != null) {
-                log.debug("handleMessage MSG_START_HELP_OVERLAY");
+                if (log.isDebugEnabled()) log.debug("handleMessage MSG_START_HELP_OVERLAY");
 
                 // Get the size of the action bar item
                 int itemWidth = mItemView.getWidth();
                 int itemHeight = mItemView.getHeight();
-                log.debug("item size={}x{}", itemWidth, itemHeight);
+                if (log.isDebugEnabled()) log.debug("item size={}x{}", itemWidth, itemHeight);
 
                 // Make sure the item is currently displayed in the action bar 
                 // (the size is 0x0 if the item is in the options menu)
@@ -256,7 +256,7 @@ public class NewVideosActionProvider extends ActionProvider implements
                     int windowWidth = windowFrame.right - windowFrame.left;
                     int windowHeight = windowFrame.bottom - windowFrame.top;
                     int statusbarHeight = windowFrame.top;
-                    log.debug("windowFrame={}", windowFrame);
+                    if (log.isDebugEnabled()) log.debug("windowFrame={}", windowFrame);
 
                     // Compute a target area a bit bigger than the item itself
                     int left = location[0] - mHelpOverlayHorizontalOffset;
@@ -277,7 +277,7 @@ public class NewVideosActionProvider extends ActionProvider implements
                     if (top < 0) {
                         top = 0;
                     }
-                    log.debug("Selected target area={} {} {} {}", left, top, right, bottom);
+                    if (log.isDebugEnabled()) log.debug("Selected target area={} {} {} {}", left, top, right, bottom);
                     
                     // Start the help overlay activity with the selected target area
                     Intent hov = new Intent(Intent.ACTION_MAIN);

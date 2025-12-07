@@ -41,25 +41,25 @@ public class CodecDiscovery {
 	}
 
 	public static void displaySupportsDoVi(boolean isSupported) {
-		log.debug("displaySupportsDoVi={}", isSupported);
+		if (log.isDebugEnabled()) log.debug("displaySupportsDoVi={}", isSupported);
 		// set bit 3 of hdrCapabilities to 1 if display supports Dolby Vision
 		hdrCapabilities |= 8;
 	}
 
 	public static void displaySupportsHdr10(boolean isSupported) {
-		log.debug("displaySupportsHdr10={}", isSupported);
+		if (log.isDebugEnabled()) log.debug("displaySupportsHdr10={}", isSupported);
 		// set bit 1 of hdrCapabilities to 1 if display supports HDR10
 		hdrCapabilities |= 1;
 	}
 
 	public static void displaySupportsHdrHLG(boolean isSupported) {
-        log.debug("displaySupportsHdrHLG={}", isSupported);
+        if (log.isDebugEnabled()) log.debug("displaySupportsHdrHLG={}", isSupported);
 		// set bit 2 of hdrCapabilities to 1 if display supports HLG
 		hdrCapabilities |= 2;
 	}
 
 	public static void displaySupportsHdr10Plus(boolean isSupported) {
-        log.debug("displaySupportsHdr10Plus={}", isSupported);
+        if (log.isDebugEnabled()) log.debug("displaySupportsHdr10Plus={}", isSupported);
 		// set bit 4 of hdrCapabilities to 1 if display supports HDR10+
 		hdrCapabilities |= 4;
 	}
@@ -94,7 +94,7 @@ public class CodecDiscovery {
 	}
 
 	public static void disableDoVi(boolean isDisabled) {
-		log.debug("disableDovi={}", isDisabled);
+		if (log.isDebugEnabled()) log.debug("disableDovi={}", isDisabled);
 		isDoViDisabled = isDisabled;
 	}
 
@@ -104,17 +104,17 @@ public class CodecDiscovery {
 
 		for (MediaCodecInfo codecInfo : codecInfos) {
 			if (isCodecInfoSupported(codecInfo, codecType, allowSwCodec)) {
-				log.trace("isCodecTypeSupported2: codecInfo.getName {} supported", codecInfo.getName());
+				if (log.isTraceEnabled()) log.trace("isCodecTypeSupported2: codecInfo.getName {} supported", codecInfo.getName());
 				return true;
 			} else {
-				log.trace("isCodecTypeSupported2: codecInfo.getName {} not supported", codecInfo.getName());
+				if (log.isTraceEnabled()) log.trace("isCodecTypeSupported2: codecInfo.getName {} not supported", codecInfo.getName());
 			}
 		}
 		return false;
 	}
 
 	private static String getCodecForProfile(String mimeType, int profile) {
-		log.debug("getCodecForProfile: mimeType={} profile={}", mimeType, profile);
+		if (log.isDebugEnabled()) log.debug("getCodecForProfile: mimeType={} profile={}", mimeType, profile);
 		if (Build.VERSION.SDK_INT < 27) return null;
 		MediaCodecList codecList = new MediaCodecList(MediaCodecList.ALL_CODECS);
 		MediaCodecInfo[] codecInfos = codecList.getCodecInfos();
@@ -129,7 +129,7 @@ public class CodecDiscovery {
 				if (capabilities != null) {
 					if (capabilities.profileLevels != null) {
 						for (MediaCodecInfo.CodecProfileLevel level : capabilities.profileLevels) {
-							log.debug("getCodecForProfile: profile={}, level={}", level.profile, level.level);
+							if (log.isDebugEnabled()) log.debug("getCodecForProfile: profile={}, level={}", level.profile, level.level);
 							if (level.profile == profile) {
 								return codecInfo.getName();
 							}
@@ -152,21 +152,21 @@ public class CodecDiscovery {
 	}
 
 	private static boolean isCodecInfoSupported(MediaCodecInfo codecInfo, String codecType, boolean allowSwCodec) {
-        log.trace("isCodecInfoSupported: isDoViDisabled={} allowSwCodec={} isEncoder={}", isDoViDisabled, allowSwCodec, codecInfo.isEncoder());
+        if (log.isTraceEnabled()) log.trace("isCodecInfoSupported: isDoViDisabled={} allowSwCodec={} isEncoder={}", isDoViDisabled, allowSwCodec, codecInfo.isEncoder());
 		if (codecInfo.isEncoder() || (!allowSwCodec && isSwCodec(codecInfo))) {
-            log.trace("isCodecTypeSupported: codecInfo.getName {} not supported (isEncoder,swCodecs)", codecInfo.getName());
+            if (log.isTraceEnabled()) log.trace("isCodecTypeSupported: codecInfo.getName {} not supported (isEncoder,swCodecs)", codecInfo.getName());
 			return false;
 		}
 		String[] types = codecInfo.getSupportedTypes();
-        log.trace("isCodecTypeSupported: looking for codecType {}, codecInfo.getName {}, supported types {}", codecType, codecInfo.getName(), Arrays.toString(types));
+        if (log.isTraceEnabled()) log.trace("isCodecTypeSupported: looking for codecType {}, codecInfo.getName {}, supported types {}", codecType, codecInfo.getName(), Arrays.toString(types));
 		for (String type : types) {
 			if (type.equalsIgnoreCase(codecType)) {
-                log.trace("isCodecTypeSupported: codecInfo.getName {} matching {}", codecInfo.getName(), codecType);
+                if (log.isTraceEnabled()) log.trace("isCodecTypeSupported: codecInfo.getName {} matching {}", codecInfo.getName(), codecType);
 				if (type.equalsIgnoreCase("video/dolby-vision") && isDoViDisabled) {
-                    log.debug("isCodecTypeSupported: rejecting codecInfo.getName {} because dolby vision disabled", codecInfo.getName());
+                    if (log.isDebugEnabled()) log.debug("isCodecTypeSupported: rejecting codecInfo.getName {} because dolby vision disabled", codecInfo.getName());
 					return false;
 				} else {
-                    log.debug("isCodecTypeSupported: validating codecInfo.getName {}", codecInfo.getName());
+                    if (log.isDebugEnabled()) log.debug("isCodecTypeSupported: validating codecInfo.getName {}", codecInfo.getName());
 					return true;
 				}
 			}

@@ -108,7 +108,7 @@ public class NetworkServerCredentialsDialog extends DialogFragment {
             String uriToBuild = "";
             uriToBuild = UriUtils.getTypeUri(mType);
             uriToBuild +="://"+mRemote+":"+mPort+"/";
-            log.debug("onCreateDialog: uriToBuild={}", uriToBuild);
+            if (log.isDebugEnabled()) log.debug("onCreateDialog: uriToBuild={}", uriToBuild);
 
             Credential cred = database.getCredential(uriToBuild);
             if(cred!=null){
@@ -162,7 +162,7 @@ public class NetworkServerCredentialsDialog extends DialogFragment {
         int portInt =  mPort;
         String portString = (portInt!=-1) ? Integer.toString(portInt) : "";
         portEt.setText(portString);
-        log.debug("onCreateDialog: username={}, domain={}, port={}, remote={}, path={}; type={}", mUsername, mDomain, mPort, mRemote, mPath, mType);
+        if (log.isDebugEnabled()) log.debug("onCreateDialog: username={}, domain={}, port={}, remote={}, path={}; type={}", mUsername, mDomain, mPort, mRemote, mPath, mType);
         usernameEt.setText(mUsername);
         passwordEt.setText(mPassword);
         if (UriUtils.requiresDomain(type)) domainEt.setText(mDomain);
@@ -208,7 +208,7 @@ public class NetworkServerCredentialsDialog extends DialogFragment {
 
                 // username can be empty with samba guest shares (UriUtils.requiresDomain(type))
                 if (username.equals("") && ! UriUtils.requiresDomain(type)) {
-                    log.debug("onClick: invalid credential, username empty and not smb protocol");
+                    if (log.isDebugEnabled()) log.debug("onClick: invalid credential, username empty and not smb protocol");
                     validUri = false;
                 }
                 // path needs to start by a "/"
@@ -229,7 +229,7 @@ public class NetworkServerCredentialsDialog extends DialogFragment {
                     validUri = false;
                 }
 
-                log.debug("onClick: scheme={}, username={}, domain={}, port={}, remote={}, path={}; type={}, validUri={}", scheme, username, domain, port, address, path, type, validUri);
+                if (log.isDebugEnabled()) log.debug("onClick: scheme={}, username={}, domain={}, port={}, remote={}, path={}; type={}, validUri={}", scheme, username, domain, port, address, path, type, validUri);
 
                 if(validUri){
 
@@ -250,7 +250,7 @@ public class NetworkServerCredentialsDialog extends DialogFragment {
                     String uriToBuild = scheme;
 
                     uriToBuild +="://"+(!address.isEmpty()?address+(port!=-1?":"+port:""):"")+path;
-                    log.debug("onCreateDialog: username={}, domain={}, port={}, remote={}, path={}; type={}", mUsername, mDomain, mPort, mRemote, mPath, mType);
+                    if (log.isDebugEnabled()) log.debug("onCreateDialog: username={}, domain={}, port={}, remote={}, path={}; type={}", mUsername, mDomain, mPort, mRemote, mPath, mType);
                     if(savePassword.isChecked())
                         NetworkCredentialsDatabase.getInstance().saveCredential(new Credential(username, password, uriToBuild, domain, true));
                     else

@@ -86,7 +86,7 @@ public class AudioDelayPickerDialog extends AlertDialog implements OnClickListen
         switch(msg.what) {
             case CHANGE_DELAY:
                 if (mCallBack != null) {
-                    log.debug("handleMessage: apply delay change {}", mAudioDelayPicker.getDelay());
+                    if (log.isDebugEnabled()) log.debug("handleMessage: apply delay change {}", mAudioDelayPicker.getDelay());
                     mCallBack.onAudioDelayChange(mAudioDelayPicker, mAudioDelayPicker.getDelay());
                 }
             break;
@@ -99,10 +99,10 @@ public class AudioDelayPickerDialog extends AlertDialog implements OnClickListen
         log.error("onStop");
         mHandler.removeCallbacksAndMessages(null);
         if (mCallBack != null) {
-            log.debug("onStop: apply delay change {}", mAudioDelayPicker.getDelay());
+            if (log.isDebugEnabled()) log.debug("onStop: apply delay change {}", mAudioDelayPicker.getDelay());
             mCallBack.onAudioDelayChange(mAudioDelayPicker, mAudioDelayPicker.getDelay());
         }
-        log.debug("onStop: apply save setting {} delay {}", mSaveSettingCB.isChecked(), (mSaveSettingCB.isChecked()?PlayerService.sPlayerService.getAudioDelay():0));
+        if (log.isDebugEnabled()) log.debug("onStop: apply save setting {} delay {}", mSaveSettingCB.isChecked(), (mSaveSettingCB.isChecked()?PlayerService.sPlayerService.getAudioDelay():0));
         PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putInt(getContext().getResources().getString(R.string.save_delay_setting_pref_key),
                 mSaveSettingCB.isChecked()?PlayerService.sPlayerService.getAudioDelay():0).commit();
     }

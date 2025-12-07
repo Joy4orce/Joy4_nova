@@ -72,7 +72,7 @@ public class VideoActionAdapter extends SparseArrayObjectAdapter {
      * @param isTvEpisode true if it is a tv episode
      */
     public VideoActionAdapter(Context context, Video video, boolean inPlayer, boolean displayRemoveFromList, boolean displayConfirmDelete, Episode nextEpisode, boolean isTvEpisode) {
-        log.debug("new VideoActionAdapter");
+        if (log.isDebugEnabled()) log.debug("new VideoActionAdapter");
         mContext = context;
         update(video, inPlayer, displayRemoveFromList, displayConfirmDelete, nextEpisode, isTvEpisode);
     }
@@ -121,13 +121,13 @@ public class VideoActionAdapter extends SparseArrayObjectAdapter {
                     clear(ACTION_MARK_AS_WATCHED);
                     set(ACTION_MARK_AS_NOT_WATCHED, new Action(ACTION_MARK_AS_NOT_WATCHED, mContext.getString(R.string.mark_as_not_watched)));
                     // keep marked watched state in sync with the buttons
-                    log.debug("update: tell VideoDetailsFragment watch state is true");
+                    if (log.isDebugEnabled()) log.debug("update: tell VideoDetailsFragment watch state is true");
                     VideoDetailsFragment.setWatchState(true);
                 } else {
                     clear(ACTION_MARK_AS_NOT_WATCHED);
                     set(ACTION_MARK_AS_WATCHED, new Action(ACTION_MARK_AS_WATCHED, mContext.getString(R.string.mark_as_watched)));
                     // keep marked watched state in sync with the buttons
-                    log.debug("update: tell VideoDetailsFragment watch state is false");
+                    if (log.isDebugEnabled()) log.debug("update: tell VideoDetailsFragment watch state is false");
                     VideoDetailsFragment.setWatchState(false);
                 }
             }
@@ -183,18 +183,18 @@ public class VideoActionAdapter extends SparseArrayObjectAdapter {
     //differs from VideoDetailsFragment
     private boolean foundDifferencesRequiringDetailsUpdate(Video v1, Video v2, int oldRemoteResume) {
 
-        if (v1==null || v2==null) {log.debug("foundDifferencesRequiringDetailsUpdate null"); return true;}
-        log.debug("foundDifferencesRequiringDetailsUpdate remotev1{}", oldRemoteResume);
-        log.debug("foundDifferencesRequiringDetailsUpdate remotev2{}", v2.getRemoteResumeMs());
-        log.debug("foundDifferencesRequiringDetailsUpdate v2{}", v2.getResumeMs());
+        if (v1==null || v2==null) { if (log.isDebugEnabled()) log.debug("foundDifferencesRequiringDetailsUpdate null"); return true;}
+        if (log.isDebugEnabled()) log.debug("foundDifferencesRequiringDetailsUpdate remotev1{}", oldRemoteResume);
+        if (log.isDebugEnabled()) log.debug("foundDifferencesRequiringDetailsUpdate remotev2{}", v2.getRemoteResumeMs());
+        if (log.isDebugEnabled()) log.debug("foundDifferencesRequiringDetailsUpdate v2{}", v2.getResumeMs());
 
-        if (v1.hasScraperData() != v2.hasScraperData()) {log.debug("foundDifferencesRequiringDetailsUpdate hasScraperData"); return true;}
-        if (v1.getResumeMs() != v2.getResumeMs()) {log.debug("foundDifferencesRequiringDetailsUpdate resumeMs"); return true;}
+        if (v1.hasScraperData() != v2.hasScraperData()) { if (log.isDebugEnabled()) log.debug("foundDifferencesRequiringDetailsUpdate hasScraperData"); return true;}
+        if (v1.getResumeMs() != v2.getResumeMs()) { if (log.isDebugEnabled()) log.debug("foundDifferencesRequiringDetailsUpdate resumeMs"); return true;}
 
-        if (oldRemoteResume != v2.getRemoteResumeMs()&&v2.getRemoteResumeMs()!=v2.getResumeMs()) {log.debug("foundDifferencesRequiringDetailsUpdate resumeMs"); return true;}
-        if (v1.isWatched() != v2.isWatched()) {log.debug("foundDifferencesRequiringDetailsUpdate isWatched"); return true;}
-        if (v1.isIndexed() != v2.isIndexed()) {log.debug("foundDifferencesRequiringDetailsUpdate isUserHidden"); return true;}
-        if (v1.locationSupportsDelete() != v2.locationSupportsDelete()) {log.debug("foundDifferencesRequiringDetailsUpdate subtitleCount"); return true;}
+        if (oldRemoteResume != v2.getRemoteResumeMs()&&v2.getRemoteResumeMs()!=v2.getResumeMs()) { if (log.isDebugEnabled()) log.debug("foundDifferencesRequiringDetailsUpdate resumeMs"); return true;}
+        if (v1.isWatched() != v2.isWatched()) { if (log.isDebugEnabled()) log.debug("foundDifferencesRequiringDetailsUpdate isWatched"); return true;}
+        if (v1.isIndexed() != v2.isIndexed()) { if (log.isDebugEnabled()) log.debug("foundDifferencesRequiringDetailsUpdate isUserHidden"); return true;}
+        if (v1.locationSupportsDelete() != v2.locationSupportsDelete()) { if (log.isDebugEnabled()) log.debug("foundDifferencesRequiringDetailsUpdate subtitleCount"); return true;}
         return false;
     }
 
@@ -221,7 +221,7 @@ public class VideoActionAdapter extends SparseArrayObjectAdapter {
         mCurrentVideo = video;
         int oldRemoteResume = mCurrentRemoteResume;
         mCurrentRemoteResume = video.getRemoteResumeMs();
-        log.debug("updateRemoteResume");
+        if (log.isDebugEnabled()) log.debug("updateRemoteResume");
         if(!foundDifferencesRequiringDetailsUpdate(oldVideo, video, oldRemoteResume))
             return;
         if(video.getRemoteResumeMs()>0 && video.getResumeMs()!=video.getRemoteResumeMs()){

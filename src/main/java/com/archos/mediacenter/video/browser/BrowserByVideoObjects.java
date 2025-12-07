@@ -318,7 +318,7 @@ public abstract class BrowserByVideoObjects extends Browser implements CommonPre
 
             case R.string.get_subtitles_online:
                 Intent subIntent = new Intent(Intent.ACTION_MAIN);
-                log.debug("onContextItemSelected: get_subtitles_online for {}", getRealPathUriFromPosition(info.position));
+                if (log.isDebugEnabled()) log.debug("onContextItemSelected: get_subtitles_online for {}", getRealPathUriFromPosition(info.position));
                 subIntent.setClass(mContext, SubtitlesDownloaderActivity2.class);
                 subIntent.putExtra(SubtitlesDownloaderActivity2.FILE_URL, getRealPathUriFromPosition(info.position).toString());
                 getActivity().startActivity(subIntent);

@@ -34,7 +34,7 @@ public class ISO639codes {
         String result = com.archos.mediacenter.utils.ISO639codes.generateTrackName(string, lang, format, titleFirst);
         if (result.startsWith("s_"))
             result =  VideoUtils.getLanguageString(context, result).toString();
-        log.debug("generateTrackName: exception string={} result={}", string, result);
+        if (log.isDebugEnabled()) log.debug("generateTrackName: exception string={} result={}", string, result);
         if (result.isEmpty()) {
             result = context.getText(R.string.unknown_track_name).toString();
         }
@@ -45,7 +45,7 @@ public class ISO639codes {
         String result = com.archos.mediacenter.utils.ISO639codes.replaceLanguageCodeInString(string);
         if (result.startsWith("s_"))
             result =  VideoUtils.getLanguageString(context, result).toString();
-        log.debug("replaceLanguageCodeInString: exception string={} result={}", string, result);
+        if (log.isDebugEnabled()) log.debug("replaceLanguageCodeInString: exception string={} result={}", string, result);
         return result;
     }
 

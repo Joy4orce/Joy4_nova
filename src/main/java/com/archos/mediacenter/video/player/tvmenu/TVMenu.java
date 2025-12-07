@@ -103,7 +103,7 @@ public class TVMenu extends LinearLayout implements FocusableTVCardView, TVSlave
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        log.debug("onKeyDown keyCode: {}", keyCode);
+        if (log.isDebugEnabled()) log.debug("onKeyDown keyCode: {}", keyCode);
         // Update current index to reflect which item actually has focus
         // This is needed because focus can move via TVCardDialog.focusSearch() without updating current
         updateCurrentFocusIndex();
@@ -136,7 +136,7 @@ public class TVMenu extends LinearLayout implements FocusableTVCardView, TVSlave
         for (int i = 0; i < ti.size(); i++) {
             if (ti.get(i).hasFocus()) {
                 current = i;
-                log.debug("updateCurrentFocusIndex: current updated to {}", current);
+                if (log.isDebugEnabled()) log.debug("updateCurrentFocusIndex: current updated to {}", current);
                 return;
             }
         }

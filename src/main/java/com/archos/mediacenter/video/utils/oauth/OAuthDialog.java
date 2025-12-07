@@ -77,7 +77,7 @@ public class OAuthDialog extends Dialog {
 	 */
 	public OAuthDialog(Context context, OAuthCallback o,OAuthData oa, OAuthClientRequest req) {
 		super(context);
-        log.debug("OAuthDialog");
+        if (log.isDebugEnabled()) log.debug("OAuthDialog");
         mdata = oa;
 		mReq = req;
 		mListener=o;
@@ -88,7 +88,7 @@ public class OAuthDialog extends Dialog {
 	 * @return The used OAuthData
 	 */
 	public OAuthData getData() {
-		log.debug("getData");
+		if (log.isDebugEnabled()) log.debug("getData");
 		return mdata;
 	}
 	
@@ -100,7 +100,7 @@ public class OAuthDialog extends Dialog {
 	 */
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		log.debug("onCreate");
+		if (log.isDebugEnabled()) log.debug("onCreate");
 
         // get another progress dialog while loading the page in this dialog
         mProgress = NovaProgressDialog.show(getContext(), "", getContext().getResources().getString(R.string.loading), true);
@@ -136,7 +136,7 @@ public class OAuthDialog extends Dialog {
 		String userAgent = "Mozilla/5.0 (Linux; Android " + Build.VERSION.RELEASE + "; " +
 				Build.BRAND + " " + Build.MODEL + ") AppleWebKit/537.36";
 		mWebView.getSettings().setUserAgentString(userAgent);
-		log.debug("onCreate: Using user agent: {}", userAgent);
+		if (log.isDebugEnabled()) log.debug("onCreate: Using user agent: {}", userAgent);
 		// TV-friendly display settings
 		//mWebView.setVerticalScrollBarEnabled(false);
 		//mWebView.setHorizontalScrollBarEnabled(false);
@@ -160,7 +160,7 @@ public class OAuthDialog extends Dialog {
 	}
 
 	public NovaWebView getWebView(){
-		log.debug("getWebView");
+		if (log.isDebugEnabled()) log.debug("getWebView");
 		return mWebView;
 	}
 	
@@ -184,7 +184,7 @@ public class OAuthDialog extends Dialog {
         @SuppressWarnings("deprecation")
         @Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
-			log.debug("shouldOverrideUrlLoading API21-23 for url {}", url);
+			if (log.isDebugEnabled()) log.debug("shouldOverrideUrlLoading API21-23 for url {}", url);
 			String urldecode = null;
 			try {
 				urldecode = URLDecoder.decode(url, "UTF-8");
@@ -195,7 +195,7 @@ public class OAuthDialog extends Dialog {
             if (!"localhost".equals(uri.getHost()) && !"auth".equals(uri.getHost())) {
                 // Enhanced validation for OAuth callback - allow only Trakt domain, localhost, or nova.trakt://auth
                 if (uri.getHost() != null && (uri.getHost().endsWith("trakt.tv") || uri.getHost().equals("localhost") || uri.getHost().equals("auth"))) {
-                    log.debug("shouldOverrideUrlLoading API21-23: allowing Trakt domain or custom auth host: {}", uri.getHost());
+                    if (log.isDebugEnabled()) log.debug("shouldOverrideUrlLoading API21-23: allowing Trakt domain or custom auth host: {}", uri.getHost());
                     return false; // Continue loading
                 } else {
                     log.warn("shouldOverrideUrlLoading API21-23: blocking non-Trakt domain: {}", uri.getHost());
@@ -214,7 +214,7 @@ public class OAuthDialog extends Dialog {
         @Override
 		public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
 			String url = request.getUrl().toString();
-			log.debug("shouldOverrideUrlLoading API24+ for url {}", url);
+			if (log.isDebugEnabled()) log.debug("shouldOverrideUrlLoading API24+ for url {}", url);
 			String urldecode = null;
 			try {
 				urldecode = URLDecoder.decode(url, "UTF-8");
@@ -225,7 +225,7 @@ public class OAuthDialog extends Dialog {
         if (!"localhost".equals(uri.getHost()) && !"auth".equals(uri.getHost())) {
             // Enhanced validation for OAuth callback - allow only Trakt domain, localhost, or nova.trakt://auth
             if (uri.getHost() != null && (uri.getHost().endsWith("trakt.tv") || uri.getHost().equals("localhost") || uri.getHost().equals("auth"))) {
-                log.debug("shouldOverrideUrlLoading API24+: allowing Trakt domain or custom auth host: {}", uri.getHost());
+                if (log.isDebugEnabled()) log.debug("shouldOverrideUrlLoading API24+: allowing Trakt domain or custom auth host: {}", uri.getHost());
                 return false; // Continue loading
             } else {
                 log.warn("shouldOverrideUrlLoading API24+: blocking non-Trakt domain: {}", uri.getHost());
@@ -250,7 +250,7 @@ public class OAuthDialog extends Dialog {
         public void onReceivedError(WebView view, int errorCode, String description, String failingUrl)
         {
             super.onReceivedError(view, errorCode, description, failingUrl);
-			log.debug("onReceivedError API21,22 for url {}", failingUrl);
+			if (log.isDebugEnabled()) log.debug("onReceivedError API21,22 for url {}", failingUrl);
         	if(mListener!=null)
         		mListener.onFinished(mdata);
             OAuthDialog.this.dismiss();
@@ -268,7 +268,7 @@ public class OAuthDialog extends Dialog {
         @Override
         public void onReceivedError(WebView view, WebResourceRequest request,  WebResourceError error)
         {
-			log.debug("onReceivedError API23+");
+			if (log.isDebugEnabled()) log.debug("onReceivedError API23+");
 			super.onReceivedError(view, request, error);
 			if(mListener!=null)
                 mListener.onFinished(mdata);
@@ -289,7 +289,7 @@ public class OAuthDialog extends Dialog {
 		@Override
 		public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error)
 		{
-			log.debug("onReceivedSslError");
+			if (log.isDebugEnabled()) log.debug("onReceivedSslError");
 			super.onReceivedSslError(view, handler, error);
 			if(mListener!=null)
 				mListener.onFinished(mdata);
@@ -327,7 +327,7 @@ public class OAuthDialog extends Dialog {
         @Override
         public void onPageStarted(WebView view, String url, Bitmap favicon)
         {
-			log.debug("onPageStarted for url {}", url);
+			if (log.isDebugEnabled()) log.debug("onPageStarted for url {}", url);
 			super.onPageStarted(view, url, favicon);
 			Activity activity = MiscUtils.getActivityFromContext(getContext());
 			if (activity != null && ! activity.isFinishing() && ! activity.isDestroyed())
@@ -341,7 +341,7 @@ public class OAuthDialog extends Dialog {
 		@Override
 				public void onPageFinished(WebView view, String url)
 		{
-			log.debug("onPageFinished for url {}", url);
+			if (log.isDebugEnabled()) log.debug("onPageFinished for url {}", url);
 			super.onPageFinished(view, url);
 				mWebView.resetDoItOnce();
 				mProgress.dismiss();
@@ -355,7 +355,7 @@ public class OAuthDialog extends Dialog {
 
 	//workaround to be accepted on amazon store
 	private void injectCSS() {
-		log.debug("injectCSS");
+		if (log.isDebugEnabled()) log.debug("injectCSS");
 		try {
 			String css = ".col-xs-4 a:focus .btn{ background-color:blue !important; }";
 			getWebView().loadUrl("javascript:(function() {" +

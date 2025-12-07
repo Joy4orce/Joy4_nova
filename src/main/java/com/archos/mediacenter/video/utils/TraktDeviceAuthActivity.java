@@ -120,7 +120,7 @@ public class TraktDeviceAuthActivity extends AppCompatActivity {
 
                 // Check if code expired
                 if (System.currentTimeMillis() >= mExpirationTime) {
-                    log.debug("Device code expired");
+                    if (log.isDebugEnabled()) log.debug("Device code expired");
                     onAuthenticationFailed(getString(R.string.trakt_device_auth_timeout));
                     return;
                 }
@@ -135,7 +135,7 @@ public class TraktDeviceAuthActivity extends AppCompatActivity {
     }
 
     private void onAuthenticationSuccess(Trakt.accessToken token) {
-        log.debug("onAuthenticationSuccess");
+        if (log.isDebugEnabled()) log.debug("onAuthenticationSuccess");
         stopPolling();
 
         // Store tokens
@@ -166,7 +166,7 @@ public class TraktDeviceAuthActivity extends AppCompatActivity {
     }
 
     private void onAuthenticationFailed(String message) {
-        log.debug("onAuthenticationFailed: {}", message);
+        if (log.isDebugEnabled()) log.debug("onAuthenticationFailed: {}", message);
         stopPolling();
 
         if (!mIsTv) {
@@ -195,14 +195,14 @@ public class TraktDeviceAuthActivity extends AppCompatActivity {
     }
 
     private void startPhoneAuth() {
-        log.debug("startPhoneAuth: showing OAuth dialog");
+        if (log.isDebugEnabled()) log.debug("startPhoneAuth: showing OAuth dialog");
         try {
             OAuthData oauthData = new OAuthData();
             mOAuthDialog = new OAuthDialog(this, new OAuthCallback() {
                 @Override
                 public void onFinished(OAuthData data) {
                     if (data != null && data.code != null) {
-                        log.debug("startPhoneAuth: received auth code, exchanging");
+                        if (log.isDebugEnabled()) log.debug("startPhoneAuth: received auth code, exchanging");
                         new ExchangeAuthCodeTask().execute(data.code);
                     } else {
                         log.warn("startPhoneAuth: auth cancelled or no code returned");
@@ -238,7 +238,7 @@ public class TraktDeviceAuthActivity extends AppCompatActivity {
         protected void onPostExecute(Trakt.deviceCode result) {
             if (result != null) {
                 mDeviceCode = result;
-                log.debug("Device code generated: user_code={}", result.user_code);
+                if (log.isDebugEnabled()) log.debug("Device code generated: user_code={}", result.user_code);
 
                 // Update UI with codes
                 mVerificationUrlText.setText(result.verification_url);
@@ -277,7 +277,7 @@ public class TraktDeviceAuthActivity extends AppCompatActivity {
         protected void onPostExecute(Trakt.accessToken result) {
             if (result != null) {
                 // Success! User authorized
-                log.debug("Access token received");
+                if (log.isDebugEnabled()) log.debug("Access token received");
                 onAuthenticationSuccess(result);
             } else {
                 // Still pending or error - continue polling if not expired
@@ -286,9 +286,9 @@ public class TraktDeviceAuthActivity extends AppCompatActivity {
                 } else if (mIsPolling && System.currentTimeMillis() < mExpirationTime) {
                     mPollHandler.postDelayed(mPollRunnable, mDeviceCode.interval * 1000L);
                 } else if (!mIsPolling) {
-                    log.debug("Polling stopped");
+                    if (log.isDebugEnabled()) log.debug("Polling stopped");
                 } else {
-                    log.debug("Code expired during polling");
+                    if (log.isDebugEnabled()) log.debug("Code expired during polling");
                     if (mAccountLocked) {
                         onAuthenticationFailed(getString(R.string.trakt_account_locked));
                     } else {
@@ -318,7 +318,7 @@ public class TraktDeviceAuthActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Trakt.accessToken result) {
             if (result != null) {
-                log.debug("ExchangeAuthCodeTask: access token received");
+                if (log.isDebugEnabled()) log.debug("ExchangeAuthCodeTask: access token received");
                 onAuthenticationSuccess(result);
             } else {
                 log.warn("ExchangeAuthCodeTask: token exchange failed");

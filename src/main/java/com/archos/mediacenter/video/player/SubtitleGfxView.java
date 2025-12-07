@@ -82,12 +82,12 @@ public class SubtitleGfxView extends View {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        log.debug("SubtitleGfxView onLayout: width={}, height={}", getWidth(), getHeight());
+        if (log.isDebugEnabled()) log.debug("SubtitleGfxView onLayout: width={}, height={}", getWidth(), getHeight());
     }
 
     @Override
     public void setVisibility(int visibility) {
-        log.debug("setVisibility: visibility={}", visibility);
+        if (log.isDebugEnabled()) log.debug("setVisibility: visibility={}", visibility);
         super.setVisibility(visibility);
         if (mExternalSurface != null)  {
             try {
@@ -100,12 +100,12 @@ public class SubtitleGfxView extends View {
                 log.error("setVisibility: cannot lock canvas!!!!");
             }
         } else {
-            log.debug("setVisibility: no external surface");
+            if (log.isDebugEnabled()) log.debug("setVisibility: no external surface");
         }
     }
     
     private void init() {
-        log.debug("init");
+        if (log.isDebugEnabled()) log.debug("init");
         mPaint = new Paint();
         mPaint.setFilterBitmap(true);
         mPaint.setAntiAlias(true);
@@ -124,7 +124,7 @@ public class SubtitleGfxView extends View {
     }
     
     public void setRenderingSurface(Surface s) {
-        log.debug("setRenderingSurface: {}", s);
+        if (log.isDebugEnabled()) log.debug("setRenderingSurface: {}", s);
         mExternalSurface = s;
     }
 
@@ -166,9 +166,9 @@ public class SubtitleGfxView extends View {
             setVisibility(View.INVISIBLE);
             return;
         }
-        log.debug("setSubtitle: bitmap={}, subtitleOriginalBounds={}, frame=({},{}), mSubtitleOriginalRect={}", bitmap == null ? "null" : "not null", subtitleOriginalBounds, frameWidth, frameHeight, mSubtitleOriginalRect);
+        if (log.isDebugEnabled()) log.debug("setSubtitle: bitmap={}, subtitleOriginalBounds={}, frame=({},{}), mSubtitleOriginalRect={}", bitmap == null ? "null" : "not null", subtitleOriginalBounds, frameWidth, frameHeight, mSubtitleOriginalRect);
         if (mBitmap == null) {
-            log.debug("setSubtitle: no bitmap, ignore");
+            if (log.isDebugEnabled()) log.debug("setSubtitle: no bitmap, ignore");
             setVisibility(View.INVISIBLE);
             return;
         }
@@ -182,7 +182,7 @@ public class SubtitleGfxView extends View {
         float surfaceScaleHeight = mDesiredHeight / (float) Player.sPlayer.getVideoHeight();
 
         // set the SubtitleGfxView layout to be of height mSurfaceControllerHeight and width mSurfaceControllerWidth
-        log.debug("setSubtitle: frameRatio={}, screenRatio={}, display=({},{}), surface=({},{}), videoSurfaceRatio={}, surfaceScaleRatio={}",
+        if (log.isDebugEnabled()) log.debug("setSubtitle: frameRatio={}, screenRatio={}, display=({},{}), surface=({},{}), videoSurfaceRatio={}, surfaceScaleRatio={}",
                 frameRatio, screenRatio, mDisplayWidth, mDisplayHeight, mDesiredWidth, mDesiredHeight, videoSurfaceRatio, surfaceScaleWidth / surfaceScaleHeight);
         if (frameRatio > videoSurfaceRatio) {
             // frame to be scaled to fill full width and centered in height with equal margin on top and bottom
@@ -210,7 +210,7 @@ public class SubtitleGfxView extends View {
             );
         }
 
-        log.debug("setSubtitle: ({}x{})->({},{}), mSubtitlesOriginalBounds={}, mScaledSubtitlesBounds={}, mScaleFactor={}, mVerticalMargin={}, mHorizontalMargin={}",
+        if (log.isDebugEnabled()) log.debug("setSubtitle: ({}x{})->({},{}), mSubtitlesOriginalBounds={}, mScaledSubtitlesBounds={}, mScaleFactor={}, mVerticalMargin={}, mHorizontalMargin={}",
                 mFrameWidth, mFrameHeight, mDesiredWidth, mDesiredHeight, mSubtitleOriginalBounds, mScaledSubtitlesBounds, mScaleFactor, mVerticalMargin, mHorizontalMargin);
 
         double ratio;
@@ -241,7 +241,7 @@ public class SubtitleGfxView extends View {
         }
         mDrawX = mScaledSubtitlesBounds.left;
         mDrawY = RECT_COORDINATES ? mScaledSubtitlesBounds.top : 0;
-        log.debug("setSubtitle: mDrawWidth={}, mDrawHeight={}, mDrawX={}, mDrawY={}", mDrawWidth, mDrawHeight, mDrawX, mDrawY);
+        if (log.isDebugEnabled()) log.debug("setSubtitle: mDrawWidth={}, mDrawHeight={}, mDrawX={}, mDrawY={}", mDrawWidth, mDrawHeight, mDrawX, mDrawY);
 
         if (getVisibility() != View.VISIBLE) {
             setVisibility(View.VISIBLE);
@@ -253,7 +253,7 @@ public class SubtitleGfxView extends View {
 
     /* Must be called in UI thread */
     public void remove() {
-        log.debug("remove");
+        if (log.isDebugEnabled()) log.debug("remove");
         mBitmap = null;
         setVisibility(View.INVISIBLE);
         // need to Invalidate to force a refresh of this view
@@ -264,7 +264,7 @@ public class SubtitleGfxView extends View {
      * @param size in Range [0..100]
      */
     public void setSize(int size, int displayWidth, int displayHeight) {
-        log.debug("setSize: size={}, displayWidth={}, displayHeight={}", size, displayWidth, displayHeight);
+        if (log.isDebugEnabled()) log.debug("setSize: size={}, displayWidth={}, displayHeight={}", size, displayWidth, displayHeight);
         mSize = size;
         mDisplayWidth = displayWidth;
         mDisplayHeight = displayHeight;
@@ -276,20 +276,20 @@ public class SubtitleGfxView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (mBitmap == null) {
-            log.debug("onMeasure: no bitmap, setMeasuredDimension(0, 0)");
+            if (log.isDebugEnabled()) log.debug("onMeasure: no bitmap, setMeasuredDimension(0, 0)");
             setMeasuredDimension(0, 0);
         } else {
             if (RECT_COORDINATES) { // use full screen
                 if (mDesiredWidth > 0 && mDesiredHeight > 0) {
                     // Use the desired dimensions set by the SurfaceController
-                    log.debug("onMeasure: use desired dimensions, setMeasuredDimension({}, {})", mDesiredWidth, mDesiredHeight);
+                    if (log.isDebugEnabled()) log.debug("onMeasure: use desired dimensions, setMeasuredDimension({}, {})", mDesiredWidth, mDesiredHeight);
                     setMeasuredDimension(mDesiredWidth, mDesiredHeight);
                 } else {
-                    log.debug("onMeasure: use full screen, setMeasuredDimension({}, {})", MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
+                    if (log.isDebugEnabled()) log.debug("onMeasure: use full screen, setMeasuredDimension({}, {})", MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));
                     // Fall back to the default behavior
                     setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec));                }
             } else { // use subtitle size
-                log.debug("onMeasure: use subtitle size, setMeasuredDimension({}, {})", MeasureSpec.getSize(widthMeasureSpec), getPaddingTop() + getPaddingBottom() + mDrawHeight);
+                if (log.isDebugEnabled()) log.debug("onMeasure: use subtitle size, setMeasuredDimension({}, {})", MeasureSpec.getSize(widthMeasureSpec), getPaddingTop() + getPaddingBottom() + mDrawHeight);
                 setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec),
                         getPaddingTop() + getPaddingBottom() + mDrawHeight);
             }
@@ -298,7 +298,7 @@ public class SubtitleGfxView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        log.debug("onDraw{}{}", (mBitmap == null ? ": no bitmap" : ""), (mBitmap != null && mBitmap.isRecycled() ? ": bitmap is recycled" : ""));
+        if (log.isDebugEnabled()) log.debug("onDraw{}{}", (mBitmap == null ? ": no bitmap" : ""), (mBitmap != null && mBitmap.isRecycled() ? ": bitmap is recycled" : ""));
         if (mBitmap != null && !mBitmap.isRecycled()) {
             Canvas c = canvas;
             if (mExternalSurface != null) {
@@ -308,7 +308,7 @@ public class SubtitleGfxView extends View {
                     int [] location = new int[2];
                     getLocationOnScreen(location);
                     r.offsetTo(location[0],location[1]);
-                    log.debug("onDraw: location={}, clipBounds={}", location, r);
+                    if (log.isDebugEnabled()) log.debug("onDraw: location={}, clipBounds={}", location, r);
                     c = mExternalSurface.lockCanvas(null);
                     c.save();
                     c.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
@@ -318,17 +318,17 @@ public class SubtitleGfxView extends View {
                     log.error("onDraw: cannot lock canvas!!!!");
                 }
             } else {
-                log.debug("onDraw: no external surface");
+                if (log.isDebugEnabled()) log.debug("onDraw: no external surface");
             }
 
-            log.debug("onDraw: draw bitmap at ({},{}) size ({},{})", mDrawX, mDrawY, mDrawWidth, mDrawHeight);
+            if (log.isDebugEnabled()) log.debug("onDraw: draw bitmap at ({},{}) size ({},{})", mDrawX, mDrawY, mDrawWidth, mDrawHeight);
             c.drawBitmap(mBitmap, mSubtitleOriginalRect, mScaledSubtitlesBounds, mPaint);
             if (c != canvas) {
                 c.restore();
                 mExternalSurface.unlockCanvasAndPost(c);
             }
         } else {
-            log.debug("onDraw: no bitmap to draw or bitmap is recycled");
+            if (log.isDebugEnabled()) log.debug("onDraw: no bitmap to draw or bitmap is recycled");
         }
     }
 }

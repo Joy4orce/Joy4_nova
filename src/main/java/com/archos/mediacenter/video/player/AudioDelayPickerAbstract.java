@@ -78,7 +78,7 @@ public abstract class AudioDelayPickerAbstract extends FrameLayout {
         mMinute = (int) delay / 60 / 1000;
         mSecond = (int) (delay % (60 * 1000)) / 1000;
         mMilliSecond = (int) (delay % 1000);
-        log.debug("updateDelay: delay={} mMinute={} mSecond={} mMilliSecond={}", delay, mMinute, mSecond, mMilliSecond);
+        if (log.isDebugEnabled()) log.debug("updateDelay: delay={} mMinute={} mSecond={} mMilliSecond={}", delay, mMinute, mSecond, mMilliSecond);
     }
 
     public void setStep(int step){
@@ -88,17 +88,17 @@ public abstract class AudioDelayPickerAbstract extends FrameLayout {
     public void setMin(int min) {
         hasMin = true;
         mMin = min - min % mStep;
-        log.debug("setMin: mMin={}", mMin);
+        if (log.isDebugEnabled()) log.debug("setMin: mMin={}", mMin);
     }
 
     public void setMax(int max) {
         hasMax = true;
         mMax= (int)(max - Math.IEEEremainder(max, mStep));
-        log.debug("setMax: mMax={}", mMax);
+        if (log.isDebugEnabled()) log.debug("setMax: mMax={}", mMax);
     }
 
     public void init(int delay, OnAudioDelayChangedListener onDelayChangedListener) {
-        log.debug("init: delay={}", delay);
+        if (log.isDebugEnabled()) log.debug("init: delay={}", delay);
         updateDelay(delay);
         mOnDelayChangedListener = onDelayChangedListener;
     }

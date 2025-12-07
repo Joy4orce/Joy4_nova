@@ -38,7 +38,7 @@ public class BrowserByUpnp extends BrowserByNetwork {
         mShortcutPath = shortcutPath;
         mShortcutName = shortcutName;
         String friendlyUri = getFriendlyUri();
-        log.debug("createShortcut: adding shortcutName={}, shortcutPath={}, friendlyUri={}", shortcutName, shortcutPath, friendlyUri);
+        if (log.isDebugEnabled()) log.debug("createShortcut: adding shortcutName={}, shortcutPath={}, friendlyUri={}", shortcutName, shortcutPath, friendlyUri);
         boolean result = ShortcutDbAdapter.VIDEO.addShortcut(getActivity(), new ShortcutDbAdapter.Shortcut(shortcutName, shortcutPath, friendlyUri));
         if (result) {
             Toast.makeText(getActivity(), getString(R.string.indexed_folder_added, shortcutName), Toast.LENGTH_SHORT).show();
@@ -58,7 +58,7 @@ public class BrowserByUpnp extends BrowserByNetwork {
         if(friendlyName != null) friendlyUri += friendlyName;
         else friendlyUri += Uri.parse(mShortcutPath).getHost();
         friendlyUri += "/" + mShortcutName;
-        log.debug("getFriendlyUri: mShortcutPath={}, mShortcutName={} -> friendlyName={}, friendlyUri={}", mShortcutPath, mShortcutName, friendlyName, friendlyUri);
+        if (log.isDebugEnabled()) log.debug("getFriendlyUri: mShortcutPath={}, mShortcutName={} -> friendlyName={}, friendlyUri={}", mShortcutPath, mShortcutName, friendlyName, friendlyUri);
         return friendlyUri;
     }
 
