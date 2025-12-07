@@ -63,6 +63,7 @@ import com.archos.mediacenter.utils.trakt.TraktService;
 import com.archos.mediacenter.video.browser.BootupRecommandationService;
 import com.archos.mediacenter.video.picasso.SmbRequestHandler;
 import com.archos.mediacenter.video.picasso.ThumbnailRequestHandler;
+import com.archos.mediacenter.video.player.PrivateMode;
 import com.archos.mediacenter.video.player.PlayerActivity;
 import com.archos.mediacenter.video.utils.LocaleConfigParser;
 import com.archos.mediacenter.video.utils.OpenSubtitlesApiHelper;
@@ -425,8 +426,6 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         }).start();
 
         Trakt.initApiKeys(this);
-        // Start TraktService to enable lifecycle callbacks and automatic syncing
-        TraktService.syncAtStart(this);
         new Thread() {
             public void run() {
                 this.setPriority(Thread.MIN_PRIORITY);
@@ -595,6 +594,10 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             }
             addNetworkListener();
             launchSambaDiscovery();
+            // Trigger an incremental Trakt sync when returning to foreground if signed in and not in private mode
+            if (Trakt.isTraktV2Enabled(this, PreferenceManager.getDefaultSharedPreferences(this))) {
+                TraktService.sync(this, TraktService.FLAG_SYNC_AUTO);
+            }
         } else {
             unRegisterHdmiAudioPlugReceiver();
             unRegisterAudioDeviceCallback();
