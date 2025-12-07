@@ -515,7 +515,10 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                             cursor.close();
 
                             //Why go through the rest of this if there are no rows remaining?
-                            if (numberOfRows <= 0) return;
+                            if (numberOfRows <= 0) {
+                                completed = true;
+                                return;
+                            }
 
                             NfoWriter.ExportContext exportContext = null;
                             if (NfoWriter.isNfoAutoExportEnabled(AutoScrapeService.this))
