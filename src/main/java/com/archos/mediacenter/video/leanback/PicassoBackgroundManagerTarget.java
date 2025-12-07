@@ -35,11 +35,13 @@ public class PicassoBackgroundManagerTarget implements Target {
     @Override
     public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom loadedFrom) {
         if (this.mBackgroundManager.isAttached()) { // try to fix some cases of "java.lang.IllegalStateException: Must attach before setting background drawable"
-            Bitmap newBitmap = bitmap.copy(bitmap.getConfig(), true);
-            Canvas canvas = new Canvas(newBitmap);
+            if (bitmap != null) {
+                Bitmap newBitmap = bitmap.copy(bitmap.getConfig(), true);
+                Canvas canvas = new Canvas(newBitmap);
 
-            canvas.drawARGB(32, 0, 0, 0);
-            this.mBackgroundManager.setBitmap(newBitmap);
+                canvas.drawARGB(32, 0, 0, 0);
+                this.mBackgroundManager.setBitmap(newBitmap);
+            }
         }
     }
 
