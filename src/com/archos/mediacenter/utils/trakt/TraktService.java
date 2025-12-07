@@ -1580,8 +1580,13 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
         if (mWaitBeforeSync || !mNetworkState.isConnected())
             return handleSyncStatus(Trakt.Status.ERROR_NETWORK, flag, null);
 
-        if (flag == 0 || flag == FLAG_SYNC_AUTO)
+        if (flag == FLAG_SYNC_AUTO) {
+            // AUTO sync should also include any pending retry flags
+            flag |= Trakt.getFlagSyncPreference(mPreferences);
+        } else if (flag == 0) {
+            // If no flag provided, reuse any pending sync flags from preferences (e.g. retry after network errors)
             flag = Trakt.getFlagSyncPreference(mPreferences);
+        }
 
         // Disable collection sync (to avoid hitting Trakt library limits)
         flag &= ~FLAG_SYNC_TO_DB_COLLECTION;
