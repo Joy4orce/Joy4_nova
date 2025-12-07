@@ -41,7 +41,7 @@ public class LastPlayedLoader extends VideoLoader {
         if (LoaderUtils.isSmartRecentlyRows()) {
             Uri baseUri = getUri();
             Uri.Builder builder = baseUri.buildUpon();
-            builder.appendQueryParameter("group", "COALESCE(" + VideoStore.Video.VideoColumns.SCRAPER_M_IMDB_ID + ", " + VideoStore.Video.VideoColumns.SCRAPER_E_IMDB_ID + ")");
+            builder.appendQueryParameter("group", "COALESCE(" + VideoStore.Video.VideoColumns.SCRAPER_M_IMDB_ID + ", " + VideoStore.Video.VideoColumns.SCRAPER_S_IMDB_ID + ")");
             builder.appendQueryParameter("having", VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED + " = MAX(" + VideoStore.Video.VideoColumns.ARCHOS_LAST_TIME_PLAYED + ")");
             setUri(builder.build());
             if (DBG) Log.d(TAG, "Modified URI: " + builder.build());
