@@ -128,6 +128,18 @@ public class VideoUtils {
     	return SUBTITLES_ARRAYLIST;
     }
 
+    public static String getSubtitleFormatLabel(Context context, int format) {
+        if (context == null) {
+            return "";
+        }
+        String[] subtitlesTypes = context.getResources().getStringArray(R.array.subtitles_types);
+        if (format >= 0 && format < subtitlesTypes.length) {
+            return subtitlesTypes[format];
+        }
+        Log.e(TAG, "getSubtitleFormatLabel: subtitle format index out of bounds: " + format);
+        return context.getResources().getString(R.string.unknown_track_name);
+    }
+
     static public CharSequence getLanguageString(Context context, CharSequence name) {
         final Resources resources = context.getResources();
         CharSequence lang;

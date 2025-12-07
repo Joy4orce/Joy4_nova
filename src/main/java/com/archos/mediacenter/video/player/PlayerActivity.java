@@ -3967,8 +3967,10 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                         }
                     } else {
                         // internal subtitle get name from name
-                        if (log.isDebugEnabled()) log.debug("onSubtitleMetadataUpdated: intsub add track name with name={} replacing language code in {}", vMetadata.getSubtitleTrack(i).name, vMetadata.getSubtitleTrack(i).language);
-                        mSubtitleInfoController.addTrack(generateTrackName(mContext, vMetadata.getSubtitleTrack(i).name, vMetadata.getSubtitleTrack(i).language, getResources().getStringArray(R.array.subtitles_types)[vMetadata.getSubtitleTrack(i).format], false), false);
+                    if (log.isDebugEnabled()) log.debug("onSubtitleMetadataUpdated: intsub add track name with name={} replacing language code in {}", vMetadata.getSubtitleTrack(i).name, vMetadata.getSubtitleTrack(i).language);
+                    SubtitleTrack track = vMetadata.getSubtitleTrack(i);
+                    String format = VideoUtils.getSubtitleFormatLabel(mContext, track.format);
+                    mSubtitleInfoController.addTrack(generateTrackName(mContext, track.name, track.language, format, false), false);
                     }
                 }
                 mSubtitleInfoController.addSeparator();

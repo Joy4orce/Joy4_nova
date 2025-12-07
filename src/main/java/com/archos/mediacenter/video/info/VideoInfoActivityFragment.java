@@ -120,6 +120,7 @@ import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCal
 import com.github.ksoichiro.android.observablescrollview.ScrollState;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.squareup.picasso.Picasso;
+import com.archos.mediacenter.video.utils.VideoUtils;
 
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -1072,13 +1073,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                     subTrack = videoMetadata.getSubtitleTrack(i);
                     if (!videoMetadata.getSubtitleTrack(i).isExternal) { //manage external subs with sub manager
                         if (log.isDebugEnabled()) log.debug("updateSubtitleInfo: int subtitleTrack {} {} {} {}", i, subTrack.name, subTrack.language, subTrack.format);
-                        String[] subtitlesTypes = getResources().getStringArray(R.array.subtitles_types);
-                        String format = "Unknown";
-                        if (subTrack.format >= 0 && subTrack.format < subtitlesTypes.length) {
-                            format = subtitlesTypes[subTrack.format];
-                        } else {
-                            if (log.isErrorEnabled()) log.error("updateSubtitleInfo: subtitle format index out of bounds: {}", subTrack.format);
-                        }
+                        String format = VideoUtils.getSubtitleFormatLabel(getContext(), subTrack.format);
                         lines.add((totSubs + 1) + ": " + StringUtils.removeHtmlTags(generateTrackName(getContext(), subTrack.name, subTrack.language, format, false)));
                         totSubs++;
                     }
