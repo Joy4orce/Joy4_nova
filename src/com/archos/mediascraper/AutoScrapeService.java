@@ -479,10 +479,12 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                 int totalNumberOfFilesScraped = 0;
 
                 public void run() {
+                    boolean completed = false;
                     //Global Scrape in Progress, so the browser can skip thumbs in scrape and not waste space in storage
                     LoaderUtils.setScrapeInProgress(true);
 
                     sIsScraping = true;
+                    saveDirtyState(true);
                     try {
                         boolean shouldRescrapAll = rescrapAlreadySearched;
                         if (log.isDebugEnabled()) log.debug("startScraping: startThread {}", (mThread==null || !mThread.isAlive()) );
@@ -751,10 +753,12 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                                     .putLong(PREFERENCE_LAST_TIME_VIDEO_SCRAPED_UTC, utcSeconds).apply();
                             TraktService.onNewVideo(AutoScrapeService.this); // should be done only at the end to not resync in loop
                         }
+                        completed = true;
                     } finally {
                         if (log.isDebugEnabled()) log.debug("THREAD FINALLY - BEFORE reset: sIsScraping={}, LoaderUtils.mScrapeInProgress={}", sIsScraping, LoaderUtils.getScrapeInProgress());
                         sIsScraping = false;
                         LoaderUtils.setScrapeInProgress(false);
+                        saveDirtyState(!completed);
                         nm.cancel(NOTIFICATION_ID);
                         if (log.isDebugEnabled()) log.debug("THREAD FINALLY - AFTER reset: sIsScraping={}, LoaderUtils.mScrapeInProgress={}", sIsScraping, LoaderUtils.getScrapeInProgress());
                     }
