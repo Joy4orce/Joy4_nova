@@ -1332,7 +1332,7 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         if (updateActivity("onLoadFinished") == null) return;
-        boolean scanningOnGoing = NetworkScannerReceiver.isScannerWorking() || AutoScrapeService.isScraping() || ImportState.VIDEO.isInitialImport();
+        boolean scanningOnGoing = NetworkScannerReceiver.isScannerWorking() || LoaderUtils.getScrapeInProgress() || ImportState.VIDEO.isInitialImport();
         if (log.isDebugEnabled()) log.debug("onLoadFinished: cursor id={}, scanningOnGoing={}", cursorLoader.getId(), scanningOnGoing);
 
         // Check if this loader has completed its initial load

@@ -24,7 +24,7 @@ import com.archos.mediacenter.video.R;
 import com.archos.mediaprovider.ImportState;
 import com.archos.mediaprovider.video.NetworkScannerReceiver;
 import com.archos.mediascraper.AutoScrapeService;
-
+import com.archos.mediaprovider.video.LoaderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,9 +83,9 @@ public class ScannerAndScraperProgress {
     private Runnable mRepeatRunnable = new Runnable() {
         @Override
         public void run() {
-            boolean scanningOnGoing = NetworkScannerReceiver.isScannerWorking() || AutoScrapeService.isScraping() || ImportState.VIDEO.isInitialImport() || ImportState.VIDEO.isRegularImport();
+            boolean scanningOnGoing = NetworkScannerReceiver.isScannerWorking() || LoaderUtils.getScrapeInProgress() || ImportState.VIDEO.isInitialImport() || ImportState.VIDEO.isRegularImport();
             mStatusVisibility = scanningOnGoing ? View.VISIBLE : View.GONE;
-            if (log.isTraceEnabled()) log.trace("mRepeatRunnable: visibility {} because scanningOngoing {} due to networkScanner {} due to autoScrapeService {} due to isInitialImport {} due to isRegularImport {}", mStatusVisibility, scanningOnGoing, NetworkScannerReceiver.isScannerWorking(), AutoScrapeService.isScraping(), ImportState.VIDEO.isInitialImport(), ImportState.VIDEO.isRegularImport());
+            if (log.isTraceEnabled()) log.trace("mRepeatRunnable: visibility {} because scanningOngoing {} due to networkScanner {} due to autoScrapeService {} due to isInitialImport {} due to isRegularImport {}", mStatusVisibility, scanningOnGoing, NetworkScannerReceiver.isScannerWorking(), LoaderUtils.getScrapeInProgress(), ImportState.VIDEO.isInitialImport(), ImportState.VIDEO.isRegularImport());
             updateCount();
             updateVisibility();
             mRepeatHandler.postDelayed(this, REPEAT_PERIOD_MS);
