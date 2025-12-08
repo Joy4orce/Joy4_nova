@@ -1278,11 +1278,11 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
             case SurfaceController.VideoFormat.ORIGINAL:
                 mFormatButton.setImageResource(R.drawable.video_format_0);
                 break;
-            case SurfaceController.VideoFormat.FULLSCREEN:
-                mFormatButton.setImageResource(R.drawable.video_format_fullscreen_selector);
+            case SurfaceController.VideoFormat.FULL_WIDTH:
+                mFormatButton.setImageResource(R.drawable.video_format_barx);
                 break;
-            case SurfaceController.VideoFormat.STRETCHED:
-                mFormatButton.setImageResource(R.drawable.video_format_stretched_selector);
+            case SurfaceController.VideoFormat.FULL_SCREEN:
+                mFormatButton.setImageResource(R.drawable.video_format_f);
                 break;
             case SurfaceController.VideoFormat.FORCE43:
                 mFormatButton.setImageResource(R.drawable.video_format_43);
@@ -1297,7 +1297,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
                 mFormatButton.setImageResource(R.drawable.video_format_239);
                 break;
             case SurfaceController.VideoFormat.AUTO:
-                mFormatButton.setImageResource(R.drawable.video_format_auto_selector);
+                mFormatButton.setImageResource(R.drawable.video_format_a);
                 break;
         }
     }

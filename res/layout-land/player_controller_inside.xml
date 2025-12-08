@@ -147,7 +147,7 @@
             android:paddingRight="@dimen/player_button_padding_full"
             android:scaleType="fitCenter"
             android:adjustViewBounds="true"
-            ads:srcCompat="@drawable/video_format_original_selector" />
+            ads:srcCompat="@drawable/video_format_0" />
     </LinearLayout>
 
     <TextView android:id="@+id/osd_left"

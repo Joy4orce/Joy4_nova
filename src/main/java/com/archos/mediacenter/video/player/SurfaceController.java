@@ -41,12 +41,12 @@ public class SurfaceController {
 
     public class VideoFormat {
         public static final int ORIGINAL = 0;
-        public static final int FULLSCREEN = 1;
+        public static final int FULL_WIDTH = 1;
         /*
          *  for 2:35 video on 4/3 screen:
          *  intermediate surface height in order to don't crop too much video
          */
-        public static final int STRETCHED = 2;
+        public static final int FULL_SCREEN = 2;
         public static final int FORCE43 = 3;
         public static final int FORCE169 = 4;
         public static final int FORCE185 = 5;
@@ -55,7 +55,7 @@ public class SurfaceController {
         
         public static final double VIDEO_FORMAT_AUTO_THRES = 0.7;
 
-        private final int[] mode = {ORIGINAL, FULLSCREEN, STRETCHED, FORCE43, FORCE169, FORCE185, FORCE239, AUTO};
+        private final int[] mode = {ORIGINAL, FULL_WIDTH, FULL_SCREEN, FORCE43, FORCE169, FORCE185, FORCE239, AUTO};
         private final int max;
         private int idx;
         public VideoFormat(int max) {
@@ -312,7 +312,7 @@ public class SurfaceController {
         fmt = getVideoFormat().getFmt();
 
         if (mEffectEnable) {
-            fmt = VideoFormat.FULLSCREEN; //only FULLSCREEN FORMAT is currently supported in OpenGL rendering
+            fmt = VideoFormat.FULL_WIDTH; //only FULL_WIDTH FORMAT is currently supported in OpenGL rendering
         }
 
         // calculate aspect ratio
@@ -350,7 +350,7 @@ public class SurfaceController {
                     if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: VideoFormat.ORIGINAL dcar>=ar dcw={}", dcw);
                 }
                 break;
-            case VideoFormat.FULLSCREEN:
+            case VideoFormat.FULL_WIDTH:
                 if (dcar < ar) {
                     //4:3 movie on 16:9 screen
                     cropW = (float)dcar / (float)ar;
@@ -377,7 +377,7 @@ public class SurfaceController {
                 }
                 break;
             }
-            case VideoFormat.STRETCHED: { // display on full screen resolution stretched: keep dcw and dch
+            case VideoFormat.FULL_SCREEN: { // display on full screen resolution stretched: keep dcw and dch
                 //cropW = 1.0f;
                 //cropH = 1.0f;
                 if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: VideoFormat.STRETCHED dc=({},{}), crop=({},{})", dcw, dch, cropW, cropH);

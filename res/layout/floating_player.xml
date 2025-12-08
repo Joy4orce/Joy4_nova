@@ -125,7 +125,7 @@
             android:id="@+id/fullscreen_button"
             android:layout_width="30dip"
             android:layout_height="30dip"
-            android:src="@drawable/video_format_fullscreen_selector"
+            android:src="@drawable/video_format_f"
             android:layout_marginLeft="3dip"
             android:layout_marginRight="3dip"
             android:layout_alignParentTop="true"
