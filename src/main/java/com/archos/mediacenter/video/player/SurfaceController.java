@@ -351,18 +351,15 @@ public class SurfaceController {
                 }
                 break;
             case VideoFormat.FULL_WIDTH:
-                if (dcar < ar) {
-                    //4:3 movie on 16:9 screen
-                    cropW = (float)dcar / (float)ar;
-                    cropH = 1.0f;
-                    if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: VideoFormat.FULLSCREEN dcar<ar 4:3 movie on 16:9 screen dc=({},{}), crop=({},{})", dcw, dch, cropW, cropH);
-                } else {
-                    //16:9 movie on 4:3 screen
-                    cropH = (float)ar / (float)dcar;
-                    cropW = 1.0f;
-                    if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: VideoFormat.FULLSCREEN dcar>=ar 16:9 movie on 4:3 screen dc=({},{}), crop=({},{})", dcw, dch, cropW, cropH);
-                }
+                //Height can go over the screen top, but set width.
+                dch = (int) (dcw/ (ar));
                 break;
+            case VideoFormat.FULL_SCREEN: { // display on full screen resolution stretched: keep dcw and dch
+                //cropW = 1.0f;
+                //cropH = 1.0f;
+                //if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: VideoFormat.FULL_SCREEN dc=({},{}), crop=({},{})", dcw, dch, cropW, cropH);
+                break;
+            }
             case VideoFormat.AUTO: {
                 //cropW = 1.0f;
                 //cropH = 1.0f;
@@ -375,12 +372,6 @@ public class SurfaceController {
                     cropW = (float) dcw / (float) (dch * ar);
                     if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: VideoFormat.AUTO dcar<=ar dc=({},{})", dcw, dch);
                 }
-                break;
-            }
-            case VideoFormat.FULL_SCREEN: { // display on full screen resolution stretched: keep dcw and dch
-                //cropW = 1.0f;
-                //cropH = 1.0f;
-                if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: VideoFormat.STRETCHED dc=({},{}), crop=({},{})", dcw, dch, cropW, cropH);
                 break;
             }
         }
