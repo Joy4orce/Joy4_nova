@@ -107,10 +107,6 @@ public class ShowIdEpisodeSearch {
     }
 
     public static void debugLruCache(LruCache<String, ShowIdEpisodeSearchResult> lruCache) {
-        if (log.isDebugEnabled()) log.debug("debugLruCache: size={}", lruCache.size());
-        if (log.isDebugEnabled()) log.debug("debugLruCache: putCount={}", lruCache.putCount());
-        if (log.isDebugEnabled()) log.debug("debugLruCache: hitCount={}", lruCache.hitCount());
-        if (log.isDebugEnabled()) log.debug("debugLruCache: missCount={}", lruCache.missCount());
-        if (log.isDebugEnabled()) log.debug("debugLruCache: evictionCount={}", lruCache.evictionCount());
+        if (log.isDebugEnabled()) log.debug("debugLruCache(Episode): size={}, put={}, hit={}, miss={}, evict={}", lruCache.size(), lruCache.putCount(), lruCache.hitCount(), lruCache.missCount(), lruCache.evictionCount());
     }
 }

@@ -14,10 +14,13 @@
 
 package com.archos.mediascraper.themoviedb3;
 
+import android.os.Bundle;
 import android.util.LruCache;
 import android.util.Pair;
 
 import com.archos.mediascraper.ScrapeStatus;
+import com.archos.mediascraper.SearchResult;
+import com.archos.mediascraper.ShowUtils;
 import com.archos.mediascraper.preprocess.TvShowSearchInfo;
 import com.archos.mediascraper.xml.ShowScraper4;
 import com.uwetrottmann.tmdb2.entities.TvShowResultsPage;
@@ -29,12 +32,19 @@ import java.io.IOException;
 
 import retrofit2.Response;
 
+import java.util.Locale;
+
 import static com.archos.mediascraper.preprocess.ParseUtils.yearExtractor;
 
 // Search Show for name query for year in language (ISO 639-1 code)
 public class SearchShow {
     private static final Logger log = LoggerFactory.getLogger(SearchShow.class);
 
+    // Tier 1 cache: Normalized show name -> showId mapping to avoid redundant TMDb searches
+    // This cache deduplicates different name variations (case, spacing) that resolve to the same show
+    private final static LruCache<String, Integer> sShowNameToIdCache = new LruCache<>(100);
+
+    // Tier 2 cache: Exact search string -> full TMDb API response
     // Benchmarks tells that with tv shows sorted in folders, size of 200 or 20 or even 10 provides the same cacheHits on fake collection of 30k episodes, 250 shows
     private final static LruCache<String, Response<TvShowResultsPage>> showCache = new LruCache<>(50);
 
@@ -60,6 +70,34 @@ public class SearchShow {
             }
 
             String searchQueryString = searchInfo.getShowName();
+
+            // Tier 1 cache check: normalized name -> showId
+            String nameCacheKey = buildNameCacheKey(searchQueryString, year, language);
+            Integer cachedShowId = sShowNameToIdCache.get(nameCacheKey);
+            if (cachedShowId != null) {
+                if (log.isDebugEnabled()) log.debug("search: Tier 1 cache hit for normalized name '{}' -> showId {}", searchQueryString, cachedShowId);
+                // Build result directly from cached showId, skip TMDb API call
+                SearchResult result = new SearchResult(SearchResult.tvshow, searchQueryString, cachedShowId);
+                result.setLanguage(language);
+                result.setScraper(showScraper);
+                result.setFile(searchInfo.getFile());
+                result.setYear(year != null ? String.valueOf(year) : null);
+                result.setOriginSearchSeason(searchInfo.getSeason());
+                result.setOriginSearchEpisode(searchInfo.getEpisode());
+
+                Bundle extra = new Bundle();
+                extra.putString(ShowUtils.EPNUM, String.valueOf(searchInfo.getEpisode()));
+                extra.putString(ShowUtils.SEASON, String.valueOf(searchInfo.getSeason()));
+                result.setExtra(extra);
+
+                myResult.result = new java.util.ArrayList<>();
+                myResult.result.add(result);
+                myResult.status = ScrapeStatus.OKAY;
+                return myResult;
+            }
+            if (log.isDebugEnabled()) log.debug("search: Tier 1 cache miss for normalized name '{}'", searchQueryString);
+
+            // Tier 2 cache check: exact search string -> full API response
             showKey = searchQueryString + ((year != null) ? "|" + year : "") + "|" + language;
             if (log.isDebugEnabled()) log.debug("SearchShowResult: cache showKey {}", showKey);
             response = showCache.get(showKey);
@@ -95,8 +133,18 @@ public class SearchShow {
                     }
                 }
                 if (isResponseOk || isResponseEmpty) {
-                    if (log.isDebugEnabled()) log.debug("search: inserting in showCache {} and response ", showKey);
+                    if (log.isDebugEnabled()) log.debug("search: inserting in Tier 2 cache showKey {} and response ", showKey);
                     showCache.put(showKey, response);
+                    // Also populate Tier 1 cache if we have results
+                    if (isResponseOk && response.body() != null && response.body().total_results > 0) {
+                        int firstResultId = response.body().results.get(0).id;
+                        sShowNameToIdCache.put(nameCacheKey, firstResultId);
+                        if (log.isDebugEnabled()) log.debug("search: inserting in Tier 1 cache normalized name '{}' -> showId {}", searchQueryString, firstResultId);
+                    }
+                }
+                if (log.isTraceEnabled()) {
+                    debugLruCache(showCache);
+                    debugNameCache(sShowNameToIdCache);
                 }
             } else {
                 if (log.isDebugEnabled()) log.debug("search: boost using cached searched show for {}", searchInfo.getShowName());
@@ -140,12 +188,31 @@ public class SearchShow {
         return myResult;
     }
 
+    /**
+     * Normalizes show name for Tier 1 cache key.
+     * Show name is already cleaned by ShowUtils.cleanUpName() (dots/underscores replaced, brackets removed).
+     * We only need to lowercase it for case-insensitive matching.
+     */
+    private static String normalizeShowNameForCache(String showName) {
+        if (showName == null) return "";
+        return showName.toLowerCase(Locale.ROOT).trim();
+    }
+
+    /**
+     * Builds cache key for Tier 1 name-to-id cache.
+     * Format: "normalizedname|year|language"
+     */
+    private static String buildNameCacheKey(String showName, Integer year, String language) {
+        String normalized = normalizeShowNameForCache(showName);
+        return normalized + (year != null ? "|" + year : "") + "|" + language;
+    }
+
     public static void debugLruCache(LruCache<String, Response<TvShowResultsPage>> lruCache) {
-        if (log.isDebugEnabled()) log.debug("debugLruCache: size={}", lruCache.size());
-        if (log.isDebugEnabled()) log.debug("debugLruCache: putCount={}", lruCache.putCount());
-        if (log.isDebugEnabled()) log.debug("debugLruCache: hitCount={}", lruCache.hitCount());
-        if (log.isDebugEnabled()) log.debug("debugLruCache: missCount={}", lruCache.missCount());
-        if (log.isDebugEnabled()) log.debug("debugLruCache: evictionCount={}", lruCache.evictionCount());
+        if (log.isDebugEnabled()) log.debug("debugLruCache(Tier2): size={}, put={}, hit={}, miss={}, evict={}", lruCache.size(), lruCache.putCount(), lruCache.hitCount(), lruCache.missCount(), lruCache.evictionCount());
+    }
+
+    public static void debugNameCache(LruCache<String, Integer> lruCache) {
+        if (log.isDebugEnabled()) log.debug("debugNameCache(Tier1): size={}, put={}, hit={}, miss={}, evict={}", lruCache.size(), lruCache.putCount(), lruCache.hitCount(), lruCache.missCount(), lruCache.evictionCount());
     }
 
 }

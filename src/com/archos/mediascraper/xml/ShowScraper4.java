@@ -111,11 +111,7 @@ public class ShowScraper4 extends BaseScraper2 {
     }
 
     public static void debugLruCache(LruCache<String, Map<String, EpisodeTags>> lruCache) {
-        if (log.isDebugEnabled()) log.debug("debugLruCache: size={}", lruCache.size());
-        if (log.isDebugEnabled()) log.debug("debugLruCache: putCount={}", lruCache.putCount());
-        if (log.isDebugEnabled()) log.debug("debugLruCache: hitCount={}", lruCache.hitCount());
-        if (log.isDebugEnabled()) log.debug("debugLruCache: missCount={}", lruCache.missCount());
-        if (log.isDebugEnabled()) log.debug("debugLruCache: evictionCount={}", lruCache.evictionCount());
+        if (log.isDebugEnabled()) log.debug("debugLruCache(Episodes): size={}, put={}, hit={}, miss={}, evict={}", lruCache.size(), lruCache.putCount(), lruCache.hitCount(), lruCache.missCount(), lruCache.evictionCount());
     }
 
     public static synchronized void reauth() {
