@@ -103,6 +103,8 @@ public final class ShowUtils {
         name = StringUtils.replaceAllChars(name, REPLACE_ME, ' ');
         // Strip out everything else in brackets <[{( .. )})>, most of the time teams names, etc
         name = StringUtils.replaceAll(name, "", BRACKETS);
+        // Collapse multiple consecutive spaces into single space
+        name = name.replaceAll("\\s+", " ");
         return name.trim();
     }
 
