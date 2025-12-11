@@ -93,6 +93,10 @@ public class NetworkRootFragment extends BrowseSupportFragment {
     private ArrayObjectAdapter mUpnpDiscoveryAdapter;
 
     private ListRow mIndexedFoldersListRow;
+    private ListRow mSmbDiscoveryListRow;
+    private ListRow mUpnpDiscoveryListRow;
+    private ListRow mNetworkShortcutsListRow;
+
 
     private ShortcutsLoaderTask mShortcutsLoaderTask;
 
@@ -214,32 +218,37 @@ public class NetworkRootFragment extends BrowseSupportFragment {
         ClassPresenterSelector classPresenter = new ClassPresenterSelector();
         classPresenter.addClassPresenter(NetworkShortcut.class, new NetworkShortcutPresenter());
         classPresenter.addClassPresenter(Box.class, new RescanBoxItemPresenter()); // for the rescan item
+        
+        //Indexed Folders
         mIndexedFoldersAdapter = new ArrayObjectAdapter(classPresenter);
         mIndexedFoldersListRow = new ListRow(
-                new HeaderItem(getString(R.string.indexed_folders)),
-                mIndexedFoldersAdapter);
+            new HeaderItem(getString(R.string.indexed_folders)),
+            mIndexedFoldersAdapter); 
         mRowsAdapter.add(mIndexedFoldersListRow);
-        mRowsAdapter.notifyArrayItemRangeChanged(0, mRowsAdapter.size());
 
+        //Shared Folders
         mSmbDiscoveryAdapter = new ArrayObjectAdapter(new SmbSharePresenter());
-        mRowsAdapter.add(new ListRow(
+        mSmbDiscoveryListRow = new ListRow(
                 new HeaderItem(getString(R.string.network_shared_folders)),
-                mSmbDiscoveryAdapter));
-        mRowsAdapter.notifyArrayItemRangeChanged(0, mRowsAdapter.size());
+                mSmbDiscoveryAdapter);
+        mRowsAdapter.add(mSmbDiscoveryListRow);
+
+        //DLNA Servers
         mUpnpDiscoveryAdapter = new ArrayObjectAdapter(new SmbSharePresenter());
-        mRowsAdapter.add(new ListRow(
+        mUpnpDiscoveryListRow = new ListRow(
                 new HeaderItem(getString(R.string.network_media_servers)),
-                mUpnpDiscoveryAdapter));
-            mRowsAdapter.notifyArrayItemRangeChanged(0, mRowsAdapter.size());
+                mUpnpDiscoveryAdapter);
+        mRowsAdapter.add(mUpnpDiscoveryListRow);
 
+        //Network Shortcuts
         mNetworkShortcutsAdapter = new ArrayObjectAdapter(new NetworkShortcutPresenter());
-        mRowsAdapter.add(new ListRow(
+        mNetworkShortcutsListRow = new ListRow(
                 new HeaderItem(getString(R.string.network_shortcuts)),
-                mNetworkShortcutsAdapter));
-        mRowsAdapter.notifyArrayItemRangeChanged(0, mRowsAdapter.size());
+                mNetworkShortcutsAdapter);
+        mRowsAdapter.add(mNetworkShortcutsListRow);
 
-        setOnItemViewClickedListener(mClickListener);
-
+        //Click Handler
+        mRowsAdapter.notifyArrayItemRangeChanged(0, mRowsAdapter.size());        setOnItemViewClickedListener(mClickListener);
     }
 
     @Override
