@@ -92,7 +92,7 @@ public class BrowserAllTvShows extends CursorBrowserByVideo {
 		// Save the sort mode
 		mPreferences.edit()
 		.putString(SORT_PARAM_KEY, mSortOrder)
-		.commit();
+		.apply();
 
 		super.onDestroy();
 	}
