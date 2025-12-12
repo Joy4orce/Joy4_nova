@@ -31,6 +31,8 @@ import java.util.regex.Pattern;
 import static com.archos.mediascraper.preprocess.ParseUtils.BRACKETS;
 import static com.archos.mediascraper.preprocess.ParseUtils.removeAfterEmptyParenthesis;
 import static com.archos.mediascraper.preprocess.ParseUtils.yearExtractor;
+import static com.archos.mediascraper.preprocess.ParseUtils.yearExtractorEndString;
+import static com.archos.mediascraper.preprocess.ParseUtils.yearExtractorStartString;
 
 /**
  * Matches everything. Tries to strip away all junk, not very reliable.
@@ -95,6 +97,26 @@ class MovieDefaultMatcher implements InputMatcher {
         Pair<String, String> nameYear = yearExtractor(name);
         name = nameYear.first;
         year = nameYear.second;
+
+        // Fallback: if yearExtractor didn't find year, try yearExtractorEndString
+        // Handles cases like "Movie.Title.2023" where year is at end
+        if (year == null || year.isEmpty()) {
+            nameYear = yearExtractorEndString(name);
+            if (nameYear.second != null && !nameYear.second.isEmpty()) {
+                name = nameYear.first;
+                year = nameYear.second;
+            }
+        }
+
+        // Fallback: if still no year found, try yearExtractorStartString
+        // Handles edge cases like "2001.A.Space.Odyssey" where year is at start
+        if (year == null || year.isEmpty()) {
+            nameYear = yearExtractorStartString(name);
+            if (nameYear.second != null && !nameYear.second.isEmpty()) {
+                name = nameYear.first;
+                year = nameYear.second;
+            }
+        }
 
         // remove junk behind () that was containing year
         // applies to movieName (1928) junk -> movieName () junk -> movieName
