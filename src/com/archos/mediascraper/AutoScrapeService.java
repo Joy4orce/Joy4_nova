@@ -684,6 +684,7 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                                         if (searchOnline) {
                                             if (log.isTraceEnabled()) log.trace("startScraping: searching online {}", title);
                                             SearchInfo searchInfo = SearchPreprocessor.instance().parseFileBased(fileUri, scrapUri);
+                                            if (reparseInfo) searchInfo.setForceReParse(true);
                                             Scraper scraper = new Scraper(AutoScrapeService.this);
                                             result = scraper.getAutoDetails(searchInfo);
                                             if (log.isTraceEnabled()) log.trace("startScraping: {} {}", ((result.tag != null) ? result.tag.getTitle() : null), ((result.tag != null) ? result.tag.getOnlineId() : null));
