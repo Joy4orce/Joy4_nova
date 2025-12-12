@@ -560,7 +560,11 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
 
                                     String title = cursor.getString(cursor.getColumnIndex(VideoStore.MediaColumns.TITLE));
                                     Uri fileUri = Uri.parse(cursor.getString(cursor.getColumnIndex(VideoStore.MediaColumns.DATA)));
-                                    Uri scrapUri = title != null && !title.isEmpty() ? Uri.parse("/" + title + ".mp4") : fileUri;
+
+                                    // This gets the info to reparse for UPnP, and grab the correct details.
+                                    boolean reparseInfo = fileUri.toString().toLowerCase().startsWith("upnp");
+
+                                    Uri scrapUri = title == null || title.isEmpty() || title.equalsIgnoreCase("null") ? fileUri : Uri.parse("/" + title + ".mp4");
                                     long ID = cursor.getLong(cursor.getColumnIndex(BaseColumns._ID));
 
                                     // for now there is no error and file is not scraped
@@ -685,7 +689,7 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                                             if (log.isTraceEnabled()) log.trace("startScraping: {} {}", ((result.tag != null) ? result.tag.getTitle() : null), ((result.tag != null) ? result.tag.getOnlineId() : null));
                                         }
 
-                                        if (result != null && result.tag != null && ID != -1) {
+                                        if (result != null && result.tag != null && ID != -1 && !result.tag.getTitle().equals("(NULL)")) {
                                             result.tag.setVideoId(ID);
                                             //ugly but necessary to avoid poster delete when replacing tag
                                             if (result.tag.getDefaultPoster() != null) {
