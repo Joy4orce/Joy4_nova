@@ -997,14 +997,18 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         // if nova is upgraded from 6.4.22 and below disable force_passthrough and android frame timing
         if ((novaPreviousVersionArray[0] < 6) ||
             (novaPreviousVersionArray[0] == 6 && novaPreviousVersionArray[1] < 4) ||
-            (novaPreviousVersionArray[0] == 6 && novaPreviousVersionArray[1] == 4 && novaPreviousVersionArray[2] <= 22)) {
+            (novaPreviousVersionArray[0] == 6 && novaPreviousVersionArray[1] == 4 && novaPreviousVersionArray[2] <= 23)) {
             PreferenceManager.getDefaultSharedPreferences(context)
                     .edit()
                     .putBoolean(VideoPreferencesCommon.KEY_FORCE_AUDIO_PASSTHROUGH, false)
                     .apply();
             PreferenceManager.getDefaultSharedPreferences(context)
                     .edit()
-                    .putBoolean(PlayerActivity.KEY_ENABLE_ANDROID_FRAME_TIMING, true)
+                    .putBoolean(PlayerActivity.KEY_ENABLE_ANDROID_FRAME_TIMING, false)
+                    .apply();
+            PreferenceManager.getDefaultSharedPreferences(context)
+                    .edit()
+                    .putBoolean(VideoPreferencesCommon.KEY_ENABLE_DYNAMIC_AUDIO_DELAY, true)
                     .apply();
         }
         // do not replace lastPlayed row with watchingUpNext one since it is still a little slow on shield
