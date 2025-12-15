@@ -353,9 +353,21 @@ public class SurfaceController {
             case VideoFormat.STRETCH_XY:
                 //Height can go over the screen top, but set width.
                 // Now we have a remove black bar in portrait too...
-                if (dcar < ar)
-                    dcw = (int) (dch * (ar));
-                else
+                if (willStretchY || (mCutoutLeft + mCutoutRight == 0 || dcar < 1)) {
+                    //THERE IS NO POSSIBLE WAY TO AVOID THE CUTOUT, AND KEEP ASPECT.
+                    //NOT KEEPING ASPECT MAKES THIS FULL_SCREEN.
+                    //I HATE THIS CASE!
+                    
+                    //I have now made it so that if cutouts are not enabled, this works normally
+                    //It also works normally in Portrait, since the problem is a landscape only issue
+                    //If cutouts are enabled, you cannot stretch Cinema Vertically on Phone.
+                    //If I allowed this, the rules would not be respected and Cutout pref would not be honored.
+                    if (mCutoutLeft + mCutoutRight == 0 || dcar < 1)
+                        dcw = (int) (dch * (ar));
+                    //else
+                        //WE ARE FULLSCREEN, TuRN CUTouts OFF To FIX!
+                    //cropW = (float) dcar / (float) ar;        //Cropping won't help you! We need a way to not draw the left and r-ecentre, cutting equal left and right. 
+                } else
                     dch = (int) (dcw / (ar));
                 break;
             case VideoFormat.FULL_SCREEN: { // display on full screen resolution stretched: keep dcw and dch
