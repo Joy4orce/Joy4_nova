@@ -215,12 +215,12 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         STOPPED,
     }
 
-    private static final int PLAYER_NOTIFICATION_ID = 5;
+    /* private static final int PLAYER_NOTIFICATION_ID = 5;
     private NotificationManager nm;
     private NotificationCompat.Builder nb;
     private static final String notifChannelId = "PlayerService_id";
     private static final String notifChannelName = "PlayerService";
-    private static final String notifChannelDescr = "PlayerService";
+    private static final String notifChannelDescr = "PlayerService"; */
 
     private boolean isSeeking = false;
 
@@ -569,12 +569,12 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         return mStreamingUri;
     }
 
-    public void stopStatusbarNotification(){
+    /* public void stopStatusbarNotification(){
         nm.cancel(PLAYER_NOTIFICATION_ID);
         stopForeground(true);
-    }
+    }*/ 
 
-    public void startStatusbarNotification(boolean isDicreteOrMinimized) {
+    /* public void startStatusbarNotification(boolean isDicreteOrMinimized) {
 
         // need to do that early to avoid ANR on Android 26+
         nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -639,7 +639,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         ServiceCompat.startForeground(this, PLAYER_NOTIFICATION_ID, nb.build(),
                 (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) ? ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK : 0
         );
-    }
+    } */ 
 
 
     private int getLastPosition(VideoDbInfo videoInfo, int resume) {
