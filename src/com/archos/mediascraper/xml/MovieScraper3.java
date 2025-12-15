@@ -46,16 +46,14 @@ import com.uwetrottmann.tmdb2.services.SearchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Locale;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import okhttp3.Cache;
 
 import static com.archos.mediascraper.MovieTags.isCollectionAlreadyKnown;
 import static com.archos.mediascraper.themoviedb3.MovieCollectionImages.downloadCollectionImage;
-
-import androidx.preference.PreferenceManager;
-
 
 public class MovieScraper3 extends BaseScraper2 {
     private static final String PREFERENCE_NAME = "themoviedb.org";
@@ -138,15 +136,39 @@ public class MovieScraper3 extends BaseScraper2 {
                 break; // first valid match wins, fallback to file name.
             }
         }
-        SearchMovieResult searchResult = SearchMovie2.search(searchQuery, language, searchInfo.getYear(), maxItems, getSearchService(), adultScrape);
 
-        // TODO: this triggers scrape for all search results, is this intended?
-        if (searchResult.status == ScrapeStatus.OKAY) {
-            for (SearchResult result : searchResult.result) {
-                result.setScraper(this);
-                result.setFile(searchInfo.getFile());
-            }
+        String reversed = new StringBuilder(searchQuery).reverse().toString();
+
+        //SEARCH TMDB FOR THE MOVIE!
+        //If the Query is 5 words or more, and for as long as it is, remove a word
+        //BUT! Only remove and try 3 times (Aussie Logic, backwards as fuck but works!)
+        SearchMovieResult searchResult = null;
+        for (int i = 0; i < 4; i++ ){
+            searchResult = SearchMovie2.search(searchQuery, language, searchInfo.getYear(), maxItems, getSearchService(), adultScrape);
+            //Check result and try again if we need to.
+            if (searchResult.status == ScrapeStatus.OKAY && (!searchResult.result.isEmpty())) {
+                // TODO: this triggers scrape for all search results, is this intended?
+                for (SearchResult result : searchResult.result) {
+                    result.setScraper(this);
+                    result.setFile(searchInfo.getFile());
+                }
+                break;
+            } else if (searchResult.status == ScrapeStatus.OKAY || searchResult.status == ScrapeStatus.NOT_FOUND) {
+                //Only if its over 3 words. (Stop false positives on small titles like "The")
+                if (searchQuery.split("[\\s\\-_.]+").length > 4) {
+                    //Grab the one word off.
+                    Pattern sepPattern = Pattern.compile("[\\s\\-_.]");
+                    Matcher matcher = sepPattern.matcher(reversed);
+                    if (matcher.find()) {
+                        searchQuery = searchQuery.substring(0, searchQuery.length() - matcher.start() - 1).trim();
+                    }
+                } else
+                    break;          //NOT OVER 3 WORDS. DONT SEARCH AGAIN
+            } else
+                break;
         }
+
+        //Return the rest we got.
         return new ScrapeSearchResult(searchResult.result, true, searchResult.status, searchResult.reason);
     }
 
