@@ -41,7 +41,7 @@ public class SurfaceController {
 
     public class VideoFormat {
         public static final int ORIGINAL = 0;
-        public static final int FULL_WIDTH = 1;
+        public static final int BAR_REMOVE = 1;
         /*
          *  for 2:35 video on 4/3 screen:
          *  intermediate surface height in order to don't crop too much video
@@ -55,7 +55,7 @@ public class SurfaceController {
         
         public static final double VIDEO_FORMAT_AUTO_THRES = 0.7;
 
-        private final int[] mode = {ORIGINAL, FULL_WIDTH, FULL_SCREEN, FORCE43, FORCE169, FORCE185, FORCE239, AUTO};
+        private final int[] mode = {ORIGINAL, BAR_REMOVE, FULL_SCREEN, FORCE43, FORCE169, FORCE185, FORCE239, AUTO};
         private final int max;
         private int idx;
         public VideoFormat(int max) {
@@ -312,7 +312,7 @@ public class SurfaceController {
         fmt = getVideoFormat().getFmt();
 
         if (mEffectEnable) {
-            fmt = VideoFormat.FULL_WIDTH; //only FULL_WIDTH FORMAT is currently supported in OpenGL rendering
+            fmt = VideoFormat.BAR_REMOVE; //only BAR_REMOVE FORMAT is currently supported in OpenGL rendering
         }
 
         // calculate aspect ratio
@@ -350,9 +350,13 @@ public class SurfaceController {
                     if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: VideoFormat.ORIGINAL dcar>=ar dcw={}", dcw);
                 }
                 break;
-            case VideoFormat.FULL_WIDTH:
+            case VideoFormat.BAR_REMOVE:
                 //Height can go over the screen top, but set width.
-                dch = (int) (dcw/ (ar));
+                // Now we have a remove black bar in portrait too...
+                if (dcar < ar)
+                    dcw = (int) (dch * (ar));
+                else
+                    dch = (int) (dcw / (ar));
                 break;
             case VideoFormat.FULL_SCREEN: { // display on full screen resolution stretched: keep dcw and dch
                 //cropW = 1.0f;

@@ -211,6 +211,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     private boolean             mDragging;
     private boolean             mSeekComplete;
     private int                 mSeekKeyDirection;
+    private int                 mBarXYIconResource = R.drawable.video_format_barx;
 
     private static boolean      mControlBarShowing, mSystemBarShowing, mSystemBarGone, mActionBarShowing, mVolumeBarShowing, mNavigationBarShowing, mIsNavBarOnBottom, mIsGestureAreaShowing;
     private static int          mGestureAreaHeight, mControlBarHeight;
@@ -1278,8 +1279,8 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
             case SurfaceController.VideoFormat.ORIGINAL:
                 mFormatButton.setImageResource(R.drawable.video_format_0);
                 break;
-            case SurfaceController.VideoFormat.FULL_WIDTH:
-                mFormatButton.setImageResource(R.drawable.video_format_barx);
+            case SurfaceController.VideoFormat.BAR_REMOVE:
+                mFormatButton.setImageResource(mBarXYIconResource);
                 break;
             case SurfaceController.VideoFormat.FULL_SCREEN:
                 mFormatButton.setImageResource(R.drawable.video_format_f);
@@ -1300,6 +1301,12 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
                 mFormatButton.setImageResource(R.drawable.video_format_a);
                 break;
         }
+    }
+
+    public void setBarRemoveIcon(boolean isScreenPortrait) {
+        mBarXYIconResource = isScreenPortrait ? R.drawable.video_format_bary : R.drawable.video_format_barx;
+        if (mFormatButton != null && mSurfaceController.getCurrentVideoFormat() == SurfaceController.VideoFormat.BAR_REMOVE)
+            mFormatButton.setImageResource(mBarXYIconResource);
     }
 
     private void doPauseResume() {

@@ -1175,6 +1175,9 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         boolean isPortrait = ((1.0f*layoutHeight/layoutWidth)>1.0);
         boolean isSeenPortrait = ((1.0f*displayHeight/displayWidth)>1.0);
 
+        //Update the icon
+        mPlayerController.setBarRemoveIcon(isSeenPortrait);
+
         // hack to fix fullscreen height on chromeos pixelbook (and more?) since it reports 2400x1440 instead of 2400x1600 but ok in multiWindow
         if(isChromeOS(mContext)&&(layoutWidth == displayWidth)&&(layoutHeight != displayHeight)) {
             log.warn("CONFIG updateSizes: hack correcting on chromeOS layoutHeight from {} to {}", layoutHeight, displayHeight);
