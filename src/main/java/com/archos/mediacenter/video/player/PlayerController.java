@@ -1279,11 +1279,11 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
             case SurfaceController.VideoFormat.ORIGINAL:
                 mFormatButton.setImageResource(R.drawable.video_format_0);
                 break;
-            case SurfaceController.VideoFormat.BAR_REMOVE:
+            case SurfaceController.VideoFormat.STRETCH_XY:
                 mFormatButton.setImageResource(mBarXYIconResource);
                 break;
             case SurfaceController.VideoFormat.FULL_SCREEN:
-                mFormatButton.setImageResource(R.drawable.video_format_f);
+                mFormatButton.setImageResource(R.drawable.video_format_arrow_xy);
                 break;
             case SurfaceController.VideoFormat.FORCE43:
                 mFormatButton.setImageResource(R.drawable.video_format_43);
@@ -1305,7 +1305,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
 
     public void setBarRemoveIcon(boolean isScreenPortrait) {
         mBarXYIconResource = isScreenPortrait ? R.drawable.video_format_arrow_vertical : R.drawable.video_format_arrow_horizontal;
-        if (mFormatButton != null && mSurfaceController.getCurrentVideoFormat() == SurfaceController.VideoFormat.BAR_REMOVE)
+        if (mFormatButton != null && mSurfaceController.getCurrentVideoFormat() == SurfaceController.VideoFormat.STRETCH_XY)
             mFormatButton.setImageResource(mBarXYIconResource);
     }
 
