@@ -501,7 +501,7 @@ public class FloatingPlayerService extends Service implements PlayerService.Play
     private int getHeight(int i) {
         if(Player.sPlayer.getVideoWidth()==0||Player.sPlayer.getVideoHeight()==0)
             return (int) dipToPixels(STARTING_HEIGHT);
-        return (int) (((float)((float)i/(float)Player.sPlayer.getVideoWidth()))*Player.sPlayer.getVideoHeight());
+        return (int) (((float)((float)i/(float)Player.sPlayer.getVideoWidth()) / Player.sPlayer.getVideoAspect())*Player.sPlayer.getVideoHeight());
     }
     private void updateSizes(WindowManager.LayoutParams paramsF) {
 
