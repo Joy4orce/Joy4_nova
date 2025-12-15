@@ -1175,7 +1175,16 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         boolean isPortrait = ((1.0f*layoutHeight/layoutWidth)>1.0);
         boolean isSeenPortrait = ((1.0f*displayHeight/displayWidth)>1.0);
 
-        //Update the icon
+        //Find the screen size.
+        DisplayMetrics metrics = new DisplayMetrics();
+        display.getMetrics(metrics);
+        
+        //Set the Floating Player Size, Full Portrait Width on Phone, Half width for Large Screen.
+        mPlayerController.floatingPlayerSize =  (int) (layoutWidth / metrics.densityDpi < 3 ?
+                (isPortrait ? layoutWidth : layoutHeight) / metrics.density :
+                layoutWidth / metrics.density / 2);
+        
+        //Update the Strecth X /Y Icon
         mPlayerController.setStretchXYIcon();
 
         // hack to fix fullscreen height on chromeos pixelbook (and more?) since it reports 2400x1440 instead of 2400x1600 but ok in multiWindow
@@ -2307,6 +2316,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                     if (mPlayer != null) {
                         int currentPos = mPlayer.getCurrentPosition();
                         floatingIntent.putExtra("floating_player_position", currentPos);
+                        floatingIntent.putExtra("floating_player_size", mPlayerController.floatingPlayerSize);            //FLOATING PLAYER SIZE
                     }
                     startService(floatingIntent);
                 }

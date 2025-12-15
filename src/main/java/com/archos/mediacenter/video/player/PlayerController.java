@@ -156,7 +156,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     private IPlayerControl      mPlayer;
     private Window              mWindow;
     private int                 mLayoutWidth, mLayoutHeight;
-    final private boolean       mSw600dp; // are we using the sw600dp ressources?
+    public int floatingPlayerSize;
 
     private int                 mActionBarHeight = 0;
     private int                 mSystemBarHeight = 0;
@@ -278,8 +278,6 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
 
         mPlayerView = playerView;
         mActionBar = actionBar;
-
-        mSw600dp = mContext.getResources().getConfiguration().smallestScreenWidthDp >= 600;
 
         mVideoTitle = (TextView) inflater.inflate(R.layout.video_title, null);
         // Default to GONE, enable it if you want it
