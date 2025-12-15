@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Gravity;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,6 +119,7 @@ public class SurfaceController {
     private int mCutoutBottom = 0;
     private int mMarginLeft = 0;
     private int mMarginTop = 0;
+    private boolean mCutoutBugToasted = false;
 
     public SurfaceController(View rootView) {
         ViewGroup mLp = (ViewGroup)rootView;
@@ -364,9 +366,13 @@ public class SurfaceController {
                     //If I allowed this, the rules would not be respected and Cutout pref would not be honored.
                     if (mCutoutLeft + mCutoutRight == 0 || dcar < 1)
                         dcw = (int) (dch * (ar));
-                    //else
-                        //WE ARE FULLSCREEN, TuRN CUTouts OFF To FIX!
-                    //cropW = (float) dcar / (float) ar;        //Cropping won't help you! We need a way to not draw the left and r-ecentre, cutting equal left and right. 
+                        //cropW = (float) dcar / (float) ar;        //Cropping won't help you! We need a way to not draw the left and r-ecentre, cutting equal left and right. 
+                    else {
+                        //WE ARE FULLSCREEN, turn Video with Cutouts ON to FIX!
+                        if (!mCutoutBugToasted) Toast.makeText(mView.getContext(), "Turn on Fullscreen Video with Cutouts for correct Aspect Ratio.", Toast.LENGTH_SHORT).show();
+                        mCutoutBugToasted = true;
+                    }
+                    
                 } else
                     dch = (int) (dcw / (ar));
                 break;
