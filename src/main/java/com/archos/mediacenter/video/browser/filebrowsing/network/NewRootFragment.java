@@ -36,7 +36,6 @@ import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediacenter.utils.ActionItem;
 import com.archos.mediacenter.utils.QuickAction;
 import com.archos.mediacenter.utils.ShortcutDbAdapter;
-import com.archos.mediacenter.video.CustomApplication;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.BrowserCategory;
 import com.archos.mediacenter.video.browser.ShortcutDb;
@@ -45,6 +44,7 @@ import com.archos.mediacenter.video.browser.filebrowsing.network.SmbBrowser.Brow
 import com.archos.mediacenter.video.browser.filebrowsing.network.UpnpBrowser.BrowserByUpnp;
 import com.archos.mediaprovider.NetworkScanner;
 import com.archos.mediaprovider.video.NetworkScannerServiceVideo;
+import com.archos.mediaprovider.video.LoaderUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -184,7 +184,7 @@ public abstract class NewRootFragment extends Fragment implements WorkgroupShort
                     loadIndexedShortcuts();
                 }
             });
-         return true;
+             return true;
         }
         return false;
     }
@@ -203,6 +203,12 @@ public abstract class NewRootFragment extends Fragment implements WorkgroupShort
 
         switch (itemId) {
             case R.string.remove_from_indexed_folders:
+                //If we are scraping, we need to stop that.
+                if (LoaderUtils.getScrapeInProgress()) {
+                    //Stop the scrape.
+                    LoaderUtils.setScrapeInProgress(false);
+                }
+
                 removeShortcut(mSelectedShortcut);
                 return true;
 

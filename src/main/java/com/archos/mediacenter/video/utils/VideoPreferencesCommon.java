@@ -759,13 +759,22 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
 
         mDbExportManualPreference = findPreference(getString(R.string.db_export_manual_prefkey));
         mDbExportManualPreference.setOnPreferenceClickListener(preference -> {
+            if (LoaderUtils.getScrapeInProgress()) {
+                //Stop the scrape.
+                LoaderUtils.setScrapeInProgress(false);
+            }
+
             backupDatabase(getContext(),"media.db");
             Toast.makeText(getActivity(), R.string.db_export_in_progress, Toast.LENGTH_SHORT).show();
-            return true;
+             return true;
         });
 
         Preference exportLibraryPreference = findPreference(getString(R.string.media_library_export_prefkey));
         exportLibraryPreference.setOnPreferenceClickListener(preference -> {
+            if (LoaderUtils.getScrapeInProgress()) {
+                //Stop the scrape.
+                LoaderUtils.setScrapeInProgress(false);
+            }
             Toast.makeText(getActivity(), R.string.media_library_export_in_progress, Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(MediaLibraryBackupService.ACTION_EXPORT, null, getActivity(), MediaLibraryBackupService.class);           
             getContext().startService(intent);
@@ -779,6 +788,11 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         });
 
         findPreference(KEY_RESCAN_STORAGE).setOnPreferenceClickListener(preference -> {
+            if (LoaderUtils.getScrapeInProgress()) {
+                //Stop the scrape.
+                LoaderUtils.setScrapeInProgress(false);
+            }
+
             rescanPath(Environment.getExternalStorageDirectory().getAbsolutePath());
             ExtStorageManager storageManager = ExtStorageManager.getExtStorageManager();
             final boolean hasExternal = storageManager.hasExtStorage();

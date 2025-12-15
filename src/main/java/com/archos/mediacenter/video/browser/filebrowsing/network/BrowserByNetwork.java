@@ -47,6 +47,7 @@ import com.archos.mediacenter.video.browser.adapters.object.Video;
 import com.archos.mediacenter.video.browser.filebrowsing.BrowserByFolder;
 import com.archos.mediacenter.video.browser.filebrowsing.ListingAdapter;
 import com.archos.mediaprovider.NetworkScanner;
+import com.archos.mediaprovider.video.LoaderUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -238,6 +239,12 @@ public class BrowserByNetwork extends BrowserByFolder {
         switch (itemId) {
             case R.string.add_to_indexed_folders:
             case R.string.remove_from_indexed_folders:
+                //If we are scraping, we need to stop that.
+                if (LoaderUtils.getScrapeInProgress()) {
+                    //Stop the scrape.
+                    LoaderUtils.setScrapeInProgress(false);
+                }
+
                 mShortcutPath = metaFile2.getUri().toString();
                 mShortcutName = metaFile2.getName();
                 if (log.isDebugEnabled()) log.debug("onContextItemSelected: mShortcutPath={}, mShortcutName={}", mShortcutPath, mShortcutName);

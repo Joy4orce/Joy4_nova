@@ -45,6 +45,7 @@ import com.archos.mediacenter.video.leanback.presenter.ShortcutDetailsPresenter;
 import com.archos.mediacenter.video.utils.VideoUtils;
 import com.archos.mediaprovider.NetworkScanner;
 
+import com.archos.mediaprovider.video.LoaderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -244,10 +245,21 @@ public class NetworkShortcutDetailsFragment extends DetailsSupportFragment imple
             startActivityForResult(intent, NetworkRootFragment.REQUEST_CODE_BROWSING);
         }
         else if (action.getId() == ACTION_REINDEX) {
+            //If we are scraping, we need to stop that.
+            if (LoaderUtils.getScrapeInProgress()) {
+                //Stop the scrape.
+                LoaderUtils.setScrapeInProgress(false);
+            }
             NetworkScanner.scanVideos(getActivity(), mShortcut.getUri());
             slightlyDelayedFinish();
         }
         else if (action.getId() == ACTION_ADD_INDEX) { // can be indexed or shortcut
+            //If we are scraping, we need to stop that.
+            if (LoaderUtils.getScrapeInProgress()) {
+                //Stop the scrape.
+                LoaderUtils.setScrapeInProgress(false);
+            }
+
             // if ! ancestor or himself indexed
             // -> if shortcut: remove shortcut and index folder
             // -> else index folder
@@ -268,9 +280,16 @@ public class NetworkShortcutDetailsFragment extends DetailsSupportFragment imple
             slightlyDelayedFinish();
         }
         else if (action.getId() == ACTION_REMOVE) {
+            //If we are scraping, we need to stop that.
+            if (LoaderUtils.getScrapeInProgress()) {
+                //Stop the scrape.
+                LoaderUtils.setScrapeInProgress(false);
+            }
+
             // if shortcut: remove shortcut
             // if indexed: unindex
             boolean result = false;
+
             if (isCurrentDirectoryShortcut)
                 result = ShortcutDb.STATIC.removeShortcut(getContext(), mShortcut.getUri())>0;
             if (isHimselfIndexedFolder)
