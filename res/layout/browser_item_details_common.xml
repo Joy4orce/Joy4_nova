@@ -36,18 +36,17 @@
         android:id="@+id/detail_line_two"
         style="@style/BrowserText.Details"
         android:layout_below="@id/detail_line_one"
-        android:layout_marginTop="4dip"
         android:layout_toRightOf="@id/left_area"
         android:ellipsize="end"
         android:textStyle="italic" />
 
     <!-- All : duration -->
 
-    <TextView
+    <!-- <TextView
         android:id="@+id/info"
         style="@style/BrowserText.Info.Video"
         android:layout_below="@id/detail_line_two"
-        android:layout_toRightOf="@id/left_area" />
+        android:layout_toRightOf="@id/left_area" /> -->>
 
     <!-- Movie   : cast -->
     <!-- TV show : plot -->
@@ -56,9 +55,12 @@
     <TextView
         android:id="@+id/detail_line_three"
         style="@style/BrowserText.Details"
-        android:layout_below="@id/info"
-        android:layout_marginTop="4dip"
+        android:layout_below="@id/detail_line_two"
+        android:layout_marginTop="8dip"
+        android:layout_height="wrap_content"
         android:layout_toRightOf="@id/left_area"
+        android:singleLine="false"
+        android:maxLines="10"
         android:ellipsize="end" />
 
     <!-- Movie or TV show  : release date and rating -->
@@ -70,6 +72,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/detail_line_three"
         android:layout_marginTop="4dip"
+        android:layout_marginBottom="10dip"
         android:layout_toRightOf="@id/left_area"
         layout="@layout/browser_item_details_date_and_rating" />
 
@@ -102,7 +105,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/expanded"
         android:paddingRight="@dimen/content_list_right_margin"
-        android:paddingBottom="2dip"
+        android:paddingBottom="10dip"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_toLeftOf="@id/expanded"
@@ -162,5 +165,4 @@
             android:visibility="gone"
             android:src="@drawable/label_network" />
     </LinearLayout>
-
 </merge>

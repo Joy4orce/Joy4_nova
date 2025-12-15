@@ -114,7 +114,7 @@ public class TvshowDetailedPresenter extends TvshowListPresenter{
             holder.detailLineTwo.setSingleLine(true);
             holder.detailLineThree.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
             holder.detailLineThree.setSingleLine(false);
-            holder.detailLineThree.setMaxLines(3);
+            holder.detailLineThree.setMaxLines(10);
         return view;
     }
     private void setViewHolderVisibility(ViewHolderDetails holder, int visibility) {

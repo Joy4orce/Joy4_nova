@@ -124,7 +124,7 @@ public class ScrapedVideoDetailedPresenter extends VideoListPresenter{
                 holder.release_date.setText(mContext.getResources().getString(R.string.scrap_year));
             }
             holder.detailLineTwo.setSingleLine(false);
-            holder.detailLineTwo.setMaxLines(3);
+            holder.detailLineTwo.setMaxLines(10);
             holder.detailLineThree.setTypeface(Typeface.DEFAULT, Typeface.NORMAL);
             holder.detailLineThree.setSingleLine(true);
         }
@@ -139,7 +139,7 @@ public class ScrapedVideoDetailedPresenter extends VideoListPresenter{
             holder.detailLineTwo.setSingleLine(true);
             holder.detailLineThree.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
             holder.detailLineThree.setSingleLine(false);
-            holder.detailLineThree.setMaxLines(3);
+            holder.detailLineThree.setMaxLines(10);
         }
         return view;
     }

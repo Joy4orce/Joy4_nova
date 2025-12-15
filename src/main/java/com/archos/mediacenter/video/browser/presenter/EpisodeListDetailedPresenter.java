@@ -81,38 +81,32 @@ public class EpisodeListDetailedPresenter extends EpisodePresenter{
         super.bindView(view,object, result, positionInAdapter);
         ViewHolderDetails holder = (ViewHolderDetails) view.getTag();
 
+        setViewHolderVisibility(holder, View.VISIBLE);
+        holder.info.setText(MediaUtils.formatTime(tvShow.getDurationMs()));
+        //holder.detailLineTwo.setText(tvShow.getEpisodeName());
+        holder.detailLineOne.setVisibility(View.GONE);
+        holder.detailLineTwo.setVisibility(View.GONE);
+        holder.detailLineThree.setText(tvShow.getDescriptionBody());
 
+        long date = tvShow.getEpisodeDate();
+        float rating = tvShow.getEpisodeRating();
+        String ratingFormated;
+        if (rating >= 0.0f) {
+            ratingFormated = mNumberFormat.format(rating);
+        } else {
+            ratingFormated = "";
+        }
+        holder.rating.setText(ratingFormated);
 
-
-            setViewHolderVisibility(holder, View.VISIBLE);
-            holder.info.setText(MediaUtils.formatTime(tvShow.getDurationMs()));
-            //holder.detailLineTwo.setText(tvShow.getEpisodeName());
-            holder.detailLineOne.setVisibility(View.GONE);
-            holder.detailLineTwo.setVisibility(View.GONE);
-            holder.detailLineThree.setText(tvShow.getDescriptionBody());
-
-            long date = tvShow.getEpisodeDate();
-            float rating = tvShow.getEpisodeRating();
-            String ratingFormated;
-            if (rating >= 0.0f) {
-                ratingFormated = mNumberFormat.format(rating);
-            } else {
-                ratingFormated = "";
-            }
-            holder.rating.setText(ratingFormated);
-
-            if (date > 0) {
-                holder.release_date.setText(mDateFormat.format(new Date(date)));
-            } else {
-                holder.release_date.setText(R.string.scrap_aired);
-            }
-            holder.detailLineTwo.setSingleLine(true);
-            holder.detailLineThree.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
-            holder.detailLineThree.setSingleLine(false);
-            holder.detailLineThree.setMaxLines(3);
-
-
-
+        if (date > 0) {
+            holder.release_date.setText(mDateFormat.format(new Date(date)));
+        } else {
+            holder.release_date.setText(R.string.scrap_aired);
+        }
+        holder.detailLineTwo.setSingleLine(true);
+        holder.detailLineThree.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
+        holder.detailLineThree.setSingleLine(false);
+        holder.detailLineThree.setMaxLines(10);
 
         return view;
     }

@@ -51,7 +51,7 @@ public class VideoListPresenter extends VideoPresenter{
         mOnExtendedClick = onExtendedClick;
         mSpannableStringBuilder = new SpannableStringBuilder();
         mTextNoShadowSpan = new TextShadowSpan();
-        mThinPhoneInPortrait = (mContext.getResources().getConfiguration().screenWidthDp < 350);
+        mThinPhoneInPortrait = ((float) mContext.getResources().getConfiguration().screenHeightDp / (float) mContext.getResources().getConfiguration().screenWidthDp > 1.777777f);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class VideoListPresenter extends VideoPresenter{
         String name = video.getName();
         if(video instanceof Episode){
             Episode episode = (Episode) video;
-            name = episode.getShowName()+" S"+episode.getSeasonNumber()+"E"+episode.getEpisodeNumber()+" "+"<i>"+episode.getName()+ITALIC;
+            name = episode.getShowName()+ITALIC;
         }
         if (name == null) name = "";
         if (name.endsWith(ITALIC)&&holder.name!=null) {
