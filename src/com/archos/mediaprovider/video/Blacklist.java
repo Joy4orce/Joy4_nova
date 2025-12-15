@@ -58,8 +58,8 @@ public class Blacklist {
         return DEFAULT_INSTANCE;
     }
 
-    // ends with sample/trailer and may have .ext, or starts with VTS_ (DVD structure files)
-    private static final Pattern BLACKLISTED = Pattern.compile("^(?:VTS_.*|.*(?:sample|trailer)(?:\\.[^.]+)?)$", Pattern.CASE_INSENSITIVE);
+    // ends with sample/trailer and may have .ext
+    private static final Pattern BLACKLISTED = Pattern.compile("^.*(?:sample|trailer)(?:\\.[^.]+)?$", Pattern.CASE_INSENSITIVE);
 
     private static final String[] BLACKLISTED_CAMERA = {
         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getPath(),
