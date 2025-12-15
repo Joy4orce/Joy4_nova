@@ -75,21 +75,6 @@ public class BrowserListOfSeasons extends BrowserWithShowHeader  {
         return (mTitle != null ? mTitle : getString(R.string.all_tv_shows));
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-
-        super.onCreateOptionsMenu(menu, inflater);
-        if (mBrowserAdapter != null
-                && !mBrowserAdapter.isEmpty()) {
-            mDisplayModeSubmenu.clear();
-            mDisplayModeSubmenu.addSubmenuItem(R.drawable.ic_menu_list_mode2, R.string.view_mode_list, 0);
-            mDisplayModeSubmenu.addSubmenuItem(R.drawable.ic_menu_grid_mode, R.string.view_mode_grid, 0);
-            mDisplayModeSubmenu.selectSubmenuItem(mViewMode == VideoUtils.VIEW_MODE_GRID
-                    ? SUBMENU_ITEM_GRID_INDEX : SUBMENU_ITEM_LIST_INDEX);
-        }
-
-    }
-
     public boolean shouldEnableMultiSelection(){
         return false;
     }

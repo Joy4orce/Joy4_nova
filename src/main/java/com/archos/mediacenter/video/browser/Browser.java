@@ -16,9 +16,9 @@
 package com.archos.mediacenter.video.browser;
 
 
-import android.annotation.SuppressLint;
+import static androidx.core.app.ActivityCompat.invalidateOptionsMenu;
+
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -64,7 +64,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.TextViewCompat;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
@@ -169,7 +168,7 @@ public abstract class Browser extends Fragment implements AbsListView.OnScrollLi
     protected int mTouchY;
     protected boolean mIsClickValid;
     protected View mRootView;
-    protected ActionBarSubmenu mDisplayModeSubmenu;
+    protected boolean mUseDetailsMode = false;
     protected ActionBarSubmenu mSortModeSubmenu;
     private View mMenuAnchor;
     protected int mScroll =0;
@@ -481,10 +480,6 @@ public abstract class Browser extends Fragment implements AbsListView.OnScrollLi
         setViewMode(viewMode);
 
         mMenuAnchor = mRootView.findViewById(R.id.menu_anchor);
-
-        mDisplayModeSubmenu = new ActionBarSubmenu(mContext, inflater, mMenuAnchor);
-        mDisplayModeSubmenu.setListener(this);
-
         mSortModeSubmenu = new ActionBarSubmenu(mContext, inflater, mMenuAnchor);
         mSortModeSubmenu.setListener(this);
         return mRootView;
@@ -1060,18 +1055,10 @@ public abstract class Browser extends Fragment implements AbsListView.OnScrollLi
         if (mBrowserAdapter != null && !mBrowserAdapter.isEmpty()) {
             // Add the "view mode" item
             MenuItem viewModeMenuItem = menu.add(MENU_VIEW_MODE_GROUP, MENU_VIEW_MODE, Menu.NONE, R.string.view_mode);
-            viewModeMenuItem.setIcon(R.drawable.ic_menu_view_mode);
             viewModeMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-            mDisplayModeSubmenu.attachMenuItem(viewModeMenuItem);
-
-            mDisplayModeSubmenu.clear();
-            mDisplayModeSubmenu.addSubmenuItem(R.drawable.ic_menu_list_mode2, R.string.view_mode_list, 0);
-            mDisplayModeSubmenu.addSubmenuItem(R.drawable.ic_menu_poster_mode, R.string.view_mode_grid, 0);
             // Details view is only proposed on tablets, not on phones
-            if (getResources().getConfiguration().isLayoutSizeAtLeast(Configuration.SCREENLAYOUT_SIZE_LARGE)||TVUtils.isTV(getActivity())) {
-                mDisplayModeSubmenu.addSubmenuItem(R.drawable.ic_menu_details_mode2, R.string.view_mode_details, 0);
-            }
-            mDisplayModeSubmenu.selectSubmenuItem(getSubmenuItemIndex(mViewMode));
+            mUseDetailsMode =  (getResources().getConfiguration().isLayoutSizeAtLeast(Configuration.SCREENLAYOUT_SIZE_LARGE)||TVUtils.isTV(getActivity()));
+            
         }
         if(shouldEnableMultiSelection())
             menu.add(0, R.string.multiple_selection, 0, R.string.multiple_selection);
@@ -1080,6 +1067,18 @@ public abstract class Browser extends Fragment implements AbsListView.OnScrollLi
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         menu.setGroupVisible(MENU_HIDE_WATCHED_GROUP, mHideOption);
+        
+        //Draw the Current Selection for Display Mode
+        MenuItem item = menu.findItem(MENU_VIEW_MODE);
+        if (item != null){
+            if (mViewMode == VideoUtils.VIEW_MODE_LIST) {
+                item.setIcon(R.drawable.ic_menu_poster_mode);
+            } else if (mViewMode == VideoUtils.VIEW_MODE_GRID) {
+                item.setIcon(mUseDetailsMode ?  R.drawable.ic_menu_details_mode2 : R.drawable.ic_menu_list_mode2);
+            } else if (mViewMode == VideoUtils.VIEW_MODE_DETAILS) {
+                item.setIcon(R.drawable.ic_menu_list_mode2);
+            }
+        }
     }
 
     @Override
@@ -1091,11 +1090,19 @@ public abstract class Browser extends Fragment implements AbsListView.OnScrollLi
             mHideWatched = !mHideWatched;
             item.setTitle(mHideWatched ? R.string.hide_seen : R.string.show_all);
             mPreferences.edit().putBoolean(VideoPreferencesCommon.KEY_HIDE_WATCHED, mHideWatched).apply();
+        } else if (item.getItemId()==R.string.multiple_selection){
+            enableMultiple(0, false);
+        } else if (item.getItemId() == MENU_VIEW_MODE){
+            if (mViewMode == VideoUtils.VIEW_MODE_LIST) {
+                applySelectedViewMode(VideoUtils.VIEW_MODE_GRID);
+            } else if (mViewMode == VideoUtils.VIEW_MODE_GRID) {
+                applySelectedViewMode(mUseDetailsMode ? VideoUtils.VIEW_MODE_DETAILS : VideoUtils.VIEW_MODE_LIST);
+            } else if (mViewMode == VideoUtils.VIEW_MODE_DETAILS) {
+                applySelectedViewMode(VideoUtils.VIEW_MODE_LIST);
+            }
+            invalidateOptionsMenu(getActivity());
         }
 
-        else if (item.getItemId()==R.string.multiple_selection){
-            enableMultiple(0, false);
-        }
         return super.onOptionsItemSelected(item);
     }
 

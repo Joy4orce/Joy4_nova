@@ -196,18 +196,6 @@ public class BrowserListOfEpisodes extends BrowserWithShowHeader {
         if(mArchosGridView!=null)
             mArchosGridView.clearChoices();
     }
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-
-        if (mBrowserAdapter != null && !mBrowserAdapter.isEmpty()) {
-            mDisplayModeSubmenu.clear();
-            mDisplayModeSubmenu.addSubmenuItem(R.drawable.ic_menu_list_mode2, R.string.view_mode_list, 0);
-            mDisplayModeSubmenu.addSubmenuItem(R.drawable.ic_menu_details_mode2, R.string.view_mode_details, 0);
-            mDisplayModeSubmenu.selectSubmenuItem(mViewMode == VideoUtils.VIEW_MODE_DETAILS
-                                                ? SUBMENU_ITEM_DETAILS_INDEX : SUBMENU_ITEM_LIST_INDEX);
-        }
-    }
 
     @Override
     public void onSubmenuItemSelected(ActionBarSubmenu submenu, int position, long itemId) {
