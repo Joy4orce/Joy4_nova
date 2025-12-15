@@ -108,7 +108,7 @@ public class SurfaceController {
     private VideoFormat mAutoVideoFormat = new VideoFormat(8);
     private int         mSurfaceWidth = 0;
     private int         mSurfaceHeight = 0;
-    
+    public boolean willStretchY;
     private int mEffectMode = VideoEffect.getDefaultMode();
     private int mEffectType = VideoEffect.getDefaultType();
 
@@ -334,7 +334,7 @@ public class SurfaceController {
         //Get the Display aspect ratio, with and without cutouts.
         double dar = (double) dw / (double) dh; // display aspect ratio
         double dcar = (double) dcw / (double) dch; // display aspect ratio without cutout
-
+        willStretchY = (dcar < ar);
         if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: sar={}, ar={}, dar={}, dcar={}", sar, ar, dar, dcar);
 
         //cropW = cropH = 1.0f;
