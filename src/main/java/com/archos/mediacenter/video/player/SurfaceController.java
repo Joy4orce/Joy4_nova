@@ -120,6 +120,7 @@ public class SurfaceController {
     private int mMarginLeft = 0;
     private int mMarginTop = 0;
     private boolean mCutoutBugToasted = false;
+    public boolean mFullScreenWithCutout = false;
 
     public SurfaceController(View rootView) {
         ViewGroup mLp = (ViewGroup)rootView;
@@ -281,7 +282,7 @@ public class SurfaceController {
         mEffectView.setLayoutParams(paramsEffect);
     }
     
-    synchronized private void updateSurface() {
+    synchronized public void updateSurface() {
         if (log.isDebugEnabled()) log.debug("updateSurface");
         // get screen size
         int dw, dh, vw, vh, fmt;
@@ -299,10 +300,23 @@ public class SurfaceController {
             if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: lcd plugged d=({},{})", dw, dh);
         }
 
+        int cutoutLeft = 0;
+        int cutoutTop = 0;
+        int cutoutRight = 0;
+        int cutoutBottom = 0;
+        if (!mFullScreenWithCutout) {
+            cutoutLeft = mCutoutLeft;
+            cutoutTop = mCutoutTop;
+            cutoutRight = mCutoutRight;
+            cutoutBottom = mCutoutBottom;
+        }
+
         // display width and height without cutout
         // When HDMI is plugged, do not apply phone's cutout metrics to external display
-        int dcw = mHdmiPlugged ? dw : (dw - mCutoutLeft - mCutoutRight);
-        int dch = mHdmiPlugged ? dh : (dh - mCutoutTop - mCutoutBottom);
+        //int dcw = mHdmiPlugged ? dw : (dw - (!mFullScreenWithCutout ? mCutoutLeft - mCutoutRight : 0));
+        //int dch = mHdmiPlugged ? dh : (dh - (!mFullScreenWithCutout ? mCutoutTop - mCutoutBottom : 0));
+        int dcw = mHdmiPlugged ? dw : (dw - cutoutLeft - cutoutRight);
+        int dch = mHdmiPlugged ? dh : (dh - cutoutTop - cutoutBottom);
         vw = mVideoWidth;
         vh = mVideoHeight;
 
@@ -355,7 +369,7 @@ public class SurfaceController {
             case VideoFormat.STRETCH_XY:
                 //Height can go over the screen top, but set width.
                 // Now we have a remove black bar in portrait too...
-                if (willStretchY || (mCutoutLeft + mCutoutRight == 0 || dcar < 1)) {
+                if (willStretchY) {
                     //THERE IS NO POSSIBLE WAY TO AVOID THE CUTOUT, AND KEEP ASPECT.
                     //NOT KEEPING ASPECT MAKES THIS FULL_SCREEN.
                     //I HATE THIS CASE!
@@ -364,7 +378,7 @@ public class SurfaceController {
                     //It also works normally in Portrait, since the problem is a landscape only issue
                     //If cutouts are enabled, you cannot stretch Cinema Vertically on Phone.
                     //If I allowed this, the rules would not be respected and Cutout pref would not be honored.
-                    if (mCutoutLeft + mCutoutRight == 0 || dcar < 1)
+                     if (dcar < 1 || mFullScreenWithCutout)
                         dcw = (int) (dch * (ar));
                         //cropW = (float) dcar / (float) ar;        //Cropping won't help you! We need a way to not draw the left and r-ecentre, cutting equal left and right. 
                     else {
@@ -412,8 +426,8 @@ public class SurfaceController {
 
         // margins to avoid cutout
         // When HDMI is plugged, do not apply phone's cutout margins to external display
-        mMarginLeft = mHdmiPlugged ? 0 : (int)((mCutoutLeft - mCutoutRight)/ 2.0f);
-        mMarginTop = mHdmiPlugged ? 0 : (int)((mCutoutTop - mCutoutBottom)/ 2.0f);
+        mMarginLeft = mHdmiPlugged || mFullScreenWithCutout ? 0 : (int)((cutoutLeft - cutoutRight)/ 2.0f);
+        mMarginTop = mHdmiPlugged || mFullScreenWithCutout? 0 : (int)((cutoutTop - cutoutBottom)/ 2.0f);
 
         ViewGroup.LayoutParams lp = mView.getLayoutParams();
         if (lp instanceof ViewGroup.MarginLayoutParams marginParams) {

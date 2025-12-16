@@ -141,6 +141,17 @@
             android:scaleType="fitCenter"
             android:adjustViewBounds="true"
             ads:srcCompat="@drawable/video_forward_selector" />
+        
+        <ImageButton
+            android:layout_width="0dip"
+            android:id="@+id/fullscreen_cutouts"
+            style="@style/PlayerControlButton"
+            android:paddingLeft="@dimen/player_button_padding_small"
+            android:paddingRight="@dimen/player_button_padding_full"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true"
+            android:visibility="gone"
+            ads:srcCompat="@drawable/video_fullscreen_cutout_off" />
 
         <ImageButton
             android:layout_width="0dip"

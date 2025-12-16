@@ -150,6 +150,21 @@
                 android:adjustViewBounds="true"
                 ads:srcCompat="@drawable/video_forward_selector" />
 
+             <ImageButton
+                android:id="@+id/fullscreen_cutouts"
+                style="@style/PlayerControlButton"
+                android:layout_marginLeft="0dip"
+                android:layout_toRightOf="@id/forward"
+                android:layout_width="58dp"
+                android:layout_height="58dp"
+                android:paddingBottom="10dip"
+                android:paddingLeft="5dip"
+                android:paddingRight="0dip"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"
+                android:visibility="gone"
+                ads:srcCompat="@drawable/video_fullscreen_cutout_off" />
+
             <ImageButton
                 android:id="@+id/format"
                 style="@style/PlayerControlButton"
@@ -158,8 +173,8 @@
                 android:layout_width="58dp"
                 android:layout_height="58dp"
                 android:paddingBottom="10dip"
-                android:paddingLeft="10dip"
-                android:paddingRight="0dip"
+                android:paddingLeft="5dip"
+                android:paddingRight="2dip"
                 android:scaleType="fitCenter"
                 android:adjustViewBounds="true"
                 ads:srcCompat="@drawable/video_format_0" />
