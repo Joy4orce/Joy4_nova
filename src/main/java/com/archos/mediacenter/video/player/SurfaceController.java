@@ -285,58 +285,57 @@ public class SurfaceController {
     synchronized public void updateSurface() {
         if (log.isDebugEnabled()) log.debug("updateSurface");
         // get screen size
-        int dw, dh, vw, vh, fmt;
+        int dw, dh, vw, vh, fmt, dcw, dch;
         float cropW = 1.0f;
         float cropH = 1.0f;
+        
+        //Get the Video Size
+        vw = mVideoWidth;
+        vh = mVideoHeight;
+
+        // calculate aspect ratio
+        double sar = (double) vw / (double) vh; // sar = source aspect ratio (video)
+        
+        //Get the Pixel Aspect Ratio
         double par = mVideoAspect;
 
-        if (mHdmiPlugged) {
-            dw = mHdmiWidth;
-            dh = mHdmiHeight;
-            if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: hdmi plugged d=({},{})", dw, dh);
-        } else {
-            dw = mLcdWidth;
-            dh = mLcdHeight;
-            if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: lcd plugged d=({},{})", dw, dh);
-        }
-
-        int cutoutLeft = 0;
-        int cutoutTop = 0;
-        int cutoutRight = 0;
-        int cutoutBottom = 0;
-        if (!mFullScreenWithCutout) {
+        //Get the applied cutout size, since it can be changed on the fly now.
+        int cutoutLeft, cutoutTop, cutoutRight, cutoutBottom = 0;
+        if (mFullScreenWithCutout) 
+            cutoutLeft = cutoutTop = cutoutRight = mCutoutBottom = 0;
+        else {
             cutoutLeft = mCutoutLeft;
             cutoutTop = mCutoutTop;
             cutoutRight = mCutoutRight;
             cutoutBottom = mCutoutBottom;
-        }
+        } 
 
-        // display width and height without cutout
-        // When HDMI is plugged, do not apply phone's cutout metrics to external display
-        //int dcw = mHdmiPlugged ? dw : (dw - (!mFullScreenWithCutout ? mCutoutLeft - mCutoutRight : 0));
-        //int dch = mHdmiPlugged ? dh : (dh - (!mFullScreenWithCutout ? mCutoutTop - mCutoutBottom : 0));
-        int dcw = mHdmiPlugged ? dw : (dw - cutoutLeft - cutoutRight);
-        int dch = mHdmiPlugged ? dh : (dh - cutoutTop - cutoutBottom);
-        vw = mVideoWidth;
-        vh = mVideoHeight;
+        //Get the Display size, with and wihtout cutout.
+        if (mHdmiPlugged) {
+            dw = mHdmiWidth;
+            dh = mHdmiHeight;
+            dcw = dw;
+            dch = dh;
+        } else {
+            dw = mLcdWidth;
+            dh = mLcdHeight;
+            dcw =  dw - cutoutLeft - cutoutRight;
+            dch =  dh - cutoutTop - cutoutBottom;
+        }
 
         if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: v=({},{})", vw, vh);
 
+        //Get the Display aspect ratio, with and without cutouts.
+        double dar = (double) dw / (double) dh;     // display aspect ratio
+        double dcar = (double) dcw / (double) dch;  // display aspect ratio without cutout
+        
+        //Early exit in case of error or nothing to do (yet)
         if (mMediaPlayer == null) log.warn("updateSurface: mMediaPlayer is null!");
         if (vw <= 0 || vh <= 0 || dcw <= 0 || dch <= 0 || mMediaPlayer == null)
             return;
-        fmt = getVideoFormat().getFmt();
-
-        //if (mEffectEnable) {
-        //    fmt = VideoFormat.STRETCH_XY; //only STRETCH_XY FORMAT is currently supported in OpenGL rendering
-        //}
-
-        // calculate aspect ratio
-        double sar = (double) vw / (double) vh; // sar = source aspect ratio (video)
-
-        //OK, so it was Married with Children having bad sources, not NoVas fault!
         
         //Do the Aspect Ratio Override if required.
+        fmt = getVideoFormat().getFmt();
         double ar = switch (fmt) {
             case VideoFormat.FORCE43 -> 4f / 3f;
             case VideoFormat.FORCE169 -> 16f / 9f;
@@ -345,15 +344,12 @@ public class SurfaceController {
             default -> par * sar;
         };
 
-        //Use the aspect ratio from the decoder if we have one, otherwise calculate one ourselves.
-        
-        //Get the Display aspect ratio, with and without cutouts.
-        double dar = (double) dw / (double) dh; // display aspect ratio
-        double dcar = (double) dcw / (double) dch; // display aspect ratio without cutout
-        willStretchY = (dcar < ar);
+        //Is the STRETCH_XY doing Y? 
+        willStretchY = (dcar < ar) ;
+
         if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: sar={}, ar={}, dar={}, dcar={}", sar, ar, dar, dcar);
 
-        //cropW = cropH = 1.0f;
+        //Apply any Video Format Effects, stretch to the right size.
         switch (fmt) {
             case VideoFormat.ORIGINAL, VideoFormat.FORCE43, VideoFormat.FORCE169, VideoFormat.FORCE185, VideoFormat.FORCE239:
                 if (dcar < ar) {
@@ -362,6 +358,7 @@ public class SurfaceController {
                     if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: VideoFormat.ORIGINAL dcar<ar dch={}", dch);
                 } else {
                     //16:9 movie on 4:3 screen
+                    cutoutLeft = cutoutTop = cutoutRight = mCutoutBottom = 0;
                     dcw = (int) (dch * ar);
                     if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: VideoFormat.ORIGINAL dcar>=ar dcw={}", dcw);
                 }
@@ -388,6 +385,8 @@ public class SurfaceController {
                     }
                     
                 } else
+                    //This stops the Fullscreen Video with Cutouts button from moving Video side to side
+                    //It doesnt take up the whole width, so we will just set cutouts to 0 and have same postition
                     dch = (int) (dcw / (ar));
                 break;
             case VideoFormat.FULL_SCREEN: { // display on full screen resolution stretched: keep dcw and dch
@@ -427,7 +426,7 @@ public class SurfaceController {
         // margins to avoid cutout
         // When HDMI is plugged, do not apply phone's cutout margins to external display
         mMarginLeft = mHdmiPlugged || mFullScreenWithCutout ? 0 : (int)((cutoutLeft - cutoutRight)/ 2.0f);
-        mMarginTop = mHdmiPlugged || mFullScreenWithCutout? 0 : (int)((cutoutTop - cutoutBottom)/ 2.0f);
+        mMarginTop = mHdmiPlugged || mFullScreenWithCutout ? 0 : (int)((cutoutTop - cutoutBottom)/ 2.0f);
 
         ViewGroup.LayoutParams lp = mView.getLayoutParams();
         if (lp instanceof ViewGroup.MarginLayoutParams marginParams) {
