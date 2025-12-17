@@ -1126,7 +1126,24 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
                     show(FLAG_SIDE_CONTROL_BAR, SHOW_TIMEOUT);
                     break;
                 case MSG_SWITCH_FULLSCREEN_WITH_CUTOUT:
-                    mSurfaceController.mFullScreenWithCutout = !mSurfaceController.mFullScreenWithCutout;
+                    if (!mSurfaceController.mFullScreenWithCutout && mSurfaceController.mCutBothSidesX) {
+                        // Go to Fullscreen with Cutout
+                        mSurfaceController.mFullScreenWithCutout = true;
+                        mSurfaceController.mCutBothSidesX = true;
+                    } else if (mSurfaceController.mFullScreenWithCutout && mSurfaceController.mCutBothSidesX) {
+                        // Go to Fullscreen with Cutouts off 
+                        mSurfaceController.mFullScreenWithCutout = false;
+                        mSurfaceController.mCutBothSidesX = false;
+                    } else if (!mSurfaceController.mFullScreenWithCutout && !mSurfaceController.mCutBothSidesX) {
+                        // Go to Fullscreen with Cutouts off (euqal size)
+                        mSurfaceController.mFullScreenWithCutout = false;
+                        mSurfaceController.mCutBothSidesX = true;
+                     } else {
+                        // Invalid combo fallback → reset to normal
+                        mSurfaceController.mFullScreenWithCutout = false;
+                        mSurfaceController.mCutBothSidesX = false;
+                    }
+
                     setFullscreenWithCutoutButtonIcon(mSurfaceController.mFullScreenWithCutout);
                     mSurfaceController.updateSurface();
                     break;
@@ -2715,6 +2732,6 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
     
     public void setFullscreenWithCutoutButtonIcon(boolean isFullscreenWithCutout) {
         if (mFullscreenWithCutoutButton != null)
-            mFullscreenWithCutoutButton.setImageResource(isFullscreenWithCutout ? R.drawable.video_fullscreen_cutout_on : R.drawable.video_fullscreen_cutout_off);
+            mFullscreenWithCutoutButton.setImageResource(isFullscreenWithCutout ? R.drawable.video_fullscreen_cutout_on : mSurfaceController.mCutBothSidesX ? R.drawable.video_fullscreen_cutout_off_equal : R.drawable.video_fullscreen_cutout_off);
     }
 }
