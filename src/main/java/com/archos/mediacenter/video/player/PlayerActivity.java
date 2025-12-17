@@ -619,6 +619,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         mSubtitleOutlineDefault = false;
         mSurfaceController = new SurfaceController(mRootView);
         mSurfaceController.mFullScreenWithCutout = mFullScreenWithCutout;
+        mSurfaceController.mCutBothSidesX = cutBothSidesX;
 
         mSurfaceController.setListener(mSurfaceListener);
 

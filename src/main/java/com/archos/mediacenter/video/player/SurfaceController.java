@@ -121,6 +121,7 @@ public class SurfaceController {
     private int mMarginTop = 0;
     private boolean mCutoutBugToasted = false;
     public boolean mFullScreenWithCutout = false;
+    public boolean mCutBothSidesX = false;
 
     public SurfaceController(View rootView) {
         ViewGroup mLp = (ViewGroup)rootView;
@@ -308,6 +309,15 @@ public class SurfaceController {
             cutoutTop = mCutoutTop;
             cutoutRight = mCutoutRight;
             cutoutBottom = mCutoutBottom;
+
+            //If we have the Cut both sides option on, apply it now.
+            //This doesnt need to be done on Y, X is where the screen rounding kills screen symmetry
+            if (mCutBothSidesX)  {
+                if (cutoutLeft > 0 && cutoutRight == 0)
+                    cutoutRight = cutoutLeft;
+                else if (cutoutRight > 0 && cutoutLeft == 0)
+                    cutoutLeft = cutoutRight;
+            }
         } 
 
         //Get the Display size, with and wihtout cutout.

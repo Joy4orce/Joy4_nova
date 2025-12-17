@@ -59,6 +59,13 @@
             app:iconSpaceReserved="false" />
         <CheckBoxPreference
             android:defaultValue="false"
+            android:key="enable_cutout_both_sidesx"
+            android:persistent="true"
+            android:summary="@string/preference_enable_cutout_both_sidesx_summary"
+            android:title="@string/preference_enable_cutout_both_sidesx"
+            app:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="false"
             android:key="allow_3rd_party_player"
             android:persistent="true"
             android:summary="@string/preferences_allow_3rd_party_player_summary"
