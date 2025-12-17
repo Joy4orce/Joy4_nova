@@ -295,8 +295,11 @@ android {
         }
     }
     lint {
-        abortOnError = false
-        checkReleaseBuilds = false
+        abortOnError false // Set to false to only fail on fatal issues
+        disable 'all'
+        enable 'NewApi'
+        fatal 'NewApi'
+        warning 'MissingSuperCall' // Downgrade MissingSuperCall to a warning
         disable 'MissingTranslation'
     }
 
@@ -309,6 +312,8 @@ android {
             outputFileName = outputFileName.replace("-noamazon-", "-")
                     .replace("-manageexternalstorage-", "-")
             variant.getAssembleProvider().configure() {
+                // Run lint during assembly to ensure the build fails on errors like NewApi
+                it.dependsOn("lint" + variant.name.capitalize())
                 it.doLast {
                     println("generated: " + outputFileName + " (" + versionName + ", " + versionCode + ")");
                 }
