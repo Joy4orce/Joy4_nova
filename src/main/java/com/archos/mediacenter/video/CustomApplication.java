@@ -185,6 +185,114 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
 
     private static volatile boolean isForeground = false;
 
+    private static boolean isHdmiAudioDeviceType(int type) {
+        if (type == AudioDeviceInfo.TYPE_HDMI) return true;
+        // TYPE_HDMI_ARC introduced in API 23.
+        if (type == AudioDeviceInfo.TYPE_HDMI_ARC) return true;
+        // TYPE_HDMI_EARC introduced in API 31.
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && type == AudioDeviceInfo.TYPE_HDMI_EARC;
+    }
+
+    private static int getDeviceMaxChannelCount(AudioDeviceInfo device) {
+        if (device == null) return 0;
+        try {
+            int[] counts = device.getChannelCounts();
+            int max = 0;
+            if (counts != null) {
+                for (int c : counts) {
+                    if (c > max) max = c;
+                }
+            }
+            return max;
+        } catch (Exception ignored) {
+            return 0;
+        }
+    }
+
+    /**
+     * Refresh HDMI/SPDIF passthrough capabilities by scanning current audio output devices.
+     * This is more reliable than relying on {@link AudioManager#ACTION_HDMI_AUDIO_PLUG} alone,
+     * especially on Android TV setups using ARC/eARC where the plug broadcast may not reflect
+     * the actual audio route.
+     */
+    private void refreshAudioOutputCapabilities(String reason) {
+        if (Build.VERSION.SDK_INT < 23 || mAudioManager == null) return;
+
+        AudioDeviceInfo[] devices = mAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
+        boolean foundHdmi = false;
+        boolean foundSpdif = false;
+
+        long bestHdmiFlags = 0;
+        int bestHdmiChannels = 0;
+        int bestHdmiEncodingCount = 0;
+        int bestHdmiType = -1;
+
+        long bestSpdifFlags = 0;
+        int bestSpdifEncodingCount = 0;
+
+        for (AudioDeviceInfo device : devices) {
+            int type = device.getType();
+            int[] encodings = device.getEncodings();
+            long flags = getEncodingFlags(encodings);
+            int maxChannels = getDeviceMaxChannelCount(device);
+
+            if (log != null && log.isDebugEnabled()) {
+                log.debug("refreshAudioOutputCapabilities({}): device type={} name={} maxChannels={} encodings={}",
+                        reason, type, device.getProductName(), maxChannels, getSupportedAudioCodecs(flags));
+            }
+
+            if (isHdmiAudioDeviceType(type)) {
+                foundHdmi = true;
+                int encodingCount = encodings != null ? encodings.length : 0;
+
+                // Pick the "best" HDMI-like device (typically ARC/eARC receiver vs TV speakers).
+                // Prefer higher max channel count, then more advertised encodings.
+                if (maxChannels > bestHdmiChannels
+                        || (maxChannels == bestHdmiChannels && encodingCount > bestHdmiEncodingCount)) {
+                    bestHdmiChannels = maxChannels;
+                    bestHdmiEncodingCount = encodingCount;
+                    bestHdmiFlags = flags;
+                    bestHdmiType = type;
+                    hdmiAudioEncodingsFlags = encodings;
+                }
+            } else if (type == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
+                foundSpdif = true;
+                int encodingCount = encodings != null ? encodings.length : 0;
+                if (encodingCount > bestSpdifEncodingCount) {
+                    bestSpdifEncodingCount = encodingCount;
+                    bestSpdifFlags = flags;
+                    spdifAudioEncodingsFlags = encodings;
+                }
+            }
+        }
+
+        hasHdmi = foundHdmi;
+        hdmiAudioEncodingFlag = foundHdmi ? bestHdmiFlags : 0;
+        if (!foundHdmi) {
+            hdmiAudioEncodingsFlags = null;
+            // Avoid carrying stale values when HDMI-like route disappears.
+            maxAudioChannelCount = 0;
+        }
+
+        hasSpdif = foundSpdif;
+        spdifAudioEncodingFlag = foundSpdif ? bestSpdifFlags : 0;
+        if (!foundSpdif) {
+            spdifAudioEncodingsFlags = null;
+        }
+
+        if (foundHdmi && bestHdmiChannels > 0) {
+            maxAudioChannelCount = bestHdmiChannels;
+        }
+
+        updateIecEncapsulationCapability();
+        updateDirectPcmMultichannelCapability();
+
+        if (log != null) {
+            log.info("refreshAudioOutputCapabilities({}): hasHdmi={} (type={}) hasSpdif={} maxAudioChannelCount={} hdmiCaps={}",
+                    reason, hasHdmi, bestHdmiType, hasSpdif, maxAudioChannelCount, getSupportedAudioCodecs(hdmiAudioEncodingFlag));
+        }
+    }
+
     public static long getHdmiAudioCodecsFlag() {
         return hdmiAudioEncodingFlag;
     }
@@ -510,26 +618,8 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
 
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         if (Build.VERSION.SDK_INT >= 23) {
-            // Detect initial audio devices
-            AudioDeviceInfo[] devices = mAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
-            for (AudioDeviceInfo device : devices) {
-                if (log.isDebugEnabled()) log.debug("onCreate: initial audio device {} {} capabilities {}", device.getType(), device.getProductName(), getSupportedAudioCodecs(getEncodingFlags(device.getEncodings())));
-                if (device.getType() == AudioDeviceInfo.TYPE_HDMI) {
-                    hasHdmi = true;
-                    hdmiAudioEncodingsFlags = device.getEncodings();
-                    hdmiAudioEncodingFlag = getEncodingFlags(hdmiAudioEncodingsFlags);
-                    updateIecEncapsulationCapability();
-                    updateDirectPcmMultichannelCapability();
-                    if (log.isDebugEnabled()) log.debug("onCreate: hdmi initial audio device");
-                }
-                if (device.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
-                    hasSpdif = true;
-                    spdifAudioEncodingsFlags = device.getEncodings();
-                    spdifAudioEncodingFlag = getEncodingFlags(spdifAudioEncodingsFlags);
-                    if (log.isDebugEnabled()) log.debug("onCreate: spdif initial audio device");
-                }
-                break;
-            }
+            // Detect initial audio devices (include HDMI ARC/eARC)
+            refreshAudioOutputCapabilities("onCreate");
         } else {
             // only set hasSpdif since hasHdmi should be caught by the broadcast receiver and be valid for lower APIs
             hasSpdif = true;
@@ -637,40 +727,20 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                 @Override
                 public void onAudioDevicesAdded(AudioDeviceInfo[] addedDevices) {
                     for (AudioDeviceInfo device : addedDevices) {
-                        if (device.getType() == AudioDeviceInfo.TYPE_HDMI) {
-                            hasHdmi = true;
-                            hdmiAudioEncodingsFlags = device.getEncodings();
-                            hdmiAudioEncodingFlag = getEncodingFlags(hdmiAudioEncodingsFlags);
-                            updateIecEncapsulationCapability();
-                            updateDirectPcmMultichannelCapability();
-                            if (log.isDebugEnabled()) log.debug("registerAudioDeviceCallback: hdmi detected capabilities {}", getSupportedAudioCodecs(hdmiAudioEncodingFlag));
+                        if (log.isDebugEnabled()) {
+                            log.debug("registerAudioDeviceCallback:onAudioDevicesAdded: type={} name={}", device.getType(), device.getProductName());
                         }
-                        if (device.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
-                            hasSpdif = true;
-                            spdifAudioEncodingsFlags = device.getEncodings();
-                            spdifAudioEncodingFlag = getEncodingFlags(spdifAudioEncodingsFlags);
-                            if (log.isDebugEnabled()) log.debug("registerAudioDeviceCallback: spdif detected capabilities {}", getSupportedAudioCodecs(spdifAudioEncodingFlag));
-                        }
-                        break;
                     }
+                    refreshAudioOutputCapabilities("devicesAdded");
                 }
                 @Override
                 public void onAudioDevicesRemoved(AudioDeviceInfo[] removedDevices) {
                     for (AudioDeviceInfo removedDevice : removedDevices) {
-                        if (removedDevice.getType() == AudioDeviceInfo.TYPE_HDMI) {
-                            hasHdmi = false;
-                            hdmiAudioEncodingFlag = 0;
-                            hdmiAudioEncodingsFlags = null;
-                            isIecEncapsulationCapable = false;  // Clear IEC capability when HDMI removed
-                            isDirectPcmMultichannelCapable = false;
+                        if (log.isDebugEnabled()) {
+                            log.debug("registerAudioDeviceCallback:onAudioDevicesRemoved: type={} name={}", removedDevice.getType(), removedDevice.getProductName());
                         }
-                        if (removedDevice.getType() == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
-                            hasSpdif = false;
-                            spdifAudioEncodingFlag = 0;
-                            spdifAudioEncodingsFlags = null;
-                        }
-                        break;
                     }
+                    refreshAudioOutputCapabilities("devicesRemoved");
                 }
             };
             mAudioManager.registerAudioDeviceCallback(mAudioDeviceCallback, null);
@@ -694,10 +764,26 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             if (action == null)
                 return;
             if (action.equalsIgnoreCase(AudioManager.ACTION_HDMI_AUDIO_PLUG)) {
-                hasHdmi = intent.getIntExtra(AudioManager.EXTRA_AUDIO_PLUG_STATE, 0) == 1;
-                hdmiAudioEncodingFlag = !hasHdmi ? 0 : getEncodingFlags(intent.getIntArrayExtra(AudioManager.EXTRA_ENCODINGS));
-                updateIecEncapsulationCapability();
-                updateDirectPcmMultichannelCapability();
+                final boolean isPlugged = intent.getIntExtra(AudioManager.EXTRA_AUDIO_PLUG_STATE, 0) == 1;
+                // On Android TV + ARC/eARC, the HDMI plug broadcast may not represent the active audio route.
+                // Prefer scanning AudioManager output devices (which include HDMI_ARC/HDMI_EARC).
+                if (Build.VERSION.SDK_INT >= 23 && mAudioManager != null) {
+                    refreshAudioOutputCapabilities("ACTION_HDMI_AUDIO_PLUG");
+                    // If system reports plugged but device scan didn't find HDMI, fall back to intent values.
+                    if (isPlugged && !hasHdmi) {
+                        hasHdmi = true;
+                        hdmiAudioEncodingsFlags = intent.getIntArrayExtra(AudioManager.EXTRA_ENCODINGS);
+                        hdmiAudioEncodingFlag = getEncodingFlags(hdmiAudioEncodingsFlags);
+                        updateIecEncapsulationCapability();
+                        updateDirectPcmMultichannelCapability();
+                    }
+                } else {
+                    hasHdmi = isPlugged;
+                    hdmiAudioEncodingsFlags = intent.getIntArrayExtra(AudioManager.EXTRA_ENCODINGS);
+                    hdmiAudioEncodingFlag = !hasHdmi ? 0 : getEncodingFlags(hdmiAudioEncodingsFlags);
+                    updateIecEncapsulationCapability();
+                    updateDirectPcmMultichannelCapability();
+                }
                 final Integer isAudioPlugged = intent.getIntExtra(AudioManager.EXTRA_AUDIO_PLUG_STATE, 0);
                 if (isAudioPlugged != null) {
                     // maxAudioChannelCount not exploited for now
