@@ -52,7 +52,6 @@ public class ParseUtils {
     // matches "[space or punctuation/brackets etc]year", year is group 1
     private static final Pattern YEAR_PATTERN = Pattern.compile("(.*)[\\s\\p{Punct}]((?:19|20)\\d{2})(?!\\d)");
     private static final Pattern YEAR_PATTERN_END_STRING = Pattern.compile("(.*)[\\s\\p{Punct}]((?:19|20)\\d{2})(?!\\d)$");
-    private static final Pattern YEAR_PATTERN_START_STRING = Pattern.compile("^((?:19|20)\\d{2})[\\s\\p{Punct}](.*)");
     private static final Pattern YEAR_ANYWHERE_PATTERN = Pattern.compile("\\b(\\d{4})\\b");
     private static final Pattern PARENTHESIS_YEAR_PATTERN = Pattern.compile("(.*)[\\s\\p{Punct}]+\\(((?:19|20)\\d{2})\\)");
     public static final int MIN_YEAR = 1900;
@@ -137,49 +136,40 @@ public class ParseUtils {
         return twoPatternExtractor2(input, YEAR_PATTERN_END_STRING);
     }
 
-    public static Pair<String, String> yearExtractorStartString(String input) {
-        if (log.isDebugEnabled()) log.debug("yearExtractorStartString input: {}", input);
-        Matcher matcher = YEAR_PATTERN_START_STRING.matcher(input);
-        if (matcher.find()) {
-            String year = matcher.group(1);
-            String name = matcher.group(2);
-            // Check that remaining string is larger than 2 chars to avoid false matches
-            if (name.length() > 2) {
-                if (log.isDebugEnabled()) log.debug("yearExtractorStartString found year: {}, name: {}", year, name);
-                return new Pair<>(name, year);
-            }
-        }
-        return new Pair<>(input, null);
-    }
-
     public static Pair<String, String> extractYearAnywhere(String input, int currentYear) {
         if (log.isDebugEnabled()) log.debug("extractYearAnywhere input: {}", input);
         String reversed = new StringBuilder(input).reverse().toString();
         Matcher matcher = YEAR_ANYWHERE_PATTERN.matcher(reversed);
         while (matcher.find()) {
             String candidateYear = new StringBuilder(matcher.group(1)).reverse().toString();
-            if (isPlausibleYear(candidateYear, input.substring(0, Math.max(0, input.length() - matcher.start() - 4)), currentYear)) {
-                int cutIndex = input.length() - matcher.start() - 4;
-                if (cutIndex >= 2) {
-                    String name = input.substring(0, cutIndex).trim();
+            String possibleName = input.substring(0, Math.max(0, input.length() - matcher.start() - 4));
+            
+            if (isValidYear(candidateYear, currentYear)) {
+                if (possibleName.trim().length() >= 2) {
+                    String name = possibleName.trim();
                     if (log.isDebugEnabled()) log.debug("extractYearAnywhere found year: {}, name: {}", candidateYear, name);
                     return new Pair<>(name, candidateYear);
                 }
+                // Valid year but invalid name -> break per Leeroy's logic
                 break;
             }
         }
         return new Pair<>(input, null);
     }
 
-    public static boolean isPlausibleYear(String year, String remainingName, int currentYear) {
+    public static boolean isValidYear(String year, int currentYear) {
         if (year == null || year.isEmpty()) return false;
-        if (remainingName == null || remainingName.trim().length() < 2) return false;
         try {
             int parsedYear = Integer.parseInt(year);
             return parsedYear >= MIN_YEAR && parsedYear <= currentYear;
         } catch (NumberFormatException e) {
             return false;
         }
+    }
+
+    public static boolean isPlausibleYear(String year, String remainingName, int currentYear) {
+        if (remainingName == null || remainingName.trim().length() < 2) return false;
+        return isValidYear(year, currentYear);
     }
 
     // matches "[space or punctuation/brackets etc](year)", year is group 1

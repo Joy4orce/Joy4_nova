@@ -35,7 +35,6 @@ import static com.archos.mediascraper.preprocess.ParseUtils.removeAfterEmptyPare
 import static com.archos.mediascraper.preprocess.ParseUtils.extractYearAnywhere;
 import static com.archos.mediascraper.preprocess.ParseUtils.yearExtractor;
 import static com.archos.mediascraper.preprocess.ParseUtils.yearExtractorEndString;
-import static com.archos.mediascraper.preprocess.ParseUtils.yearExtractorStartString;
 
 /**
  * Matches everything. Tries to strip away all junk, not very reliable.
@@ -108,16 +107,6 @@ class MovieDefaultMatcher implements InputMatcher {
         // Handles cases like "Movie.Title.2023" where year is at end
         if (year == null || year.isEmpty()) {
             nameYear = yearExtractorEndString(name);
-            if (isPlausibleYear(nameYear.second, nameYear.first, currentYear)) {
-                name = nameYear.first;
-                year = nameYear.second;
-            }
-        }
-
-        // Fallback: if still no year found, try yearExtractorStartString
-        // Handles edge cases like "2001.A.Space.Odyssey" where year is at start
-        if (year == null || year.isEmpty()) {
-            nameYear = yearExtractorStartString(name);
             if (isPlausibleYear(nameYear.second, nameYear.first, currentYear)) {
                 name = nameYear.first;
                 year = nameYear.second;
