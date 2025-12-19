@@ -179,9 +179,17 @@ public class CodecDiscovery {
 		String hdrMode = Player.getHdr(context);
 		technicalInfo += context.getResources().getString(R.string.supported_refresh_rates) + " " + CustomApplication.getSupportedRefreshRates() + " → " + Player.getRefreshRate() + " / " + Player.getFps();
 		technicalInfo += "\n" + context.getResources().getString(R.string.hdr_capability) + " " + getHdrScreenCapabilities(context) + ( hdrMode.isEmpty() ? "" : " → " + hdrMode);
-		String supportedAudioCodecs = CustomApplication.getSupportedAudioCodecs();
-		if (!supportedAudioCodecs.isEmpty())
-			technicalInfo += "\n" + context.getResources().getString(R.string.hdmi_audio_capabilities) + " " + supportedAudioCodecs;
+
+		String hdmiAudioCodecs = CustomApplication.getSupportedAudioCodecs(CustomApplication.getHdmiOnlyAudioCodecsFlag());
+		if (!hdmiAudioCodecs.isEmpty())
+			technicalInfo += "\n" + context.getResources().getString(R.string.hdmi_audio_capabilities) + " " + hdmiAudioCodecs;
+
+		if (CustomApplication.isSpdifConnected()) {
+			String spdifAudioCodecs = CustomApplication.getSupportedAudioCodecs(CustomApplication.getSpdifOnlyAudioCodecsFlag());
+			if (!spdifAudioCodecs.isEmpty())
+				technicalInfo += "\n" + context.getResources().getString(R.string.spdif_audio_capabilities) + " " + spdifAudioCodecs;
+		}
+
 		int maxAudioChannelCount = CustomApplication.getMaxAudioChannelCount();
 		if (maxAudioChannelCount > 0)
 			technicalInfo += "\n" + context.getResources().getString(R.string.max_audio_channels) + " " + maxAudioChannelCount;

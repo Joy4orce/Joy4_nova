@@ -63,7 +63,10 @@
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:textColor="#ffffff"
-                android:textSize="@dimen/tv_menu_small_font_size"
+                card_view:autoSizeTextType="uniform"
+                card_view:autoSizeMinTextSize="6sp"
+                card_view:autoSizeMaxTextSize="@dimen/tv_menu_font_size"
+                card_view:autoSizeStepGranularity="1sp"
                 android:focusable="false"
                 android:visibility="gone" />
 
