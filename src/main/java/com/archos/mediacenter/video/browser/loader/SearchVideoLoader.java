@@ -23,10 +23,11 @@ public class SearchVideoLoader extends VideoLoader {
     // search based on scraper title and file title
     private static final String SELECTION = VideoStore.Video.VideoColumns.SCRAPER_TITLE + " LIKE ? OR "
             + VideoStore.MediaColumns.TITLE + " LIKE ? OR "
-            + VideoStore.Video.VideoColumns.SCRAPER_E_NAME + " LIKE ?";
+            + VideoStore.Video.VideoColumns.SCRAPER_E_NAME + " LIKE ? ";
 
     private static final String DEFAULT_QUERY = "";
-    private static final String DEFAULT_SORT = "name COLLATE LOCALIZED ASC,"
+    private static final String DEFAULT_SORT = "CASE WHEN " + VideoStore.Video.VideoColumns.SCRAPER_TITLE + " LIKE ? THEN 0 WHEN " + VideoStore.MediaColumns.TITLE + " LIKE ? THEN 0 ELSE 1 END"
+            + ", CASE WHEN " + VideoStore.Video.VideoColumns.SCRAPER_M_IMDB_ID + " > 0 THEN 0 ELSE 1 END, name COLLATE LOCALIZED ASC,"
             + VideoStore.Video.VideoColumns.SCRAPER_E_SEASON + " ASC ,"
             + VideoStore.Video.VideoColumns.SCRAPER_E_EPISODE + " ASC";
 
@@ -61,7 +62,7 @@ public class SearchVideoLoader extends VideoLoader {
 
     @Override
     public String[] getSelectionArgs() {
-        return new String[] { "%" + mQuery + "%", "%" + mQuery + "%", "%" + mQuery + "%" };
+        return new String[] { '%'+mQuery+'%', '%'+mQuery+'%', '%'+mQuery+'%',mQuery +"%", mQuery+"%"};
     }
 
 }
