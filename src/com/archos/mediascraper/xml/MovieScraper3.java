@@ -27,6 +27,7 @@ import com.archos.mediascraper.ScrapeStatus;
 import com.archos.mediascraper.Scraper;
 import com.archos.mediascraper.ScraperCache;
 import com.archos.mediascraper.SearchResult;
+import com.archos.mediascraper.TagsFactory;
 import com.archos.mediascraper.preprocess.MovieSearchInfo;
 import com.archos.mediascraper.preprocess.SearchInfo;
 import com.archos.mediascraper.themoviedb3.CollectionInfo;
@@ -39,6 +40,7 @@ import com.archos.mediascraper.themoviedb3.MovieIdResult;
 import com.archos.mediascraper.themoviedb3.MyTmdb;
 import com.archos.mediascraper.themoviedb3.SearchMovie2;
 import com.archos.mediascraper.themoviedb3.SearchMovieResult;
+
 import com.uwetrottmann.tmdb2.services.CollectionsService;
 import com.uwetrottmann.tmdb2.services.MoviesService;
 import com.uwetrottmann.tmdb2.services.SearchService;
@@ -139,10 +141,19 @@ public class MovieScraper3 extends BaseScraper2 {
 
         String reversed = new StringBuilder(searchQuery).reverse().toString();
 
+        //Check the Database for this Movie, we may have scraped it already on a different URI.
+        SearchMovieResult searchResult = MovieTags.getMovieResultIfAlreadyKnown(mContext, searchQuery, searchInfo.getYear(), searchInfo.getOriginalUri());
+        if (searchResult != null) {
+            for (SearchResult result : searchResult.result) {
+                result.setScraper(this);
+                result.setFile(searchInfo.getFile());
+            }
+            return new ScrapeSearchResult(searchResult.result, true, searchResult.status, searchResult.reason);
+        }
+
         //SEARCH TMDB FOR THE MOVIE!
         //If the Query is 5 words or more, and for as long as it is, remove a word
         //BUT! Only remove and try 3 times (Aussie Logic, backwards as fuck but works!)
-        SearchMovieResult searchResult = null;
         for (int i = 0; i < (searchInfo.aggressiveScan ? 4 : 1); i++ ){
             searchResult = SearchMovie2.search(searchQuery, language, searchInfo.getYear(), maxItems, getSearchService(), adultScrape);
             //Check result and try again if we need to.
@@ -181,6 +192,12 @@ public class MovieScraper3 extends BaseScraper2 {
 
         long movieId = result.getId();
         Uri searchFile = result.getFile();
+
+        //If we got this result from the database, grab the tags from there and return them instead of going to TMDB.
+        if (result.fromDB){
+            MovieTags tag = TagsFactory.buildMovieTags(mContext, movieId);
+            return new ScrapeDetailResult(tag, true, null, ScrapeStatus.OKAY, null);
+        }
 
         // get base info
         MovieIdResult search = MovieId2.getBaseInfo(movieId, language, getMoviesService(), mContext);
