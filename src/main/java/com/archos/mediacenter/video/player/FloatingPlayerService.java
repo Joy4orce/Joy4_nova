@@ -425,16 +425,25 @@ public class FloatingPlayerService extends Service implements PlayerService.Play
                                     mPlayerController.setVisibility(View.GONE);
                                     float newDist = spacing(event);
                                     if (newDist > 10f) {
+                                        //Get display width, we cant go over.
+                                        Display display = mWindowManager.getDefaultDisplay();
+                                        Point point = new Point();
+                                        display.getRealSize(point);
+
+                                        //We start at our minimum size.
                                         int width = (int) (initialWidth + (newDist - oldDist));
-                                        int minWidth = (int) dipToPixels(MIN_WIDTH);
-                                        if (width < minWidth)
-                                            width = minWidth;
+                                        int maxWidth = point.x;
+                                        if (width < mFloatingPlayerSize)
+                                            width =  mFloatingPlayerSize;
+                                        else if (width > maxWidth)
+                                            width = maxWidth;
+
+                                        //Update width.
                                         mParamsF.width = width;
                                         mParamsF.height = getHeight(width);
                                         mSubtitleManager.setScreenSize(mParamsF.width, mParamsF.height);
                                         mWindowManager.updateViewLayout(v, mParamsF);
                                         updateSubsSize();
-
                                     }
 
                                 }
@@ -512,7 +521,7 @@ public class FloatingPlayerService extends Service implements PlayerService.Play
 
         int width, height;
 
-        width = (int) dipToPixels(mFloatingPlayerSize);;
+        width = mFloatingPlayerSize;;
 
         height = getHeight(width);
         paramsF.width = width;

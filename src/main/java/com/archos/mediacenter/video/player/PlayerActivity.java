@@ -1178,12 +1178,13 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         DisplayMetrics metrics = new DisplayMetrics();
         display.getMetrics(metrics);
         
-        //Set the Floating Player Size, Full Portrait Width on Phone, Half width for Large Screen.
+        //Set the Floating Player Size, 45% of the smallest side, or 2 inches on Tablet etc.
         int smallestSide = (isPortrait ? displayWidth : displayHeight);
+        int smallestSideLayout = (isPortrait ? layoutWidth : layoutHeight);
         mPlayerController.floatingPlayerSize =  (int) ( smallestSide / metrics.densityDpi < 3 ?
-                smallestSide / metrics.density:
-                smallestSide / metrics.density / 2);
-        
+                (int) (smallestSideLayout * 0.45):
+                metrics.densityDpi * 2);
+                
         //Update the Strecth X /Y Icon
         mPlayerController.setStretchXYIcon();
 
