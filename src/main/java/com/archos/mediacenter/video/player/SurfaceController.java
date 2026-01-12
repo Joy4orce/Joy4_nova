@@ -369,7 +369,7 @@ public class SurfaceController {
                         //cropW = (float) dcar / (float) ar;        //Cropping won't help you! We need a way to not draw the left and r-ecentre, cutting equal left and right. 
                     else {
                         //WE ARE FULLSCREEN, turn Video with Cutouts ON to FIX!
-                        if (!mCutoutBugToasted) Toast.makeText(mView.getContext(), "Turn on Fullscreen Video with Cutouts for correct Aspect Ratio.", Toast.LENGTH_SHORT).show();
+                        if (!mCutoutBugToasted) Toast.makeText(mView.getContext(), R.string.toast_cutout_aspect_ratio_fix, Toast.LENGTH_SHORT).show();
                         mCutoutBugToasted = true;
                     }
                     
