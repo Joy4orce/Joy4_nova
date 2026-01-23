@@ -63,7 +63,7 @@ public class VideoListPresenter extends VideoPresenter{
         String name = video.getName();
         if(video instanceof Episode){
             Episode episode = (Episode) video;
-            name = episode.getShowName()+ITALIC;
+            name = episode.getShowName()+" S"+episode.getSeasonNumber()+"E"+episode.getEpisodeNumber()+" "+"<i>"+episode.getName()+ITALIC;
         }
         if (name == null) name = "";
         if (name.endsWith(ITALIC)&&holder.name!=null) {
