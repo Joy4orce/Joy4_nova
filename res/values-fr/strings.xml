@@ -545,8 +545,8 @@
     <string name="preferences_enable_downmix_androidtv_summary">Toujours convertir la piste audio multicanaux en stéréo (à sélectionner si les dialogues sont inaudibles)</string>
     <string name="preferences_allow_3rd_party_player">Permettre l\'utilisation d\'un autre player vidéo</string>
     <string name="preferences_allow_3rd_party_player_summary">Les autres applications compatibles seront proposées par Android au lancement d\'une vidéo. Notez bien que certaines fonctionnalités ne sont pas supportées (point de reprise, marque page, etc.)</string>
-    <string name="preference_tv_3d_automatic_switch">Activer automatiquement la commutation 3D\"</string>
-    <string name="preference_tv_3d_automatic_switch_summary">Utiliser cette option si votre télé 3D supporte cette fonctionnalité\"</string>
+    <string name="preference_tv_3d_automatic_switch">Activer automatiquement la commutation 3D</string>
+    <string name="preference_tv_3d_automatic_switch_summary">Utiliser cette option si votre télé 3D supporte cette fonctionnalité</string>
     <string name="enable_android_frame_timing">Activer la synchronisation Android des trames</string>
     <string name="enable_android_frame_timing_summary">Utiliser la synchronisation d\'affichage d\'Android pour un rendu plus fluide (expérimental)</string>
     <string name="hide_watched_videos">Masquer les vidéos regardées</string>
