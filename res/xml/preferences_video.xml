@@ -570,7 +570,7 @@
             android:title="@string/network_nfo_parse"
             app:iconSpaceReserved="false"/>
         <CheckBoxPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:key="scrape_from_database_key"
             android:summary="@string/enable_scrape_from_db_summary"
             android:title="@string/enable_scrape_from_db_title"
