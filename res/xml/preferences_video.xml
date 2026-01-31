@@ -89,7 +89,7 @@
             android:title="@string/preferences_force_passthrough"
             app:iconSpaceReserved="false"/>
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="playback_speed"
             android:persistent="true"
             android:summary="@string/preferences_playback_speed_summary"
@@ -188,7 +188,7 @@
             android:digits="0123456789"
             app:iconSpaceReserved="false"/>
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="enable_android_frame_timing"
             android:persistent="true"
             android:summary="@string/enable_android_frame_timing_summary"
