@@ -1108,6 +1108,10 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                     .edit()
                     .putBoolean(VideoPreferencesCommon.KEY_ENABLE_DYNAMIC_AUDIO_DELAY, true)
                     .apply();
+            PreferenceManager.getDefaultSharedPreferences(context)
+                    .edit()
+                    .putBoolean(VideoPreferencesCommon.KEY_PLAYBACK_SPEED, true)
+                    .apply();
         }
         // do not replace lastPlayed row with watchingUpNext one since it is still a little slow on shield
         /*
