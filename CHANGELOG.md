@@ -1,5 +1,869 @@
 # Nova Video Player changelog
 
+<a id="v6.4.26"></a>
+## [v6.4.26 /!\ pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.26) - 2026-02-01
+
+This release addresses regressions found in last avos media engine audio pipelines fixes
+
+- Fix: avoid using stale heard‑time for speed changes on android_sync=1 when delay is invalid.
+- Fix: hold last‑good delay on android_sync=0 when timing becomes invalid to prevent sync loss in long runs.
+- Fix: include atempo filter latency in heard‑time when timing is invalid.
+- Fix: stabilize resume sync with delay‑valid streak gating.
+- Chore: remove debug‑only speed‑change logging to fix build.
+
+To be on the safe side, by default android frame synchronization delegation is off, dynamic audio delay estilation and atempo ffmpeg based audio speed are enabled.
+
+[Changes][v6.4.26]
+
+
+<a id="v6.4.25"></a>
+## [v6.4.25 /!\ pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.25) - 2026-01-31
+
+- Scraper optimizations: speed and robustness in detection enhancements
+- Many lipsync and audio/video synchronization optimizations (capturing corner cases with bogus audiotrack devices such as google streamer 4k)
+- Capability to scrape from media database when there is already a corresponding entry resulting in boost in scrape performance when dealing with multiple network shares protocols pointing towards same files
+- Pretty notifications during scrape process
+- Properly detect HDMI ARC/eARC for passthrough
+- Floating player size fixes
+- More surface stretching options and aspect ratio fixes enabling to force aspect ratio on bogus videos
+- New player UI tri-state button to manage different layouts for displays with cutouts
+
+This release contains major contributions from @leeroy.
+
+From now on frame synchronization, dynamic audio delay estilation and atempo ffmpeg based audio speed are the default modes.
+
+[Changes][v6.4.25]
+
+
+<a id="v6.4.24"></a>
+## [v6.4.24 /!\ pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.24) - 2025-12-17
+
+- Scraper optimizations (more to come)
+- Fix floating player playback regression
+- More aspect ratio bugfixes and more accessible and self explanatory icons (more to come)
+- Fix video playback stuttering on high latency/large jitter variance devices such as google streamer 4k
+- Improve lipsync by removing artificial audiotrack audio pipeline delay bias
+- Nicer scrape notification on phone monitoring files processed
+- Do not generate all thumbs for every video, only for non scraped on demand
+
+This release contains major contributions from @leeroy.
+
+Please try out enabling android frame synchronization, dynamic audio delay estimation, and the new atempo ffmpeg based audio speed with passthrough disabled.
+
+[Changes][v6.4.24]
+
+
+<a id="v6.4.23"></a>
+## [v6.4.23 /!\ pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.23) - 2025-12-07
+
+- Audio speed: use atempo ffmpeg based filter instead of audiotrack to avoid compatibility issues with some hard
+wares
+- Many audio passthrough fixes for universal AC3 recode and nova or system encapsulation
+- New smart recently categories (off by default) changing "Last added" and "Last played" to "New to watch" and "Continue watching" with the goal of de-cluttering the rows. It only lists scraped content and only last episode viewed or new are displayed to avoid duplication. New section only displayed unwatched content.
+- New projector mode aligning visible part of the video to the top of the screen
+- Added force aspect ratio for coping with badly encoded videos (4:3, 16:9, 1.85:1, 2.39:1)
+- Aspect ratio icons now reflect current aspect ratio instead of next one
+- Fix external subtitles disappearing for remote shares video files
+- Fix non-scraped videos box disappearing in leanback MainFragment
+- Fix external display video rendering in small format regression
+- Address cannot find tv show on manual search for non scraped content
+- Honor VPN setting in connectivity check
+- Fix audio/video desync when using Android frame posting or smoother video playback
+- Verify files exist on filesystem before hiding them on USB volumes causing media library loss on Android TV using USB HDDs (regression)
+- Capacity to have legacy UI persistent on Android TV interface in nova settings
+- Address blue screen of death happening sometimes
+- Add option to hide player controls when paused for 5 seconds
+- Webdav: send basic auth in UTF-8 and fix credential encoding
+- New Android TV preferences row material icons with clearer visible focus
+- Add non scraped videos category in phone/tablet UI browser
+- Add VTT subtitles support
+- Force option consistency in settings
+- Fix thumbnail creation for non scraped videos (needs to be enabled through settings for network shares)
+- Remove foreground services (again) not to upset Google and delay application publication (nova needs to remain in foreground for media scan to complete)
+- Trakt implement new device based login for android TV
+- Sync and traffic optimizations for trakt to avoid account locking
+
+This release contains major contributions from @leeroy.
+
+Please try out android frame synchronization enabled, dynamic audio delay estimation, and the new atempo ffmpeg based audio speed with passthrough disabled.
+~
+
+[Changes][v6.4.23]
+
+
+<a id="v6.4.22"></a>
+## [v6.4.22 /!\ pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.22) - 2025-11-18
+
+This is a pre-release since it contains some large changes on audio pipeline that deserves some testing.
+
+- Audio passthrough: delegate IEC encapsulation to Android for mode 2 and keep mode 1/3 on nova own IEC encapsulation. Rationale is that mediatek based devices (firestick 4k max and google streamer 4k) weirdly fails audio passthrough for EAC3 content (reverts to multichannel PCM) making mode 1 a more "universal" mode
+- Many fixes regarding audio passthrough proper initialization
+- Honor VPN setting in connectivity check to fix tailscale etc. remote access
+- Complete hide watched videos from library functionality (thx @leeroy)
+- Fix on leanback non scaped video box not showing sometimes
+
+[Changes][v6.4.22]
+
+
+<a id="v6.4.21"></a>
+## [v6.4.21 /!\ pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.21) - 2025-11-16
+
+This is a pre-release since it contains some large changes on audio pipeline that deserves some testing.
+
+- Fix regression with passthrough deactivated leading to stereo output
+- Increase robustness of audio pipeline creation following rearchitecture
+- Take into account AV receiver reported number of PCM channels capability
+
+[Changes][v6.4.21]
+
+
+<a id="v6.4.20"></a>
+## [v6.4.20 /!\ pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.20) - 2025-11-15
+
+This is a pre-release since it contains some large changes on audio pipeline that deserves some testing.
+
+WARNING: there is a regression that sets only stereo output, new release soon...
+
+- Rearchitect audio pipeline for more robust passthrough and complete AC3 recoding passthrough implementation
+- Fix excessive battery consumption regression
+- Videos are displayed with release date sorting in videos by year fragments (proper functioning requires full movies rescrape since it is a new information element added to the database)
+- Option to remember brightness level (thx @Leeroy)
+- All native binaries are 16kB aligned in compliance with Google rule and should result in faster app loading
+- Fix external display video rendering in small format
+- Fix video pause state not being preserved on screen wake-up
+- Fix video resume point not being preserved on screen wake-up after display timeout
+- Address cannot find tv show on manual search for non scraped content
+- De-duplicate in last added videos multiple video of identical tv show episodes or movies
+- Subtitle enumeration caching to increase efficiency and remove redondant checks
+- Force audio passthrough turned off by default: otherwise it could force non supported audio format to be sent to AV receiver
+- Nicer round edges Video cards on phone/tablets (thx @Leeroy)
+- Finish option to hide videos from media library (thx @Leeroy)
+- jsch upstep to 2.27.6 and okhttp3 logging-interceptor to 5.3.0
+- Stability enhancements
+
+[Changes][v6.4.20]
+
+
+<a id="v6.4.19"></a>
+## [v6.4.19 release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.19) - 2025-11-03
+
+- Fix selecting audio track on video with multi audio tracks leading to no sound
+- Fix -1 no Internet error when trying to login to trakt on some devices
+- Fix audio speed not selectable on devices with no audio passthrough capability
+
+[Changes][v6.4.19]
+
+
+<a id="v6.4.18"></a>
+## [v6.4.18 release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.18) - 2025-11-02
+
+- Video fluidity: schedule MediaCodec buffers with releaseOutputBufferAtTime keeping sink timing management done by avos with higher video workers thread priority (should be compatible with TVs using motion compensation)
+- Smarter trakt synchronization method saving bandwidth and handling multiple devices (major refactoring)
+- Fix some video samples playing choppy at start but ok after a seek
+- Fix preserving current playback time when switching to floating player
+- Better WebDAV 302 redirect handling (thx @alonginwind)
+- Many menu settings consistency checks to prevent selecting option when not available (i.e. audio passthrough when no hdmi/spdif, smoother scrolling, etc.)
+- Generate thumbnails only if there is no poster available
+- On Android TV get back to first position of last played row instead of previous position if a video has been played
+- Many stability enhancements addressing sentry reported crashes
+- Switch to parametrized logback syntax to avoid unnecessary arguments evaluations when not logging is configured (performance optimization)
+- Upsteps: jsch 2.27.5, tmdb-java 2.13
+- For universal audio passthrough, decode PCM then reencode to AC3 all streams even the videos with (E)AC3 tracks to benefit from audio filters (night mode, audio boost). Side effect: lose AC3/Atmos JOC.
+
+NOTE: option "Android frame timing" suffers from A/V desync when doing successive play/pause/play. It is not ready yet.
+
+Please report any regression on trakt sync.
+
+[Changes][v6.4.18]
+
+
+<a id="v6.4.17"></a>
+## [v6.4.17 release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.17) - 2025-10-20
+
+- fix AV sync lost after pause using passthrough (disable dynamic AV delay estimation when in passthrough mode and revert to `AudioSystem.getOutputLatency()` which gives better result than `AudioTrack.getLatency()`)
+- increase performance using parametrised logging
+- avos (native multimedia player) host simulator is back using SDL for debugging
+- supernova external package support (but what is this...)
+
+[Changes][v6.4.17]
+
+
+<a id="v6.4.16"></a>
+## [v6.4.16 release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.16) - 2025-10-19
+
+Major new release with new features!
+
+- New Audio/Video delay dynamic estimation to get better synchronisation especially for bluetooth headsets
+- Add new universal passthrough mode with AC3 5.1 recoding of non AC3 streams. The primary goal is to help AndroidTV TVs that are using a sound bar via ARC (not eARC) which payload cannot sustain multichannel PCM output
+- New seamless audio speed (not based on seek anymore) mode enabling various playback speed from 0.05x to 2.00x. Though accessible through menu/tile while playing, various shortcuts are enabled described in [FAQ](https://home.courville.org/nova_video_player-faq/index.html). Control is also mapped to next/prev track available on some remotes (e.g. [Ugoos UR02 BT remote](https://ugoos.com/ugoos-bt-remote-control-ur02)).
+- UPnP uses jupnp instead of deprecated cling
+- Fix NFO and srt generated with size 0 using smbj SMB implementation
+- ffmpeg 8.0 upstep
+- Fix various java leaks (potentially addressing the blue screen of death requiring reboots)
+- New media database, network shortcuts and credentials export/import creating/using `/sdcard/Android/data/org.courville.nova/files/backup.zip`
+- Implement downmix fallback when ffmpeg is enable to detect audio channel mapping (seems to happen somehow), thx @Leeroy
+
+Note the apk is heavier because ac3recode requires new ffmpeg libraries.
+
+TO TEST: please enable in option "Android frame timing" for testing, it should improve video fluidity.
+
+[Changes][v6.4.16]
+
+
+<a id="v6.4.15"></a>
+## [v6.4.15 release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.15) - 2025-10-06
+
+- fix internal storage scan OOM regression
+- avoid to download backdrop glitch on leanback on next episode VideoInfo when backdrop should not be changed
+- fix video sync regression
+- fix downmixing
+- manage multiple usb disks with hide/unhide strategy enabling incremental faster rescanning
+- network scan and scrape performance enhancements
+
+[Changes][v6.4.15]
+
+
+<a id="v6.4.12"></a>
+## [v6.4.12 release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.12) - 2025-09-28
+
+- take more channel layouts into account for audio stereo downmix
+- fix video import regression
+
+[Changes][v6.4.12]
+
+
+<a id="v6.4.11"></a>
+## [v6.4.11 release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.11) - 2025-09-27
+
+- avoid USB/SMB rescans and medialib loss
+- dynamic audio channel mapping
+- fix trakt login window and automatic folder rescan regressions
+- fix various A/V desync
+- improved subtitle rendering (justification/multilines)
+
+[Changes][v6.4.11]
+
+
+<a id="v6.4.9"></a>
+## [v6.4.9 release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.9) - 2025-09-14
+
+- fix a potential audio/video sync regression
+
+[Changes][v6.4.9]
+
+
+<a id="v6.4.8"></a>
+## [v6.4.8 release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.8) - 2025-09-13
+
+- new seek based audio speed implementation
+- gestures for audio speed (check FAQ)
+- upsteps: boost 1.89, libtorrent 2.0.11, torrentd is 16K aligned
+- process resume position when using nova as external player
+- fix A/V desync with flac audio tracks
+- loaders speed improvements via database indexing
+- fix collections getting only one movie or being empty
+- adopt an retry mechanism to check network shares availability to allow NAS servers to wake up from suspend before declaring the server not available (should help with folders declared not available)
+- scape/scan services are back to foreground dataSync processes to allow operation with nova in background (will require convincing with google for play update)
+
+[Changes][v6.4.8]
+
+
+<a id="v6.4.5"></a>
+## [v6.4.5 release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.5) - 2025-07-06
+
+- stability enhancements
+
+[Changes][v6.4.5]
+
+
+<a id="v6.4.4"></a>
+## [v6.4.4 release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.4) - 2025-07-04
+
+- fix AV1 playback/seek on pixel9 g5 and mediatek devices (google streamer and firestick 4k max)
+- fix nvidia shield external USB storage subtitle download
+- stability enhancements
+
+Note: apk is now larger because so libs are stored uncompressed following new Google gradle changes for device optimizations (storage, app start time, upgrade).
+
+[Changes][v6.4.4]
+
+
+<a id="v6.4.3"></a>
+## [v6.4.3 release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.3) - 2025-05-21
+
+- stability enhancements
+
+[Changes][v6.4.3]
+
+
+<a id="v6.4.2"></a>
+## [v6.4.2 release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.2) - 2025-05-10
+
+- fix video paused lost after screensaver regression
+- many stability enhancements
+
+[Changes][v6.4.2]
+
+
+<a id="v6.4.1"></a>
+## [v6.4.1 release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.4.1) - 2025-04-28
+
+- target SDK 35, raise min SDK to 23 (Android 6.0)
+- rework player UI to comply with new edge to edge display constraints and avoid round display borders
+- new gfx subtitle rendering and scaling logic following video view format
+- blacklist recycle bins on popular NAS
+- fix audio delay picker focus on Android TV
+- new subtitle title format
+- upgrade ffmpeg to 7.1.1 and dav1d to 1.5.1
+- fix external player stopping after a while (thanks @wasky)
+- stability enhancements
+
+[Changes][v6.4.1]
+
+
+<a id="v6.3.9"></a>
+## [v6.3.9 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.3.9) - 2024-12-07
+
+- revert to ffmpeg 4.4.5 since upgrade breaks passthrough
+- fix performmance hit when using trakt after video information retrieval
+- target SDK 34 to comply with Google API rules and remove foreground dataSync processes not granted to nova by Google
+
+Important note: due to limitations imposed by Google when switching to API 34, foreground processes have not been granted to nova for background video media information retrieval. This means that nova cannot scan videos in background and full scan needs to be performed when nova is in foreground.
+Coping with this constraint required some intrusive modifications that could result in some regressions and debug: hence the pre-release tag.
+
+[Changes][v6.3.9]
+
+
+<a id="v6.2.56"></a>
+## [v6.2.56 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.56) - 2024-02-04
+
+- UPnP network shares: use jupnp Java library instead of EOL cling
+- proguard cleanup /!\ could cause some regressions
+
+This is an experimental pre-release: please report any issue with UPnP here https://github.com/nova-video-player/aos-AVP/issues/74
+
+[Changes][v6.2.56]
+
+
+<a id="v6.2.42"></a>
+## [v6.2.42 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.42) - 2024-01-01
+
+- Thinner player controller volume/seek bars
+- Fix ftp not working due to time dependency
+- Stability enhancements
+
+[Changes][v6.2.42]
+
+
+<a id="v6.2.41"></a>
+## [v6.2.41 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.41) - 2023-12-30
+
+- Faster local/USB storage scan at application start
+
+Please provide feedback if you experience any issue with local/HDD storage indexing
+
+[Changes][v6.2.41]
+
+
+<a id="v6.2.26"></a>
+## [v6.2.26 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.26) - 2023-09-21
+
+- Remove MANAGE_EXTERNAL_STORAGE permission since denied by Google Play (was allowed on Internal release but not Production ones...)
+- Fix deactivate Dolby Vision setting 
+- Audio speed when enabled can be incremented/decremented via CHANNEL UP/DOWN or NEXT/PREVIOUS TRACK MEDIA remote keys
+
+[Changes][v6.2.26]
+
+
+<a id="v6.2.25"></a>
+## [v6.2.25 release refused by Google](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.25) - 2023-09-08
+
+- Fix DTS passthrough not working on some devices
+
+NOTE: publication rejected by Google since nova is not allowed to use MANAGE_EXTERNAL_STORAGE though many other video player have managed to get it:
+```
+package: com.kmplayer
+uses-permission: name='android.permission.MANAGE_EXTERNAL_STORAGE'
+package: org.xbmc.kodi
+uses-permission: name='android.permission.MANAGE_EXTERNAL_STORAGE'
+package: com.mxtech.videoplayer.ad
+uses-permission: name='android.permission.MANAGE_EXTERNAL_STORAGE'
+package: video.player.videoplayer
+uses-permission: name='android.permission.MANAGE_EXTERNAL_STORAGE'
+package: com.kmp.video
+uses-permission: name='android.permission.MANAGE_EXTERNAL_STORAGE'
+package: com.mine.videoplayer
+uses-permission: name='android.permission.MANAGE_EXTERNAL_STORAGE'
+package: org.videolan.vlc
+uses-permission: name='android.permission.MANAGE_EXTERNAL_STORAGE'
+```
+Result next release will not have this permission. I am not sure yet of collateral effects upgrading for those who installed this pre-release manually.
+
+Message to Google:
+> For good reasons Google restricts MANAGE_EXTERNAL_STORAGE permission since API31.
+> Nova thus switched to MediaStore API.
+> As a consequence nova is only able to see files registered as Media files by Google (missing video/subtitles formats such as ASS & NFO files).
+> These files are not modifiable nor visible from nova when using local storage (incl. USB HDDs).
+> This creates loss of functionality & incomprehension from nova users.
+> Numerous appeals were issued & proper request filed for being granted the permission with explanation video.
+> Only got default "no answers"/"not compliant" without having a Google support taking time to understand/review the case properly.
+> Note that many other video players have the wanted MANAGE_EXTERNAL_STORAGE permission: e.g. VLC, mx player, video player all format, Video Player KMP, kodi...
+> I consider this as unfair treatment and discrimination.
+> Sad that an app that has almost 500k active users and 1.5M downloads on Google Play cannot get proper attention from Google.
+
+[Changes][v6.2.25]
+
+
+<a id="v6.2.24"></a>
+## [v6.2.24 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.24) - 2023-09-03
+
+- Enhanced network shortcut URI format check to avoid crashes when users inputs non valid entries
+
+[Changes][v6.2.24]
+
+
+<a id="v6.2.23"></a>
+## [v6.2.23 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.23) - 2023-09-01
+
+- Many stability enhancements
+- Fix cannot open video on webdav(s) network share in some cases
+
+[Changes][v6.2.23]
+
+
+<a id="v6.2.22"></a>
+## [v6.2.22 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.22) - 2023-08-29
+
+- Fix black screen playback on ONN and other Android TV 12 devices
+- Fix capability test to read external storage regression due to MANAGE_EXTERNAL_STORAGE introduction
+
+[Changes][v6.2.22]
+
+
+<a id="v6.2.21"></a>
+## [v6.2.21 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.21) - 2023-08-28
+
+- Permission checker: fix crash seen with MANAGE_EXTERNAL_STORAGE permission on some Android versions
+- Scrape enhancement: do not skip TV shows with no poster on TMDB in results when there is no other one proposed
+
+[Changes][v6.2.21]
+
+
+<a id="v6.2.20"></a>
+## [v6.2.20 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.20) - 2023-08-27
+
+- Support more scrape and subtitle languages
+- Display audio/sub track titles
+- Fix hdd subtitles download
+- Many scrape enhancements (name cleanup removing brackets, solving long lasting bug on considering locale movie title, better show detection)
+- This pre-release has MANAGE_EXTERNAL_STORAGE permission that seems to be allowed on Google Play finally for nova (TBC on full deployment): fixes issues not being able to process NFO/ASS and other files not considered as multimedia by Android library or not being owned by nova
+- Integrate Slovak contributed translation
+- Uprade smbj to 0.12.2 (fixes SMB faster implementation playback issues)
+- Internationalization: all ISO639.(2(b)|3) 2/3 letter codes rely now on Android (still managing exceptions)
+Subtitle "None" is listed as first item in subs selection
+- Fix crash at start on devices with API<30 (Android 11)
+
+[Changes][v6.2.20]
+
+
+<a id="v6.2.13"></a>
+## [v6.2.13 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.13) - 2023-05-26
+
+- smbj: fix subtitles download
+- trakt: fix signing focus issue on Android TV
+
+[Changes][v6.2.13]
+
+
+<a id="v6.2.12"></a>
+## [v6.2.12 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.12) - 2023-05-25
+
+- smbj: increase robustness (fix timeout regressions, catch API errors)
+
+[Changes][v6.2.12]
+
+
+<a id="v6.2.11"></a>
+## [v6.2.11 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.11) - 2023-05-21
+
+- smbj: fix "empty folder issue" when connecting to network shortcut
+
+[Changes][v6.2.11]
+
+
+<a id="v6.2.10"></a>
+## [v6.2.10 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.10) - 2023-05-21
+
+- Add sort video option when browsing by folders
+- Fix smbj folder delete
+- Make smbj use bouncycastle security provider
+
+[Changes][v6.2.10]
+
+
+<a id="v6.2.8"></a>
+## [v6.2.8 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.8) - 2023-05-10
+
+- perfect smbj stability and SMB settings logic
+
+[Changes][v6.2.8]
+
+
+<a id="v6.2.7"></a>
+## [v6.2.7 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.7) - 2023-05-08
+
+- Add sshj new network shares support (alternate SFTP)
+- Add an option to use smbj by default instead of jcifs-ng (not SMB1 compatible)
+- Add an option to use sshj by default instead of legacy sftp support
+- Webdav write support
+- smbj and webdav stability improvements
+
+[Changes][v6.2.7]
+
+
+<a id="v6.2.5"></a>
+## [v6.2.5 really experimental pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.5) - 2023-04-22
+
+/!\ Not for the faint of the heart: subject to crashes.
+
+- smbj stability improvements (perhaps not yet stable)
+
+[Changes][v6.2.5]
+
+
+<a id="v6.2.4"></a>
+## [v6.2.4 really experimental pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.4) - 2023-04-22
+
+/!\ Not for the faint of the heart: subject to crashes.
+
+- smbj stability improvements (perhaps not yet stable)
+
+[Changes][v6.2.4]
+
+
+<a id="v6.2.3"></a>
+## [v6.2.3 really experimental pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.3) - 2023-04-22
+
+/!\ Not for the faint of the heart: subject to crashes.
+
+* smbj stability improvements (perhaps not yet stable)
+
+[Changes][v6.2.3]
+
+
+<a id="v6.2.2"></a>
+## [v6.2.2 really experimental pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.2.2) - 2023-04-21
+
+/!\ Not for the faint of the heart: subject to crashes.
+
+- Add smbj SMB2+ implementation capable of higher throughput than jcifs-ng (for now). smbj network shortcuts need to be added manually (no discovery in this release)
+- Add webdav write support
+
+[Changes][v6.2.2]
+
+
+<a id="v6.1.5"></a>
+## [v6.1.5 github release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.1.5) - 2023-03-31
+
+- Be sure to process year provided in movie files to increase scrape accuracy
+- Fix regression in VideoLoaders
+
+[Changes][v6.1.5]
+
+
+<a id="v6.1.2"></a>
+## [v6.1.2 github release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.1.2) - 2023-03-20
+
+- Enhance webdav stabillity
+- Fix all videos icon boxes not getting updated on AndroidTV
+- Fix loss of video database content after exiting/re-entering the app on AndroidTV
+
+[Changes][v6.1.2]
+
+
+<a id="v6.1.1"></a>
+## [v6.1.1 github release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.1.1) - 2023-03-09
+
+- Add webdav network share support
+- Add network shortcuts support for all network shares
+
+[Changes][v6.1.1]
+
+
+<a id="v6.0.78"></a>
+## [v6.0.78 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.78) - 2022-11-04
+
+- Add option to not apply audio passthrough if AV receiver does not support codec
+- Fix external storage videos perceived as not indexed on Android TV boxes
+
+[Changes][v6.0.78]
+
+
+<a id="v6.0.77"></a>
+## [v6.0.77 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.77) - 2022-10-28
+
+- Re-enable experimental playback speed control but avoid to enforce change of speed if 1.0x is selected
+- Fix network share videos staying in movie collection after deletion
+
+Warning: this is a pre-release with some media db change, use for testing only.
+
+[Changes][v6.0.77]
+
+
+<a id="v6.0.74"></a>
+## [v6.0.74 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.74) - 2022-10-16
+
+- Target Android API32
+- Experimental playback speed control
+- Do not apply audio passthrough if receiver does not support codec use and revert to PCM multichannel decoding instead
+- Fix some local video files not indexed on recent Android
+- ffmpeg 4.4.3, openssl 1.1.1r, androidx library updates
+- Stability enhancements
+
+[Changes][v6.0.74]
+
+
+<a id="v6.0.68"></a>
+## [v6.0.68 pre-release (SMB experimental)](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.68) - 2022-06-12
+
+- enable SMBv3
+- add possibility to browse/add SMB network share manually by URI on Android TV
+- 2022 year movie banner on Android TV
+
+[Changes][v6.0.68]
+
+
+<a id="v6.0.61"></a>
+## [v6.0.61 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.61) - 2022-04-14
+
+- Stability enhancements
+- ffmpeg 5.0.1, dav1d 1.0.0, opus latest master upsteps (please report any **regression** on multimedia playback)
+
+[Changes][v6.0.61]
+
+
+<a id="v6.0.58"></a>
+## [v6.0.58 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.58) - 2022-04-04
+
+- Stability enhancements
+- Sentry debug backend integration for crashlytics
+
+[Changes][v6.0.58]
+
+
+<a id="v6.0.55"></a>
+## [v6.0.55 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.55) - 2022-03-27
+
+- Display content rating and better audio/resolution tag on leanback
+
+[Changes][v6.0.55]
+
+
+<a id="v6.0.52"></a>
+## [v6.0.52 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.52) - 2022-03-11
+
+- Fix fdroid build
+
+[Changes][v6.0.52]
+
+
+<a id="v6.0.51"></a>
+## [v6.0.51 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.51) - 2022-03-11
+
+- Fix crash happening during scrape
+- Stability enhancements
+
+[Changes][v6.0.51]
+
+
+<a id="v6.0.50"></a>
+## [v6.0.50 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.50) - 2022-03-08
+
+- Fix tvshow rescrape having same name
+- Stability enhancements
+
+[Changes][v6.0.50]
+
+
+<a id="v6.0.49"></a>
+## [v6.0.49 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.49) - 2022-03-06
+
+- Decrease UI glitch on browse by TV show on phone UI
+- Stability enhancements
+
+[Changes][v6.0.49]
+
+
+<a id="v6.0.48"></a>
+## [v6.0.48 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.48) - 2022-03-04
+
+- Fix widget not launching video
+- STOP remote button stops player
+- Make rescan storage setting work
+- Stability enhancements
+
+[Changes][v6.0.48]
+
+
+<a id="v6.0.47"></a>
+## [v6.0.47 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.47) - 2022-03-01
+
+- Scrobbler threshold raised to 90%
+- Fix crash changing info on tvshow
+- Add adult scrape hidden option NOT on google play
+- Blacklist nova scrape files for initial video import
+- Swedish translations
+- Fix NFO processing not working on SMB share
+- Fix scrape in loop
+
+[Changes][v6.0.47]
+
+
+<a id="v6.0.46"></a>
+## [v6.0.46 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.46) - 2022-02-18
+
+This release is based on minSDK 21 targetSDK 31, AndroidX libraries, NDK-r23b, ffmpeg 4.4.1
+- Writer tag for tvshow retrieved on tmdb
+- Scraper enhancements
+- No more next episode jumping button on TV UI back from played video
+- Translations: Swedish and Traditional Chinese progress
+- Speed up initial local storage video import blacklisting whatsapp files before import
+- WARNING: media db upgrade (any downgrade will wipe out your meta data)
+
+[Changes][v6.0.46]
+
+
+<a id="v6.0.43"></a>
+## [v6.0.43 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.43) - 2022-02-04
+
+- Add https streaming support
+- Fix wrong application name
+
+[Changes][v6.0.43]
+
+
+<a id="v6.0.41"></a>
+## [v6.0.41 pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.41) - 2022-02-01
+
+This release is based on minSDK 21 targetSDK 31, AndroidX libraries, NDK-r23b, ffmpeg 4.4.1
+- Truly (?!) eliminate  sponsor link causing application rejection. Link was only visible for sideloaded apk but not for GooglePlay installation. Google refuses to check this point.
+- Traditional Chinese translations
+
+[Changes][v6.0.41]
+
+
+<a id="v6.0.40"></a>
+## [v6.0.40 internal release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.40) - 2022-01-31
+
+This release is based on minSDK 21 targetSDK 31, AndroidX libraries, NDK-r23b, ffmpeg 4.4.1
+- Eliminate  sponsor link causing application rejection. Link was only visible for sideloaded apk but not for GooglePlay installation. Google refuses to check this point.
+- Remove application name translation. Google test translates Czech and Portuguese "nova video player" back to English to "new video player" causing rejection. Other applications like "nova launcher" do not face such issue.
+- Reformat trakt login dialog to keep track of watched videos: it causes rejection without reason provided
+
+[Changes][v6.0.40]
+
+
+<a id="v6.0.37"></a>
+## [v6.0.37  pre-release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.37) - 2022-01-14
+
+This release is based on minSDK 21 targetSDK 31, AndroidX libraries, NDK-r23b, ffmpeg 4.4.1
+- Make sponsor link enabled as compilation option.
+
+[Changes][v6.0.37]
+
+
+<a id="v6.0.36"></a>
+## [v6.0.36  Google play internal (non public) release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.0.36) - 2021-12-23
+
+This release is based on minSDK 21, targetSDK 31, AndroidX libraries, NDK-r22, ffmpeg 4.4.1
+- Movie collections/sagas support on Android TV
+- Separate animation/movies/series sections on Android TV
+- Faster TV shows media information retrieval
+- Report properly DTSHD & DTSHD MA
+- ffmpeg 4.4.1 & dav1d 0.9.2 upstep
+- MDNS samba discovery
+- New refresh rate selection algorithm optimizing judder effect
+- Add domain option to samba network credential dialog
+- Optimize network shares rescan speed when files deleted/renamed
+- Dolby vision support
+- Binge watch mode
+- Fix trakt tvshow sync
+- Target API31 (warning: relocation of nfo/jpg for local storage videos)
+- WARNING: media db upgrade (any downgrade will wipe out your meta data)
+
+[Changes][v6.0.36]
+
+
+<a id="v4.2"></a>
+## [v4.2 API28+AndroidX beta release](https://github.com/nova-video-player/aos-AVP/releases/tag/v4.2) - 2019-04-27
+
+Unstable branch: this release is based on minSDK 21, targetSDK 28, AndroidX libraries, NDK-r20, ffmpeg 4.2.
+- Option to have landscape fullscreen video on display with cutouts
+- AndroidX migration
+- Poster/backdrop zoom on AndroidTV via long press
+-  Improve stability of phone/tablet UI after API28 migration
+- New A-Z orb option in All TV shows/Movies for alphabetical order browsing
+- New all/not viewed orb option in All TV shows/Movies for limiting browsing to all/not viewed videos
+
+[Changes][v4.2]
+
+
+<a id="v3.6"></a>
+## [v3.6 Google Play beta release](https://github.com/nova-video-player/aos-AVP/releases/tag/v3.6) - 2019-04-27
+
+Testing branch: this release is based on minSDK 21, targetSDK 27, NDK-r20, ffmpeg 4.2.
+- Upgrade to latest ffmpeg and dav1d soft codecs
+
+[Changes][v3.6]
+
+
+<a id="v3.5"></a>
+## [v3.5 release candidate](https://github.com/nova-video-player/aos-AVP/releases/tag/v3.5) - 2019-04-17
+
+Testing branch: this release is based on minSDK 21, targetSDK 27, NDK-r20, ffmpeg 4.2.
+- Fix software decoding on pre-M Android versions
+
+[Changes][v3.5]
+
+
+<a id="v4.1"></a>
+## [v4.1 API28 beta release](https://github.com/nova-video-player/aos-AVP/releases/tag/v4.1) - 2019-04-08
+
+Unstable branch: this release is based on minSDK 21, targetSDK 28, NDK-r19, ffmpeg 4.2.
+- New video overview
+- Leanback style settings on AndroidTV
+- Add recently added TV channels
+- Improved subtitles picker wizard look
+- API28 migration
+
+[Changes][v4.1]
+
+
+<a id="v3.4-smb"></a>
+## [v3.4 special SMBv2/3 test release (experimental)](https://github.com/nova-video-player/aos-AVP/releases/tag/v3.4-smb) - 2019-03-18
+
+Testing branch: this release is based on minSDK 21, targetSDK 27, NDK-r19, ffmpeg 4.2.
+- SMBv2/3 support via jcifs-ng
+- Ability to deindex local folders
+
+[Changes][v3.4-smb]
+
+
+<a id="v3.3"></a>
+## [v3.3.1 Google Play beta release](https://github.com/nova-video-player/aos-AVP/releases/tag/v3.3) - 2019-03-11
+
+Testing branch: this release is based on minSDK 21, targetSDK 27, NDK-r19, ffmpeg 4.2.
+- New TV show categories on TV interface for quicker browsing through large collection
+- Countless TV UI improvements (player look and feel, roles, movies trailers, audio badges, global deleletion/de-indexation, subtitles picker, more dynamic banners)
+- New player shortcuts (A/S switch audio/sub track, U/D = volume up/down) and menu support
+- Improve audio passthrough stability
+- Fix crash in presence of damaged sdcard
+- Fix cloud support (still no streaming)
+- Do not downmix to stereo on phones/tablets if Android is recent enough (N): delegate to Android
+
+[Changes][v3.3]
+
+
 <a id="v6.3.28"></a>
 ## [v6.3.28 release](https://github.com/nova-video-player/aos-AVP/releases/tag/v6.3.28) - 2025-02-02
 
