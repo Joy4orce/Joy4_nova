@@ -614,7 +614,7 @@
     <string name="preference_remove_dolby_vision_summary">Use standard video codecs over dolby vision ones</string>
     <string name="preference_cutout_short_edges">Fullscreen video with display cutouts</string>
     <string name="preference_cutout_short_edges_summary">Allow landscape fullscreen video on display with cutouts</string>
-    <string name="toast_cutout_aspect_ratio_fix">Turn on Fullscreen Video with Cutouts for correct Aspect Ratio.</string>
+    <string name="toast_cutout_aspect_ratio_fix">Turn on fullscreen video with cutouts for correct aspect ratio.</string>
     <string name="preference_enable_cutout_both_sidesx">Cut display equally on both sides</string>
     <string name="preference_enable_cutout_both_sidesx_summary">Cut the display equally on both sides, so the screen is symmetrical.</string>
     <string name="category_languages">Subtitles</string>
