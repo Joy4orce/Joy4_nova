@@ -1,13 +1,13 @@
-- UPnP uses jupnp instead of deprecated cling
-- avoid USB/SMB rescans and medialib loss
-- fix downmix
-- fix trakt login window and automatic folder rescan regressions
-- improved subtitle rendering (justification/multilines)
-- new seek based audio speed
+- seamless audio speed with remote shortcuts
+- better lipsync, passthrough and downmix
+- AC3 universal audio passthrough
+- new aspect ratio modes & projector mode
+- display cutout modes in player UI
+- trakt sync speed logic revisited
+- scrape reliability & speed enhancements
+- UPnP uses jupnp instead of cling
+- avoid USB/SMB rescans & medialib loss
 - new gestures (check FAQ)
-- fix folder play mode
-- resume position with nova as external player
-- fix AV1 playback/seek
-- fix nvidia shield USB storage subtitle download
-- loaders speed improvements
-- fix empty or single movie collections
+- subtitles fixes & improved rendering
+- smart categories: new to watch & continue watching
+- database backup/restore
