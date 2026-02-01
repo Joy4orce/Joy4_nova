@@ -137,7 +137,7 @@
     <string name="date_view_month">月</string>
     <string name="date_view_year">年</string>
     <string name="all_movies_and_tv_shows">电影和电视节目</string>
-    <string name="non_scraped_videos">未扫描的视频</string>
+    <string name="non_scraped_videos">未刮削的视频</string>
     <string name="no_server">没有找到媒体服务器</string>
     <string name="cannot_open_video">无法打开此视频</string>
     <string name="confirm_delete">你确定要删除吗？</string>
@@ -264,7 +264,7 @@
     <string name="you_have_no_anime_collections">无动漫合集</string>
     <string name="you_have_no_tv_shows">没有电视节目</string>
     <string name="you_have_no_anime_shows">没有动画电视节目</string>
-    <string name="you_have_no_non_scraped_videos">没有未扫描的视频</string>
+    <string name="you_have_no_non_scraped_videos">没有未刮削的视频</string>
     <plurals name="Nmovies">
         <item quantity="other"><xliff:g id="count">%d</xliff:g> 部电影</item>
     </plurals>
@@ -590,7 +590,7 @@
     <string name="tv_scraper">电视节目</string>
     <string name="movie_scraper">电影</string>
     <string name="enable_auto_scrap">自动获取新视频信息</string>
-    <string name="enable_adult_scrap_title">成人视频抓取</string>
+    <string name="enable_adult_scrap_title">成人视频刮削</string>
     <string name="enable_adult_scrap_summary">启用成人视频信息检索 (默认禁用)</string>
     <string name="locale">系统语言</string>
     <string name="scraper_language_title">视频描述语言</string>
@@ -726,10 +726,10 @@
     <string name="preferences_show_watching_up_next_row">显示“正在观看/随后观看”栏</string>
     <string name="preferences_show_last_added_row_summary">选中以显示您最近添加的媒体</string>
     <string name="preferences_show_last_added_row">显示“最近添加”栏</string>
-    <string name="preferences_show_last_played_row_summary">选中以显示您上次播放的媒体</string>
-    <string name="preferences_show_last_played_row">显示“上次播放”栏</string>
+    <string name="preferences_show_last_played_row_summary">选中以显示您最近播放的媒体</string>
+    <string name="preferences_show_last_played_row">显示“最近播放”栏</string>
     <string name="preferences_reset_last_played_row">重置“上次播放”栏</string>
-    <string name="reset_last_played_row_in_progress">正在重置“上次播放”栏……</string>
+    <string name="reset_last_played_row_in_progress">正在重置“最近播放”栏</string>
     <string name="pref_smart_recently_rows_title">智能最近分类</string>
     <string name="pref_declutter_home_rows_summary">在“最近添加”中仅显示未观看内容，并在“最近播放”中避免重复项</string>
     <string name="preferences_show_all_movies_row_summary">选中以“所有电影”栏代替“电影类别”栏</string>
@@ -837,7 +837,7 @@
     <string name="private_mode_is_off">隐私模式已关闭</string>
     <string name="private_mode">隐私模式</string>
     <string name="private_mode_description">隐私模式 将禁用下述功能：\n
-        - 自动索引和自动扫描视频\n
+        - 自动索引和自动刮削视频\n
         - 最近播放\n
         - 播放进度记忆\n
         - Trakt 同步</string>
@@ -899,16 +899,16 @@
     <string name="drawer_close">drawer_close</string>
     <string name="view_more">查看更多</string>
     <string name="nfo_export_in_progress">正在导出 NFO</string>
-    <string name="rescrap_in_progress">重新扫描整个媒体库</string>
-    <string name="rescrap_movies_in_progress">正在重新整理所有电影</string>
-    <string name="rescrap_collections_in_progress">正在重新整理所有合集</string>
+    <string name="rescrap_in_progress">重新刮削整个媒体库</string>
+    <string name="rescrap_movies_in_progress">正在重新刮削所有电影</string>
+    <string name="rescrap_collections_in_progress">正在重新刮削所有合集</string>
     <string name="acquire_external_usb_permission">Nova 视频需要特殊权限才能访问外部存储。请在下一个屏幕上选择您的存储</string>
-    <string name="rescrap_not_found">重新扫描没有说明的视频</string>
-    <string name="rescrap_all_title">重新扫描所有文件</string>
-    <string name="rescrap_all_movies_title">重新整理所有电影</string>
-    <string name="rescrap_all_collections_title">重新整理所有合集</string>
-    <string name="nfo_export_manual_title">导出已扫描的视频</string>
-    <string name="nfo_export_manual_summary">导出已经扫描过的每个视频的 .nfo 文件</string>
+    <string name="rescrap_not_found">重新刮削没有描述的视频</string>
+    <string name="rescrap_all_title">重新刮削所有文件</string>
+    <string name="rescrap_all_movies_title">重新刮削所有电影</string>
+    <string name="rescrap_all_collections_title">重新刮削所有合集</string>
+    <string name="nfo_export_manual_title">导出已刮削的视频</string>
+    <string name="nfo_export_manual_summary">导出已经刮削过的每个视频的 .nfo 文件</string>
     <string name="db_export_manual_title">导出媒体数据库</string>
     <string name="db_export_manual_summary">为调试目的将 media.db 文件导出到 /sdcard</string>
     <string name="db_export_in_progress">正在导出数据库</string>
@@ -927,7 +927,7 @@
     <string name="media_library_backup_info">找到备份文件：backup.zip\n大小：%d MB\n\n⚠️ 包含：元数据、凭据、快捷方式、图片\n\n是否继续导入？</string>
     <string name="media_library_import_dialog_title">导入媒体库 + 凭据 + 快捷方式</string>
     <string name="media_library_import_confirm_title">⚠️ 确认完全替换</string>
-    <string name="media_library_import_warning">⚠️ 警告：完全替换 ⚠️\n\n此操作将完全删除您当前的媒体库，并替换为备份文件中的内容。\n\n当前所有数据都将永久丢失：\n• 所有已抓取的电影/电视节目元数据\n• 所有缓存的海报和背景墙\n• 所有观看进度和历史记录\n• 所有网络凭据（SMB/FTP/SFTP/WebDAV）\n• 所有网络快捷方式/书签\n• 所有自定义编辑和设置\n\n此操作无法撤销！\n\n导入后应用将自动重启。\n\n是否确定要继续？</string>
+    <string name="media_library_import_warning">⚠️ 警告：完全替换 ⚠️\n\n此操作将完全删除您当前的媒体库，并替换为备份文件中的内容。\n\n当前所有数据都将永久丢失：\n• 所有已刮削的电影/电视节目元数据\n• 所有缓存的海报和背景墙\n• 所有观看进度和历史记录\n• 所有网络凭据（SMB/FTP/SFTP/WebDAV）\n• 所有网络快捷方式/书签\n• 所有自定义编辑和设置\n\n此操作无法撤销！\n\n导入后应用将自动重启。\n\n是否确定要继续？</string>
     <string name="media_library_import_button_confirm">是的，删除并替换</string>
     <string name="system">系统</string>
     <string name="keep_setting">记住此设置</string>

@@ -562,6 +562,9 @@
     <string name="preference_remove_dolby_vision_summary">Utilisez des codecs vidéo standards plutôt que dolby vision</string>
     <string name="preference_cutout_short_edges">Vidéo plein écran même en présence d\'encoche</string>
     <string name="preference_cutout_short_edges_summary">Permet la vidéo plein écran en orientation paysage avec des écrans à encoches</string>
+    <string name="toast_cutout_aspect_ratio_fix">Activez le plein écran en présence d\'encoches pour respecter le format d\'image.</string>
+    <string name="preference_enable_cutout_both_sidesx">Rogner l\'affichage de manière symétrique en présence d\'encoche</string>
+    <string name="preference_enable_cutout_both_sidesx_summary">Applique une bordure égale des deux côtés de l\'écran pour garantir la symétrie en présence d\'encoche.</string>
     <string name="category_languages">Sous-titres</string>
     <string name="subtitles_hide_default">Ne pas afficher les sous-titres par défaut</string>
     <string name="subtitles_hide_default_summary">Cochez afin de ne pas afficher les sous-titres par défaut</string>
@@ -595,6 +598,8 @@
     <string name="tv_scraper">Séries</string>
     <string name="movie_scraper">Films</string>
     <string name="enable_auto_scrap">Obtenir automatiquement des descriptions pour les nouvelles vidéos</string>
+    <string name="enable_scrape_from_db_title">Réutiliser les descriptions déjà récupérées</string>
+    <string name="enable_scrape_from_db_summary">Si une vidéo en double est détectée, utiliser les données déjà récupérées. Désactivez pour une récupération initiale plus rapide !</string>
     <string name="enable_adult_scrap_title">Descriptions des vidéos pour adultes</string>
     <string name="enable_adult_scrap_summary">Activer la récupération des informations des vidéos pour adultes (désactivé par défaut)</string>
     <string name="locale">Langue du système</string>
@@ -981,6 +986,7 @@
     <string name="enable_sponsor_summary">Activer le lien pour effectuer des dons: chaque contribution compte.</string>
     <string name="hdr_capability">Capacités HDR de l\'écran :</string>
     <string name="hdmi_audio_capabilities">Capacités audio du récepteur HDMI :</string>
+    <string name="spdif_audio_capabilities">Capacités audio S/PDIF:</string>
     <string name="max_audio_channels">Nombre maximum de canaux audio :</string>
     <string name="supported_refresh_rates">Taux de rafraîchissement pris en charge :</string>
     <string name="upgrade_info">Informations sur la mise à jour</string>
