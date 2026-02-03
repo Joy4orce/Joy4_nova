@@ -42,7 +42,9 @@ import android.provider.BaseColumns;
 
 import com.archos.mediacenter.utils.trakt.TraktService;
 import com.archos.medialib.R;
+import com.archos.mediaprovider.ArchosMediaIntent;
 import com.archos.mediaprovider.DeleteFileCallback;
+import com.archos.environment.ArchosUtils;
 import com.archos.environment.NetworkState;
 import com.archos.mediaprovider.video.LoaderUtils;
 import com.archos.mediaprovider.video.VideoStore;
@@ -498,6 +500,10 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                         if (numberOfRows <= 0) {
                             cursor.close();
                             LoaderUtils.setScrapeInProgress(false);
+                            // Notify UI that scraping is complete so boxes can be refreshed
+                            Intent intent = new Intent(ArchosMediaIntent.ACTION_VIDEO_SCANNER_SCAN_FINISHED, null);
+                            intent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
+                            sendBroadcast(intent);
                             stopSelf();
                             nm.cancel(NOTIFICATION_ID);
                             return;
@@ -773,6 +779,11 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
 
                     //Global Scrape in Progress, so the browser can skip thumbs in scrape and not waste space in storage
                     LoaderUtils.setScrapeInProgress(false);
+
+                    // Notify UI that scraping is complete so boxes can be refreshed
+                    Intent intent = new Intent(ArchosMediaIntent.ACTION_VIDEO_SCANNER_SCAN_FINISHED, null);
+                    intent.setPackage(ArchosUtils.getGlobalContext().getPackageName());
+                    sendBroadcast(intent);
                 }
             };
             mThread.start();
