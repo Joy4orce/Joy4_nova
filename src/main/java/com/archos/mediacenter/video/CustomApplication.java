@@ -246,9 +246,10 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                 int encodingCount = encodings != null ? encodings.length : 0;
 
                 // Pick the "best" HDMI-like device (typically ARC/eARC receiver vs TV speakers).
-                // Prefer higher max channel count, then more advertised encodings.
-                if (maxChannels > bestHdmiChannels
-                        || (maxChannels == bestHdmiChannels && encodingCount > bestHdmiEncodingCount)) {
+                // Prefer more advertised encodings (indicating passthrough support), then higher max channel count.
+                // This fixes issues where an AVR reports 0 channels but many codecs, vs TV reporting 2 channels and only PCM.
+                if (encodingCount > bestHdmiEncodingCount
+                        || (encodingCount == bestHdmiEncodingCount && maxChannels > bestHdmiChannels)) {
                     bestHdmiChannels = maxChannels;
                     bestHdmiEncodingCount = encodingCount;
                     bestHdmiFlags = flags;
