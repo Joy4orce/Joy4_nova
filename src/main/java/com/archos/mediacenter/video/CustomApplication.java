@@ -112,6 +112,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private static long spdifAudioEncodingFlag = 0;
     private static int[] hdmiAudioEncodingsFlags;
     private static int[] spdifAudioEncodingsFlags;
+    private static int[] hdmiChannelMasks;
     private static long maxAudioChannelCount = 0;
     private static boolean hasHdmi = false;
     private static boolean hasSpdif = false;
@@ -226,6 +227,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         int bestHdmiChannels = 0;
         int bestHdmiEncodingCount = 0;
         int bestHdmiType = -1;
+        int[] bestHdmiChannelMasks = null;
 
         long bestSpdifFlags = 0;
         int bestSpdifEncodingCount = 0;
@@ -255,6 +257,11 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                     bestHdmiFlags = flags;
                     bestHdmiType = type;
                     hdmiAudioEncodingsFlags = encodings;
+                    try {
+                        bestHdmiChannelMasks = device.getChannelMasks();
+                    } catch (Exception ignored) {
+                        bestHdmiChannelMasks = null;
+                    }
                 }
             } else if (type == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
                 foundSpdif = true;
@@ -271,6 +278,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         hdmiAudioEncodingFlag = foundHdmi ? bestHdmiFlags : 0;
         if (!foundHdmi) {
             hdmiAudioEncodingsFlags = null;
+            hdmiChannelMasks = null;
             // Avoid carrying stale values when HDMI-like route disappears.
             maxAudioChannelCount = 0;
         }
@@ -283,6 +291,9 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
 
         if (foundHdmi && bestHdmiChannels > 0) {
             maxAudioChannelCount = bestHdmiChannels;
+        }
+        if (foundHdmi) {
+            hdmiChannelMasks = bestHdmiChannelMasks;
         }
 
         updateIecEncapsulationCapability();
@@ -863,6 +874,10 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
 
     public static int getMaxAudioChannelCount() {
         return (int) maxAudioChannelCount;
+    }
+
+    public static int[] getHdmiChannelMasks() {
+        return hdmiChannelMasks;
     }
 
     public static boolean isIecEncapsulationCapable() {

@@ -795,6 +795,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             int maxPcmChannels = CustomApplication.getEffectiveMaxPcmChannels();
             LibAvos.setMaxPcmChannels(maxPcmChannels);
             log.info("onStart: Set max PCM channels to {}", maxPcmChannels);
+            LibAvos.setPcmChannelMasks(CustomApplication.getHdmiChannelMasks());
             LibAvos.setPassthrough(CustomApplication.isPassthroughSupported() ? Integer.parseInt(mPreferences.getString("force_audio_passthrough_multiple","0") ) : 0);
             if (mPreferences.getBoolean(VideoPreferencesCommon.KEY_FORCE_AUDIO_PASSTHROUGH, false)) {
                 long forcedFlags = CustomApplication.allHdmiAudioCodecs;
