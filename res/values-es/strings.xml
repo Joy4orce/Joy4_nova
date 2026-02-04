@@ -563,6 +563,9 @@ Experimental: puede no funcionar en todas las configuraciones.</string>
     <string name="preference_remove_dolby_vision_summary">Usa códecs de vídeo estándar sobre los de Dolby Visión</string>
     <string name="preference_cutout_short_edges">Pantalla completa con recortes de pantalla</string>
     <string name="preference_cutout_short_edges_summary">Permite visualización de vídeo horizontal en pantalla completa con recortes</string>
+    <string name="toast_cutout_aspect_ratio_fix">Activar vídeo a pantalla completa con recortes para que la relación de aspecto sea correcta.</string>
+    <string name="preference_enable_cutout_both_sidesx">Recortar la pantalla por igual en ambos lados</string>
+    <string name="preference_enable_cutout_both_sidesx_summary">Corta la pantalla por igual en ambos lados, por lo que la pantalla es simétrica.</string>
     <string name="category_languages">Subtítulos</string>
     <string name="subtitles_hide_default">Ocultar subtítulos por defecto</string>
     <string name="subtitles_hide_default_summary">Marcar si desea ocultar los subtítulos por defecto</string>
@@ -596,6 +599,8 @@ Experimental: puede no funcionar en todas las configuraciones.</string>
     <string name="tv_scraper">Series</string>
     <string name="movie_scraper">Películas</string>
     <string name="enable_auto_scrap">Obtener información automáticamente para nuevos vídeos</string>
+    <string name="enable_scrape_from_db_title">Usar información ya obtenida</string>
+    <string name="enable_scrape_from_db_summary">Si se encuentra un vídeo duplicado, utilizar información ya obtenida. ¡Desactive para hacer su procesado inicial más rápido!</string>
     <string name="enable_adult_scrap_title">Procesado de vídeo para adultos</string>
     <string name="enable_adult_scrap_summary">Habilita la recuperación de información de vídeos para adultos (desactivado por defecto)</string>
     <string name="locale">Idioma del sistema</string>
@@ -980,6 +985,7 @@ Experimental: puede no funcionar en todas las configuraciones.</string>
     <string name="enable_sponsor_summary">Activar enlace de patrocinador para donaciones: cada contribución ayuda.</string>
     <string name="hdr_capability">Capacidades de la pantalla HDR:</string>
     <string name="hdmi_audio_capabilities">Capacidades del receptor de audio HDMI:</string>
+    <string name="spdif_audio_capabilities">Capacidades de audio S/PDIF:</string>
     <string name="max_audio_channels">Máximos canales de audio:</string>
     <string name="supported_refresh_rates">Tasas de refresco soportadas:</string>
     <string name="upgrade_info">Información de la actualización</string>

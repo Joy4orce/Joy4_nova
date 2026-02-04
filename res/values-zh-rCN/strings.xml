@@ -555,8 +555,8 @@
     <string name="preferences_tv_refreshrate_switch_match_frame_rate">Android 12+ 帧率匹配功能</string>
     <string name="preference_remove_dolby_vision">禁用杜比视界</string>
     <string name="preference_remove_dolby_vision_summary">使用标准视频编解码器而不是杜比视界</string>
-    <string name="preference_cutout_short_edges">异形屏视频全屏</string>
-    <string name="preference_cutout_short_edges_summary">允许在异形屏上进行视频横屏全屏播放</string>
+    <string name="preference_cutout_short_edges">刘海屏视频全屏</string>
+    <string name="preference_cutout_short_edges_summary">允许在刘海屏上进行视频横屏全屏播放</string>
     <string name="category_languages">字幕</string>
     <string name="subtitles_hide_default">默认隐藏字幕</string>
     <string name="subtitles_hide_default_summary">如果您想要默认隐藏字幕，请勾选此项。</string>

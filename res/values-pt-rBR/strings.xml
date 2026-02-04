@@ -560,6 +560,9 @@
     <string name="preference_remove_dolby_vision_summary">Dar preferência aos codecs de video padrão ao invés dos codecs dolby vision</string>
     <string name="preference_cutout_short_edges">Vídeo em tela cheia com cortamentos de tela</string>
     <string name="preference_cutout_short_edges_summary">Permitir vídeo em tela cheia em modo paisagem com cortes de tela</string>
+    <string name="toast_cutout_aspect_ratio_fix">Ative o vídeo em tela cheia com recortes para a relação de aspecto correta.</string>
+    <string name="preference_enable_cutout_both_sidesx">Recortar o display igualmente em ambos os lados</string>
+    <string name="preference_enable_cutout_both_sidesx_summary">Corte o display igualmente em ambos os lados, então a tela é simétrica.</string>
     <string name="category_languages">Legendas</string>
     <string name="subtitles_hide_default">Ocultar legendas por padrão</string>
     <string name="subtitles_hide_default_summary">Marque se você deseja ocultar legendas por padrão</string>
@@ -593,6 +596,8 @@
     <string name="tv_scraper">Séries de TV</string>
     <string name="movie_scraper">Filmes</string>
     <string name="enable_auto_scrap">Obter informações automaticamente para novos vídeos</string>
+    <string name="enable_scrape_from_db_title">Usar informações já pesquisadas</string>
+    <string name="enable_scrape_from_db_summary">Se um vídeo duplicado for encontrado, use informações já pesquisadas. Desligue para tornar seu scrape inicial mais rápido!</string>
     <string name="enable_adult_scrap_title">Obter informações de vídeos adultos</string>
     <string name="enable_adult_scrap_summary">Habilitar recuperação de informações de vídeo adultos (desativado por padrão)</string>
     <string name="locale">Idioma do sistema</string>
@@ -976,6 +981,7 @@
     <string name="enable_sponsor_summary">Habilitar link de patrocinador Nova: cada contribuição ajuda.</string>
     <string name="hdr_capability">Capacidade de tela HDR:</string>
     <string name="hdmi_audio_capabilities">Recursos de áudio do receptor HDMI:</string>
+    <string name="spdif_audio_capabilities">Recursos de áudio S/PDIF:</string>
     <string name="max_audio_channels">Máximo de canais de áudio:</string>
     <string name="supported_refresh_rates">Taxas de atualização suportadas:</string>
     <string name="upgrade_info">Informações sobre atualização</string>

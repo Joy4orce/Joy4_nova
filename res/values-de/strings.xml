@@ -561,6 +561,9 @@
     <string name="preference_remove_dolby_vision_summary">Standard-Videocodecs gegenüber Dolby Vision-Codecs verwenden</string>
     <string name="preference_cutout_short_edges">Video im Vollbildmodus mit Display-Cutouts</string>
     <string name="preference_cutout_short_edges_summary">Querformatige Vollbildvideos auf Displays mit Cutouts erlauben</string>
+    <string name="toast_cutout_aspect_ratio_fix">Vollbild-Video mit Cutouts einschalten, für korrektes Seitenverhältnis.</string>
+    <string name="preference_enable_cutout_both_sidesx">Anzeige auf beiden Seiten gleichmäßig bescheiden</string>
+    <string name="preference_enable_cutout_both_sidesx_summary">Anzeige auf beiden Seiten gleich beschneiden, so dass der Bildschirm symmetrisch ist.</string>
     <string name="category_languages">Untertitel</string>
     <string name="subtitles_hide_default">Untertitel defaultmäßig ausblenden</string>
     <string name="subtitles_hide_default_summary">Überprüfen Sie, ob Sie Untertitel deafultmäßig ausblenden möchten</string>
@@ -594,6 +597,8 @@
     <string name="tv_scraper">TV-Sendungen</string>
     <string name="movie_scraper">Filme</string>
     <string name="enable_auto_scrap">Automatisch Infos für neue Videos erhalten</string>
+    <string name="enable_scrape_from_db_title">Bereits gescrapte Informationen verwenden</string>
+    <string name="enable_scrape_from_db_summary">Wenn ein doppeltes Video gefunden wird, verwenden Sie bereits gescarpte Informationen. Ausschalten, um erstes Scrapen zu beschleunigen!</string>
     <string name="enable_adult_scrap_title">Erwachsenen-Video Scraping</string>
     <string name="enable_adult_scrap_summary">Abrufen von Erwachsenen-Video-Informationen  deaktivieren (defaultmäßig deaktiviert)</string>
     <string name="locale">Systemsprache</string>
@@ -980,6 +985,7 @@
     <string name="enable_sponsor_summary">Sponsor-Link für Spenden aktivieren: Jeder Beitrag hilft.</string>
     <string name="hdr_capability">HDR-Bildschirmfunktionen:</string>
     <string name="hdmi_audio_capabilities">HDMI-Receiver Audio-Fähigkeiten:</string>
+    <string name="spdif_audio_capabilities">S/PDIF Audio-Funktionen:</string>
     <string name="max_audio_channels">Maximale Anzahl an Audiokanälen:</string>
     <string name="supported_refresh_rates">Unterstützte Aktualisierungsraten:</string>
     <string name="upgrade_info">Upgrade-Information</string>
