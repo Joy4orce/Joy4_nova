@@ -452,23 +452,16 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
      * Update the enabled and selectable state of dynamic audio delay preference
      * based on passthrough settings.
      *
-     * Dynamic audio delay should only be disabled for Mode 2 (Android system passthrough)
-     * because Android's compressed audio path doesn't support precise timing adjustments.
-     *
-     * Mode 1 (Nova/IEC61937 encapsulation) and Mode 3 (AC3 recoding) can use dynamic
-     * audio delay because they process audio through Nova's pipeline before output.
-     *
-     * @param passthroughMode the passthrough mode (0=off, 1=Nova encapsulation, 2=Android passthrough, 3=AC3 recoding)
+     * @param passthroughEnabled true if audio passthrough is enabled
      * @param frameTimingEnabled true if Android frame timing is enabled (unused but kept for compatibility)
      */
-    private void updateDynamicAudioDelayState(int passthroughMode, boolean frameTimingEnabled) {
-        if (passthroughMode == 2) {
-            // Mode 2 (Android system passthrough) - disable dynamic audio delay
-            // Android's compressed audio path doesn't support dynamic delay adjustments
+    private void updateDynamicAudioDelayState(boolean passthroughEnabled, boolean frameTimingEnabled) {
+        if (passthroughEnabled) {
+            // Passthrough takes precedence - disable dynamic audio delay
             mEnableDynamicAudioDelay.setEnabled(false);
             mEnableDynamicAudioDelay.setSelectable(false);
         } else {
-            // Mode 0 (disabled), Mode 1 (Nova encapsulation), Mode 3 (AC3 recoding) - allow dynamic audio delay
+            // Normal state - user can control dynamic audio delay
             mEnableDynamicAudioDelay.setEnabled(true);
             mEnableDynamicAudioDelay.setSelectable(true);
         }
@@ -591,9 +584,8 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         boolean frameTimingEnabled = mSharedPreferences.getBoolean("enable_android_frame_timing", false);
 
         if (isPassthroughSupported) {
-            String passthroughModeStr = mSharedPreferences.getString("force_audio_passthrough_multiple", "0");
-            int passthroughMode = Integer.parseInt(passthroughModeStr);
-            boolean passthroughEnabled = passthroughMode != 0;
+            String passthroughMode = mSharedPreferences.getString("force_audio_passthrough_multiple", "0");
+            boolean passthroughEnabled = !"0".equals(passthroughMode);
             mForceAudioPassthrough.setEnabled(passthroughEnabled);
             mPlaybackSpeed.setEnabled(!passthroughEnabled);
             mPlaybackSpeed.setSelectable(!passthroughEnabled);
@@ -601,11 +593,10 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             mAudioSpeedAudiotrack.setSelectable(!passthroughEnabled);
             // Disable downmix should be non-selectable when passthrough is enabled
             mDisableDownmix.setSelectable(!passthroughEnabled);
-            // Dynamic audio delay: only disable for mode 2 (Android passthrough)
-            updateDynamicAudioDelayState(passthroughMode, frameTimingEnabled);
+            // Dynamic audio delay depends on both passthrough and frame timing
+            updateDynamicAudioDelayState(passthroughEnabled, frameTimingEnabled);
             mForceAudioPassthroughMultiple.setOnPreferenceChangeListener((preference, newValue) -> {
-                int newPassthroughMode = Integer.parseInt(newValue.toString());
-                boolean newPassthroughEnabled = newPassthroughMode != 0;
+                boolean newPassthroughEnabled = !"0".equals(newValue.toString());
                 mForceAudioPassthrough.setEnabled(newPassthroughEnabled);
                 mPlaybackSpeed.setEnabled(!newPassthroughEnabled);
                 mPlaybackSpeed.setSelectable(!newPassthroughEnabled);
@@ -614,7 +605,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
                 // Disable downmix should be non-selectable when passthrough is enabled
                 mDisableDownmix.setSelectable(!newPassthroughEnabled);
                 boolean currentFrameTimingEnabled = mEnableAndroidFrameTiming.isChecked();
-                updateDynamicAudioDelayState(newPassthroughMode, currentFrameTimingEnabled);
+                updateDynamicAudioDelayState(newPassthroughEnabled, currentFrameTimingEnabled);
                 return true;
             });
         } else {
@@ -630,15 +621,15 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             // Disable downmix is selectable when passthrough is not supported
             mDisableDownmix.setSelectable(true);
             // Frame timing can still affect dynamic audio delay even without passthrough
-            updateDynamicAudioDelayState(0, frameTimingEnabled);
+            updateDynamicAudioDelayState(false, frameTimingEnabled);
         }
 
         // Set up listener for frame timing changes
         mEnableAndroidFrameTiming.setOnPreferenceChangeListener((preference, newValue) -> {
             boolean newFrameTimingEnabled = (Boolean) newValue;
-            int currentPassthroughMode = isPassthroughSupported ?
-                Integer.parseInt(mSharedPreferences.getString("force_audio_passthrough_multiple", "0")) : 0;
-            updateDynamicAudioDelayState(currentPassthroughMode, newFrameTimingEnabled);
+            boolean currentPassthroughEnabled = isPassthroughSupported &&
+                !"0".equals(mSharedPreferences.getString("force_audio_passthrough_multiple", "0"));
+            updateDynamicAudioDelayState(currentPassthroughEnabled, newFrameTimingEnabled);
             return true;
         });
         mStreamBufferSize = (EditTextPreference) findPreference(KEY_STREAM_BUFFER_SIZE);
