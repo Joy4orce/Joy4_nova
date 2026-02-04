@@ -3688,21 +3688,35 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             String action = intent.getAction();
             boolean returnResult = intent.getBooleanExtra("return_result", false);
             if (log.isDebugEnabled()) log.debug("detectExternalPlayerMode: action={}, return_result={}", action, returnResult);
+
             // Check if launched via ACTION_VIEW (typical for external player usage)
             if (Intent.ACTION_VIEW.equals(action)) {
-                // Check if the calling package is different from Nova (external app launched us)
+                // Try to get calling package from multiple sources
                 mCallingPackage = getCallingPackage();
-                if (mCallingPackage != null && !mCallingPackage.equals(getPackageName())) {
-                    // Only treat as external player if return_result is requested or if called by external app
-                    if (returnResult || !mCallingPackage.equals(getPackageName())) {
-                        mIsExternalPlayer = true;
-                        if (log.isDebugEnabled()) log.debug("detectExternalPlayerMode: Nova launched as external player by {}", mCallingPackage);
+
+                // API 22+: Try getReferrer() as fallback (more reliable than getCallingPackage)
+                if (mCallingPackage == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                    Uri referrer = getReferrer();
+                    if (referrer != null && "android-app".equals(referrer.getScheme())) {
+                        mCallingPackage = referrer.getHost();
+                        if (log.isDebugEnabled()) log.debug("detectExternalPlayerMode: Got calling package from referrer: {}", mCallingPackage);
                     }
-                } else {
                 }
-            } else {
+
+                // Check if we have external player indicators
+                boolean hasExternalIndicators = returnResult ||
+                        intent.hasExtra("position") ||
+                        intent.hasExtra("resume_position") ||
+                        intent.hasExtra("startfrom");
+
+                // Detect external player mode if:
+                // 1. We have a calling package that's different from Nova, OR
+                // 2. We have external player indicators (position extras, return_result, etc.)
+                if ((mCallingPackage != null && !mCallingPackage.equals(getPackageName())) || hasExternalIndicators) {
+                    mIsExternalPlayer = true;
+                    if (log.isDebugEnabled()) log.debug("detectExternalPlayerMode: Nova launched as external player by {} (hasExternalIndicators={})", mCallingPackage, hasExternalIndicators);
+                }
             }
-        } else {
         }
     }
 
