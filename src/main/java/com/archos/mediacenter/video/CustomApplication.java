@@ -262,6 +262,10 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                     } catch (Exception ignored) {
                         bestHdmiChannelMasks = null;
                     }
+                    if (log != null && log.isDebugEnabled()) {
+                        log.debug("refreshAudioOutputCapabilities({}): hdmi channel masks={}",
+                                reason, Arrays.toString(bestHdmiChannelMasks));
+                    }
                 }
             } else if (type == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
                 foundSpdif = true;
