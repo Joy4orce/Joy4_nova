@@ -882,9 +882,17 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         if (!mResumeFromLast && getSharedPreferences("player", 0).getInt("lastintent", 0) == getIntent().hashCode()) {
             /* resume video if last intent == current intent
              * (when resumed from history for example)
+             * NOTE: Skip this check when used as external player with position extras to respect caller's position
              */
-            mResumeFromLast = true;
-            if (log.isDebugEnabled()) log.debug("postOnPlayerServiceBind: Set mResumeFromLast=true due to lastintent match");
+            boolean hasPositionExtras = getIntent().hasExtra("startfrom") ||
+                                       getIntent().hasExtra("position") ||
+                                       getIntent().hasExtra("resume_position");
+            if (!(mIsExternalPlayer && hasPositionExtras)) {
+                mResumeFromLast = true;
+                if (log.isDebugEnabled()) log.debug("postOnPlayerServiceBind: Set mResumeFromLast=true due to lastintent match");
+            } else {
+                if (log.isDebugEnabled()) log.debug("postOnPlayerServiceBind: Skipping mResumeFromLast - external player with position extras detected");
+            }
         }
         final String action = getIntent().getAction();
         if (mResumeFromLast || (action != null && action.equals(ArchosIntents.ARCHOS_RESUME_VIDEOPLAYER))) {
