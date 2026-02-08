@@ -557,6 +557,9 @@
     <string name="preference_remove_dolby_vision_summary">使用标准视频编解码器而不是杜比视界</string>
     <string name="preference_cutout_short_edges">刘海屏视频全屏</string>
     <string name="preference_cutout_short_edges_summary">允许在刘海屏上进行视频横屏全屏播放</string>
+    <string name="toast_cutout_aspect_ratio_fix">开启全屏视频，适配刘海屏以保持正确宽高比。</string>
+    <string name="preference_enable_cutout_both_sidesx">两侧等距裁剪显示区域</string>
+    <string name="preference_enable_cutout_both_sidesx_summary">两侧等距裁剪显示区域，使屏幕对称。</string>
     <string name="category_languages">字幕</string>
     <string name="subtitles_hide_default">默认隐藏字幕</string>
     <string name="subtitles_hide_default_summary">如果您想要默认隐藏字幕，请勾选此项。</string>
@@ -590,6 +593,8 @@
     <string name="tv_scraper">电视节目</string>
     <string name="movie_scraper">电影</string>
     <string name="enable_auto_scrap">自动获取新视频信息</string>
+    <string name="enable_scrape_from_db_title">使用已刮削的信息</string>
+    <string name="enable_scrape_from_db_summary">如果找到重复视频，则使用已刮削的信息。关闭此选项可加快初始刮削速度！</string>
     <string name="enable_adult_scrap_title">成人视频刮削</string>
     <string name="enable_adult_scrap_summary">启用成人视频信息检索 (默认禁用)</string>
     <string name="locale">系统语言</string>
@@ -976,6 +981,7 @@
     <string name="enable_sponsor_summary">启用捐赠赞助链接：每个捐赠都有帮助。</string>
     <string name="hdr_capability">HDR 屏幕功能：</string>
     <string name="hdmi_audio_capabilities">HDMI 接收器音频功能：</string>
+    <string name="spdif_audio_capabilities">S/PDIF 音频功能：</string>
     <string name="max_audio_channels">最大音频声道数：</string>
     <string name="supported_refresh_rates">支持的刷新率：</string>
     <string name="upgrade_info">升级信息</string>

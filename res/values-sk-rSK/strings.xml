@@ -572,6 +572,9 @@
     <string name="preference_remove_dolby_vision_summary">Používanie štandardných video kodekov namiesto Dolby Vision</string>
     <string name="preference_cutout_short_edges">Video na celú obrazovku s výrezmi displeja</string>
     <string name="preference_cutout_short_edges_summary">Povoliť zobrazenie videa na šírku na displeji s výrezmi</string>
+    <string name="toast_cutout_aspect_ratio_fix">Zapnúť video na celú obrazovku s výrezmi pre správny pomer strán.</string>
+    <string name="preference_enable_cutout_both_sidesx">Rovnomerné skrátenie displeja na oboch stranách</string>
+    <string name="preference_enable_cutout_both_sidesx_summary">Orezajte displej rovnako na oboch stranách, aby bol obrazovka symetrická.</string>
     <string name="category_languages">Titulky</string>
     <string name="subtitles_hide_default">Skryť predvolené titulky</string>
     <string name="subtitles_hide_default_summary">Označte, či chcete skryť predvolené titulky</string>
@@ -605,6 +608,8 @@
     <string name="tv_scraper">Seriály</string>
     <string name="movie_scraper">Filmy</string>
     <string name="enable_auto_scrap">Automatické získavanie informácií o nových videách</string>
+    <string name="enable_scrape_from_db_title">Použite už získané informácie</string>
+    <string name="enable_scrape_from_db_summary">Ak sa nájde duplicitné video, použite už získané informácie. Vypnite túto funkciu, aby bolo počiatočné získavanie informácií rýchlejšie!</string>
     <string name="enable_adult_scrap_title">Získavanie informácii o videách pre dospelých</string>
     <string name="enable_adult_scrap_summary">Povoliť vyhľadávanie informácií o videách pre dospelých (predvolene vypnuté)</string>
     <string name="locale">Jazyk systému</string>
@@ -991,6 +996,7 @@
     <string name="enable_sponsor_summary">Povoliť sponzorský odkaz pre darovanie: každý príspevok pomáha.</string>
     <string name="hdr_capability">Funkcie obrazovky HDR:</string>
     <string name="hdmi_audio_capabilities">Zvukové funkcie HDMI:</string>
+    <string name="spdif_audio_capabilities">Funkcie zvuku S/PDIF:</string>
     <string name="max_audio_channels">Maximálny počet zvukových kanálov:</string>
     <string name="supported_refresh_rates">Podporované obnovovacie frekvencie:</string>
     <string name="upgrade_info">Informácie o aktualizácii</string>
