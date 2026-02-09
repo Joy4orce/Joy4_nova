@@ -578,8 +578,8 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
                 b.putBoolean(Scraper.ITEM_REQUEST_BASIC_VIDEO, true);
                 if (result.isTvShow()) {
                     b.putInt(Scraper.ITEM_REQUEST_SEASON, result.getOriginSearchSeason());
-                    // to get the correct poster
-                    //b.putInt(Scraper.ITEM_REQUEST_EPISODE, result.getOriginSearchEpisode());
+                    b.putInt(Scraper.ITEM_REQUEST_EPISODE, result.getOriginSearchEpisode());
+                    // For manual single-episode scraping, fetch only the requested episode instead of entire season
                 }
                 // Get the details for this match
                 ScrapeDetailResult detail = mScraper.getDetails(result, b);
@@ -690,8 +690,8 @@ public class VideoInfoScraperSearchFragment extends Fragment implements  Handler
                     b.putBoolean(Scraper.ITEM_REQUEST_BASIC_VIDEO, true);
                     if (result.isTvShow()) {
                         b.putInt(Scraper.ITEM_REQUEST_SEASON, result.getOriginSearchSeason());
-                        // to get the correct poster
-                        //b.putInt(Scraper.ITEM_REQUEST_EPISODE, result.getOriginSearchEpisode());
+                        b.putInt(Scraper.ITEM_REQUEST_EPISODE, result.getOriginSearchEpisode());
+                        // For manual single-episode scraping, fetch only the requested episode instead of entire season
                     }
                     ScrapeDetailResult detail = mScraper.getDetails(result, b);
                     tags = detail.tag;

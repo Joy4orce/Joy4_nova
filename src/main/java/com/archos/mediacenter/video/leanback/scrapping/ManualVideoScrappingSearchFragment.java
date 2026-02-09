@@ -104,8 +104,9 @@ public class ManualVideoScrappingSearchFragment extends ManualScrappingSearchFra
 
         if (result.isTvShow()) {
             b.putInt(Scraper.ITEM_REQUEST_SEASON, result.getOriginSearchSeason());
-            // this is required to get the season poster (episode does not have this information on tmdb)
-            //b.putInt(Scraper.ITEM_REQUEST_EPISODE, result.getOriginSearchEpisode());
+            b.putInt(Scraper.ITEM_REQUEST_EPISODE, result.getOriginSearchEpisode());
+            // For manual single-episode scraping, fetch only the requested episode instead of entire season
+            // This improves performance by reducing API response size and processing time
         }
         ScrapeDetailResult detail = mScraper.getDetails(result, b);
         BaseTags tags = detail.tag;

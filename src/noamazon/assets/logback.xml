@@ -117,23 +117,32 @@
     <logger name="com.archos.mediacenter.video.utils.TraktSigninDialogPreference" level="DEBUG"/>
 
     <!-- Debug scraper -->
-    <logger name="com.archos.mediascraper.themoviedb3" level="INFO"/>
-    <logger name="com.archos.mediascraper.themoviedb3.MyTmdb" level="INFO"/>
-    <logger name="com.archos.mediascraper.preprocess" level="INFO"/>
-    <logger name="com.archos.mediascraper.preprocess.MovieDefaultMatcher" level="INFO"/>
-    <logger name="com.archos.mediascraper.preprocess.ParseUtils" level="INFO"/>
+    <logger name="com.archos.mediascraper.Scraper" level="DEBUG"/>
+    <logger name="com.archos.mediascraper.themoviedb3" level="DEBUG"/>
+    <logger name="com.archos.mediascraper.themoviedb3.MyTmdb" level="DEBUG"/>
+    <logger name="com.archos.mediascraper.preprocess" level="DEBUG"/>
+    <logger name="com.archos.mediascraper.preprocess.SearchPreprocessor" level="DEBUG"/>
+    <logger name="com.archos.mediascraper.preprocess.TvShowPathMatcher" level="DEBUG"/>
+    <logger name="com.archos.mediascraper.preprocess.TvShowFolderMatcher" level="DEBUG"/>
+    <logger name="com.archos.mediascraper.preprocess.MovieDefaultMatcher" level="DEBUG"/>
+    <logger name="com.archos.mediascraper.preprocess.ParseUtils" level="DEBUG"/>
 
-    <logger name="com.archos.mediascraper.xml" level="INFO"/>
+    <logger name="com.archos.mediascraper.xml" level="DEBUG"/>
+    <logger name="com.archos.mediascraper.xml.BaseScraper2" level="DEBUG"/>
+    <logger name="com.archos.mediascraper.xml.ShowScraper4" level="DEBUG"/>
+    <logger name="com.archos.mediascraper.xml.MovieScraper3" level="DEBUG"/>
     <logger name="com.archos.mediascraper.NfoWriter" level="INFO"/>
     <logger name="com.archos.mediascraper.NfoParser" level="INFO"/>
-    <logger name="com.archos.mediascraper.themoviedb3.SearchMovieParser2" level="INFO"/>
-    <logger name="com.archos.mediascraper.themoviedb3.SearchParserResult" level="INFO"/>
-    <logger name="com.archos.mediascraper.themoviedb3.SearchShowParser" level="INFO"/>
+    <logger name="com.archos.mediascraper.themoviedb3.SearchMovieParser2" level="DEBUG"/>
+    <logger name="com.archos.mediascraper.themoviedb3.SearchParserResult" level="DEBUG"/>
+    <logger name="com.archos.mediascraper.themoviedb3.SearchShowParser" level="DEBUG"/>
+    <logger name="com.archos.mediascraper.themoviedb3.ShowIdParser" level="DEBUG"/>
+    <logger name="com.archos.mediascraper.themoviedb3.ShowIdEpisodes" level="DEBUG"/>
     <logger name="com.archos.mediascraper.AllCollectionScrapeService" level="INFO"/>
-    <logger name="com.archos.mediascraper.xml.MovieScraper3" level="INFO"/>
-    <logger name="com.archos.mediascraper.xml.ShowScraper4" level="INFO"/>
 
-
+    <logger name="com.archos.mediacenter.video.leanback.scrapping" level="TRACE"/>
+    <logger name="com.archos.mediacenter.video.info" level="TRACE"/>
+    
     <logger name="com.archos.mediaprovider.video.ScraperTables" level="INFO"/>
     <logger name="com.archos.mediaprovider.video.VideoOpenHelper" level="INFO"/>
 
