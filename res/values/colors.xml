@@ -111,7 +111,7 @@
     <color name="theme_details_secondary_black">#ff616161</color>
     
     <color name="theme_grid_item_blue">#ff012643</color>
-    <color name="theme_grid_item_black">#ff000000</color>
+    <color name="theme_grid_item_black">#ff363636</color>     <!-- Dark grey visible on black background -->
     
     <color name="theme_category_selector_blue">@color/lightblue800</color>
     <color name="theme_category_selector_black">@color/lightgrey</color>
