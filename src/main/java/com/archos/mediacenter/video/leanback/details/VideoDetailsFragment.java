@@ -131,6 +131,7 @@ import com.archos.mediacenter.video.utils.PlayUtils;
 import com.archos.mediacenter.video.utils.StoreRatingDialogBuilder;
 import com.archos.mediacenter.video.utils.SubtitlesDownloaderActivity2;
 import com.archos.mediacenter.video.utils.VideoMetadata;
+import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.mediacenter.video.utils.WebUtils;
 import com.archos.mediaprovider.video.VideoStore;
@@ -342,15 +343,15 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
         mHandler = new Handler();
         setTopOffsetRatio(0.5f);
         XmlDb.getInstance().addResumeChangeListener(this);
-        mColor = ContextCompat.getColor(getActivity(), R.color.leanback_details_background);
+        mColor = ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor();
         mDescriptionPresenter = new VideoDetailsDescriptionPresenter();
         mOverviewRowPresenter = new ArchosDetailsOverviewRowPresenter(mDescriptionPresenter);
         //be aware of a hack to avoid fullscreen overview : cf onSetRowStatus
         FullWidthDetailsOverviewSharedElementHelper helper = new FullWidthDetailsOverviewSharedElementHelper();
         helper.setSharedElementEnterTransition(getActivity(), VideoDetailsActivity.SHARED_ELEMENT_NAME, 1000);
         mOverviewRowPresenter.setListener(helper);
-        mOverviewRowPresenter.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.leanback_details_background));
-        mOverviewRowPresenter.setActionsBackgroundColor(getDarkerColor(ContextCompat.getColor(getActivity(), R.color.leanback_details_background)));
+        mOverviewRowPresenter.setBackgroundColor(ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor());
+        mOverviewRowPresenter.setActionsBackgroundColor(getDarkerColor(ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor()));
         mOverviewRowPresenter.setOnActionClickedListener(mOnActionClickedListener);
         mVideoBadgePresenter = new VideoBadgePresenter(getActivity());
         mFileListAdapter = new ArrayObjectAdapter(mVideoBadgePresenter);
@@ -1047,7 +1048,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
             }
 
             if (smoothUpdate) {
-                mColor = ContextCompat.getColor(getActivity(), R.color.leanback_details_background);
+                mColor = ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor();
                 
                 mVideoBadgePresenter.setSelectedBackgroundColor(mColor);
                 mOverviewRowPresenter.updateBackgroundColor(mColor);
@@ -1339,7 +1340,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
         @Override
         protected Bitmap doInBackground(Video... videos) {
             Video video = videos[0];
-            mColor = ContextCompat.getColor(getActivity(), R.color.leanback_details_background);
+            mColor = ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor();
             mVideoBadgePresenter.setSelectedBackgroundColor(mColor);
 
             Uri imageUri = null;
@@ -1377,7 +1378,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
                 else if (palette.getDarkMutedSwatch() != null)
                     mColor = palette.getDarkMutedSwatch().getRgb();
                 else
-                    mColor = ContextCompat.getColor(getActivity(), R.color.leanback_details_background);
+        mColor = ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor();
                 dominantColor = mColor;
                 mVideoBadgePresenter.setSelectedBackgroundColor(mColor);
                 mOverviewRowPresenter.updateBackgroundColor(mColor);
@@ -1786,7 +1787,7 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
                 else if (palette.getDarkMutedSwatch() != null)
                     color = palette.getDarkMutedSwatch().getRgb();
                 else
-                    color = ContextCompat.getColor(getActivity(), R.color.leanback_details_background);
+                    color = ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor();
 
                 if (color != mColor) {
                     mColor = color;

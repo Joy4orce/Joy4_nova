@@ -73,6 +73,7 @@ import androidx.loader.content.CursorLoader;
 import com.archos.filecorelibrary.FileUtilsQ;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.Delete;
+import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.browser.adapters.MovieCollectionAdapter;
 import com.archos.mediacenter.video.browser.adapters.mappers.CollectionCursorMapper;
 import com.archos.mediacenter.video.browser.adapters.mappers.VideoCursorMapper;
@@ -201,7 +202,7 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
 
         if (log.isDebugEnabled()) log.debug("onCreate: {}", mCollection.getName());
 
-        mColor = ContextCompat.getColor(getActivity(), R.color.leanback_details_background);
+        mColor = ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor();
         mHandler = new Handler();
         mDescriptionPresenter = new CollectionDetailsDescriptionPresenter();
         mOverviewRowPresenter = new ArchosDetailsOverviewRowPresenter(mDescriptionPresenter);
@@ -209,8 +210,8 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
         FullWidthDetailsOverviewSharedElementHelper helper = new FullWidthDetailsOverviewSharedElementHelper();
         helper.setSharedElementEnterTransition(getActivity(), SHARED_ELEMENT_NAME, 1000);
         mOverviewRowPresenter.setListener(helper);
-        mOverviewRowPresenter.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.leanback_details_background));
-        mOverviewRowPresenter.setActionsBackgroundColor(getDarkerColor(ContextCompat.getColor(getActivity(), R.color.leanback_details_background)));
+        mOverviewRowPresenter.setBackgroundColor(ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor());
+        mOverviewRowPresenter.setActionsBackgroundColor(getDarkerColor(ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor()));
         mOverviewRowPresenter.setOnActionClickedListener(new OnActionClickedListener() {
             @Override
             public void onActionClicked(Action action) {
@@ -684,7 +685,7 @@ public class CollectionFragment extends DetailsFragmentWithLessTopOffset impleme
                     else if (palette.getDarkMutedSwatch() != null)
                         mColor = palette.getDarkMutedSwatch().getRgb();
                     else
-                        mColor = ContextCompat.getColor(getActivity(), R.color.leanback_details_background);
+                    mColor = ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor();
                     if (isWatched)
                         bitmap = PresenterUtils.addWatchedMark(bitmap, getContext());
                 }

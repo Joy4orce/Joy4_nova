@@ -15,6 +15,7 @@
 package com.archos.mediacenter.video;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,8 +23,10 @@ import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
+import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.MainActivity;
 import com.archos.mediacenter.video.leanback.MainActivityLeanback;
+import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 
 import org.slf4j.Logger;
@@ -39,12 +42,19 @@ import java.util.Locale;
 public class EntryActivity extends AppCompatActivity {
 
     private static final Logger log = LoggerFactory.getLogger(EntryActivity.class);
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
+        // Apply theme before super.onCreate() to avoid visual flash
+        ThemeManager themeManager = ThemeManager.getInstance(this);
+        // EntryActivity uses launcher theme which is already neutral black
+        // The actual theme will be set in the launched activity (MainActivity or MainActivityLeanback)
         ((CustomApplication) getApplication()).loadLocale();
         super.onCreate(savedInstanceState);
+        
+        // Apply window theme after super.onCreate()
+        themeManager.applyWindowTheme(this);
 
         if (log.isDebugEnabled()) log.debug("onCreate");
 
@@ -71,12 +81,30 @@ public class EntryActivity extends AppCompatActivity {
         startActivity(i);;
 
         finish();
+
+        mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                    recreate();
+                }
+            }
+        };
+        ThemeManager.getInstance(this).registerThemeChangeListener(mThemeChangeListener);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         ((CustomApplication) getApplication()).loadLocale();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mThemeChangeListener != null) {
+            ThemeManager.getInstance(this).unregisterThemeChangeListener(mThemeChangeListener);
+        }
+        super.onDestroy();
     }
 
 }

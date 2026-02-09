@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -37,6 +38,8 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.archos.mediacenter.video.utils.ThemeManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.TextViewCompat;
@@ -154,6 +157,7 @@ abstract public class BrowserByFolder extends BrowserByVideoObjects implements
     private boolean mIsFirst = true;
     private String mTitle;
     protected int mFirstFileIndex;
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -179,6 +183,12 @@ abstract public class BrowserByFolder extends BrowserByVideoObjects implements
 
     @Override
     public void onResume() {
+        // Apply theme colors to actionbar - safe to do here when ActionBar is initialized
+        if (getActivity() != null && ((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(
+                new android.graphics.drawable.ColorDrawable(ThemeManager.getInstance(getActivity()).getToolbarBackgroundColor())
+            );
+        }
         mIsActive = true;
         super.onResume();
         if (mFileList.isEmpty()) {
@@ -203,7 +213,35 @@ abstract public class BrowserByFolder extends BrowserByVideoObjects implements
     @Override
     public void onStart() {
         super.onStart();
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getActionBarTitle());
+        if (getActivity() != null && ((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getActionBarTitle());
+        }
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Apply theme colors to actionbar - defer to onResume when ActionBar is available
+        // Register theme change listener
+        mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                    if (getActivity() != null) {
+                        getActivity().recreate();
+                    }
+                }
+            }
+        };
+        ThemeManager.getInstance(getActivity()).registerThemeChangeListener(mThemeChangeListener);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mThemeChangeListener != null && getActivity() != null) {
+            ThemeManager.getInstance(getActivity()).unregisterThemeChangeListener(mThemeChangeListener);
+        }
     }
 
     @Override

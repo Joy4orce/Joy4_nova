@@ -25,5 +25,5 @@
         android:layout_width="60dip"
         android:layout_height="2dip"
         android:layout_marginBottom="0dip"
-        android:background="@color/lightblue700" />
+        android:background="@color/ui_accent_medium" />
 </LinearLayout>

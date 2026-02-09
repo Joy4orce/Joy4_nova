@@ -46,6 +46,7 @@ import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.HeaderGridView;
 import com.archos.mediacenter.video.browser.MainActivity;
 import com.archos.mediacenter.video.browser.adapters.mappers.TvshowCursorMapper;
+import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.browser.adapters.object.Tvshow;
 import com.archos.mediacenter.video.browser.loader.SeasonsLoader;
 import com.archos.mediacenter.video.browser.loader.TvshowLoader;
@@ -324,7 +325,7 @@ public abstract class BrowserWithShowHeader extends CursorBrowserByVideo  {
                     if (log.isDebugEnabled()) log.debug("TvShowAsyncTask.Result: {}x{} ---- {}", bitmap.getWidth(), bitmap.getHeight(), posterUri);
                     if(bitmap!=null) {
                         Palette palette = Palette.from(bitmap).generate();
-                        mColor = palette.getDarkVibrantColor(ContextCompat.getColor(getActivity(), R.color.leanback_details_background));
+                        mColor = palette.getDarkVibrantColor(ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor());
                     }
                 }
             }

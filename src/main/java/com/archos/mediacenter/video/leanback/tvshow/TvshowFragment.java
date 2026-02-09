@@ -64,6 +64,7 @@ import androidx.loader.content.CursorLoader;
 
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.adapters.mappers.TvshowCursorMapper;
+import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.browser.adapters.mappers.VideoCursorMapper;
 import com.archos.mediacenter.video.browser.adapters.object.Episode;
 import com.archos.mediacenter.video.browser.adapters.object.Tvshow;
@@ -184,7 +185,7 @@ public class TvshowFragment extends DetailsFragmentWithLessTopOffset implements 
             setmTvshow(tvShowId);
         }
 
-        mColor = ContextCompat.getColor(getActivity(), R.color.leanback_details_background);
+        mColor = ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor();
         mHandler = new Handler();
         mDescriptionPresenter = new TvshowDetailsDescriptionPresenter();
         mOverviewRowPresenter = new ArchosDetailsOverviewRowPresenter(mDescriptionPresenter);
@@ -192,8 +193,8 @@ public class TvshowFragment extends DetailsFragmentWithLessTopOffset implements 
         FullWidthDetailsOverviewSharedElementHelper helper = new FullWidthDetailsOverviewSharedElementHelper();
         helper.setSharedElementEnterTransition(getActivity(), SHARED_ELEMENT_NAME, 1000);
         mOverviewRowPresenter.setListener(helper);
-        mOverviewRowPresenter.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.leanback_details_background));
-        mOverviewRowPresenter.setActionsBackgroundColor(getDarkerColor(ContextCompat.getColor(getActivity(), R.color.leanback_details_background)));
+        mOverviewRowPresenter.setBackgroundColor(ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor());
+        mOverviewRowPresenter.setActionsBackgroundColor(getDarkerColor(ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor()));
         mOverviewRowPresenter.setOnActionClickedListener(new OnActionClickedListener() {
             @Override
             public void onActionClicked(Action action) {
@@ -766,7 +767,7 @@ public class TvshowFragment extends DetailsFragmentWithLessTopOffset implements 
                 else if (palette.getDarkMutedSwatch() != null)
                     mColor = palette.getDarkMutedSwatch().getRgb();
                 else
-                    mColor = ContextCompat.getColor(getActivity(), R.color.leanback_details_background);
+                    mColor = ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor();
                 dominantColor = mColor;
                 if (isWatched)
                     bitmap = PresenterUtils.addWatchedMark(bitmap, getContext());

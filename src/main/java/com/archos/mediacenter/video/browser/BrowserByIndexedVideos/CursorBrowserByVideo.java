@@ -135,7 +135,9 @@ abstract public class CursorBrowserByVideo extends BrowserByVideoObjects impleme
         if (mCursor != null && !mCursor.isClosed())
 	        bindAdapter();
         LoaderManager.getInstance(this).restartLoader(0, null, this);
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getActionBarTitle());
+        if (getActivity() != null && ((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(getActionBarTitle());
+        }
     }
 
 

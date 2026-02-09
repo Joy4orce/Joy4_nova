@@ -26,7 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/textviews"
-        android:background="@color/lightblue900"
+        android:background="@color/ui_accent_dark"
         android:scaleType="center"
         app:srcCompat="@drawable/filetype_video_server" />
 

@@ -15,6 +15,7 @@
 package com.archos.mediacenter.video.leanback.scrapping;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -37,6 +38,8 @@ import android.util.Log;
 
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.leanback.ShadowLessListRow;
+import com.archos.mediacenter.video.utils.ThemeManager;
+import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.mediacenter.video.leanback.adapter.object.EmptyView;
 import com.archos.mediacenter.video.leanback.presenter.EmptyViewPresenter;
 import com.archos.mediacenter.video.leanback.presenter.ScraperBaseTagsPresenter;
@@ -75,6 +78,7 @@ public abstract class ManualScrappingSearchFragment extends SafeSearchSupportFra
     private NfoTask mNfoTask;
 
     private static final int SEARCH_REQUEST_CODE = 1;
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
 
     /*
         Execute in our own serial executor :
@@ -145,11 +149,42 @@ public abstract class ManualScrappingSearchFragment extends SafeSearchSupportFra
         super.onActivityCreated(savedInstanceState);
 
         Resources r = getResources();
-        BackgroundManager bgMngr = BackgroundManager.getInstance(getActivity());
-        bgMngr.attach(getActivity().getWindow());
-        bgMngr.setColor(ContextCompat.getColor(getActivity(), R.color.leanback_background));
+        updateBackground();
         mNfoTask = new NfoTask();
         mNfoTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void updateBackground() {
+        BackgroundManager bgMngr = BackgroundManager.getInstance(getActivity());
+        bgMngr.attach(getActivity().getWindow());
+        int backgroundColor = ThemeManager.getInstance(getActivity()).getLeanbackBackgroundColor();
+        bgMngr.setColor(backgroundColor);
+    }
+
+    private void setupThemeListener() {
+        // Guard against duplicate registration
+        if (mThemeChangeListener != null) {
+            return;
+        }
+        ThemeManager themeManager = ThemeManager.getInstance(getActivity());
+        mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                    updateBackground();
+                }
+            }
+        };
+        themeManager.registerThemeChangeListener(mThemeChangeListener);
+    }
+
+    @Override
+    public void onDestroyView() {
+        // Unregister theme change listener
+        if (mThemeChangeListener != null) {
+            ThemeManager.getInstance(getActivity()).unregisterThemeChangeListener(mThemeChangeListener);
+        }
+        super.onDestroyView();
     }
 
     @Override
@@ -192,6 +227,13 @@ public abstract class ManualScrappingSearchFragment extends SafeSearchSupportFra
     public void onStop(){
         super.onStop();
         mNfoTask.cancel(true);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateBackground();
+        setupThemeListener();
     }
 
     protected abstract BaseTags getNfoTags();

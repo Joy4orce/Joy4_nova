@@ -65,6 +65,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.content.ContextCompat;
 import androidx.core.text.HtmlCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -94,6 +95,7 @@ import com.archos.mediacenter.video.utils.ExternalPlayerResultListener;
 import com.archos.mediacenter.video.utils.ExternalPlayerWithResultStarter;
 import com.archos.mediacenter.video.utils.MiscUtils;
 import com.archos.mediacenter.video.utils.PlayUtils;
+import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.utils.TraktSigninDialogPreference;
 import com.archos.mediacenter.video.utils.VideoPreferencesActivity;
 import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
@@ -174,6 +176,7 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
     public static Boolean mStereoForced = false;
     private BroadcastReceiver mTraktRelogBroadcastReceiver;
     private AlertDialog mTraktRelogAlertDialog;
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private ViewStub mGlobalResumeViewStub;
@@ -196,10 +199,32 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
     }
 
     public void setBackground() {
-        int backgroundResId = PrivateMode.isActive() ? R.drawable.background_2014_dark : R.drawable.background_2014;
-        getWindow().getDecorView().setBackgroundResource(backgroundResId);
-        if(mDrawerLayout != null)
-            mDrawerLayout.findViewById(R.id.category_container).setBackgroundResource(backgroundResId);
+        // Update private mode indicator visibility
+        View privateModeIndicator = findViewById(R.id.private_mode_indicator);
+        if (privateModeIndicator != null) {
+            privateModeIndicator.setVisibility(PrivateMode.isActive() ? View.VISIBLE : View.GONE);
+        }
+        
+        if (PrivateMode.isActive()) {
+            // Private mode: use theme-appropriate color for both phone and TV
+            int backgroundColor = ThemeManager.getInstance(this).getPrivateModeColor();
+            getWindow().getDecorView().setBackgroundColor(backgroundColor);
+            if(mDrawerLayout != null)
+                mDrawerLayout.findViewById(R.id.category_container).setBackgroundColor(backgroundColor);
+        } else if (ThemeManager.getInstance(this).isBlackTheme() && 
+                   ThemeManager.getInstance(this).isPhoneMode(this)) {
+            // Phone + Black theme: Apply gradient to window AND category container
+            ThemeManager.getInstance(this).applyPhoneWindowGradient(this);
+            if(mDrawerLayout != null)
+                mDrawerLayout.findViewById(R.id.category_container).setBackground(
+                    ThemeManager.getInstance(this).getPhoneCategoryGradient());
+        } else {
+            // TV or Blue theme: Keep existing behavior
+            ThemeManager.getInstance(this).applyWindowGradient(this);
+            if(mDrawerLayout != null)
+                mDrawerLayout.findViewById(R.id.category_container).setBackgroundColor(
+                    ThemeManager.getInstance(this).getLeanbackBackgroundColor());
+        }
     }
 
     private void setHomeButton() {
@@ -211,11 +236,29 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // Apply correct theme before super.onCreate() to avoid visual flash
+        ThemeManager themeManager = ThemeManager.getInstance(this);
+        if (themeManager.isBlackTheme()) {
+            setTheme(R.style.ArchosThemeBlackNoActionBar);
+        } else {
+            setTheme(R.style.ArchosThemeBlueNoActionBar);
+        }
+        themeManager.applyWindowTheme(this);
         ((CustomApplication) getApplication()).loadLocale();
         //CustomApplication.loadLocale(getResources());
         requestWindowFeature(Window.FEATURE_OPTIONS_PANEL);
         this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
         super.onCreate(savedInstanceState);
+
+        mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                    recreate();
+                }
+            }
+        };
+        ThemeManager.getInstance(this).registerThemeChangeListener(mThemeChangeListener);
 
         // Update uimode/uimode_leanback to reflect we're in phone/tablet mode
         com.archos.mediacenter.video.UiChoiceDialog.updateUiModePreferences(this, false);
@@ -512,6 +555,14 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
             mNewVideosActionProvider.cancelHelpOverlayRequest();
         }
         super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mThemeChangeListener != null) {
+            ThemeManager.getInstance(this).unregisterThemeChangeListener(mThemeChangeListener);
+        }
+        super.onDestroy();
     }
 
     @Override

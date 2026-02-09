@@ -15,6 +15,7 @@
 package com.archos.mediacenter.video.utils;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,6 +28,7 @@ public class VideoPreferencesActivity extends AppCompatActivity {
 
 	final public static String ALLOW_3RD_PARTY_PLAYER = "allow_3rd_party_player";
 	final public static boolean ALLOW_3RD_PARTY_PLAYER_DEFAULT = false;
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
 
     final public static String FOLDER_BROWSING_DEFAULT_FOLDER = "folder_browsing_default_folder";
     final public static String FOLDER_BROWSING_DEFAULT_FOLDER_DEFAULT = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).getPath();
@@ -35,10 +37,21 @@ public class VideoPreferencesActivity extends AppCompatActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        ThemeManager.getInstance(this).applyWindowTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.preferences_video);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+
+        mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                    recreate();
+                }
+            }
+        };
+        ThemeManager.getInstance(this).registerThemeChangeListener(mThemeChangeListener);
     }
 
     public void videoPreferenceOsClick(View v) {
@@ -73,6 +86,14 @@ public class VideoPreferencesActivity extends AppCompatActivity {
                 break;
         }
         return ret;
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mThemeChangeListener != null) {
+            ThemeManager.getInstance(this).unregisterThemeChangeListener(mThemeChangeListener);
+        }
+        super.onDestroy();
     }
 
 }

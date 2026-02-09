@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -34,12 +36,15 @@ import androidx.preference.PreferenceManager;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.adapters.mappers.TvshowCursorMapper;
 import com.archos.mediacenter.video.browser.loader.TvshowsByAlphaLoader;
+import com.archos.mediacenter.video.utils.ThemeManager;
+import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.mediacenter.video.browser.loader.TvshowsSelectionLoader;
 import com.archos.mediacenter.video.leanback.CompatibleCursorMapperConverter;
 import com.archos.mediacenter.video.leanback.VideoViewClickedListener;
 import com.archos.mediacenter.video.leanback.overlay.Overlay;
 import com.archos.mediacenter.video.leanback.presenter.PosterImageCardPresenter;
 import com.archos.mediacenter.video.player.PrivateMode;
+import com.archos.mediacenter.video.utils.PrivateModeUIHelper;
 import com.archos.mediacenter.video.tvshow.TvshowSortOrderEntries;
 import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 
@@ -82,6 +87,7 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
     SparseArray<CursorObjectAdapter> mAdaptersMap = new SparseArray<>();
 
     BackgroundManager bgMngr = null;
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
 
     abstract protected Loader<Cursor> getSubsetLoader(Context context);
 
@@ -101,6 +107,9 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Add private mode indicator overlay
+        PrivateModeUIHelper.addPrivateModeIndicator(getActivity(), view);
 
         mOverlay = new Overlay(this);
 
@@ -124,6 +133,10 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
     @Override
     public void onDestroyView() {
         mOverlay.destroy();
+        // Unregister theme change listener
+        if (mThemeChangeListener != null) {
+            ThemeManager.getInstance(getActivity()).unregisterThemeChangeListener(mThemeChangeListener);
+        }
         super.onDestroyView();
     }
 
@@ -155,11 +168,13 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
         setHeadersState(HEADERS_ENABLED);
         setHeadersTransitionOnBackEnabled(true);
 
-        // set fastLane (or headers) background color
-        setBrandColor(ContextCompat.getColor(getActivity(), R.color.leanback_side));
+        // Apply theme-aware colors
+        ThemeManager themeManager = ThemeManager.getInstance(getActivity());
+        // set fastLane (or headers) background color based on theme
+        setBrandColor(themeManager.getLeanbackHeaderColor());
 
         // set search icon color
-        setSearchAffordanceColor(ContextCompat.getColor(getActivity(),R.color.lightblueA200));
+        setSearchAffordanceColor(ThemeManager.getInstance(getActivity()).getSearchAffordanceColor());
 
         setupEventListeners();
 
@@ -172,6 +187,9 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
         mTvshowMapper = new CompatibleCursorMapperConverter(new TvshowCursorMapper());
 
         LoaderManager.getInstance(this).initLoader(-1, null, this);
+
+        // Setup theme change listener
+        setupThemeListener();
     }
 
     private void setupEventListeners() {
@@ -321,17 +339,43 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
     }
 
     private void updateBackground() {
+        // Update private mode indicator visibility
+        PrivateModeUIHelper.updatePrivateModeIndicator(getView());
+
         bgMngr = BackgroundManager.getInstance(getActivity());
         if(!bgMngr.isAttached())
             bgMngr.attach(getActivity().getWindow());
 
         if (PrivateMode.isActive()) {
-            bgMngr.setColor(ContextCompat.getColor(getActivity(), R.color.private_mode));
-            bgMngr.setDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.private_background));
+            int privateModeColor = ThemeManager.getInstance(getActivity()).getPrivateModeColor();
+            bgMngr.setColor(privateModeColor);
+            bgMngr.setDrawable(new ColorDrawable(privateModeColor));
         } else {
-            bgMngr.setColor(ContextCompat.getColor(getActivity(), R.color.leanback_background));
-            bgMngr.setDrawable(new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.leanback_background)));
+            // Use ThemeManager to get the appropriate background color for the current theme
+            int backgroundColor = ThemeManager.getInstance(getActivity()).getLeanbackBackgroundColor();
+            bgMngr.setColor(backgroundColor);
+            bgMngr.setDrawable(new ColorDrawable(backgroundColor));
         }
+    }
+
+    private void setupThemeListener() {
+        // Guard against duplicate registration
+        if (mThemeChangeListener != null) {
+            return;
+        }
+        ThemeManager themeManager = ThemeManager.getInstance(getActivity());
+        mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                    if (log.isDebugEnabled()) log.debug("Theme changed, updating background and colors");
+                    updateBackground();
+                    // Update brand color
+                    setBrandColor(themeManager.getLeanbackHeaderColor());
+                }
+            }
+        };
+        themeManager.registerThemeChangeListener(mThemeChangeListener);
     }
 
 }

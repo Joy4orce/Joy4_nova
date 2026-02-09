@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.archos.filecorelibrary.MetaFile2;
+import com.archos.mediacenter.video.utils.ThemeManager;
 
 /**
  * ListPresenter for MetaFile objects (used for folders and non-video files)
@@ -34,6 +35,8 @@ public class MetaFileListPresenter extends ListPresenter {
         MetaFile2 file = (MetaFile2)item;
 
         vh.setTitleText(file.getName());
+        // Apply theme background color for folders to override blue background in drawable
+        vh.getImageView().setBackgroundColor(ThemeManager.getInstance(mContext).getLeanbackHeaderColor());
         vh.getImageView().setImageResource(PresenterUtils.getIconResIdFor(file));
         vh.getImageView().setScaleType(ImageView.ScaleType.CENTER);
         vh.setContentTextVisibility(View.GONE);

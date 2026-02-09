@@ -19,6 +19,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.util.SparseArray;
 import android.view.KeyEvent;
@@ -51,8 +53,11 @@ import com.archos.mediacenter.video.leanback.presenter.PosterImageCardPresenter;
 import com.archos.mediacenter.video.leanback.presenter.VideoListPresenter;
 import com.archos.mediacenter.video.leanback.search.VideoSearchActivity;
 import com.archos.mediacenter.video.player.PrivateMode;
+import com.archos.mediacenter.video.utils.PrivateModeUIHelper;
 import com.archos.mediacenter.video.tvshow.AnimeShowSortOrderEntries;
 import com.archos.mediacenter.video.utils.DbUtils;
+import com.archos.mediacenter.video.utils.ThemeManager;
+import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.mediaprovider.video.VideoStore;
 
 public class AllAnimeShowsGridFragment extends MyVerticalGridFragment implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -74,6 +79,7 @@ public class AllAnimeShowsGridFragment extends MyVerticalGridFragment implements
     private String mSortOrder;
     private CharSequence[] mSortOrderEntries;
     private BackgroundManager bgMngr = null;
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
 
     private boolean mShowWatched;
 
@@ -166,6 +172,9 @@ public class AllAnimeShowsGridFragment extends MyVerticalGridFragment implements
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Add private mode indicator overlay
+        PrivateModeUIHelper.addPrivateModeIndicator(getActivity(), view);
+
         mOverlay = new Overlay(this);
 
         // Set orb icon
@@ -184,7 +193,7 @@ public class AllAnimeShowsGridFragment extends MyVerticalGridFragment implements
         getTitleView().setOrb5IconResId(R.drawable.orb_alpha);
 
         // Set orb color
-        setSearchAffordanceColor(ContextCompat.getColor(getActivity(), R.color.lightblueA200));
+        setSearchAffordanceColor(ThemeManager.getInstance(getActivity()).getSearchAffordanceColor());
 
         // Set first orb action
         getTitleView().setOnOrb1ClickedListener(new View.OnClickListener() {
@@ -277,6 +286,10 @@ public class AllAnimeShowsGridFragment extends MyVerticalGridFragment implements
     @Override
     public void onDestroyView() {
         mOverlay.destroy();
+        // Unregister theme change listener
+        if (mThemeChangeListener != null) {
+            ThemeManager.getInstance(getActivity()).unregisterThemeChangeListener(mThemeChangeListener);
+        }
         super.onDestroyView();
     }
 
@@ -285,6 +298,24 @@ public class AllAnimeShowsGridFragment extends MyVerticalGridFragment implements
         super.onResume();
         mOverlay.resume();
         updateBackground();
+        setupThemeListener();
+    }
+
+    private void setupThemeListener() {
+        // Guard against duplicate registration
+        if (mThemeChangeListener != null) {
+            return;
+        }
+        ThemeManager themeManager = ThemeManager.getInstance(getActivity());
+        mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                    updateBackground();
+                }
+            }
+        };
+        themeManager.registerThemeChangeListener(mThemeChangeListener);
     }
 
     @Override
@@ -335,16 +366,21 @@ public class AllAnimeShowsGridFragment extends MyVerticalGridFragment implements
     }
 
     private void updateBackground() {
+        // Update private mode indicator visibility
+        PrivateModeUIHelper.updatePrivateModeIndicator(getView());
+
         bgMngr = BackgroundManager.getInstance(getActivity());
         if(!bgMngr.isAttached())
             bgMngr.attach(getActivity().getWindow());
 
         if (PrivateMode.isActive()) {
-            bgMngr.setColor(ContextCompat.getColor(getActivity(), R.color.private_mode));
-            bgMngr.setDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.private_background));
+            int privateModeColor = ThemeManager.getInstance(getActivity()).getPrivateModeColor();
+            bgMngr.setColor(privateModeColor);
+            bgMngr.setDrawable(new ColorDrawable(privateModeColor));
         } else {
-            bgMngr.setColor(ContextCompat.getColor(getActivity(), R.color.leanback_background));
-            bgMngr.setDrawable(new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.leanback_background)));
+            int backgroundColor = ThemeManager.getInstance(getActivity()).getLeanbackBackgroundColor();
+            bgMngr.setColor(backgroundColor);
+            bgMngr.setDrawable(new ColorDrawable(backgroundColor));
         }
     }
 

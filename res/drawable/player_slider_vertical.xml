@@ -31,7 +31,7 @@
             <shape android:shape="rectangle" >
                 <corners android:radius="8dip" />
 
-                <solid android:color="@color/lightblue900" />
+                <solid android:color="@color/ui_accent_primary" />
             </shape>
         </scale>
     </item>
@@ -42,7 +42,7 @@
             <shape android:shape="rectangle" >
                 <corners android:radius="8dip" />
 
-                <solid android:color="@color/lightblue500" />
+                <solid android:color="@color/ui_accent_secondary" />
             </shape>
         </scale>
     </item>

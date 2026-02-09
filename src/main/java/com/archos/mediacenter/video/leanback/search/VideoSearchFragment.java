@@ -16,6 +16,7 @@ package com.archos.mediacenter.video.leanback.search;
 
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -37,6 +38,8 @@ import androidx.leanback.widget.ObjectAdapter;
 
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.adapters.mappers.VideoCursorMapper;
+import com.archos.mediacenter.video.utils.ThemeManager;
+import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.mediacenter.video.leanback.CompatibleCursorMapperConverter;
 import com.archos.mediacenter.video.leanback.ShadowLessListRow;
 import com.archos.mediacenter.video.leanback.VideoViewClickedListener;
@@ -62,6 +65,7 @@ public class VideoSearchFragment extends SafeSearchSupportFragment implements Se
     private VideoLoader mSearchLoader;
     private String mLastQuery;
     private static final int SEARCH_REQUEST_CODE = 1;
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
 
     private class SearchRunnable implements Runnable {
         private String mQuery;
@@ -114,11 +118,44 @@ public class VideoSearchFragment extends SafeSearchSupportFragment implements Se
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         Resources r = getResources();
+        updateBackground();
+        // Setup theme change listener
+        setupThemeListener();
+    }
+
+    private void updateBackground() {
         BackgroundManager bgMngr = BackgroundManager.getInstance(getActivity());
         try {
             bgMngr.attach(getActivity().getWindow());
         } catch (IllegalStateException e) {}
-        bgMngr.setColor(ContextCompat.getColor(getActivity(), R.color.leanback_background));
+        int backgroundColor = ThemeManager.getInstance(getActivity()).getLeanbackBackgroundColor();
+        bgMngr.setColor(backgroundColor);
+    }
+
+    private void setupThemeListener() {
+        // Guard against duplicate registration
+        if (mThemeChangeListener != null) {
+            return;
+        }
+        ThemeManager themeManager = ThemeManager.getInstance(getActivity());
+        mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                    updateBackground();
+                }
+            }
+        };
+        themeManager.registerThemeChangeListener(mThemeChangeListener);
+    }
+
+    @Override
+    public void onDestroyView() {
+        // Unregister theme change listener
+        if (mThemeChangeListener != null) {
+            ThemeManager.getInstance(getActivity()).unregisterThemeChangeListener(mThemeChangeListener);
+        }
+        super.onDestroyView();
     }
 
 

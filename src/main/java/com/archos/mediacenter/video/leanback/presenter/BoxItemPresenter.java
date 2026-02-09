@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.leanback.adapter.object.Box;
+import com.archos.mediacenter.video.utils.ThemeManager;
 
 /**
  * Created by vapillon on 10/04/15.
@@ -68,6 +69,10 @@ public class BoxItemPresenter extends Presenter {
     public void onBindViewHolder(ViewHolder viewHolder, Object item) {
         final BoxViewHolder vh = (BoxViewHolder)viewHolder;
         Box box = (Box)item;
+        
+        // Apply theme color to image container background (must be in onBind to update on theme change)
+        vh.mImageViewContainer.setBackgroundColor(ThemeManager.getInstance(vh.mCard.getContext()).getLeanbackHeaderColor());
+        
         vh.getTextView().setText(box.getName());
 
         if (box.getBitmap()!=null) {

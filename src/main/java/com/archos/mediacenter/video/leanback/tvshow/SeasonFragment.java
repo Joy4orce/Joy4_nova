@@ -18,7 +18,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -28,6 +32,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.IntentSenderRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 import androidx.leanback.app.BackgroundManager;
 import androidx.leanback.app.BrowseSupportFragment;
 import androidx.leanback.widget.ArrayObjectAdapter;
@@ -52,7 +58,11 @@ import com.archos.mediacenter.video.leanback.adapter.PlaceholderCursorObjectAdap
 import com.archos.mediacenter.video.leanback.filebrowsing.ListingActivity;
 import com.archos.mediacenter.video.leanback.overlay.Overlay;
 import com.archos.mediacenter.video.leanback.presenter.SeasonPresenter;
+import com.archos.mediacenter.video.player.PrivateMode;
 import com.archos.mediacenter.video.utils.DbUtils;
+import com.archos.mediacenter.video.utils.PrivateModeUIHelper;
+import com.archos.mediacenter.video.utils.ThemeManager;
+import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.mediacenter.video.utils.VideoUtils;
 
 import org.slf4j.Logger;
@@ -87,6 +97,7 @@ public class SeasonFragment extends BrowseSupportFragment implements LoaderManag
     private ListRow mSeasonsListRow;
 
     private Overlay mOverlay;
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
 
     // need to be static otherwise ActivityResultLauncher find them null
     private static Delete delete;
@@ -122,9 +133,7 @@ public class SeasonFragment extends BrowseSupportFragment implements LoaderManag
         String tvshowPoster = getActivity().getIntent().getStringExtra(EXTRA_TVSHOW_POSTER);
         mTvshowPosterUri = tvshowPoster != null ? Uri.parse(tvshowPoster) : null;
 
-        // Just need to attach the background manager to keep the background of the parent activity
-        BackgroundManager bgMngr = BackgroundManager.getInstance(getActivity());
-        bgMngr.attach(getActivity().getWindow());
+        updateBackground();
 
         setTitle(mTvshowName);
         setHeadersState(HEADERS_DISABLED);
@@ -251,19 +260,64 @@ public class SeasonFragment extends BrowseSupportFragment implements LoaderManag
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Add private mode indicator overlay
+        PrivateModeUIHelper.addPrivateModeIndicator(getActivity(), view);
+
         mOverlay = new Overlay(this);
     }
 
     @Override
     public void onDestroyView() {
         mOverlay.destroy();
+        // Unregister theme change listener
+        if (mThemeChangeListener != null) {
+            ThemeManager.getInstance(getActivity()).unregisterThemeChangeListener(mThemeChangeListener);
+        }
         super.onDestroyView();
+    }
+
+    private void updateBackground() {
+        // Update private mode indicator visibility
+        PrivateModeUIHelper.updatePrivateModeIndicator(getView());
+
+        BackgroundManager bgMngr = BackgroundManager.getInstance(getActivity());
+        bgMngr.attach(getActivity().getWindow());
+
+        if (PrivateMode.isActive()) {
+            int privateModeColor = ThemeManager.getInstance(getActivity()).getPrivateModeColor();
+            bgMngr.setColor(privateModeColor);
+            bgMngr.setDrawable(new ColorDrawable(privateModeColor));
+        } else {
+            int backgroundColor = ThemeManager.getInstance(getActivity()).getLeanbackBackgroundColor();
+            bgMngr.setColor(backgroundColor);
+            bgMngr.setDrawable(new ColorDrawable(backgroundColor));
+        }
+    }
+
+    private void setupThemeListener() {
+        // Guard against duplicate registration
+        if (mThemeChangeListener != null) {
+            return;
+        }
+        ThemeManager themeManager = ThemeManager.getInstance(getActivity());
+        mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                    updateBackground();
+                }
+            }
+        };
+        themeManager.registerThemeChangeListener(mThemeChangeListener);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         mOverlay.resume();
+        updateBackground();
+        setupThemeListener();
 
         // Start loading the list of seasons
         LoaderManager.getInstance(this).restartLoader(1, null, this);

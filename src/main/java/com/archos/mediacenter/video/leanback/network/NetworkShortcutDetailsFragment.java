@@ -16,6 +16,7 @@ package com.archos.mediacenter.video.leanback.network;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -42,6 +43,8 @@ import com.archos.mediacenter.video.leanback.adapter.object.Shortcut;
 import com.archos.mediacenter.video.leanback.details.ArchosDetailsOverviewRowPresenter;
 import com.archos.mediacenter.video.leanback.filebrowsing.ListingActivity;
 import com.archos.mediacenter.video.leanback.presenter.ShortcutDetailsPresenter;
+import com.archos.mediacenter.video.utils.ThemeManager;
+import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.mediacenter.video.utils.VideoUtils;
 import com.archos.mediaprovider.NetworkScanner;
 
@@ -82,6 +85,7 @@ public class NetworkShortcutDetailsFragment extends DetailsSupportFragment imple
     private Handler mHandler;
     private int oldPos = 0;
     private int oldSelectedSubPosition = 0;
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -89,7 +93,9 @@ public class NetworkShortcutDetailsFragment extends DetailsSupportFragment imple
 
         BackgroundManager bgMngr = BackgroundManager.getInstance(getActivity());
         bgMngr.attach(getActivity().getWindow());
-        bgMngr.setColor(ContextCompat.getColor(getActivity(), R.color.leanback_background));
+        // Use ThemeManager to get the appropriate background color for the current theme
+        int backgroundColor = ThemeManager.getInstance(getActivity()).getLeanbackBackgroundColor();
+        bgMngr.setColor(backgroundColor);
 
         mShortcut = (Shortcut)getActivity().getIntent().getSerializableExtra(EXTRA_SHORTCUT);
 
@@ -101,13 +107,43 @@ public class NetworkShortcutDetailsFragment extends DetailsSupportFragment imple
         mDetailsRowPresenter = new ArchosDetailsOverviewRowPresenter(new ShortcutDetailsPresenter());
         //be aware of a hack to avoid fullscreen overview : cf onSetRowStatus
 
-        mDetailsRowPresenter.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.lightblue900));
-        mDetailsRowPresenter.setActionsBackgroundColor(getDarkerColor(ContextCompat.getColor(getActivity(), R.color.lightblue900)));
+        // Use ThemeManager to get the appropriate details primary color for the current theme
+        int detailsPrimaryColor = ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor();
+        mDetailsRowPresenter.setBackgroundColor(detailsPrimaryColor);
+        mDetailsRowPresenter.setActionsBackgroundColor(getDarkerColor(detailsPrimaryColor));
         mDetailsRowPresenter.setOnActionClickedListener(this);
 
         ArrayObjectAdapter adapter = new ArrayObjectAdapter(mDetailsRowPresenter);
         adapter.add(detailRow);
         setAdapter(adapter);
+
+        // Register theme change listener
+        setupThemeListener();
+    }
+
+    private void setupThemeListener() {
+        // Guard against duplicate registration
+        if (mThemeChangeListener != null) {
+            return;
+        }
+        ThemeManager themeManager = ThemeManager.getInstance(getActivity());
+        mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                    if (log.isDebugEnabled()) log.debug("Theme changed, updating colors");
+                    // Update background
+                    BackgroundManager bgMngr = BackgroundManager.getInstance(getActivity());
+                    int backgroundColor = themeManager.getLeanbackBackgroundColor();
+                    bgMngr.setColor(backgroundColor);
+                    // Update details row colors
+                    int detailsPrimaryColor = themeManager.getDetailsPrimaryColor();
+                    mDetailsRowPresenter.setBackgroundColor(detailsPrimaryColor);
+                    mDetailsRowPresenter.setActionsBackgroundColor(getDarkerColor(detailsPrimaryColor));
+                }
+            }
+        };
+        themeManager.registerThemeChangeListener(mThemeChangeListener);
     }
 
     private int getDarkerColor(int color) {
@@ -201,6 +237,10 @@ public class NetworkShortcutDetailsFragment extends DetailsSupportFragment imple
     @Override
     public void onDestroyView() {
         mOverlay.destroy();
+        // Unregister theme change listener
+        if (mThemeChangeListener != null) {
+            ThemeManager.getInstance(getActivity()).unregisterThemeChangeListener(mThemeChangeListener);
+        }
         super.onDestroyView();
     }
 

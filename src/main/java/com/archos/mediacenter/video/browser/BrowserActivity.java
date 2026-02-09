@@ -19,6 +19,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.fragment.app.Fragment;
@@ -37,6 +38,8 @@ import android.view.View;
 import com.archos.mediacenter.cover.Cover;
 import com.archos.mediacenter.cover.CoverRoll3D;
 import com.archos.mediacenter.video.R;
+import com.archos.mediacenter.video.utils.ThemeManager;
+import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.mediacenter.video.browser.BrowserByIndexedVideos.BrowserListOfSeasons;
 import com.archos.mediacenter.video.browser.dialogs.Paste;
 
@@ -69,14 +72,19 @@ abstract public class BrowserActivity extends AppCompatActivity {
         public Object mCoverRoll;
     };
 
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
+
     public void onCreate(Bundle savedInstanceState) {
+        ThemeManager.getInstance(this).applyWindowTheme(this);
         super.onCreate(savedInstanceState);
 
 
-
         setContentView(getLayoutID());
-        setSupportActionBar((Toolbar) findViewById(R.id.main_toolbar));
-        ViewCompat.setElevation(findViewById(R.id.main_toolbar), getResources().getDimension(R.dimen.toolbar_default_elevation));
+        Toolbar toolbar = findViewById(R.id.main_toolbar);
+        setSupportActionBar(toolbar);
+        ViewCompat.setElevation(toolbar, getResources().getDimension(R.dimen.toolbar_default_elevation));
+        // Apply theme color to toolbar background programmatically
+        toolbar.setBackgroundColor(ThemeManager.getInstance(this).getToolbarBackgroundColor());
 
         // CoverRoll will trigger the info menu by itself but the
         // onPrepareDialog/onCreateDialog are to be handled here...
@@ -96,6 +104,16 @@ abstract public class BrowserActivity extends AppCompatActivity {
             String coverRollInitContentId = getIntent().getDataString();
             mCoverRoll.setContentId(coverRollInitContentId);
         }
+
+        mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                    recreate();
+                }
+            }
+        };
+        ThemeManager.getInstance(this).registerThemeChangeListener(mThemeChangeListener);
     }
 
     public void onResume() {
@@ -129,6 +147,10 @@ abstract public class BrowserActivity extends AppCompatActivity {
         if (mCoverRoll != null) {
             mCoverRoll.onStopGL();
             mCoverRoll.onDestroy(this);
+        }
+
+        if (mThemeChangeListener != null) {
+            ThemeManager.getInstance(this).unregisterThemeChangeListener(mThemeChangeListener);
         }
 
         super.onDestroy();

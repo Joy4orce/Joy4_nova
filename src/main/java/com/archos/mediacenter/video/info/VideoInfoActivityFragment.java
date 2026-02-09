@@ -97,6 +97,7 @@ import com.archos.mediacenter.video.player.PrivateMode;
 import com.archos.mediacenter.video.utils.DbUtils;
 import com.archos.mediacenter.video.utils.DelayedBackgroundLoader;
 import com.archos.mediacenter.video.utils.ExternalPlayerResultListener;
+import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.utils.ExternalPlayerWithResultStarter;
 import com.archos.mediacenter.video.utils.PlayUtils;
 import com.archos.mediacenter.video.utils.StoreRatingDialogBuilder;
@@ -355,7 +356,6 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
         // pass the right deleteLauncher linked to activity
         FileUtilsQ.setDeleteLauncher(deleteLauncher);
         CustomApplication.resetLastVideoPlayed();
-        mColor = ContextCompat.getColor(getActivity(), R.color.leanback_details_background);
         mVideoList = new ArrayList<>();
         mBackgroundLoader = new DelayedBackgroundLoader(getActivity(), 0, 0.2f);
         ImageViewSetterConfiguration config = ImageViewSetterConfiguration.Builder.createNew()
@@ -363,6 +363,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                 .build();
         mBackgroundSetter = new ImageViewSetter(getActivity(), config);
         mSubtitleListCache = new HashMap<>();
+        mColor = ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor();
     }
 
     @Override
@@ -928,10 +929,11 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                 }
                 if(mBitmap!=null) {
                     Palette palette = Palette.from(mBitmap).generate();
+                    int defaultColor = ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor();
                     if(video.hasScraperData()&&video.getPosterUri()!=null)
-                        mColor = palette.getDarkVibrantColor(ContextCompat.getColor(getActivity(), R.color.leanback_details_background));
+                        mColor = palette.getDarkVibrantColor(defaultColor);
                     else
-                        mColor = ContextCompat.getColor(getActivity(), R.color.leanback_details_background);
+                        mColor = defaultColor;
                 }
 
         }
@@ -1005,7 +1007,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
         mScraperContainer.setVisibility(View.GONE);
         mScrapButton.setVisibility(View.VISIBLE);
         mScraperPlotContainer.setVisibility(View.GONE);
-        mColor =  ContextCompat.getColor(getActivity(), R.color.leanback_details_background);
+        mColor = ThemeManager.getInstance(getActivity()).getDetailsPrimaryColor();
     }
 
     private void goToScraped() {

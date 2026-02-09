@@ -24,6 +24,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -48,6 +49,7 @@ import com.archos.mediacenter.video.browser.loader.EpisodesLoader;
 import com.archos.mediacenter.video.browser.presenter.EpisodeListDetailedPresenter;
 import com.archos.mediacenter.video.browser.presenter.EpisodePresenter;
 import com.archos.mediacenter.video.info.VideoInfoCommonClass;
+import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.utils.VideoUtils;
 import com.archos.mediaprovider.video.VideoStore;
 
@@ -81,7 +83,9 @@ public class BrowserByShow extends BrowserWithShowHeader {
 
     public void onViewCreated(View view, Bundle save ){
         super.onViewCreated(view, save);
-        ((MainActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(null);
+        if (getActivity() != null && ((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
+            ((MainActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(null);
+        }
         ((ListView)mArchosGridView).setDivider(new ColorDrawable(ContextCompat.getColor(getContext(), R.color.transparent_white_list_divider)));
         ((ListView)mArchosGridView).setDividerHeight(3);
     }
@@ -91,10 +95,13 @@ public class BrowserByShow extends BrowserWithShowHeader {
         ((ListView)mArchosGridView).setDivider(null); //unset otherwise, crash in listview
         ((ListView)mArchosGridView).setDividerHeight(0);
         mApplicationFrameLayout.setBackground(null);
-        ((MainActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(ContextCompat.getDrawable(getContext(), R.color.leanback_background_transparent));
-        getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-
+        if (getActivity() != null && ((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
+            ((MainActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(
+                new ColorDrawable(ThemeManager.getInstance(getContext()).getToolbarBackgroundColor())
+            );
+            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
     }
 
     public String[] getCursorSelectionArgs() {

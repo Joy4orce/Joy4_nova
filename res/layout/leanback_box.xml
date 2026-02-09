@@ -27,7 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/name"
-        android:background="@color/lightblue900">
+        android:background="@color/ui_accent_dark">
 
         <ImageView
             android:id="@+id/image"

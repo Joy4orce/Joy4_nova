@@ -24,6 +24,7 @@ import android.widget.TextView;
 
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.leanback.adapter.object.Shortcut;
+import com.archos.mediacenter.video.utils.ThemeManager;
 
 /**
  * Created by vapillon on 10/04/15.
@@ -71,6 +72,8 @@ public class NetworkShortcutPresenter extends Presenter {
     public void onBindViewHolder(ViewHolder viewHolder, Object item) {
         NetworkShortcutViewHolder vh = (NetworkShortcutViewHolder)viewHolder;
         Shortcut shortcut = (Shortcut)item;
+        // Apply theme-aware background color to the image container
+        vh.getImageView().setBackgroundColor(ThemeManager.getInstance(vh.mCard.getContext()).getLeanbackHeaderColor());
         vh.getImageView().setImageResource(shortcut.getImage());
         vh.getNameTextView().setText(shortcut.getName());
         vh.getPathTextView().setVisibility(View.GONE);

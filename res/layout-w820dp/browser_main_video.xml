@@ -72,6 +72,19 @@ category, and contents.
             android:layout_toRightOf="@+id/left_view"
             android:layout_height="match_parent" />
 
+        <!-- Private mode indicator icon -->
+        <ImageView
+            android:id="@+id/private_mode_indicator"
+            android:layout_width="@dimen/private_mode_indicator_size"
+            android:layout_height="@dimen/private_mode_indicator_size"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="@dimen/private_mode_indicator_margin"
+            android:src="@drawable/ic_incognito"
+            android:visibility="gone"
+            android:alpha="0.6"
+            android:importantForAccessibility="no" />
+
     </RelativeLayout>
 
 

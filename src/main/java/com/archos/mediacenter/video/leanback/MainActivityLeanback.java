@@ -37,6 +37,7 @@ import com.archos.mediacenter.video.UiChoiceDialog;
 import com.archos.mediacenter.video.browser.BootupRecommandationService;
 import com.archos.mediacenter.video.browser.PermissionChecker;
 import com.archos.mediacenter.video.leanback.settings.VideoSettingsActivity;
+import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.mediacenter.video.leanback.channels.ChannelManager;
 import com.archos.mediaprovider.video.LoaderUtils;
@@ -55,6 +56,7 @@ public class MainActivityLeanback extends LeanbackActivity {
 
     private String mCurrentUiModeLeanback;
     private PermissionChecker mPermissionChecker;
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
@@ -75,6 +77,13 @@ public class MainActivityLeanback extends LeanbackActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         log.warn("onCreate: MainActivityLeanback instance created: {}", this.hashCode());
+        
+        // Apply correct theme before super.onCreate() to avoid visual flash
+        ThemeManager themeManager = ThemeManager.getInstance(this);
+        if (themeManager.isBlackTheme()) {
+            setTheme(R.style.MyLeanbackTheme_Black);
+        }
+        
         ((CustomApplication) getApplication()).loadLocale();
 
         // Check if user disabled "Always start in TV interface" - if so, redirect to phone UI
@@ -125,6 +134,16 @@ public class MainActivityLeanback extends LeanbackActivity {
         setContentView(R.layout.androidtv_root_activity);
         AutoScrapeService.registerObserver(this);
 
+        // Register theme change listener to update window immediately when theme changes
+        mThemeChangeListener = (sharedPreferences, key) -> {
+            if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                // Apply theme immediately - this updates the window visible behind translucent settings
+                ThemeManager.getInstance(this).applyWindowTheme(this);
+            }
+        };
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(mThemeChangeListener);
+
         // Defer heavy database operations until after window is visible
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(() -> {
@@ -144,8 +163,13 @@ public class MainActivityLeanback extends LeanbackActivity {
     @Override
     protected void onDestroy(){
         log.warn("onDestroy: MainActivityLeanback instance destroyed: {}", this.hashCode());
-        super.onDestroy();
+        // Unregister theme change listener
+        if (mThemeChangeListener != null) {
+            PreferenceManager.getDefaultSharedPreferences(this)
+                    .unregisterOnSharedPreferenceChangeListener(mThemeChangeListener);
+        }
         UnavailablePosterBroadcastReceiver.unregisterReceiver(this);
+        super.onDestroy();
     }
 
     /**

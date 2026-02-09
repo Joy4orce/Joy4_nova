@@ -24,12 +24,15 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.cardview.widget.CardView;
+
 import com.archos.mediacenter.utils.ImageLabel;
 import com.archos.mediacenter.utils.ThumbnailEngine;
 import com.archos.mediacenter.utils.trakt.Trakt;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.adapters.AdapterDefaultValues;
 import com.archos.mediacenter.video.browser.filebrowsing.ListingAdapter;
+import com.archos.mediacenter.video.utils.ThemeManager;
 
 /**
  * Created by alexandre on 26/10/15.
@@ -81,8 +84,14 @@ public class CommonPresenter implements Presenter {
     public View getView(ViewGroup parent, Object object, View view) {
         ViewHolder holder;
         int inflate = mDefaultValues.getLayoutId(getItemType());
-        if(!(view!=null&& view.getTag()!=null&& view.getTag().getClass().isInstance(getNewViewHolder()) && ((ViewHolder)view.getTag()).type == inflate))
+        if(!(view!=null&& view.getTag()!=null&& view.getTag().getClass().isInstance(getNewViewHolder()) && ((ViewHolder)view.getTag()).type == inflate)) {
             view = LayoutInflater.from(mContext).inflate(inflate, parent, false);
+            // Apply theme color to CardView background if it's a CardView
+            if (view instanceof CardView) {
+                CardView cardView = (CardView) view;
+                cardView.setCardBackgroundColor(ThemeManager.getInstance(mContext).getGridItemBackgroundColor());
+            }
+        }
         // -------------------------------------------------
         // File-based item => create a ViewHolder structure
         // -------------------------------------------------

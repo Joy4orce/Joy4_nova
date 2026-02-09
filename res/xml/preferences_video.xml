@@ -268,6 +268,17 @@
             android:summary="@string/hide_controls_on_pause_summary"
             android:title="@string/hide_controls_on_pause"
             app:iconSpaceReserved="false"/>
+
+        <ListPreference
+            android:defaultValue="blue"
+            android:dialogTitle="@string/theme_selection_title"
+            android:entries="@array/theme_selection_entries"
+            android:entryValues="@array/theme_selection_entryvalues"
+            android:key="app_theme"
+            android:persistent="true"
+            android:summary="@string/theme_selection_summary"
+            android:title="@string/theme_selection_title"
+            app:iconSpaceReserved="false"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preferences_leanback_user_interface" android:key="category_leanback_user_interface"
         app:iconSpaceReserved="false" >

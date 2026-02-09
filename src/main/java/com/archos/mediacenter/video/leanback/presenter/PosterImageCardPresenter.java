@@ -42,6 +42,7 @@ import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediacenter.utils.trakt.Trakt;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.adapters.object.Collection;
+import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.browser.adapters.object.Episode;
 import com.archos.mediacenter.video.browser.adapters.object.Movie;
 import com.archos.mediacenter.video.browser.adapters.object.Tvshow;
@@ -92,7 +93,7 @@ public class PosterImageCardPresenter extends Presenter {
             mCardView.addViewToRoot(mOccurenciesView);
             mCardView.setMainImageDimensions(getWidth(context), getHeight(context));
             mCardView.setMainImage(new ColorDrawable(ContextCompat.getColor(context, R.color.lb_basic_card_bg_color)));
-            mCardView.getMainImageView().setBackgroundColor(ContextCompat.getColor(context, R.color.lightblue900));
+            mCardView.getMainImageView().setBackgroundColor(ThemeManager.getInstance(context).getGridItemBackgroundColor());
             mCardView.setFocusable(true);
             mCardView.setFocusableInTouchMode(true);
 
@@ -366,6 +367,8 @@ public class PosterImageCardPresenter extends Presenter {
 
     private void bindMetaFile(VideoViewHolder vh, MetaFile2 file) {
         final ImageCardView card = vh.getImageCardView();
+        // Apply theme background color behind the icon to override blue background in drawable
+        card.getMainImageView().setBackgroundColor(ThemeManager.getInstance(mContext).getLeanbackHeaderColor());
         card.setMainImage(ContextCompat.getDrawable(mContext, PresenterUtils.getIconResIdFor(file)), false);
         card.setMainImageScaleType(ImageView.ScaleType.CENTER);
         card.setTitleText(file.getName());

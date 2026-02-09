@@ -44,6 +44,7 @@ import android.util.Log;
 import com.archos.mediacenter.utils.trakt.Trakt;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.player.PlayerActivity;
+import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediaprovider.video.LoaderUtils;
 import com.archos.mediaprovider.video.VideoStore;
 import com.archos.mediaprovider.video.VideoStore.Video.VideoColumns;
@@ -264,7 +265,7 @@ public class  UpdateRecommendationsService extends IntentService implements Defa
 					.setOngoing(true)
 					.setPriority(mPriority)
 					.setOnlyAlertOnce(true)
-					.setColor(ContextCompat.getColor(UpdateRecommendationsService.this, R.color.lightblue800))
+					.setColor(ThemeManager.getInstance(UpdateRecommendationsService.this).getDetailsPrimaryColor())
 					.setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
 					.setLargeIcon(mImageUri)
 					.setSmallIcon(mSmallIcon)

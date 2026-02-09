@@ -20,6 +20,8 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
@@ -29,6 +31,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.ContextCompat;
 import androidx.leanback.app.BackgroundManager;
 import androidx.leanback.app.BrowseSupportFragment;
@@ -54,9 +57,12 @@ import com.archos.mediacenter.video.browser.loader.MoviesLoader;
 import com.archos.mediacenter.video.browser.loader.MoviesSelectionLoader;
 import com.archos.mediacenter.video.leanback.CompatibleCursorMapperConverter;
 import com.archos.mediacenter.video.leanback.VideoViewClickedListener;
+import com.archos.mediacenter.video.utils.ThemeManager;
+import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.mediacenter.video.leanback.overlay.Overlay;
 import com.archos.mediacenter.video.leanback.presenter.PosterImageCardPresenter;
 import com.archos.mediacenter.video.player.PrivateMode;
+import com.archos.mediacenter.video.utils.PrivateModeUIHelper;
 import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 
 import java.util.ArrayList;
@@ -89,6 +95,7 @@ public abstract class MoviesByFragment extends BrowseSupportFragment implements 
      * Map to update the adapter when we get the onLoadFinished() callback
      */
     SparseArray<CursorObjectAdapter> mAdaptersMap = new SparseArray<>();
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
 
     abstract protected Loader<Cursor> getSubsetLoader(Context context);
 
@@ -102,6 +109,10 @@ public abstract class MoviesByFragment extends BrowseSupportFragment implements 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Add private mode indicator overlay
+        PrivateModeUIHelper.addPrivateModeIndicator(getActivity(), view);
+
         mOverlay = new Overlay(this);
 
         SearchOrbView searchOrbView = (SearchOrbView) getView().findViewById(R.id.title_orb);
@@ -124,6 +135,10 @@ public abstract class MoviesByFragment extends BrowseSupportFragment implements 
     @Override
     public void onDestroyView() {
         mOverlay.destroy();
+        // Unregister theme change listener
+        if (mThemeChangeListener != null) {
+            ThemeManager.getInstance(getActivity()).unregisterThemeChangeListener(mThemeChangeListener);
+        }
         super.onDestroyView();
     }
 
@@ -162,11 +177,13 @@ public abstract class MoviesByFragment extends BrowseSupportFragment implements 
         setHeadersState(HEADERS_ENABLED);
         setHeadersTransitionOnBackEnabled(true);
 
-        // set fastLane (or headers) background color
-        setBrandColor(ContextCompat.getColor(getActivity(), R.color.leanback_side));
+        // Apply theme-aware colors
+        ThemeManager themeManager = ThemeManager.getInstance(getActivity());
+        // set fastLane (or headers) background color based on theme
+        setBrandColor(themeManager.getLeanbackHeaderColor());
 
         // set search icon color
-        setSearchAffordanceColor(ContextCompat.getColor(getActivity(), R.color.lightblueA200));
+        setSearchAffordanceColor(ThemeManager.getInstance(getActivity()).getSearchAffordanceColor());
 
         setupEventListeners();
 
@@ -179,6 +196,9 @@ public abstract class MoviesByFragment extends BrowseSupportFragment implements 
         mVideoMapper = new CompatibleCursorMapperConverter(new VideoCursorMapper());
 
         LoaderManager.getInstance(this).initLoader(-1, null, this);
+
+        // Setup theme change listener
+        setupThemeListener();
     }
 
     private void setupEventListeners() {
@@ -337,6 +357,9 @@ public abstract class MoviesByFragment extends BrowseSupportFragment implements 
     }
 
     private void updateBackground() {
+        // Update private mode indicator visibility
+        PrivateModeUIHelper.updatePrivateModeIndicator(getView());
+
         Resources r = getResources();
 
         bgMngr = BackgroundManager.getInstance(getActivity());
@@ -344,12 +367,35 @@ public abstract class MoviesByFragment extends BrowseSupportFragment implements 
             bgMngr.attach(getActivity().getWindow());
 
         if (PrivateMode.isActive()) {
-            bgMngr.setColor(ContextCompat.getColor(getActivity(), R.color.private_mode));
-            bgMngr.setDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.private_background));
+            int privateModeColor = ThemeManager.getInstance(getActivity()).getPrivateModeColor();
+            bgMngr.setColor(privateModeColor);
+            bgMngr.setDrawable(new ColorDrawable(privateModeColor));
         } else {
-            bgMngr.setColor(ContextCompat.getColor(getActivity(), R.color.leanback_background));
-            bgMngr.setDrawable(new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.leanback_background)));
+            // Use ThemeManager to get the appropriate background color for the current theme
+            int backgroundColor = ThemeManager.getInstance(getActivity()).getLeanbackBackgroundColor();
+            bgMngr.setColor(backgroundColor);
+            bgMngr.setDrawable(new ColorDrawable(backgroundColor));
         }
+    }
+
+    private void setupThemeListener() {
+        // Guard against duplicate registration
+        if (mThemeChangeListener != null) {
+            return;
+        }
+        ThemeManager themeManager = ThemeManager.getInstance(getActivity());
+        mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                    Log.d(TAG, "Theme changed, updating background and colors");
+                    updateBackground();
+                    // Update brand color
+                    setBrandColor(themeManager.getLeanbackHeaderColor());
+                }
+            }
+        };
+        themeManager.registerThemeChangeListener(mThemeChangeListener);
     }
 
 }

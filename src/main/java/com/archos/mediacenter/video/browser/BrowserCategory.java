@@ -45,6 +45,7 @@ import com.archos.mediacenter.video.CustomApplication;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.info.VideoInfoActivity;
 import com.archos.mediacenter.video.player.PrivateMode;
+import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.mediacenter.video.utils.WebUtils;
 import com.archos.environment.NetworkState;
@@ -91,6 +92,7 @@ abstract public class BrowserCategory extends ListFragment {
     private PropertyChangeListener propertyChangeListener = null;
     private boolean mNetworkStateListenerAdded = false;
     private boolean mEnableSponsor = false;
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
 
     /**
      * This object is used to store basic info for the category list item.
@@ -163,6 +165,24 @@ abstract public class BrowserCategory extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ListView categoryView = (ListView) inflater.inflate(R.layout.browser_category, container, false);
         categoryView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        
+        // Check if we're in phone mode with black theme for special selector
+        ThemeManager themeManager = ThemeManager.getInstance(getContext());
+        if (themeManager.isBlackTheme() && themeManager.isPhoneMode(getContext())) {
+            // Phone + Black theme: Use rounded grey selector
+            categoryView.setSelector(R.drawable.phone_category_selector);
+        } else {
+            // TV or Blue theme: Use standard selector
+            android.graphics.drawable.StateListDrawable selector = new android.graphics.drawable.StateListDrawable();
+            int selectorColor = themeManager.getCategorySelectorColor();
+            // Activated state (selected item)
+            selector.addState(new int[]{android.R.attr.state_activated}, new android.graphics.drawable.ColorDrawable(selectorColor));
+            // Focused state (keyboard navigation)
+            selector.addState(new int[]{android.R.attr.state_focused}, new android.graphics.drawable.ColorDrawable(selectorColor));
+            // Default state (transparent)
+            selector.addState(new int[]{}, new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+            categoryView.setSelector(selector);
+        }
         return categoryView;
     }
 
@@ -218,6 +238,29 @@ abstract public class BrowserCategory extends ListFragment {
                 }
             };
         updateUI(); // get initialization right
+
+        // Register theme change listener to update category selector color
+        mThemeChangeListener = (sharedPreferences, key) -> {
+            if (ThemeManager.KEY_APP_THEME.equals(key)) {
+                ListView listView = getListView();
+                if (listView != null) {
+                    android.graphics.drawable.StateListDrawable selector = new android.graphics.drawable.StateListDrawable();
+                    int selectorColor = ThemeManager.getInstance(getContext()).getCategorySelectorColor();
+                    // Activated state (selected item)
+                    selector.addState(new int[]{android.R.attr.state_activated}, new android.graphics.drawable.ColorDrawable(selectorColor));
+                    // Focused state (keyboard navigation)
+                    selector.addState(new int[]{android.R.attr.state_focused}, new android.graphics.drawable.ColorDrawable(selectorColor));
+                    // Default state (transparent)
+                    selector.addState(new int[]{}, new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                    listView.setSelector(selector);
+                }
+                // Refresh adapter to update item backgrounds
+                if (mCategoryAdapter != null) {
+                    mCategoryAdapter.notifyDataSetChanged();
+                }
+            }
+        };
+        ThemeManager.getInstance(getContext()).registerThemeChangeListener(mThemeChangeListener);
     }
 
     private void addNetworkListener() {
@@ -281,6 +324,10 @@ abstract public class BrowserCategory extends ListFragment {
         if (DBG) Log.d(TAG, "onPause");
         getActivity().unregisterReceiver(mExternalStorageReceiver);
         removeNetworkListener();
+        // Unregister theme change listener
+        if (mThemeChangeListener != null) {
+            ThemeManager.getInstance(getContext()).unregisterThemeChangeListener(mThemeChangeListener);
+        }
         super.onPause();
     }
 
@@ -293,7 +340,9 @@ abstract public class BrowserCategory extends ListFragment {
             f.setArguments(b);
         }
         loadFragmentAfterStackReset(f);
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(struc.title);
+        if (getActivity() != null && ((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(struc.title);
+        }
     }
 
     /**
@@ -621,7 +670,16 @@ abstract public class BrowserCategory extends ListFragment {
 
             final TextView tv = (TextView) convertView;
             if (type == ITEM_VIEW_TYPE_CATEGORY) {
-                convertView.setBackgroundResource(R.drawable.category_item_background_normal);
+                // Create theme-aware background selector
+                android.graphics.drawable.StateListDrawable bgSelector = new android.graphics.drawable.StateListDrawable();
+                int selectorColor = ThemeManager.getInstance(getContext()).getCategorySelectorColor();
+                // Pressed state
+                bgSelector.addState(new int[]{android.R.attr.state_pressed}, new android.graphics.drawable.ColorDrawable(selectorColor));
+                // Activated/selected state
+                bgSelector.addState(new int[]{android.R.attr.state_activated}, new android.graphics.drawable.ColorDrawable(selectorColor));
+                // Default state (transparent)
+                bgSelector.addState(new int[]{}, new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                convertView.setBackground(bgSelector);
                 // Set the category name
                 ItemData item = (ItemData) mCategoryList.get(position);
                 tv.setText(item.text);

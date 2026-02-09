@@ -15,9 +15,12 @@
 package com.archos.mediacenter.video.leanback.network;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,6 +29,9 @@ import android.os.Handler;
 import androidx.core.content.ContextCompat;
 import androidx.leanback.app.BackgroundManager;
 import androidx.leanback.app.BrowseSupportFragment;
+
+import com.archos.mediacenter.video.utils.ThemeManager;
+import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.ClassPresenterSelector;
 import androidx.leanback.widget.HeaderItem;
@@ -63,6 +69,7 @@ import com.archos.mediacenter.video.leanback.presenter.NetworkShortcutPresenter;
 import com.archos.mediacenter.video.leanback.presenter.RescanBoxItemPresenter;
 import com.archos.mediacenter.video.leanback.presenter.SmbSharePresenter;
 import com.archos.mediacenter.video.player.PrivateMode;
+import com.archos.mediacenter.video.utils.PrivateModeUIHelper;
 import com.archos.mediaprovider.video.NetworkScannerReceiver;
 
 import org.jupnp.model.meta.Device;
@@ -107,6 +114,7 @@ public class NetworkRootFragment extends BrowseSupportFragment {
     private Overlay mOverlay;
     private ArrayObjectAdapter mNetworkShortcutsAdapter;
     private NetworkShortcutsLoaderTask mNetworkShortcutsLoaderTask;
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
 
     // temp debug flag (to remove once re-scan feature is published)
     static boolean sDisplayRescanItem = false;
@@ -123,12 +131,20 @@ public class NetworkRootFragment extends BrowseSupportFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Add private mode indicator overlay
+        PrivateModeUIHelper.addPrivateModeIndicator(getActivity(), view);
+
         mOverlay = new Overlay(this);
     }
 
     @Override
     public void onDestroyView() {
         mOverlay.destroy();
+        // Unregister theme change listener
+        if (mThemeChangeListener != null) {
+            ThemeManager.getInstance(getActivity()).unregisterThemeChangeListener(mThemeChangeListener);
+        }
         super.onDestroyView();
     }
 
@@ -149,6 +165,9 @@ public class NetworkRootFragment extends BrowseSupportFragment {
         mShortcutsLoaderTask.execute();
         mNetworkShortcutsLoaderTask = new NetworkShortcutsLoaderTask(); //not in the same task because this isn't using the same cursor
         mNetworkShortcutsLoaderTask.execute();
+
+        // Setup theme change listener
+        setupThemeListener();
     }
 
     @Override
@@ -635,6 +654,9 @@ public class NetworkRootFragment extends BrowseSupportFragment {
     }
 
     private void updateBackground() {
+        // Update private mode indicator visibility
+        PrivateModeUIHelper.updatePrivateModeIndicator(getView());
+
         Resources r = getResources();
 
         bgMngr = BackgroundManager.getInstance(getActivity());
@@ -642,11 +664,32 @@ public class NetworkRootFragment extends BrowseSupportFragment {
             bgMngr.attach(getActivity().getWindow());
 
         if (PrivateMode.isActive()) {
-            bgMngr.setColor(ContextCompat.getColor(getActivity(), R.color.private_mode));
-            bgMngr.setDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.private_background));
+            int privateModeColor = ThemeManager.getInstance(getActivity()).getPrivateModeColor();
+            bgMngr.setColor(privateModeColor);
+            bgMngr.setDrawable(new ColorDrawable(privateModeColor));
         } else {
-            bgMngr.setColor(ContextCompat.getColor(getActivity(), R.color.leanback_background));
-            bgMngr.setDrawable(new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.leanback_background)));
+            // Use ThemeManager to get the appropriate background color for the current theme
+            int backgroundColor = ThemeManager.getInstance(getActivity()).getLeanbackBackgroundColor();
+            bgMngr.setColor(backgroundColor);
+            bgMngr.setDrawable(new ColorDrawable(backgroundColor));
         }
+    }
+
+    private void setupThemeListener() {
+        // Guard against duplicate registration
+        if (mThemeChangeListener != null) {
+            return;
+        }
+        ThemeManager themeManager = ThemeManager.getInstance(getActivity());
+        mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                    if (log.isDebugEnabled()) log.debug("Theme changed, updating background");
+                    updateBackground();
+                }
+            }
+        };
+        themeManager.registerThemeChangeListener(mThemeChangeListener);
     }
 }

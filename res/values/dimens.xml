@@ -81,4 +81,8 @@
     <item name="wrap_content" format="integer" type="dimen">-2</item>
     <dimen name="lb_guidedactions_item_icon_width">@dimen/wrap_content</dimen>
 
+    <!-- Private mode indicator -->
+    <dimen name="private_mode_indicator_size">48dp</dimen>
+    <dimen name="private_mode_indicator_margin">16dp</dimen>
+
 </resources>

@@ -25,6 +25,7 @@ import android.widget.TextView;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.leanback.adapter.object.SmbShare;
 import com.archos.mediacenter.video.leanback.adapter.object.UpnpServer;
+import com.archos.mediacenter.video.utils.ThemeManager;
 
 /**
 * Created by vapillon on 10/04/15.
@@ -72,6 +73,8 @@ public class SmbSharePresenter extends Presenter {
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, Object item) {
         SmbShortcutViewHolder vh = (SmbShortcutViewHolder)viewHolder;
+        // Apply theme-aware background color to the image container
+        vh.getImageView().setBackgroundColor(ThemeManager.getInstance(vh.mCard.getContext()).getLeanbackHeaderColor());
         if (item instanceof SmbShare) {
             SmbShare share = (SmbShare) item;
             vh.getNameTextView().setText(share.getDisplayName());

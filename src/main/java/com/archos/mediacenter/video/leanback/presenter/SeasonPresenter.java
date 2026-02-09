@@ -36,6 +36,7 @@ import android.widget.TextView;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.adapters.object.Season;
 import com.archos.mediacenter.video.leanback.tvshow.TvshowActionAdapter;
+import com.archos.mediacenter.video.utils.ThemeManager;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -59,7 +60,7 @@ public class SeasonPresenter extends Presenter {
             mCardView = (ImageCardView)view;
             mCardView.setMainImageDimensions(getWidth(context), getHeight(context));
             mCardView.setMainImage(new ColorDrawable(ContextCompat.getColor(context, R.color.lb_basic_card_bg_color)));
-            mCardView.getMainImageView().setBackgroundColor(ContextCompat.getColor(context, R.color.lightblue900));
+            mCardView.getMainImageView().setBackgroundColor(ThemeManager.getInstance(context).getGridItemBackgroundColor());
             mCardView.setFocusable(true);
             mCardView.setFocusableInTouchMode(true);
             

@@ -1,19 +1,23 @@
 package com.archos.mediacenter.video.leanback.settings;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
 import androidx.leanback.preference.LeanbackPreferenceFragmentCompat;
 import androidx.leanback.preference.LeanbackSettingsFragmentCompat;
 
 import com.archos.mediacenter.video.CustomApplication;
+import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 
 public class VideoSettingsFragment extends LeanbackSettingsFragmentCompat {
 
     private PrefsFragment mPrefsFragment;
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
 
     @Override
     public void onPreferenceStartInitialScreen() {
@@ -44,6 +48,35 @@ public class VideoSettingsFragment extends LeanbackSettingsFragmentCompat {
             mPrefsFragment.onActivityResult(requestCode, resultCode, data);
     }
 
+    @Override
+    public void onViewCreated(android.view.View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Note: Don't apply window theme for leanback preferences
+        // The activity uses MyLeanbackTheme.Preferences which has translucent window
+        // Applying a background would break the overlay appearance
+
+        // Set up theme change listener - MainActivityLeanback will handle the window theme update
+        mThemeChangeListener = (sharedPreferences, key) -> {
+            if (key.equals(VideoPreferencesCommon.KEY_APP_THEME)) {
+                // Signal to parent that theme changed - it will update its window
+                getActivity().setResult(VideoPreferencesCommon.ACTIVITY_RESULT_UI_MODE_CHANGED);
+            }
+        };
+        PreferenceManager.getDefaultSharedPreferences(requireContext())
+                .registerOnSharedPreferenceChangeListener(mThemeChangeListener);
+    }
+
+    @Override
+    public void onDestroyView() {
+        // Unregister theme change listener
+        if (mThemeChangeListener != null) {
+            PreferenceManager.getDefaultSharedPreferences(requireContext())
+                    .unregisterOnSharedPreferenceChangeListener(mThemeChangeListener);
+        }
+        super.onDestroyView();
+    }
+
     public static class PrefsFragment extends LeanbackPreferenceFragmentCompat {
 
         private VideoPreferencesCommon mPreferencesCommon = new VideoPreferencesCommon(this);
@@ -51,6 +84,17 @@ public class VideoSettingsFragment extends LeanbackSettingsFragmentCompat {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             mPreferencesCommon.onCreatePreferences(savedInstanceState, rootKey);
+        }
+
+        @Override
+        public void onViewCreated(android.view.View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+            // Apply theme background color to the preference list (RecyclerView)
+            // This colors only the right-side content area, not the entire window
+            if (getListView() != null) {
+                getListView().setBackgroundColor(ThemeManager.getInstance(requireContext()).getLeanbackBackgroundColor());
+            }
+            // Note: Header color is now handled by the theme (MyLeanbackTheme.Preferences.Black)
         }
 
         @Override

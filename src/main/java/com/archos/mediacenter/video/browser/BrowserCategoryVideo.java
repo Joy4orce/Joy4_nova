@@ -16,6 +16,7 @@
 package com.archos.mediacenter.video.browser;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.preference.PreferenceManager;
 import androidx.fragment.app.Fragment;
@@ -24,6 +25,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+
+import com.archos.mediacenter.video.utils.ThemeManager;
+import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 
 import com.archos.mediacenter.video.R;
 import com.archos.mediaprovider.video.LoaderUtils;
@@ -68,6 +72,7 @@ public class BrowserCategoryVideo extends BrowserCategory implements androidx.ap
      * Used to disable the action bar navigation listener when initializing the action bar navigation while the fragment is already created
      */
     private boolean mNavigationItemListenerActive = true;
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
     private static final int ITEM_ID_VIDEO_FOLDER = ITEM_ID_OFFSET + 0;
     private static final int ITEM_ID_MOVIES = ITEM_ID_OFFSET + 1;
     private static final int ITEM_ID_TV_SHOWS = ITEM_ID_OFFSET + 2;
@@ -102,10 +107,37 @@ public class BrowserCategoryVideo extends BrowserCategory implements androidx.ap
     }
     public void onViewCreated(View v, Bundle save){
         super.onViewCreated(v, save);
+        // Apply theme colors to actionbar - defer to onResume when ActionBar is available
+        // Register theme change listener
+        mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                    if (getActivity() != null) {
+                        getActivity().recreate();
+                    }
+                }
+            }
+        };
+        ThemeManager.getInstance(getActivity()).registerThemeChangeListener(mThemeChangeListener);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mThemeChangeListener != null && getActivity() != null) {
+            ThemeManager.getInstance(getActivity()).unregisterThemeChangeListener(mThemeChangeListener);
+        }
     }
 
     @Override
     public void onResume() {
+        // Apply theme colors to actionbar - safe to do here when ActionBar is initialized
+        if (getActivity() != null && ((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
+            ((AppCompatActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(
+                new android.graphics.drawable.ColorDrawable(ThemeManager.getInstance(getActivity()).getToolbarBackgroundColor())
+            );
+        }
         super.onResume();
         // Update category labels when returning from preferences (smart mode may have changed)
         updateCategoryLabels();

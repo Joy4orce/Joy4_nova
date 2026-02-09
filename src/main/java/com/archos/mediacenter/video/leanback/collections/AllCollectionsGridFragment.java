@@ -22,6 +22,8 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
@@ -59,6 +61,8 @@ import com.archos.mediacenter.video.leanback.presenter.VideoListPresenter;
 import com.archos.mediacenter.video.leanback.search.VideoSearchActivity;
 import com.archos.mediacenter.video.player.PrivateMode;
 import com.archos.mediacenter.video.utils.DbUtils;
+import com.archos.mediacenter.video.utils.PrivateModeUIHelper;
+import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.mediaprovider.video.VideoStore;
 
@@ -89,6 +93,8 @@ public class AllCollectionsGridFragment extends MyVerticalGridFragment implement
     private boolean mSeparateAnimeFromShowMovie;
 
     private Context mContext;
+
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
 
     public static SparseArray<CollectionsSortOrderEntry> sortOrderIndexer = new SparseArray<CollectionsSortOrderEntry>();
     static {
@@ -180,6 +186,9 @@ public class AllCollectionsGridFragment extends MyVerticalGridFragment implement
         if (DBG) Log.d(TAG, "onViewCreated");
         super.onViewCreated(view, savedInstanceState);
 
+        // Add private mode indicator overlay
+        PrivateModeUIHelper.addPrivateModeIndicator(getActivity(), view);
+
         mOverlay = new Overlay(this);
 
         // Set orb icon
@@ -198,8 +207,19 @@ public class AllCollectionsGridFragment extends MyVerticalGridFragment implement
         getTitleView().setOrb5IconResId(R.drawable.orb_alpha);
 
         // Set orb color
-        setSearchAffordanceColor(ContextCompat.getColor(getActivity(), R.color.lightblueA200));
-        
+        setSearchAffordanceColor(ThemeManager.getInstance(getActivity()).getSearchAffordanceColor());
+
+        // Register theme change listener to update UI when theme changes
+        mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                    updateBackground();
+                }
+            }
+        };
+        ThemeManager.getInstance(getActivity()).registerThemeChangeListener(mThemeChangeListener);
+
         // Set first orb action
         getTitleView().setOnOrb1ClickedListener(new View.OnClickListener() {
             @Override
@@ -282,6 +302,10 @@ public class AllCollectionsGridFragment extends MyVerticalGridFragment implement
     @Override
     public void onDestroyView() {
         mOverlay.destroy();
+        // Unregister theme change listener
+        if (mThemeChangeListener != null) {
+            ThemeManager.getInstance(getActivity()).unregisterThemeChangeListener(mThemeChangeListener);
+        }
         super.onDestroyView();
     }
 
@@ -341,6 +365,9 @@ public class AllCollectionsGridFragment extends MyVerticalGridFragment implement
     }
 
     private void updateBackground() {
+        // Update private mode indicator visibility
+        PrivateModeUIHelper.updatePrivateModeIndicator(getView());
+
         Resources r = getResources();
 
         bgMngr = BackgroundManager.getInstance(getActivity());
@@ -348,11 +375,14 @@ public class AllCollectionsGridFragment extends MyVerticalGridFragment implement
             bgMngr.attach(getActivity().getWindow());
 
         if (PrivateMode.isActive()) {
-            bgMngr.setColor(ContextCompat.getColor(getActivity(), R.color.private_mode));
-            bgMngr.setDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.private_background));
+            int privateModeColor = ThemeManager.getInstance(getActivity()).getPrivateModeColor();
+            bgMngr.setColor(privateModeColor);
+            bgMngr.setDrawable(new ColorDrawable(privateModeColor));
         } else {
-            bgMngr.setColor(ContextCompat.getColor(getActivity(), R.color.leanback_background));
-            bgMngr.setDrawable(new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.leanback_background)));
+            // Use ThemeManager to get the appropriate background color for the current theme
+            int backgroundColor = ThemeManager.getInstance(getActivity()).getLeanbackBackgroundColor();
+            bgMngr.setColor(backgroundColor);
+            bgMngr.setDrawable(new ColorDrawable(backgroundColor));
         }
     }
 

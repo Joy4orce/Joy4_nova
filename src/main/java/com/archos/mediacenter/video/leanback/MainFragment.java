@@ -28,6 +28,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.core.content.ContextCompat;
 import androidx.leanback.app.BackgroundManager;
@@ -110,6 +111,8 @@ import com.archos.mediacenter.video.leanback.tvshow.TvshowsByGenreActivity;
 import com.archos.mediacenter.video.leanback.tvshow.TvshowsByRatingActivity;
 import com.archos.mediacenter.video.player.PrivateMode;
 import com.archos.mediacenter.video.tvshow.TvshowSortOrderEntries;
+import com.archos.mediacenter.video.utils.PrivateModeUIHelper;
+import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.mediacenter.video.utils.WebUtils;
 import com.archos.mediaprovider.ArchosMediaIntent;
@@ -220,6 +223,7 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
     private IntentFilter mUpdateFilter;
 
     private BackgroundManager bgMngr;
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
 
     private AsyncTask mBuildAllMoviesBoxTask;
     private AsyncTask mBuildAllAnimesBoxTask;
@@ -253,6 +257,9 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
         super.onViewCreated(view, savedInstanceState);
         mActivity = getActivity();
 
+        // Add private mode indicator overlay
+        PrivateModeUIHelper.addPrivateModeIndicator(mActivity, view);
+
         mOverlay = new Overlay(this);
         mPrefs = PreferenceManager.getDefaultSharedPreferences(mActivity);
         mSeparateAnimeFromShowMovie = mPrefs.getBoolean(VideoPreferencesCommon.KEY_SEPARATE_ANIME_MOVIE_SHOW, VideoPreferencesCommon.SEPARATE_ANIME_MOVIE_SHOW_DEFAULT);
@@ -280,11 +287,28 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
         setHeadersState(HEADERS_ENABLED);
         setHeadersTransitionOnBackEnabled(true);
 
-        // set fastLane (or headers) background color
-        setBrandColor(ContextCompat.getColor(mActivity, R.color.leanback_side));
+        // Apply theme-aware colors
+        ThemeManager themeManager = ThemeManager.getInstance(mActivity);
+        // set fastLane (or headers) background color based on theme
+        setBrandColor(themeManager.getLeanbackHeaderColor());
 
-        // set search icon color
-        setSearchAffordanceColor(ContextCompat.getColor(mActivity, R.color.lightblueA200));
+        // set search icon color - always blue like in the fork
+        setSearchAffordanceColor(ThemeManager.getInstance(mActivity).getSearchAffordanceColor());
+
+        // Register theme change listener to update UI when theme changes
+        mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                    if (log.isDebugEnabled()) log.debug("Theme changed, updating background and colors");
+                    updateBackground();
+                    // Update brand color
+                    setBrandColor(themeManager.getLeanbackHeaderColor());
+                    // Search icon stays blue - no change needed
+                }
+            }
+        };
+        themeManager.registerThemeChangeListener(mThemeChangeListener);
 
         setupEventListeners();
 
@@ -355,6 +379,12 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
         if (mOverlay != null) {
             mOverlay.destroy();
         }
+
+        // Unregister theme change listener
+        if (mThemeChangeListener != null) {
+            ThemeManager.getInstance(mActivity).unregisterThemeChangeListener(mThemeChangeListener);
+        }
+
         super.onDestroyView();
     }
 
@@ -611,12 +641,19 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
         bgMngr = BackgroundManager.getInstance(mActivity);
         if(!bgMngr.isAttached())
             bgMngr.attach(mActivity.getWindow());
+        
+        // Update private mode indicator visibility
+        PrivateModeUIHelper.updatePrivateModeIndicator(getView());
+        
         if (PrivateMode.isActive()) {
-            bgMngr.setColor(ContextCompat.getColor(mActivity, R.color.private_mode));
-            bgMngr.setDrawable(ContextCompat.getDrawable(mActivity, R.drawable.private_background));
+            int privateModeColor = ThemeManager.getInstance(mActivity).getPrivateModeColor();
+            bgMngr.setColor(privateModeColor);
+            bgMngr.setDrawable(new ColorDrawable(privateModeColor));
         } else {
-            bgMngr.setColor(ContextCompat.getColor(mActivity, R.color.leanback_background));
-            bgMngr.setDrawable(new ColorDrawable(ContextCompat.getColor(mActivity, R.color.leanback_background)));
+            // Use ThemeManager to get the appropriate background color for the current theme
+            int backgroundColor = ThemeManager.getInstance(mActivity).getLeanbackBackgroundColor();
+            bgMngr.setColor(backgroundColor);
+            bgMngr.setDrawable(new ColorDrawable(backgroundColor));
         }
     }
 
@@ -1693,6 +1730,7 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
                         PrivateMode.toggle();
                         mPrefs.edit().putBoolean(PREF_PRIVATE_MODE, PrivateMode.isActive()).apply();
                         updatePrivateMode(icon);
+                        updateBackground();
                         break;
                     case LEGACY_UI:
                         new DensityTweak(vActivity)

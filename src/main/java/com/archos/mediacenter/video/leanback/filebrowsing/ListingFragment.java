@@ -24,6 +24,8 @@ import androidx.loader.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.preference.PreferenceManager;
@@ -70,6 +72,8 @@ import com.archos.mediacenter.video.leanback.presenter.PosterImageCardPresenter;
 import com.archos.mediacenter.video.leanback.presenter.VideoListPresenter;
 import com.archos.mediacenter.video.player.PrivateMode;
 import com.archos.mediacenter.video.utils.PlayUtils;
+import com.archos.mediacenter.video.utils.PrivateModeUIHelper;
+import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.mediacenter.video.utils.VideoUtils;
 
@@ -138,6 +142,7 @@ public abstract class ListingFragment extends MyVerticalGridFragment implements 
     private Cursor mCursor;
 
     private BackgroundManager bgMngr = null;
+    private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
 
     /**
      * flag used to make the difference between first-creation and back-from-backstack
@@ -228,13 +233,16 @@ public abstract class ListingFragment extends MyVerticalGridFragment implements 
 
         super.onViewCreated(view, savedInstanceState);
 
+        // Add private mode indicator overlay
+        PrivateModeUIHelper.addPrivateModeIndicator(getActivity(), view);
+
         mOverlay = new Overlay(this);
 
         setSecondOrbIcon();
         setSecondOrbAction();
 
         // Set orb color
-        setSearchAffordanceColor(ContextCompat.getColor(getActivity(), R.color.lightblueA200));
+        setSearchAffordanceColor(ThemeManager.getInstance(getActivity()).getSearchAffordanceColor());
 
         // set null listener to hide the first orb
         getTitleView().setOnOrb1ClickedListener(null);
@@ -271,6 +279,10 @@ public abstract class ListingFragment extends MyVerticalGridFragment implements 
     public void onDestroyView() {
         if (log.isDebugEnabled()) log.debug("onDestroyView");
         mOverlay.destroy();
+        // Unregister theme change listener
+        if (mThemeChangeListener != null) {
+            ThemeManager.getInstance(getActivity()).unregisterThemeChangeListener(mThemeChangeListener);
+        }
         super.onDestroyView();
     }
 
@@ -298,6 +310,8 @@ public abstract class ListingFragment extends MyVerticalGridFragment implements 
         }
         updateBackground();
         getTitleView().resetLastOrb();
+        // Setup theme change listener
+        setupThemeListener();
     }
 
     @Override
@@ -756,17 +770,41 @@ public abstract class ListingFragment extends MyVerticalGridFragment implements 
     }
 
     private void updateBackground() {
+        // Update private mode indicator visibility
+        PrivateModeUIHelper.updatePrivateModeIndicator(getView());
+
         bgMngr = BackgroundManager.getInstance(getActivity());
         if(!bgMngr.isAttached())
             bgMngr.attach(getActivity().getWindow());
 
         if (PrivateMode.isActive()) {
-            bgMngr.setColor(ContextCompat.getColor(getActivity(), R.color.private_mode));
-            bgMngr.setDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.private_background));
+            int privateModeColor = ThemeManager.getInstance(getActivity()).getPrivateModeColor();
+            bgMngr.setColor(privateModeColor);
+            bgMngr.setDrawable(new ColorDrawable(privateModeColor));
         } else {
-            bgMngr.setColor(ContextCompat.getColor(getActivity(), R.color.leanback_background));
-            bgMngr.setDrawable(new ColorDrawable(ContextCompat.getColor(getActivity(), R.color.leanback_background)));
+            // Use ThemeManager to get the appropriate background color for the current theme
+            int backgroundColor = ThemeManager.getInstance(getActivity()).getLeanbackBackgroundColor();
+            bgMngr.setColor(backgroundColor);
+            bgMngr.setDrawable(new ColorDrawable(backgroundColor));
         }
+    }
+
+    private void setupThemeListener() {
+        // Guard against duplicate registration
+        if (mThemeChangeListener != null) {
+            return;
+        }
+        ThemeManager themeManager = ThemeManager.getInstance(getActivity());
+        mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (VideoPreferencesCommon.KEY_APP_THEME.equals(key)) {
+                    if (log.isDebugEnabled()) log.debug("Theme changed, updating background");
+                    updateBackground();
+                }
+            }
+        };
+        themeManager.registerThemeChangeListener(mThemeChangeListener);
     }
 
     private static String itemid2sortorder(int itemid) {

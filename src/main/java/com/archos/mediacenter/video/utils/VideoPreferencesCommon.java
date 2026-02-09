@@ -200,6 +200,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
     public static final String KEY_SMB_DISABLE_UDP_DISCOVERY = "pref_smb_disable_udp_discovery";
     public static final String KEY_SMB_DISABLE_MDNS_DISCOVERY = "pref_smb_disable_mdns_discovery";
     public static final String KEY_SMBJ = "pref_smbj";
+    public static final String KEY_APP_THEME = "app_theme";
 
     public static final boolean SEPARATE_ANIME_MOVIE_SHOW_DEFAULT = true;
     // TODO: disabled until issue #186 is fixed
@@ -1549,6 +1550,12 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
                 } else {
                     new TraktService.Client(getActivity(), null, false).wipeCollection();
                 }
+            }
+        } else if (key.equals(KEY_APP_THEME)) {
+            // Theme changed - restart activity to apply new theme
+            Activity activity = getActivity();
+            if (activity != null) {
+                activity.recreate();
             }
         }
     }

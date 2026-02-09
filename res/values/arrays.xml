@@ -223,4 +223,14 @@
         <item>HDR10+</item>
         <item>Dolby Vision</item>
     </string-array>
+
+    <string-array name="theme_selection_entries" translatable="false">
+        <item>@string/theme_blue</item>
+        <item>@string/theme_black</item>
+    </string-array>
+
+    <string-array name="theme_selection_entryvalues">
+        <item>blue</item>
+        <item>black</item>
+    </string-array>
 </resources>
