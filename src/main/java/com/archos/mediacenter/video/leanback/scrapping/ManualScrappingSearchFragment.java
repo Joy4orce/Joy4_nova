@@ -155,8 +155,11 @@ public abstract class ManualScrappingSearchFragment extends SafeSearchSupportFra
     }
 
     private void updateBackground() {
+        if (getActivity() == null) return;
         BackgroundManager bgMngr = BackgroundManager.getInstance(getActivity());
-        bgMngr.attach(getActivity().getWindow());
+        if (!bgMngr.isAttached()) {
+            bgMngr.attach(getActivity().getWindow());
+        }
         int backgroundColor = ThemeManager.getInstance(getActivity()).getLeanbackBackgroundColor();
         bgMngr.setColor(backgroundColor);
     }

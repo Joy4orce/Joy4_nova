@@ -60,7 +60,7 @@ public class VideoSettingsFragment extends LeanbackSettingsFragmentCompat {
         mThemeChangeListener = (sharedPreferences, key) -> {
             if (key.equals(VideoPreferencesCommon.KEY_APP_THEME)) {
                 // Signal to parent that theme changed - it will update its window
-                getActivity().setResult(VideoPreferencesCommon.ACTIVITY_RESULT_UI_MODE_CHANGED);
+                getActivity().setResult(VideoPreferencesCommon.ACTIVITY_RESULT_THEME_CHANGED);
             }
         };
         PreferenceManager.getDefaultSharedPreferences(requireContext())

@@ -1102,7 +1102,7 @@
             android:exported="true"
             android:label="@string/preferences"
             android:launchMode="singleTop"
-            android:theme="@style/ArchosThemeBlue">
+            android:theme="@style/ArchosThemeLauncher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>

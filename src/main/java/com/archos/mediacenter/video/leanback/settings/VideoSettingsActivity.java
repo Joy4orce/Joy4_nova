@@ -27,6 +27,17 @@ public class VideoSettingsActivity extends LeanbackActivity {
         overridePendingTransition(0, R.anim.slide_out_to_right);
     }
 
+    private int getResultCode() {
+        // This is a workaround to get the current result code
+        // since there's no public API for it
+        return 0; // We can't easily get this, so we'll log differently
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

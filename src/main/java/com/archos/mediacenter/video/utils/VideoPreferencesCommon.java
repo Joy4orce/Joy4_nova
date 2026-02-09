@@ -58,6 +58,7 @@ import com.archos.mediacenter.video.CustomApplication;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.UiChoiceDialog;
 import com.archos.mediacenter.video.browser.loader.MoviesLoader;
+import com.archos.mediacenter.video.leanback.LeanbackActivity;
 import com.archos.mediacenter.video.leanback.MainFragment;
 import com.archos.mediacenter.video.leanback.animes.AllAnimesGridFragment;
 import com.archos.mediacenter.video.leanback.animes.AnimesSortOrderEntry;
@@ -290,6 +291,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
 
     final public static int ACTIVITY_RESULT_UI_MODE_CHANGED = 665;
     final public static int ACTIVITY_RESULT_UI_ZOOM_CHANGED = 667;
+    final public static int ACTIVITY_RESULT_THEME_CHANGED = 668;
     private Preference mExportManualPreference;
     private Preference mDbExportManualPreference = null;
 
@@ -1552,10 +1554,23 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
                 }
             }
         } else if (key.equals(KEY_APP_THEME)) {
-            // Theme changed - restart activity to apply new theme
+            // Theme changed - set result code and restart activity to apply new theme
             Activity activity = getActivity();
             if (activity != null) {
-                activity.recreate();
+                activity.setResult(ACTIVITY_RESULT_THEME_CHANGED);
+
+                // Check if this is a leanback settings activity
+                boolean isLeanbackSettings = (activity instanceof com.archos.mediacenter.video.leanback.settings.VideoSettingsActivity) ||
+                                              (activity instanceof com.archos.mediacenter.video.leanback.settings.VideoSettingsMoreLeanbackActivity) ||
+                                              (activity instanceof com.archos.mediacenter.video.leanback.settings.VideoSettingsLicencesActivity);
+
+                if (isLeanbackSettings) {
+                    // Recreate settings activity so theme changes immediately
+                    activity.recreate();
+                } else if (!(activity instanceof LeanbackActivity)) {
+                    // Phone mode: recreate to apply theme
+                    activity.recreate();
+                }
             }
         }
     }

@@ -37,11 +37,19 @@ public class VideoPreferencesActivity extends AppCompatActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        ThemeManager.getInstance(this).applyWindowTheme(this);
+        ThemeManager themeManager = ThemeManager.getInstance(this);
+        if (themeManager.isBlackTheme()) {
+            setTheme(R.style.ArchosThemeBlack);
+        } else {
+            setTheme(R.style.ArchosThemeBlue);
+        }
         super.onCreate(savedInstanceState);
+        themeManager.applyWindowTheme(this);
         setContentView(R.layout.preferences_video);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+        }
 
         mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override

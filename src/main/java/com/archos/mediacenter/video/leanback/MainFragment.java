@@ -636,11 +636,14 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
     }
 
     private void updateBackground() {
-        if (updateActivity("updateBackground") == null) return; // do not update background when activity has been destroyed
+        if (updateActivity("updateBackground") == null) {
+            return; // do not update background when activity has been destroyed
+        }
         Resources r = getResources();
         bgMngr = BackgroundManager.getInstance(mActivity);
-        if(!bgMngr.isAttached())
+        if(!bgMngr.isAttached()) {
             bgMngr.attach(mActivity.getWindow());
+        }
         
         // Update private mode indicator visibility
         PrivateModeUIHelper.updatePrivateModeIndicator(getView());
@@ -649,12 +652,42 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
             int privateModeColor = ThemeManager.getInstance(mActivity).getPrivateModeColor();
             bgMngr.setColor(privateModeColor);
             bgMngr.setDrawable(new ColorDrawable(privateModeColor));
+            // Leanback's right panel is backed by browse_frame; update it explicitly
+            View root = getView();
+            if (root != null) {
+                View browseFrame = root.findViewById(R.id.browse_frame);
+                if (browseFrame != null) {
+                    browseFrame.setBackgroundColor(privateModeColor);
+                }
+            }
         } else {
             // Use ThemeManager to get the appropriate background color for the current theme
             int backgroundColor = ThemeManager.getInstance(mActivity).getLeanbackBackgroundColor();
             bgMngr.setColor(backgroundColor);
             bgMngr.setDrawable(new ColorDrawable(backgroundColor));
+            // Leanback's right panel is backed by browse_frame; update it explicitly
+            View root = getView();
+            if (root != null) {
+                View browseFrame = root.findViewById(R.id.browse_frame);
+                if (browseFrame != null) {
+                    browseFrame.setBackgroundColor(backgroundColor);
+                }
+            }
         }
+    }
+
+    /**
+     * Public method to refresh theme-related UI elements
+     * Called when theme changes from settings
+     */
+    public void refreshTheme() {
+        if (log.isDebugEnabled()) log.debug("refreshTheme called");
+        // Update background
+        updateBackground();
+        // Update brand color (headers)
+        ThemeManager themeManager = ThemeManager.getInstance(mActivity);
+        setBrandColor(themeManager.getLeanbackHeaderColor());
+        // Search icon stays blue - no change needed
     }
 
     private void setupEventListeners() {

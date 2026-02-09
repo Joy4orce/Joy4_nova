@@ -210,6 +210,14 @@ public class MainActivityLeanback extends LeanbackActivity {
                 // restart the leanback activity for user to change the zoom
                 finish();
                 startActivity(new Intent(this, EntryActivity.class));
+            } else if (resultCode == VideoPreferencesCommon.ACTIVITY_RESULT_THEME_CHANGED) {
+                // Theme changed - update window background and refresh MainFragment
+                ThemeManager.getInstance(this).applyWindowTheme(this);
+                MainFragment mainFragment = (MainFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.main_browse_fragment);
+                if (mainFragment != null) {
+                    mainFragment.refreshTheme();
+                }
             }
         }
     }

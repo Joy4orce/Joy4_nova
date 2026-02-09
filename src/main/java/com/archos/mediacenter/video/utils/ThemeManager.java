@@ -336,16 +336,21 @@ public class ThemeManager {
         Window window = activity.getWindow();
         if (window == null) return;
 
-        // Set window background gradient - BOTTOM_TO_TOP to match fork's angle=90
-        android.graphics.drawable.GradientDrawable gradient = new android.graphics.drawable.GradientDrawable(
-            android.graphics.drawable.GradientDrawable.Orientation.BOTTOM_TOP,
-            new int[] { getGradientStartColor(), getGradientEndColor() }
-        );
-        window.setBackgroundDrawable(gradient);
+        // Check if this is a leanback activity (TV mode)
+        boolean isLeanback = UiChoiceDialog.applicationIsInLeanbackMode(activity);
+        
+        if (!isLeanback) {
+            // Phone mode: Set window background gradient
+            android.graphics.drawable.GradientDrawable gradient = new android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.BOTTOM_TOP,
+                new int[] { getGradientStartColor(), getGradientEndColor() }
+            );
+            window.setBackgroundDrawable(gradient);
 
-        // Also apply to decor view to ensure cutout area is covered
-        if (activity.getWindow().getDecorView() != null) {
-            activity.getWindow().getDecorView().setBackground(gradient);
+            // Also apply to decor view to ensure cutout area is covered
+            if (activity.getWindow().getDecorView() != null) {
+                activity.getWindow().getDecorView().setBackground(gradient);
+            }
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
