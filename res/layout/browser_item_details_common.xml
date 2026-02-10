@@ -56,6 +56,7 @@
         android:id="@+id/detail_line_three"
         style="@style/BrowserText.Details"
         android:layout_below="@id/detail_line_two"
+        android:layout_above="@id/rating_and_date"
         android:layout_marginTop="8dip"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/left_area"
@@ -70,8 +71,7 @@
         android:id="@+id/rating_and_date"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/detail_line_three"
-        android:layout_marginTop="4dip"
+        android:layout_above="@id/bottom_row"
         android:layout_marginBottom="10dip"
         android:layout_toRightOf="@id/left_area"
         layout="@layout/browser_item_details_date_and_rating" />

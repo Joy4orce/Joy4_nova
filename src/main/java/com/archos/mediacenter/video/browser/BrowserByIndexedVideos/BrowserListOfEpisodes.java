@@ -89,8 +89,10 @@ public class BrowserListOfEpisodes extends BrowserWithShowHeader {
         if (getActivity() != null && ((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
             ((MainActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(null);
         }
-        ((ListView)mArchosGridView).setDivider(new ColorDrawable(ContextCompat.getColor(getContext(), R.color.transparent_white_list_divider)));
-        ((ListView)mArchosGridView).setDividerHeight(3);
+        if (mArchosGridView instanceof ListView) {
+            ((ListView)mArchosGridView).setDivider(new ColorDrawable(ContextCompat.getColor(getContext(), R.color.transparent_white_list_divider)));
+            ((ListView)mArchosGridView).setDividerHeight(3);
+        }
         // Register theme change listener
         mThemeChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             @Override
@@ -107,8 +109,10 @@ public class BrowserListOfEpisodes extends BrowserWithShowHeader {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ((ListView)mArchosGridView).setDivider(null); //unset otherwise, crash in listview
-        ((ListView)mArchosGridView).setDividerHeight(0);
+        if (mArchosGridView instanceof ListView) {
+            ((ListView)mArchosGridView).setDivider(null); //unset otherwise, crash in listview
+            ((ListView)mArchosGridView).setDividerHeight(0);
+        }
         mApplicationFrameLayout.setBackground(null);
         if (getActivity() != null && ((AppCompatActivity)getActivity()).getSupportActionBar() != null) {
             ((MainActivity)getActivity()).getSupportActionBar().setBackgroundDrawable(

@@ -82,7 +82,8 @@ public class EpisodeListDetailedPresenter extends EpisodePresenter{
         ViewHolderDetails holder = (ViewHolderDetails) view.getTag();
 
         setViewHolderVisibility(holder, View.VISIBLE);
-        holder.info.setText(MediaUtils.formatTime(tvShow.getDurationMs()));
+        if (holder.info != null)
+            holder.info.setText(MediaUtils.formatTime(tvShow.getDurationMs()));
         //holder.detailLineTwo.setText(tvShow.getEpisodeName());
         holder.detailLineOne.setVisibility(View.GONE);
         holder.detailLineTwo.setVisibility(View.GONE);
