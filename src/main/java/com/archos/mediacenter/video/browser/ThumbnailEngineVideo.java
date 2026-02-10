@@ -135,9 +135,15 @@ public class ThumbnailEngineVideo extends ThumbnailEngine {
 	     */
 	    private final String mPosterPath;
 
+	    /**
+	     * The episode picture (TMDb still) for which this result has been computed
+	     */
+	    private final String mEpisodePicturePath;
+
 		public VideoResult(Bitmap thumb, ThumbnailRequestVideo videoRequest) {
 			super(thumb);
 			mPosterPath = videoRequest.getPosterPath();
+			mEpisodePicturePath = videoRequest.getEpisodePicturePath();
 		}
 
 		/**
@@ -152,6 +158,9 @@ public class ThumbnailEngineVideo extends ThumbnailEngine {
 		        // Check if the scraper info have been updated.
 		        // If yes this VideoResult is not up to date compared to the request argument.
 		        if (!isEquals(mPosterPath, videoRequest.getPosterPath())) {
+		            return true;
+		        }
+		        if (!isEquals(mEpisodePicturePath, videoRequest.getEpisodePicturePath())) {
 		            return true;
 		        }
 		    }
@@ -196,7 +205,16 @@ public class ThumbnailEngineVideo extends ThumbnailEngine {
 			return null;
 		}
 
-		String posterPath = videoRequest.getPosterPath();
+		// Use episode picture (TMDb still) when available, otherwise fall back to poster
+		String posterPath = videoRequest.getEpisodePicturePath();
+		if (DBG) Log.d(TAG, "computeThumbnail: episodePicturePath from request=" + videoRequest.getEpisodePicturePath());
+		if (DBG) Log.d(TAG, "computeThumbnail: posterPath from request=" + videoRequest.getPosterPath());
+		if (posterPath == null) {
+			posterPath = videoRequest.getPosterPath();
+			if (DBG) Log.d(TAG, "computeThumbnail: falling back to posterPath=" + posterPath);
+		} else {
+			if (DBG) Log.d(TAG, "computeThumbnail: using episodePicturePath=" + posterPath);
+		}
 
 		// --- Multi-poster case ---
 		ArrayList<String> postersPaths = videoRequest.getPostersPaths();
@@ -276,8 +294,10 @@ public class ThumbnailEngineVideo extends ThumbnailEngine {
 			if (poster.length() != 0) {
 				if (DBG)
 					Log.d(TAG, "decodeCover before for " + poster + " of length " + poster.length());
+				java.io.File f = new java.io.File(poster);
+				if (DBG) Log.d(TAG, "decodeCover: file exists=" + f.exists() + ", canRead=" + f.canRead() + ", size=" + f.length());
 				Bitmap coverBitmap = BitmapFactory.decodeFile(poster);
-				if (DBG) Log.d(TAG, "decodeCover after");
+				if (DBG) Log.d(TAG, "decodeCover after, bitmap=" + coverBitmap);
 				if (coverBitmap != null) {
 					// There is a valid poster
 					if (DBG)

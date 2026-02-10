@@ -32,6 +32,7 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.loader.content.Loader;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -43,6 +44,7 @@ import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 
 import com.archos.mediacenter.utils.ActionBarSubmenu;
 import com.archos.mediacenter.video.R;
+import com.archos.mediacenter.video.browser.Browser;
 import com.archos.mediacenter.video.browser.MainActivity;
 import com.archos.mediacenter.video.browser.ThumbnailRequesterVideo;
 import com.archos.mediacenter.video.browser.adapters.AdapterByShow;
@@ -226,6 +228,35 @@ public class BrowserListOfEpisodes extends BrowserWithShowHeader {
         super.onResume();
         if(mArchosGridView!=null)
             mArchosGridView.clearChoices();
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        // Show current mode icon instead of next mode
+        MenuItem item = menu.findItem(Browser.MENU_VIEW_MODE);
+        if (item != null) {
+            if (mViewMode == VideoUtils.VIEW_MODE_LIST) {
+                item.setIcon(R.drawable.ic_menu_list_mode2);
+            } else if (mViewMode == VideoUtils.VIEW_MODE_DETAILS) {
+                item.setIcon(R.drawable.ic_menu_details_mode2);
+            }
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Override to skip GRID mode - only cycle between LIST and DETAILS
+        if (item.getItemId() == Browser.MENU_VIEW_MODE) {
+            if (mViewMode == VideoUtils.VIEW_MODE_LIST) {
+                applySelectedViewMode(VideoUtils.VIEW_MODE_DETAILS);
+            } else {
+                applySelectedViewMode(VideoUtils.VIEW_MODE_LIST);
+            }
+            getActivity().invalidateOptionsMenu();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

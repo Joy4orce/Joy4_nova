@@ -84,7 +84,7 @@ public class EpisodeListDetailedPresenter extends EpisodePresenter{
         setViewHolderVisibility(holder, View.VISIBLE);
         if (holder.info != null)
             holder.info.setText(MediaUtils.formatTime(tvShow.getDurationMs()));
-        //holder.detailLineTwo.setText(tvShow.getEpisodeName());
+        // detailLineOne is already set by EpisodePresenter with SXXEYY prefix, hide it to avoid duplication
         holder.detailLineOne.setVisibility(View.GONE);
         holder.detailLineTwo.setVisibility(View.GONE);
         holder.detailLineThree.setText(tvShow.getDescriptionBody());

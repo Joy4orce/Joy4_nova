@@ -153,7 +153,9 @@ public abstract class BrowserWithShowHeader extends CursorBrowserByVideo  {
         if(mHeaderView!=null) { //removing headerview
             if (mArchosGridView instanceof ListView) {
                 ((ListView) mArchosGridView).removeHeaderView(mHeaderView);
-                ((AdapterView)mHeaderView.getParent()).removeViewInLayout(mHeaderView);
+                if (mHeaderView.getParent() != null) {
+                    ((AdapterView)mHeaderView.getParent()).removeViewInLayout(mHeaderView);
+                }
             }
             if(mArchosGridView instanceof HeaderGridView)
                 ((HeaderGridView) mArchosGridView).removeHeaderView(mHeaderView);
@@ -384,7 +386,7 @@ public abstract class BrowserWithShowHeader extends CursorBrowserByVideo  {
             plotTv.setText(show.getPlot());
             plotTv.setMaxLines(Integer.MAX_VALUE);
 
-            setSeason((TextView)mHeaderView.findViewById(R.id.season));
+            setSeason((TextView)mHeaderView.findViewById(R.id.number));
             plotTv.setVisibility(View.VISIBLE);
                 if(!mPlotIsFullyDisplayed)
                 mHeaderView.getLayoutParams().height = getResources().getDimensionPixelSize(R.dimen.video_details_item_height);

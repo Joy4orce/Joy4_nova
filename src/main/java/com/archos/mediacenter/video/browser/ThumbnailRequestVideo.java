@@ -37,11 +37,17 @@ public class ThumbnailRequestVideo extends ThumbnailRequest {
      */
     private final Uri mVideoFile2;
 
+    /**
+     * Episode-specific picture (TMDb still) - takes priority over poster
+     */
+    private final String mEpisodePicturePath;
+
     public ThumbnailRequestVideo(int listPosition, long mediaDbId, String posterPath) {
 		super(listPosition, mediaDbId);
 		mPosterPath = posterPath;
 		mPosterPaths = null;
         mVideoFile2 = null;
+        mEpisodePicturePath = null;
 	}
 
     public ThumbnailRequestVideo(int listPosition, long mediaDbId, ArrayList<String> posterPaths) {
@@ -49,6 +55,7 @@ public class ThumbnailRequestVideo extends ThumbnailRequest {
         mPosterPath = null;
         mPosterPaths = posterPaths;
         mVideoFile2 = null;
+        mEpisodePicturePath = null;
     }
 
 
@@ -57,6 +64,15 @@ public class ThumbnailRequestVideo extends ThumbnailRequest {
         mPosterPath = posterPath;
         mPosterPaths = null;
         mVideoFile2 = videoFile;
+        mEpisodePicturePath = null;
+    }
+
+    public ThumbnailRequestVideo(int listPosition, long mediaDbId, String posterPath, String episodePicturePath) {
+        super(listPosition, mediaDbId);
+        mPosterPath = posterPath;
+        mPosterPaths = null;
+        mVideoFile2 = null;
+        mEpisodePicturePath = episodePicturePath;
     }
 	public String getPosterPath() {
 		return mPosterPath;
@@ -68,6 +84,10 @@ public class ThumbnailRequestVideo extends ThumbnailRequest {
 
     public Uri getVideoFile() {
         return mVideoFile2;
+    }
+
+    public String getEpisodePicturePath() {
+        return mEpisodePicturePath;
     }
 
     @Override

@@ -42,7 +42,7 @@ public class EpisodePresenter extends VideoPresenter implements Presenter {
 
     @Override
     public View bindView(View view, Object object, ThumbnailEngine.Result result, int positionInAdapter) {
-        super.bindView(view, object, null, positionInAdapter);
+        super.bindView(view, object, result, positionInAdapter);
         Episode episode = (Episode) object;
                 // ------------------------------------------------
                 // File-based item => fill the ViewHolder fields depending
@@ -54,10 +54,6 @@ public class EpisodePresenter extends VideoPresenter implements Presenter {
         ViewHolder holder = (ViewHolder) view.getTag();
         if(holder.secondLine!=null)
             holder.secondLine.setVisibility(View.VISIBLE);
-        String name = episode.getName();
-        if(name == null ||  name.isEmpty())
-            name = episode.getShowName()+ " "+ mContext.getString(R.string.leanback_episode_SXEX_code, episode.getSeasonNumber(), episode.getEpisodeNumber());
-        holder.name.setText(name);
         int resumePosition = episode.getRemoteResumeMs()>0?episode.getRemoteResumeMs():episode.getResumeMs();
         boolean resume = resumePosition>0 || resumePosition == PlayerActivity.LAST_POSITION_END;
         if (resume&&holder.resume!=null) {
@@ -74,10 +70,26 @@ public class EpisodePresenter extends VideoPresenter implements Presenter {
 
         }
 
-        if(holder.name!=null)
+        if(holder.name!=null) {
             holder.name.setEllipsize(TextUtils.TruncateAt.END);
+            // Prepend episode number to name for better identification in season context
+            String nameText = episode.getName();
+            if(nameText == null || nameText.isEmpty()) {
+                nameText = String.valueOf(episode.getEpisodeNumber());
+            } else {
+                nameText = episode.getEpisodeNumber() + " - " + nameText;
+            }
+            holder.name.setText(nameText);
+        }
 
-        holder.number.setText(""+episode.getEpisodeNumber());
+        if (holder.number != null)
+            holder.number.setText(""+episode.getEpisodeNumber());
+
+        // Show episode number badge on grid thumbnails
+        if (holder.episodeNumberBadge != null) {
+            holder.episodeNumberBadge.setText("E" + episode.getEpisodeNumber());
+            holder.episodeNumberBadge.setVisibility(View.VISIBLE);
+        }
 
         if(holder.expanded!=null)
             holder.expanded.setVisibility(View.GONE);

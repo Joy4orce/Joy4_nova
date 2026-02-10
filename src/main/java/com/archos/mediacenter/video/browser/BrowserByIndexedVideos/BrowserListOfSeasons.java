@@ -24,12 +24,14 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.TextView;
 
 import com.archos.mediacenter.utils.ActionBarSubmenu;
 import com.archos.mediacenter.video.R;
+import com.archos.mediacenter.video.browser.Browser;
 import com.archos.mediacenter.video.browser.BrowserCategory;
 import com.archos.mediacenter.video.browser.ThumbnailEngineVideo;
 import com.archos.mediacenter.video.browser.adapters.PresenterAdapterByCursor;
@@ -79,6 +81,35 @@ public class BrowserListOfSeasons extends BrowserWithShowHeader  {
         return false;
     }
     
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        // Show current mode icon instead of next mode
+        MenuItem item = menu.findItem(Browser.MENU_VIEW_MODE);
+        if (item != null) {
+            if (mViewMode == VideoUtils.VIEW_MODE_LIST) {
+                item.setIcon(R.drawable.ic_menu_list_mode2);
+            } else if (mViewMode == VideoUtils.VIEW_MODE_GRID) {
+                item.setIcon(R.drawable.ic_menu_poster_mode);
+            }
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Override to only cycle between LIST and GRID (no DETAILS mode for seasons)
+        if (item.getItemId() == Browser.MENU_VIEW_MODE) {
+            if (mViewMode == VideoUtils.VIEW_MODE_LIST) {
+                applySelectedViewMode(VideoUtils.VIEW_MODE_GRID);
+            } else {
+                applySelectedViewMode(VideoUtils.VIEW_MODE_LIST);
+            }
+            getActivity().invalidateOptionsMenu();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     @Override
     public void onSubmenuItemSelected(ActionBarSubmenu submenu, int position, long itemId) {
         switch (position) {

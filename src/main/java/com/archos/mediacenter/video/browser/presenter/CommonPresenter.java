@@ -64,6 +64,7 @@ public class CommonPresenter implements Presenter {
         TextView info;
         TextView name;
         TextView number;
+        TextView episodeNumberBadge;
         View secondLine;
         // This is the clickable zone.
         View expandedZone;
@@ -99,6 +100,7 @@ public class CommonPresenter implements Presenter {
         holder.type = inflate;
 
         holder.number = (TextView) view.findViewById(R.id.number);
+        holder.episodeNumberBadge = (TextView) view.findViewById(R.id.episode_number_badge);
         holder.thumbnail = (ImageView) view.findViewById(R.id.thumbnail);
 
         if (Trakt.isTraktV2Enabled(mContext, PreferenceManager.getDefaultSharedPreferences(mContext))) {
