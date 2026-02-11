@@ -578,8 +578,12 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         mForceAudioPassthrough.setSelectable(isPassthroughSupported);
         mForceAudioPassthroughMultiple.setSelectable(isPassthroughSupported);
 
-        // Remove Mode 1 (IEC61937 manual wrapping) from options if not supported by device
-        if (!isIecEncapsulationCapable && mForceAudioPassthroughMultiple != null) {
+        // Remove Mode 1 (IEC61937 manual wrapping) from options if not supported by device.
+        // On API < 23, EXTRA_ENCODINGS is unreliable on some TVs, so don't hide mode 1
+        // based solely on that signal.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && !isIecEncapsulationCapable
+                && mForceAudioPassthroughMultiple != null) {
             removeMode1FromPassthroughOptions(mForceAudioPassthroughMultiple);
         }
 
