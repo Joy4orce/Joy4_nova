@@ -103,7 +103,7 @@
             android:title="@string/preferences_audio_speed_audiotrack"
             app:iconSpaceReserved="false"/>
         <CheckBoxPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:key="enable_dynamic_audio_delay"
             android:persistent="true"
             android:summary="@string/preferences_enable_dynamic_audio_delay_summary"
