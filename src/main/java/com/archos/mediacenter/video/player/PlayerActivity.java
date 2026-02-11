@@ -793,6 +793,12 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             // enable passthrough only if HDMI is connected and enabled in options
             // Use effective max PCM channels
             int maxPcmChannels = CustomApplication.getEffectiveMaxPcmChannels();
+            log.info("onStart: PCM diagnostic - maxPcmChannels={} hasHdmi={} isIecCapable={} isDirectPcmCapable={} maxAudioChannelCount={}",
+                    maxPcmChannels,
+                    CustomApplication.isHdmiConnected(),
+                    CustomApplication.isIecEncapsulationCapable(),
+                    CustomApplication.isDirectPcmMultichannelCapable(),
+                    CustomApplication.getMaxAudioChannelCount());
             LibAvos.setMaxPcmChannels(maxPcmChannels);
             log.info("onStart: Set max PCM channels to {}", maxPcmChannels);
             LibAvos.setPcmChannelMasks(CustomApplication.getHdmiChannelMasks());

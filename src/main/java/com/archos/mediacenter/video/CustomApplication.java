@@ -920,6 +920,10 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         return isIecEncapsulationCapable;
     }
 
+    public static boolean isDirectPcmMultichannelCapable() {
+        return isDirectPcmMultichannelCapable;
+    }
+
     /**
      * Calculate appropriate PCM channel limit based on HDMI capabilities
      *
@@ -949,8 +953,17 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             return pcmCh;
         }
 
-        // Otherwise, cap to stereo for safety
-        log.info("getEffectiveMaxPcmChannels: IEC not available and no direct PCM support, capping to 2 channels (maxAudioChannelCount={})", maxAudioChannelCount);
+        // IEC not explicitly reported and direct PCM not available, but we have HDMI with a reported channel count.
+        // Use the reported maxAudioChannelCount instead of defaulting to stereo - the device advertised this capability
+        // via HDMI_AUDIO_PLUG broadcast, which is reliable for ARC/eARC setups.
+        if (maxAudioChannelCount > 0) {
+            log.info("getEffectiveMaxPcmChannels: using reported maxAudioChannelCount={} (HDMI connected, IEC={})", 
+                    maxAudioChannelCount, isIecEncapsulationCapable);
+            return (int) maxAudioChannelCount;
+        }
+        
+        // Last resort: cap to stereo for safety when no channel info available
+        log.info("getEffectiveMaxPcmChannels: no channel info available, capping to 2 channels");
         return 2;
     }
 
