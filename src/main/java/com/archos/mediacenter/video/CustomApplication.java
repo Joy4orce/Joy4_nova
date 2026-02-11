@@ -194,6 +194,34 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && type == AudioDeviceInfo.TYPE_HDMI_EARC;
     }
 
+    private static boolean isSpdifAudioDeviceType(int type, int[] encodings, boolean isAndroidTv) {
+        if (type == AudioDeviceInfo.TYPE_LINE_DIGITAL) return true;
+        // Some Android TVs report optical SPDIF as TYPE_AUX_LINE.
+        if (type == AudioDeviceInfo.TYPE_AUX_LINE) {
+            if (isAndroidTv) return true;
+            return hasCompressedAudioEncoding(encodings);
+        }
+        return false;
+    }
+
+    private static boolean hasCompressedAudioEncoding(int[] encodings) {
+        if (encodings == null) return false;
+        for (int encoding : encodings) {
+            switch (encoding) {
+                case AudioFormat.ENCODING_AC3:
+                case AudioFormat.ENCODING_E_AC3:
+                case AudioFormat.ENCODING_DTS:
+                case AudioFormat.ENCODING_DTS_HD:
+                case AudioFormat.ENCODING_IEC61937:
+                case AudioFormat.ENCODING_DOLBY_TRUEHD:
+                    return true;
+                default:
+                    break;
+            }
+        }
+        return false;
+    }
+
     private static int getDeviceMaxChannelCount(AudioDeviceInfo device) {
         if (device == null) return 0;
         try {
@@ -222,6 +250,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         AudioDeviceInfo[] devices = mAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
         boolean foundHdmi = false;
         boolean foundSpdif = false;
+        boolean isAndroidTv = ArchosFeatures.isAndroidTV(this);
 
         long bestHdmiFlags = 0;
         int bestHdmiChannels = 0;
@@ -232,6 +261,9 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         long bestSpdifFlags = 0;
         int bestSpdifEncodingCount = 0;
 
+        if (log != null && log.isDebugEnabled()) {
+            log.debug("refreshAudioOutputCapabilities({}): {} output device(s)", reason, devices.length);
+        }
         for (AudioDeviceInfo device : devices) {
             int type = device.getType();
             int[] encodings = device.getEncodings();
@@ -267,7 +299,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                                 reason, Arrays.toString(bestHdmiChannelMasks));
                     }
                 }
-            } else if (type == AudioDeviceInfo.TYPE_LINE_DIGITAL) {
+            } else if (isSpdifAudioDeviceType(type, encodings, isAndroidTv)) {
                 foundSpdif = true;
                 int encodingCount = encodings != null ? encodings.length : 0;
                 if (encodingCount > bestSpdifEncodingCount) {
