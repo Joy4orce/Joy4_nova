@@ -453,14 +453,22 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
 
     /**
      * Update the enabled and selectable state of dynamic audio delay preference
-     * based on passthrough settings.
+     * based on passthrough settings. When passthrough is enabled, dynamic audio delay
+     * is automatically turned off as it's not compatible with passthrough mode.
      *
      * @param passthroughEnabled true if audio passthrough is enabled
      * @param frameTimingEnabled true if Android frame timing is enabled (unused but kept for compatibility)
      */
     private void updateDynamicAudioDelayState(boolean passthroughEnabled, boolean frameTimingEnabled) {
         if (passthroughEnabled) {
-            // Passthrough takes precedence - disable dynamic audio delay
+            // Passthrough takes precedence - disable and turn off dynamic audio delay
+            if (mEnableDynamicAudioDelay.isChecked()) {
+                mEnableDynamicAudioDelay.setChecked(false);
+                mSharedPreferences.edit().putBoolean(KEY_ENABLE_DYNAMIC_AUDIO_DELAY, false).apply();
+                if (log.isDebugEnabled()) {
+                    log.debug("updateDynamicAudioDelayState: passthrough enabled, turning off dynamic audio delay");
+                }
+            }
             mEnableDynamicAudioDelay.setEnabled(false);
             mEnableDynamicAudioDelay.setSelectable(false);
         } else {
