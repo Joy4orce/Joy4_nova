@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Map;
 
 public class VideoMetadata implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -244,6 +245,10 @@ public class VideoMetadata implements Serializable {
     }
     
     public void fillFromRetriever(Context ctx) {
+        fillFromRetriever(ctx, null);
+    }
+
+    public void fillFromRetriever(Context ctx, Map<String, String> headers) {
         if (mFile == null && mRemotePath == null)
             return;
         reset();
@@ -252,13 +257,21 @@ public class VideoMetadata implements Serializable {
         IMediaMetadataRetriever retriever = MediaFactory.createMetadataRetriever(ctx);
 
         try {
-            if (mFile != null)
+            if (mFile != null) {
+                if (log.isDebugEnabled()) log.debug("fillFromRetriever: local file={}", mFile.getPath());
                 retriever.setDataSource(mFile.getPath());
-            else
-                retriever.setDataSource(mRemotePath);
+            } else {
+                if (headers != null && !headers.isEmpty()) {
+                    if (log.isDebugEnabled()) log.debug("fillFromRetriever: remote url={} with {} headers: {}", mRemotePath, headers.size(), headers.keySet());
+                    retriever.setDataSource(mRemotePath, headers);
+                } else {
+                    if (log.isDebugEnabled()) log.debug("fillFromRetriever: remote url={} (no headers)", mRemotePath);
+                    retriever.setDataSource(mRemotePath);
+                }
+            }
             mFileSize = getMetadataRetrieverLong(retriever, IMediaMetadataRetriever.METADATA_KEY_FILE_SIZE);
             nbTrack = getMetadataRetrieverInt(retriever, IMediaMetadataRetriever.METADATA_KEY_NB_VIDEO_TRACK);
-            if (log.isDebugEnabled()) log.debug("fillFromRetriever: nbTrack={}", nbTrack);
+            if (log.isDebugEnabled()) log.debug("fillFromRetriever: fileSize={} nbVideoTrack={}", mFileSize, nbTrack);
             if (nbTrack > 0)
                 mVideoTrack = new VideoTrack(retriever);
             nbTrack = getMetadataRetrieverInt(retriever, IMediaMetadataRetriever.METADATA_KEY_NB_AUDIO_TRACK);
@@ -277,6 +290,7 @@ public class VideoMetadata implements Serializable {
             mVideoHeight = getMetadataRetrieverInt(retriever, IMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
             mDuration = getMetadataRetrieverInt(retriever, IMediaMetadataRetriever.METADATA_KEY_DURATION);
         } catch (Exception ex) {
+            log.error("fillFromRetriever: failed for url={}, ex={}", mRemotePath != null ? mRemotePath : (mFile != null ? mFile.getPath() : "null"), ex.getMessage());
         }
         retriever.release();
     }

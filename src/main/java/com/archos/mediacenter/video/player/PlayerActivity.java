@@ -969,6 +969,23 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
         mIsReadytoStart = false;
         if (log.isDebugEnabled()) log.debug("postOnPlayerServiceBind() ");
+
+        // Read HTTP headers passed by external apps (MX Player API / Stremio)
+        Bundle headersBundle = getIntent().getBundleExtra("headers");
+        if (headersBundle != null && !headersBundle.isEmpty()) {
+            mExtraMap = new java.util.HashMap<>();
+            for (String key : headersBundle.keySet()) {
+                Object value = headersBundle.get(key);
+                if (value instanceof String) {
+                    mExtraMap.put(key, (String) value);
+                }
+            }
+            if (log.isDebugEnabled()) log.debug("postOnPlayerServiceBind: found {} HTTP headers from external intent: {}", mExtraMap.size(), mExtraMap.keySet());
+        } else {
+            if (log.isDebugEnabled()) log.debug("postOnPlayerServiceBind: no HTTP headers in external intent");
+        }
+        if (log.isDebugEnabled()) log.debug("postOnPlayerServiceBind: uri={}, mExtraMap={}", getIntent().getData(), mExtraMap);
+
         Intent intent = new Intent();
         intent.putExtras(getIntent());
         intent.setData(getIntent().getData());
@@ -2635,6 +2652,15 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         intent.putExtra(VideoInfoActivity.EXTRA_PLAYER_TYPE, mPlayer.getType());
         intent.putExtra(VideoInfoActivity.EXTRA_VIDEO_ID, mVideoId);
         intent.putExtra(VideoInfoActivity.EXTRA_LAUNCHED_FROM_PLAYER, true);
+        // Forward HTTP headers so the info activity can probe the stream with the same headers
+        if (mExtraMap != null && !mExtraMap.isEmpty()) {
+            Bundle headersBundle = new Bundle();
+            for (java.util.Map.Entry<String, String> entry : mExtraMap.entrySet()) {
+                headersBundle.putString(entry.getKey(), entry.getValue());
+            }
+            intent.putExtra("headers", headersBundle);
+            if (log.isDebugEnabled()) log.debug("showVideoInfos: forwarding {} headers to info activity", mExtraMap.size());
+        }
         startActivity(intent);
         mIsInfoActivityDisplayed = true;
     }

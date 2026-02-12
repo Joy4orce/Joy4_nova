@@ -1400,7 +1400,21 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
                 return mVideoMetadateCache.get(startingPath);
             }
             else {
-                VideoMetadata videoMetaData = VideoInfoCommonClass.retrieveMetadata(video,getActivity());
+                // Pick up any HTTP headers forwarded from the external player intent (e.g. Stremio/debrid)
+                android.os.Bundle headersBundle = getActivity() != null
+                        ? getActivity().getIntent().getBundleExtra("headers") : null;
+                java.util.Map<String, String> headers = null;
+                if (headersBundle != null && !headersBundle.isEmpty()) {
+                    headers = new java.util.HashMap<>();
+                    for (String key : headersBundle.keySet()) {
+                        Object val = headersBundle.get(key);
+                        if (val instanceof String) headers.put(key, (String) val);
+                    }
+                    if (log.isDebugEnabled()) log.debug("VideoInfoTask: using {} HTTP headers from intent", headers.size());
+                } else {
+                    if (log.isDebugEnabled()) log.debug("VideoInfoTask: no HTTP headers in activity intent");
+                }
+                VideoMetadata videoMetaData = VideoInfoCommonClass.retrieveMetadata(video, getActivity(), headers);
                 if(video!=null&&video.isIndexed())
                     videoMetaData.save(getActivity(), startingPath);
                 mVideoMetadateCache.put(startingPath, videoMetaData);

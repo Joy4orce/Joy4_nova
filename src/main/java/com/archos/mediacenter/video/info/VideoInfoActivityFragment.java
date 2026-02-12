@@ -1460,9 +1460,22 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                 return mVideoMetadateCache.get(startingPath);
             }
             else {
-
+                // Pick up any HTTP headers forwarded from the external player intent (e.g. Stremio/debrid)
+                android.os.Bundle headersBundle = getActivity() != null
+                        ? getActivity().getIntent().getBundleExtra("headers") : null;
+                java.util.Map<String, String> headers = null;
+                if (headersBundle != null && !headersBundle.isEmpty()) {
+                    headers = new java.util.HashMap<>();
+                    for (String key : headersBundle.keySet()) {
+                        Object val = headersBundle.get(key);
+                        if (val instanceof String) headers.put(key, (String) val);
+                    }
+                    if (log.isDebugEnabled()) log.debug("VideoInfoTask: using {} HTTP headers from intent", headers.size());
+                } else {
+                    if (log.isDebugEnabled()) log.debug("VideoInfoTask: no HTTP headers in activity intent");
+                }
                 // Get metadata from file
-                VideoMetadata videoMetaData = VideoInfoCommonClass.retrieveMetadata(video, getActivity());
+                VideoMetadata videoMetaData = VideoInfoCommonClass.retrieveMetadata(video, getActivity(), headers);
                 if(video!=null&&video.isIndexed()) {
                     if (log.isDebugEnabled()) log.debug("VideoInfoTask doInBackground, saving {}", startingPath);
 

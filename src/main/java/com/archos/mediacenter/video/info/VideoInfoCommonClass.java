@@ -35,13 +35,18 @@ import com.archos.mediaprovider.video.VideoStore;
 
 import org.jupnp.model.meta.Device;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Map;
 
 /**
  * Created by alexandre on 15/01/16.
  */
 public class VideoInfoCommonClass {
+    private static final Logger log = LoggerFactory.getLogger(VideoInfoCommonClass.class);
     final static String SEP = "  ";
 
 
@@ -69,9 +74,14 @@ public class VideoInfoCommonClass {
     }
 
     public static VideoMetadata retrieveMetadata(Video video, Context context){
+        return retrieveMetadata(video, context, null);
+    }
+
+    public static VideoMetadata retrieveMetadata(Video video, Context context, Map<String, String> headers){
         String startingPath= video.getFilePath();
         String streamingPath = startingPath;
         if (streamingPath == null) return null;
+        if (log.isDebugEnabled()) log.debug("retrieveMetadata: path={} headers={}", streamingPath, headers != null ? headers.keySet() : "none");
         //first, look for upnp streaming uri
         if(streamingPath.startsWith("upnp")&&video!=null){
             StreamUriFinder streamUriFinder = new StreamUriFinder(video.getFileUri(),context);
@@ -105,7 +115,7 @@ public class VideoInfoCommonClass {
         }
         // Get metadata from file
         VideoMetadata videoMetaData = new VideoMetadata(streamingPath);
-        videoMetaData.fillFromRetriever(context);
+        videoMetaData.fillFromRetriever(context, headers);
         return videoMetaData;
 
     }
