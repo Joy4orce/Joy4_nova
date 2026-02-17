@@ -318,7 +318,7 @@ public class SubtitleManager {
                     int l;
                     byte[] buffer;
                     for (String ext : VideoUtils.getSubtitleExtensions()) {
-                        String url = stripExtensionFromName(fileUri.toString()) + "." + ext;
+                        String url = FileUtils.getParentUrl(fileUri).toString() + FileUtils.getFileNameWithoutExtension(fileUri) + "." + ext;
                         String name = FileUtils.getFileNameWithoutExtension(fileUri) + "." + ext;
                         HttpURLConnection con = null;
                         try {
