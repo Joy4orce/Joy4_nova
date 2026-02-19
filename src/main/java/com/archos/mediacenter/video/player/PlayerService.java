@@ -1243,7 +1243,11 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         if (log.isDebugEnabled()) log.debug("onDestroy");
         saveVideoStateIfReady();
         if (log.isDebugEnabled()) log.debug("onDestroy: release mediaSessionCompat");
-        if (mSession != null) mSession.release();
+        if (mSession != null) {
+            stopNowPlayingCard();
+            mSession.setActive(false);
+            mSession.release();
+        }
         if(mIndexHelper!=null)
             mIndexHelper.abort();
         mDestroyed = true;
@@ -1792,13 +1796,18 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
             // deprecated and always true
             //mSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
             mSession.setActive(true);
+            // Set initial stopped state to avoid reporting undefined/playing state
+            PlaybackStateCompat.Builder initialStateBuilder = new PlaybackStateCompat.Builder()
+                    .setActions(getAvailableActions());
+            initialStateBuilder.setState(PlaybackStateCompat.STATE_STOPPED, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0.0f);
+            mSession.setPlaybackState(initialStateBuilder.build());
         }
 
         mSession.setSessionActivity(pi);;
     }
 
     /**
-     * update state of now playing card to play / buffering / stop
+     * update state of now playing card to play / buffering / pause / stop
      */
     private void updateNowPlayingState() {
         if(mSession==null)
@@ -1821,6 +1830,16 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
             stateBuilder.setState(PlaybackStateCompat.STATE_BUFFERING, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f);
             mSession.setPlaybackState(stateBuilder.build());
         }
+        else if (mPlayer != null && mPlayer.isPaused()) {
+            // Video is paused - report PAUSED state, not STOPPED
+            if (!mSession.isActive()) {
+                mSession.setActive(true);
+            }
+            PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
+                    .setActions(getAvailableActions());
+            stateBuilder.setState(PlaybackStateCompat.STATE_PAUSED, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0.0f);
+            mSession.setPlaybackState(stateBuilder.build());
+        }
         else stopNowPlayingCard();
     }
 
@@ -1834,8 +1853,9 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
 
         PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
                 .setActions(getAvailableActions());
-        stateBuilder.setState(PlaybackStateCompat.STATE_STOPPED, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f);
+        stateBuilder.setState(PlaybackStateCompat.STATE_STOPPED, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0.0f);
         mSession.setPlaybackState(stateBuilder.build());
+        mSession.setActive(false);
     }
 
     /**
