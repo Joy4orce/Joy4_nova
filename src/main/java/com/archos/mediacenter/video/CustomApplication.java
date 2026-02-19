@@ -323,6 +323,21 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         spdifAudioEncodingFlag = foundSpdif ? bestSpdifFlags : 0;
         if (!foundSpdif) {
             spdifAudioEncodingsFlags = null;
+        } else if (bestSpdifEncodingCount == 0) {
+            // Some Android TV builds expose SPDIF but do not report encodings via AudioDeviceInfo.
+            // Only inject fallback codecs when force passthrough is enabled.
+            boolean forcePassthrough = PreferenceManager.getDefaultSharedPreferences(this)
+                    .getBoolean(VideoPreferencesCommon.KEY_FORCE_AUDIO_PASSTHROUGH, false);
+            if (forcePassthrough) {
+                // Allow all passthrough codecs when user explicitly forces passthrough.
+                spdifAudioEncodingsFlags = null;
+                spdifAudioEncodingFlag = allHdmiAudioCodecs;
+                if (log != null) {
+                    log.warn("refreshAudioOutputCapabilities({}): SPDIF encodings not reported; using fallback ALL codecs (force passthrough enabled)", reason);
+                }
+            } else if (log != null) {
+                log.warn("refreshAudioOutputCapabilities({}): SPDIF encodings not reported; not injecting codecs (force passthrough disabled)", reason);
+            }
         }
 
         if (foundHdmi && bestHdmiChannels > 0) {
@@ -433,7 +448,14 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
      */
     private void updateIecEncapsulationCapability() {
         final int AVOS_ENCODING_IEC61937 = 13;
-        isIecEncapsulationCapable = (hdmiAudioEncodingFlag & (1L << AVOS_ENCODING_IEC61937)) != 0;
+        // IEC61937 support can be advertised via HDMI or SPDIF.
+        long caps = hdmiAudioEncodingFlag | spdifAudioEncodingFlag;
+        isIecEncapsulationCapable = (caps & (1L << AVOS_ENCODING_IEC61937)) != 0;
+        // If SPDIF is present but encodings are not reported, keep IEC mode available.
+        if (!isIecEncapsulationCapable && hasSpdif
+                && (spdifAudioEncodingsFlags == null || spdifAudioEncodingsFlags.length == 0)) {
+            isIecEncapsulationCapable = true;
+        }
         if (log.isDebugEnabled()) log.debug("updateIecEncapsulationCapability: isIecEncapsulationCapable={}", isIecEncapsulationCapable);
     }
 
