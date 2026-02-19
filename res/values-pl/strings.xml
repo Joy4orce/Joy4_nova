@@ -27,9 +27,9 @@
     <string name="nfo_export_exporting_all">wszystko</string>
     <string name="nfo_export_in_progress">Trwa eksportowanie NFO</string>
     <string name="rescrap_in_progress">Aktualizowanie całej biblioteki</string>
-    <string name="rescraping_collection">Aktualizowanie zbioru</string>
-    <string name="rescraping_collections">Aktualizowanie zbiorów</string>
-    <string name="rescraping_noimage_collections">Aktualizowanie zbiorów bez ilustracji</string>
+    <string name="rescraping_collection">Aktualizowanie kolekcji</string>
+    <string name="rescraping_collections">Aktualizowanie kolekcji</string>
+    <string name="rescraping_noimage_collections">Aktualizowanie kolekcji bez plakatów</string>
     <string name="rescrap_all_title">Aktualizuj wszystko</string>
     <!-- trakt.tv -->
     <string name="trakt_toast_syncing_error">Brak synchronizacji z usługą Trakt</string>
@@ -113,7 +113,7 @@
     <string name="movie_genre_war">Wojenny</string>
     <string name="movie_genre_western">Western</string>
     <!-- There are official translations for the tmdb tv genres -->
-    <string name="tvshow_genre_action_adventure">Akcja i Przygoda</string>
+    <string name="tvshow_genre_action_adventure">Akcja i przygoda</string>
     <string name="tvshow_genre_animation">Animowane</string>
     <string name="tvshow_genre_comedy">Komedie</string>
     <string name="tvshow_genre_crime">Kryminały</string>
@@ -124,10 +124,10 @@
     <string name="tvshow_genre_mystery">Detektywistyczne</string>
     <string name="tvshow_genre_news">Wiadomości</string>
     <string name="tvshow_genre_reality">Obyczajowe</string>
-    <string name="tvshow_genre_scifi_fantasy">Sci-Fi i Fantasy</string>
+    <string name="tvshow_genre_scifi_fantasy">Sci-Fi i fantasy</string>
     <string name="tvshow_genre_soap">Telenowele</string>
     <string name="tvshow_genre_talk">Talk-show</string>
-    <string name="tvshow_genre_war_politics">Wojna i Polityka</string>
+    <string name="tvshow_genre_war_politics">Wojna i polityka</string>
     <string name="tvshow_genre_western">Western</string>
     <!--
       STRINGS BELOW ARE FOR MUSIC ONLY.
