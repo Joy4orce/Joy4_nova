@@ -65,6 +65,7 @@
     <string name="recently_added_videos">اخیراً افزوده شده</string>
     <string name="recently_played">اخیراً پخش شده</string>
     <string name="recently_played_videos">اخیراً پخش شده</string>
+    <string name="new_and_unwatched"></string>
     <string name="video_lists">لیست های پخش</string>
     <!-- The string used in main storage list -->
     <string name="external_storage">کارت SD خارجی</string>
@@ -614,6 +615,9 @@
     <string name="rotation_unlock">فعال‌سازی چرخش خودکار صفحه</string>
     <string name="rotation_locked">غیر‌فعال‌سازی چرخش خودکار صفحه</string>
     <!-- Help overlay -->
+    <string name="network_thumbnails_summary"></string>
+    <string name="network_bookmarks_summary"></string>
+    <string name="share_folders_smbv2_summary"></string>
     <string name="connection_reset">بازنشانی</string>
     <!-- Info dialog, not indexed file -->
     <!-- Brightness -->

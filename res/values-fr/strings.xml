@@ -581,6 +581,10 @@
     <string name="UiLang_summary">Définir la langue de l\'interface utilisateur de nova, choisir système pour utiliser la valeur par défaut du système</string>
     <string name="ui_mode_title">Type d\'interface utilisateur</string>
     <string name="ui_mode_summary">Choisir entre les modes TV et tablette/smartphone</string>
+    <string name="theme_selection_title">Couleur du thème</string>
+    <string name="theme_selection_summary">Sélectionnez votre thème de couleur préféré</string>
+    <string name="theme_blue">Bleu</string>
+    <string name="theme_black">Noir</string>
     <string name="preferences_video_about">A propos</string>
     <string name="preferences_video_os_text">Sous-titres fournis par</string>
     <string name="preferences_video_tmdb_text">Descriptions des films/séries fournies par</string>

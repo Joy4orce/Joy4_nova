@@ -582,6 +582,10 @@ Experimental: puede no funcionar en todas las configuraciones.</string>
     <string name="UiLang_summary">Establecer el idioma de la interfaz de usuario de Nova, seleccione \'sistema\' para usar el definido por defecto para el sistema</string>
     <string name="ui_mode_title">Modo de interfaz de usuario</string>
     <string name="ui_mode_summary">Elija entre interfaz de usuario TV y Teléfono/Tablet</string>
+    <string name="theme_selection_title">Color del tema</string>
+    <string name="theme_selection_summary">Selecciona tu color de tema preferido</string>
+    <string name="theme_blue">Azul</string>
+    <string name="theme_black">Negro</string>
     <string name="preferences_video_about">Acerca de</string>
     <string name="preferences_video_os_text">Subtitulos proporcionados por</string>
     <string name="preferences_video_tmdb_text">Información de la Película / Serie proporcionada por</string>

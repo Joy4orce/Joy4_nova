@@ -580,6 +580,10 @@
     <string name="UiLang_summary">Sprache der nova-Benutzeroberfläche festlegen, System auswählen zum Verwenden von System-Default</string>
     <string name="ui_mode_title">Benutzeroberflächen-Modus</string>
     <string name="ui_mode_summary">Zwischen TV- und Tablet/Phone-UI wählen</string>
+    <string name="theme_selection_title">Farbschema</string>
+    <string name="theme_selection_summary">Bevorzugtes Farbschema auswählen</string>
+    <string name="theme_blue">Blau</string>
+    <string name="theme_black">Schwarz</string>
     <string name="preferences_video_about">Über</string>
     <string name="preferences_video_os_text">Untertitel bereitgestellt von</string>
     <string name="preferences_video_tmdb_text">Film-/TV-Sendungsinformation bereitgestellt von</string>

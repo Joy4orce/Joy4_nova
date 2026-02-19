@@ -23,7 +23,7 @@
     <!-- Menu item to refresh servers list -->
     <string name="refresh_servers_list">刷新服务器列表</string>
     <!-- Menu item to enable network shares -->
-    <string name="enable_network_shares">启用网络共享</string>
+    <string name="enable_network_shares">启用局域网共享</string>
     <string name="initial_scan">初始化扫描</string>
     <!-- Library screen, menu item -->
     <string name="search_title">搜索</string>
@@ -49,14 +49,14 @@
     <!-- Infos dialog tabs -->
     <string name="info_tab_movie">电影</string>
     <string name="info_tab_show">电视节目</string>
-    <string name="info_tab_episode">剧集</string>
+    <string name="info_tab_episode">选集</string>
     <string name="info_tab_video">视频</string>
     <string name="info_tab_file">文件信息</string>
     <string name="info_tab_backdrop_chooser">背景墙选择</string>
     <string name="info_tab_poster_chooser">海报选择</string>
     <string name="info_tab_share">共享</string>
     <string name="info_menu_backdrop_select">背景墙</string>
-    <string name="info_menu_series_backdrop_select">群组背景墙</string>
+    <string name="info_menu_series_backdrop_select">背景墙队列</string>
     <string name="info_menu_poster_select">选择另一张海报</string>
     <string name="info_menu_series_poster_select">选择另一张海报</string>
     <!-- COVER ROLL -->
@@ -576,6 +576,10 @@
     <string name="UiLang_summary">设置 Nova 用户界面语言，选择系统来使用系统默认语言</string>
     <string name="ui_mode_title">用户界面模式</string>
     <string name="ui_mode_summary">在电视、平板电脑/手机用户界面之间选择</string>
+    <string name="theme_selection_title">颜色主题</string>
+    <string name="theme_selection_summary">选择首选颜色主题</string>
+    <string name="theme_blue">蓝色</string>
+    <string name="theme_black">黑色</string>
     <string name="preferences_video_about">关于</string>
     <string name="preferences_video_os_text">字幕提供方</string>
     <string name="preferences_video_tmdb_text">电影/电视节目信息提供方</string>

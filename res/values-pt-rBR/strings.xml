@@ -579,6 +579,10 @@
     <string name="UiLang_summary">Defina o idioma da interface do usuário e escolha o sistema para usar o padrão do sistema</string>
     <string name="ui_mode_title">Modo de interface do usuário</string>
     <string name="ui_mode_summary">Escolha entre TV e Tablet/Telefone</string>
+    <string name="theme_selection_title">Tema de cor</string>
+    <string name="theme_selection_summary">Selecione sua cor preferida</string>
+    <string name="theme_blue">Azul</string>
+    <string name="theme_black">Preto</string>
     <string name="preferences_video_about">Sobre</string>
     <string name="preferences_video_os_text">Legendas fornecidas por</string>
     <string name="preferences_video_tmdb_text">Informações de séries de TV e Filmes fornecidas por</string>

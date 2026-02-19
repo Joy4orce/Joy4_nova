@@ -591,6 +591,10 @@
     <string name="UiLang_summary">Nastavenie jazyka používateľského rozhrania Nova, výber systému pre použitie predvoleného systémového jazyka</string>
     <string name="ui_mode_title">Režim užívateľského rozhrania</string>
     <string name="ui_mode_summary">Výber medzi TV a používateľským rozhraním tabletu/telefónu</string>
+    <string name="theme_selection_title">Farebná téma</string>
+    <string name="theme_selection_summary">Vyberte si svoju obľúbenú farebnú tému</string>
+    <string name="theme_blue">Modrá</string>
+    <string name="theme_black">Čierna</string>
     <string name="preferences_video_about">O aplikácii</string>
     <string name="preferences_video_os_text">Titulky poskytuje</string>
     <string name="preferences_video_tmdb_text">Informácie o filme/seriálu poskytol</string>

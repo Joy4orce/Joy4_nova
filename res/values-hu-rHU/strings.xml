@@ -580,6 +580,10 @@
     <string name="UiLang_summary">A NOVA felhasználói felület nyelvének beállítása. Válassza a Rendszer opciót a rendszer nyelvének használatához</string>
     <string name="ui_mode_title">Felhasználói felület módja</string>
     <string name="ui_mode_summary">Válasszon TV vagy Tablet/Telefon felület között</string>
+    <string name="theme_selection_title">Színséma</string>
+    <string name="theme_selection_summary">Válaszd ki a kedvenc színsémádat</string>
+    <string name="theme_blue">Kék</string>
+    <string name="theme_black">Fekete</string>
     <string name="preferences_video_about">Névjegy</string>
     <string name="preferences_video_os_text">A feliratok szolgáltatója</string>
     <string name="preferences_video_tmdb_text">Film/sorozat információ szolgáltatója</string>
