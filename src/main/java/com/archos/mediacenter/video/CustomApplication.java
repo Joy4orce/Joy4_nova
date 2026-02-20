@@ -360,6 +360,18 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         return hdmiAudioEncodingFlag | spdifAudioEncodingFlag;
     }
 
+    /**
+     * Capabilities used by native passthrough routing.
+     * When HDMI/ARC/eARC is present, prefer HDMI-only capabilities to avoid
+     * contaminating the active route with SPDIF fallback flags (notably IEC61937).
+     */
+    public static long getNativeAudioCodecsFlag() {
+        if (hasHdmi) {
+            return hdmiAudioEncodingFlag;
+        }
+        return spdifAudioEncodingFlag;
+    }
+
     private static SambaDiscovery mSambaDiscovery = null;
 
     private PropertyChangeListener propertyChangeListener = null;
@@ -448,13 +460,18 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
      */
     private void updateIecEncapsulationCapability() {
         final int AVOS_ENCODING_IEC61937 = 13;
-        // IEC61937 support can be advertised via HDMI or SPDIF.
-        long caps = hdmiAudioEncodingFlag | spdifAudioEncodingFlag;
-        isIecEncapsulationCapable = (caps & (1L << AVOS_ENCODING_IEC61937)) != 0;
-        // If SPDIF is present but encodings are not reported, keep IEC mode available.
-        if (!isIecEncapsulationCapable && hasSpdif
-                && (spdifAudioEncodingsFlags == null || spdifAudioEncodingsFlags.length == 0)) {
-            isIecEncapsulationCapable = true;
+        // Route-aware IEC capability:
+        // - HDMI/ARC/eARC active: trust HDMI capability only.
+        // - No HDMI route: use SPDIF capability (with legacy fallback for missing encodings).
+        if (hasHdmi) {
+            isIecEncapsulationCapable = (hdmiAudioEncodingFlag & (1L << AVOS_ENCODING_IEC61937)) != 0;
+        } else {
+            isIecEncapsulationCapable = (spdifAudioEncodingFlag & (1L << AVOS_ENCODING_IEC61937)) != 0;
+            // If SPDIF is present but encodings are not reported, keep IEC mode available.
+            if (!isIecEncapsulationCapable && hasSpdif
+                    && (spdifAudioEncodingsFlags == null || spdifAudioEncodingsFlags.length == 0)) {
+                isIecEncapsulationCapable = true;
+            }
         }
         if (log.isDebugEnabled()) log.debug("updateIecEncapsulationCapability: isIecEncapsulationCapable={}", isIecEncapsulationCapable);
     }
