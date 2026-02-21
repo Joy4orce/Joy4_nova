@@ -102,13 +102,19 @@ endif
 REPO_TOP_DIR := $(shell pwd)
 AVOS_DIR := native/avos
 FFMPEG_DIR := native/ffmpeg-android-builder
+FFMPEG_PREBUILT_DIR := native/prebuilt/ffmpeg
 DAV1D_DIR := native/dav1d-android-builder
+DAV1D_PREBUILT_DIR := native/prebuilt/dav1d
 OPUS_DIR := native/opus-android-builder
+OPUS_PREBUILT_DIR := native/prebuilt/opus
 OPENSSL_DIR := native/openssl-android-builder
+OPENSSL_PREBUILT_DIR := native/prebuilt/openssl
+LIBMYSOFA_DIR := native/libmysofa-android-builder
+LIBMYSOFA_PREBUILT_DIR := native/prebuilt/libmysofa
+TORRENTD_PREBUILT_DIR := native/prebuilt/torrentd
 
 NATIVE_PKG_LIST := \
 	FileCoreLibrary \
-	native/torrentd \
 	native/libyuv \
 	native/libnativehelper
 
@@ -226,27 +232,31 @@ $(foreach PKG,$(NATIVE_LIST),$(eval $(call gen_native_build,$(PKG))))
 define cp_ffmpeg_libs
 	@if [ "$(NDK_CPU_ARM_NEON)" = "1" ];then \
 		mkdir -p $(1)/libs/armeabi-v7a; \
-		cp $(DAV1D_DIR)/build-armeabi-v7a/src/libdav1d.so $(1)/libs/armeabi-v7a/libdav1d.so; \
-		cp $(OPUS_DIR)/lib/armeabi-v7a/libopus.so $(1)/libs/armeabi-v7a/libopus.so; \
-		cp -r $(FFMPEG_DIR)/dist-$(2)-armeabi-v7a/lib/*so $(1)/libs/armeabi-v7a; \
+		cp $(DAV1D_PREBUILT_DIR)/lib/armeabi-v7a/libdav1d.so $(1)/libs/armeabi-v7a/libdav1d.so; \
+		cp $(OPUS_PREBUILT_DIR)/lib/armeabi-v7a/libopus.so $(1)/libs/armeabi-v7a/libopus.so; \
+		cp $(LIBMYSOFA_PREBUILT_DIR)/lib/armeabi-v7a/libmysofa.so $(1)/libs/armeabi-v7a/libmysofa.so; \
+		cp -r $(FFMPEG_PREBUILT_DIR)/dist-$(2)-armeabi-v7a/lib/*so $(1)/libs/armeabi-v7a; \
 	fi;
 	@if [ "$(NDK_CPU_X86)" = "1" ];then \
 		mkdir -p $(1)/libs/x86; \
-		cp $(DAV1D_DIR)/build-x86/src/libdav1d.so $(1)/libs/x86/libdav1d.so; \
-		cp $(OPUS_DIR)/lib/x86/libopus.so $(1)/libs/x86/libopus.so; \
-		cp -r $(FFMPEG_DIR)/dist-$(2)-x86/lib/*so $(1)/libs/x86; \
+		cp $(DAV1D_PREBUILT_DIR)/lib/x86/libdav1d.so $(1)/libs/x86/libdav1d.so; \
+		cp $(OPUS_PREBUILT_DIR)/lib/x86/libopus.so $(1)/libs/x86/libopus.so; \
+		cp $(LIBMYSOFA_PREBUILT_DIR)/lib/x86/libmysofa.so $(1)/libs/x86/libmysofa.so; \
+		cp -r $(FFMPEG_PREBUILT_DIR)/dist-$(2)-x86/lib/*so $(1)/libs/x86; \
 	fi
 	@if [ "$(NDK_CPU_ARM_64)" = "1" ];then \
 		mkdir -p $(1)/libs/arm64-v8a; \
-		cp $(DAV1D_DIR)/build-arm64-v8a/src/libdav1d.so $(1)/libs/arm64-v8a/libdav1d.so; \
-		cp $(OPUS_DIR)/lib/arm64-v8a/libopus.so $(1)/libs/arm64-v8a/libopus.so; \
-		cp -r $(FFMPEG_DIR)/dist-$(2)-arm64-v8a/lib/*so $(1)/libs/arm64-v8a; \
+		cp $(DAV1D_PREBUILT_DIR)/lib/arm64-v8a/libdav1d.so $(1)/libs/arm64-v8a/libdav1d.so; \
+		cp $(OPUS_PREBUILT_DIR)/lib/arm64-v8a/libopus.so $(1)/libs/arm64-v8a/libopus.so; \
+		cp $(LIBMYSOFA_PREBUILT_DIR)/lib/arm64-v8a/libmysofa.so $(1)/libs/arm64-v8a/libmysofa.so; \
+		cp -r $(FFMPEG_PREBUILT_DIR)/dist-$(2)-arm64-v8a/lib/*so $(1)/libs/arm64-v8a; \
 	fi
 	@if [ "$(NDK_CPU_X86_64)" = "1" ];then \
 		mkdir -p $(1)/libs/x86_64; \
-		cp $(DAV1D_DIR)/build-x86_64/src/libdav1d.so $(1)/libs/x86_64/libdav1d.so; \
-		cp $(OPUS_DIR)/lib/x86_64/libopus.so $(1)/libs/x86_64/libopus.so; \
-		cp -r $(FFMPEG_DIR)/dist-$(2)-x86_64/lib/*so $(1)/libs/x86_64; \
+		cp $(DAV1D_PREBUILT_DIR)/lib/x86_64/libdav1d.so $(1)/libs/x86_64/libdav1d.so; \
+		cp $(OPUS_PREBUILT_DIR)/lib/x86_64/libopus.so $(1)/libs/x86_64/libopus.so; \
+		cp $(LIBMYSOFA_PREBUILT_DIR)/lib/x86_64/libmysofa.so $(1)/libs/x86_64/libmysofa.so; \
+		cp -r $(FFMPEG_PREBUILT_DIR)/dist-$(2)-x86_64/lib/*so $(1)/libs/x86_64; \
 	fi
 endef
 
@@ -279,20 +289,26 @@ endef
 native_avos: native_build_native/avos
 
 clean_prebuilt:
-	rm -rf native/torrentd/libs
-	rm -rf $(FFMPEG_DIR)/dist-*
+	rm -rf native/torrentd/obj
+	rm -rf $(TORRENTD_PREBUILT_DIR)/libs
+	rm -rf $(FFMPEG_PREBUILT_DIR)/dist-*
 	rm -rf $(DAV1D_DIR)/build-*
-	rm -rf $(OPUS_DIR)/lib/*
-	rm -rf $(OPENSSL_DIR)/dist-*
+	rm -rf $(DAV1D_PREBUILT_DIR)/lib/*
+	rm -rf $(OPUS_DIR)/build-*
+	rm -rf $(OPUS_PREBUILT_DIR)/lib/*
+	rm -rf $(OPENSSL_PREBUILT_DIR)/dist-*
+	rm -rf $(LIBMYSOFA_DIR)/build-*
+	rm -rf $(LIBMYSOFA_PREBUILT_DIR)/lib/*
+	rm -rf $(LIBMYSOFA_PREBUILT_DIR)/include/*
 	rm -rf MediaLib/libs/trakt-java.jar
 	rm -rf MediaLib/libs/cling-*-2.1.2.jar
 	rm -rf MediaLib/libs/seamless-*-1.1.2.jar
 	rm -rf FileCoreLibrary/libs/jcifs-ng.jar
 
-$(FFMPEG_DIR)/dist-full-arm64-v8a/lib/libavcodec.so:
+$(FFMPEG_PREBUILT_DIR)/dist-full-arm64-v8a/lib/libavcodec.so:
 	make native_build_native/ffmpeg-android-builder
 
-native_avos_base: $(FFMPEG_DIR)/dist-full-arm64-v8a/lib/libavcodec.so
+native_avos_base: $(FFMPEG_PREBUILT_DIR)/dist-full-arm64-v8a/lib/libavcodec.so
 	$(call cp_ffmpeg_libs,MediaLib,base)
 	$(call make_avos,MediaLib,base)
 
@@ -300,7 +316,7 @@ native_avos_full: native_build_native/ffmpeg-android-builder
 	$(call cp_ffmpeg_libs,MediaLib,full)
 	$(call make_avos,MediaLib,full)
 
-native_build_native/ffmpeg-android-builder: native_build_native/dav1d-android-builder native_build_native/opus-android-builder native_build_native/openssl-android-builder
+native_build_native/ffmpeg-android-builder: native_build_native/dav1d-android-builder native_build_native/opus-android-builder native_build_native/openssl-android-builder native_build_native/libmysofa-android-builder
 	cd native/ffmpeg-android-builder; REPO_TOP_DIR=$(REPO_TOP_DIR) bash bootstrap_avp_ffmpeg.sh
 
 native_build_native/dav1d-android-builder:
@@ -312,21 +328,39 @@ native_build_native/opus-android-builder:
 native_build_native/openssl-android-builder:
 	cd native/openssl-android-builder; REPO_TOP_DIR=$(REPO_TOP_DIR) bash bootstrap.sh
 
+native_build_native/libmysofa-android-builder:
+	cd native/libmysofa-android-builder; REPO_TOP_DIR=$(REPO_TOP_DIR) bash build.sh
+
 native_build_native/torrentd: native_build_native/boost native_build_native/libtorrent
+	@if [ -f $(TORRENTD_PREBUILT_DIR)/libs/arm64-v8a/torrentd ]; then \
+		echo "torrentd already built, skipping"; \
+	else \
+		REPO_TOP_DIR=$(REPO_TOP_DIR) BUILD=$(BUILD) NDK_APP_ABI="$(NDK_APP_ABI)" ASAN="$(asan)" android_ndk=$(android_ndk) $(android_ndk)/ndk-build $(ndk_debug) $(ndk_v) $(ndk_jobs) -C native/torrentd NDK_LIBS_OUT=$(REPO_TOP_DIR)/$(TORRENTD_PREBUILT_DIR)/libs; \
+	fi
+
+native_clean_native/torrentd:
+	rm -rf native/torrentd/obj
+	rm -rf $(TORRENTD_PREBUILT_DIR)/libs
 
 native_build_native/boost:
-	cd native/boost; REPO_TOP_DIR=$(REPO_TOP_DIR) bash bootstrap_avp_boost.sh
+	@if [ -f $(TORRENTD_PREBUILT_DIR)/libs/arm64-v8a/torrentd ]; then \
+		echo "torrentd prebuilt exists, skipping boost"; \
+	else \
+		cd native/boost; REPO_TOP_DIR=$(REPO_TOP_DIR) bash bootstrap_avp_boost.sh; \
+	fi
 
 native_build_native/libtorrent:
-	cd native/libtorrent-android-builder; REPO_TOP_DIR=$(REPO_TOP_DIR) bash bootstrap_libtorrent.sh
+	@if [ -f $(TORRENTD_PREBUILT_DIR)/libs/arm64-v8a/torrentd ]; then \
+		echo "torrentd prebuilt exists, skipping libtorrent"; \
+	else \
+		cd native/libtorrent-android-builder; REPO_TOP_DIR=$(REPO_TOP_DIR) bash bootstrap_libtorrent.sh; \
+	fi
 
-native/torrentd/libs/arm64-v8a/torrentd:
-	make native_build_native/torrentd
-native_torrentd: native/torrentd/libs/arm64-v8a/torrentd
+native_torrentd: native_build_native/torrentd
 	rm -f MediaLib/libs/armeabi/libtorrentd.so ;\
 	for i in armeabi-v7a arm64-v8a x86 x86_64;do \
 		mkdir -p MediaLib/libs/$$i ;\
-		cp native/torrentd/libs/$$i/torrentd MediaLib/libs/$$i/libtorrentd.so ;\
+		cp $(TORRENTD_PREBUILT_DIR)/libs/$$i/torrentd MediaLib/libs/$$i/libtorrentd.so ;\
 	done
 
 trakt-java: MediaLib/libs/trakt-java.jar
