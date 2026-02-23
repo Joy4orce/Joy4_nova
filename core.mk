@@ -288,6 +288,19 @@ endef
 
 native_avos: native_build_native/avos
 
+clean_native_build:
+	rm -rf native/boost/boost-*
+	rm -rf $(DAV1D_DIR)/build-*
+	rm -rf $(FFMPEG_DIR)/ffmpeg.git
+	rm -rf $(OPUS_DIR)/opus $(OPUS_DIR)/build-*
+	rm -rf $(OPENSSL_DIR)/openssl.git
+	rm -rf $(LIBMYSOFA_DIR)/libmysofa $(LIBMYSOFA_DIR)/build-*
+	rm -rf native/libtorrent-android-builder/libtorrent
+	rm -rf native/torrentd/obj
+	rm -rf $(AVOS_DIR)/obj $(AVOS_DIR)/libs
+	rm -rf native/libyuv/obj native/libyuv/libs
+	rm -rf native/libnativehelper/obj native/libnativehelper/libs
+
 clean_prebuilt:
 	rm -rf native/torrentd/obj
 	rm -rf $(TORRENTD_PREBUILT_DIR)/libs
@@ -335,6 +348,7 @@ native_build_native/torrentd: native_build_native/boost native_build_native/libt
 	@if [ -f $(TORRENTD_PREBUILT_DIR)/libs/arm64-v8a/torrentd ]; then \
 		echo "torrentd already built, skipping"; \
 	else \
+		mkdir -p $(TORRENTD_PREBUILT_DIR)/libs; \
 		REPO_TOP_DIR=$(REPO_TOP_DIR) BUILD=$(BUILD) NDK_APP_ABI="$(NDK_APP_ABI)" ASAN="$(asan)" android_ndk=$(android_ndk) $(android_ndk)/ndk-build $(ndk_debug) $(ndk_v) $(ndk_jobs) -C native/torrentd NDK_LIBS_OUT=$(REPO_TOP_DIR)/$(TORRENTD_PREBUILT_DIR)/libs; \
 	fi
 
