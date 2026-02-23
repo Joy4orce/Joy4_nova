@@ -1,0 +1,79 @@
+[submodule "Video"]
+	path = Video
+	url = ../aos-Video.git
+	branch = v6.4
+[submodule "MediaLib"]
+	path = MediaLib
+	url = ../aos-MediaLib.git
+	branch = v6.4
+[submodule "FileCoreLibrary"]
+	path = FileCoreLibrary
+	url = ../aos-FileCoreLibrary.git
+	branch = v6.4
+[submodule "native/avos"]
+	path = native/avos
+	url = ../aos-avos.git
+	branch = ffmpeg_n8_0
+[submodule "native/audiocompress"]
+	path = native/audiocompress
+	url = ../aos-audiocompress.git
+[submodule "native/ffmpeg-android-builder"]
+	path = native/ffmpeg-android-builder
+	url = ../ffmpeg-android-builder-nobin.git
+	branch = v8_0
+[submodule "native/dav1d-android-builder"]
+	path = native/dav1d-android-builder
+	url = ../dav1d-android-builder-nobin.git
+	branch = v1_4
+[submodule "native/opus-android-builder"]
+	path = native/opus-android-builder
+	url = ../opus-android-builder-nobin.git
+	branch = 20241012
+[submodule "native/libmysofa-android-builder"]
+	path = native/libmysofa-android-builder
+	url = ../libmysofa-android-builder.git
+	branch = main
+[submodule "native/openssl-android-builder"]
+	path = native/openssl-android-builder
+	url = ../openssl-android-builder-nobin.git
+	branch = v3_5_2
+[submodule "native/libyuv"]
+	path = native/libyuv
+	url = ../aos-libyuv.git
+[submodule "native/libnativehelper"]
+	path = native/libnativehelper
+	url = ../aos-libnativehelper.git
+[submodule "native/boost"]
+	path = native/boost
+	url = ../aos-boost-android-builder.git
+[submodule "native/libtorrent-android-builder"]
+	path = native/libtorrent-android-builder
+	url = ../aos-libtorrent-android-builder.git
+	branch = main
+[submodule "native/torrentd"]
+	path = native/torrentd
+	url = ../torrentd-nobin.git
+[submodule "native/prebuilt/ffmpeg"]
+	path = native/prebuilt/ffmpeg
+	url = ../prebuilt-ffmpeg.git
+	branch = v8_0
+[submodule "native/prebuilt/opus"]
+	path = native/prebuilt/opus
+	url = ../prebuilt-opus.git
+	branch = main
+[submodule "native/prebuilt/dav1d"]
+	path = native/prebuilt/dav1d
+	url = ../prebuilt-dav1d.git
+	branch = v1_5
+[submodule "native/prebuilt/openssl"]
+	path = native/prebuilt/openssl
+	url = ../prebuilt-openssl.git
+	branch = v3_5
+[submodule "native/prebuilt/libmysofa"]
+	path = native/prebuilt/libmysofa
+	url = ../prebuilt-libmysofa.git
+	branch = v1_3
+[submodule "native/prebuilt/torrentd"]
+	path = native/prebuilt/torrentd
+	url = ../prebuilt-torrentd.git
+	branch = main
