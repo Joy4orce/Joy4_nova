@@ -73,7 +73,8 @@ endif
 $(info android_cmake is $(android_cmake))
 
 # NDK prebuilt and LLVM toolchain paths
-ndk_host := prebuilt/$(os)-$(shell uname -m)
+# WARNING: x86_64 hardcoded, should be changed when NDK ships native arm64 prebuilt for Apple Silicon
+ndk_host := prebuilt/$(os)-x86_64
 ndk_prebuilt := $(android_ndk)/$(ndk_host)
 ndk_llvm := $(android_ndk)/toolchains/llvm/$(ndk_host)
 

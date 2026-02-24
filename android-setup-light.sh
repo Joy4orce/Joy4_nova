@@ -52,7 +52,9 @@ export PATH=$CMAKE_PATH/bin:$PATH
 
 # make sure we use first sdk/ndk and not host tools
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-PREBUILT=prebuilt/${OS}-$(uname -m)
+# WARNING: x86_64 hardcoded, should be changed when NDK ships native arm64 prebuilt for Apple Silicon
+#PREBUILT=prebuilt/${OS}-$(uname -m)
+PREBUILT=prebuilt/${OS}-x86_64
 export PATH=${NDK_PATH}/$PREBUILT/bin:$PATH
 echo PREBUILT_PATH is ${NDK_PATH}/$PREBUILT
 export PATH=${NDK_PATH}/toolchains/llvm/$PREBUILT/bin:$PATH
