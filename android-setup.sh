@@ -46,29 +46,43 @@ WHICHSDKMANAGER=`which sdkmanager`
 [ "$WHICHSDKMANAGER" == "${androidSdk}/cmdline-tools/bin/sdkmanager" ] && SDKMANAGER="yes | JAVA_HOME=${JAVA17} ${androidSdk}/cmdline-tools/bin/sdkmanager --sdk_root=${androidSdk}"
 [ "$WHICHSDKMANAGER" == "${androidSdk}/cmdline-tools/latest/bin/sdkmanager" ] && SDKMANAGER="yes | JAVA_HOME=${JAVA17} ${androidSdk}/cmdline-tools/latest/bin/sdkmanager"
 export JAVA_HOME=${JAVA17}
-NDKVER=26
-# retrieve first the java11 latest sdkmanager from cmdline-tools
-eval $SDKMANAGER \'cmdline-tools\;latest\'
-# install other necessary packages: ndk, cmake etc.
-if [ ! -d "${androidSdk}/ndk" ]
-then
-  ndk=$(pkg="ndk;$NDKVER"; sdkmanager --list | grep ${pkg} | sed "s/^.*\($pkg\.[0-9\.]*\) .*$/\1/g" | tail -n 1)
-  yes | sdkmanager "${ndk}" > /dev/null
-  echo NDK $ndk installed
+
+# install cmdline-tools if not already installed (use versioned package to avoid duplicates)
+cmdtools_ver=$(sdkmanager --list | grep "cmdline-tools;latest" | sed 's/[^|]*| *\([0-9\.]*\).*/\1/')
+if [ -d "${androidSdk}/cmdline-tools/${cmdtools_ver}" ]; then
+  echo "android cmdline-tools ${cmdtools_ver} already installed, skipping"
+else
+  echo "installing android cmdline-tools ${cmdtools_ver}..."
+  #eval $SDKMANAGER \'cmdline-tools\;latest\'
+  yes | sdkmanager "cmdline-tools;${cmdtools_ver}" > /dev/null
 fi
+
+# install latest ndk if not present
+ndk=$(sdkmanager --list | grep "^  ndk;" | grep -v rc | grep -v alpha | sed "s/^.*\(ndk;[0-9\.]*\).*/\1/g" | sort -V | tail -n 1)
+if [ -d "${androidSdk}/ndk" ]; then
+  echo "android ndk already installed, updating to ${ndk}..."
+fi
+yes | sdkmanager "${ndk}" > /dev/null
+echo NDK ${ndk} installed
 [ -d "${androidSdk}/ndk" ] && NDK_PATH=$(ls -d ${androidSdk}/ndk/* | sort -V | tail -n 1)
 echo NDK_PATH is ${NDK_PATH}
 export ANDROID_NDK_HOME=${NDK_PATH}
 export ANDROID_NDK_ROOT=${NDK_PATH}
-if [ ! -d "${androidSdk}/cmake" ]
-then
-  cmake=$(pkg="cmake"; sdkmanager --list | grep ${pkg} | sed "s/^.*\($pkg;[0-9\.]*\).*$/\1/g" | head -n 1)
-  yes | sdkmanager "${cmake}" > /dev/null
-fi
-# latest cmake
+
+# install latest cmake (exclude rc/alpha)
+cmake=$(sdkmanager --list | grep "cmake;" | grep -v rc | grep -v alpha | sed "s/^.*\(cmake;[0-9\.]*\).*$/\1/g" | sort -V | tail -n 1)
+#cmake=$(sdkmanager --list | grep cmake | sed "s/^.*\(cmake;[0-9\.]*\).*$/\1/g" | head -n 1)
+yes | sdkmanager "${cmake}" > /dev/null
+echo CMAKE ${cmake} installed
 [ -d "${androidSdk}/cmake" ] && CMAKE_PATH=$(ls -d ${androidSdk}/cmake/* | sort -V | tail -n 1)
 echo CMAKE_PATH is ${CMAKE_PATH}
 export PATH=$CMAKE_PATH/bin:$PATH
+
+# install latest build-tools and platform-tools (exclude rc/alpha)
+buildtools=$(sdkmanager --list | grep "build-tools;" | grep -v rc | grep -v alpha | sed "s/^.*\(build-tools;[0-9\.]*\).*$/\1/g" | sort -V | tail -n 1)
+#yes | sdkmanager platform-tools 'build-tools;30.0.3' > /dev/null
+yes | sdkmanager platform-tools "${buildtools}" > /dev/null
+echo BUILD-TOOLS ${buildtools} installed
 
 # make sure we use first sdk/ndk and not host tools
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
