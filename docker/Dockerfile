@@ -50,7 +50,7 @@ RUN echo "Install Android NDK" && \
     yes | sdkmanager "${ndk}" > /dev/null
 
 RUN echo "Install Android cmake" && \
-    cmake=$(pkg="cmake"; sdkmanager --list | grep ${pkg} | sed "s/^.*\($pkg;[0-9\.]*\).*$/\1/g" | head -n 1)
+    cmake=$(pkg="cmake"; sdkmanager --list | grep ${pkg} | sed "s/^.*\($pkg;[0-9\.]*\).*$/\1/g" | head -n 1) && \
     yes | sdkmanager "${cmake}" > /dev/null
 
 RUN echo "Install Android build-tools" && \
