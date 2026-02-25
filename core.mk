@@ -212,10 +212,10 @@ native_clean_$(1):
 	fi;
 endef
 
-all: AVP/android-setup
+all:
 	cd Video; ANDROID_SDK_ROOT=$(android_sdk) ./gradlew aND
 
-full: AVP/android-setup
+full:
 	cd Video; ANDROID_SDK_ROOT=$(android_sdk) ./gradlew -PadultScrape -Psponsor aND
 
 AVP/android-setup: AVP/android-cmdline-tools AVP/android-ndk AVP/android-cmake AVP/android-others
