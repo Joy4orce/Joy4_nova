@@ -1,26 +1,22 @@
 FROM ubuntu:latest
-MAINTAINER Courville Software <software@courville.org>
+LABEL maintainer="Courville Software <software@courville.org>"
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV USER root
+ENV DEBIAN_FRONTEND=noninteractive
+ENV USER=root
 
-# install build tools
-RUN echo "Install Linux build environment"
-RUN apt update && apt upgrade --yes --assume-yes
-RUN apt install -y nasm ninja-build maven build-essential \
+# install build tools, repo, and set up python
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y \
+        nasm meson ninja-build maven build-essential \
         file git wget curl unzip sudo pkg-config \
         python3 python3-pip python3-setuptools python3-wheel \
-        openjdk-8-jdk-headless openjdk-11-jdk-headless \
-        tig vim-tiny less screen
-
-# use python3
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
-RUN apt clean autoclean
-RUN pip3 install meson==0.53.2
-
-# download and install repo
-RUN curl https://storage.googleapis.com/git-repo-downloads/repo | sudo tee /usr/local/bin/repo > /dev/null
-RUN chmod a+x /usr/local/bin/repo
+        openjdk-17-jdk-headless \
+        tig vim-tiny less screen && \
+    apt-get clean autoclean && \
+    rm -rf /var/lib/apt/lists/* && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
+    curl https://storage.googleapis.com/git-repo-downloads/repo | tee /usr/local/bin/repo > /dev/null && \
+    chmod a+x /usr/local/bin/repo
 
 # set proper env variables
 ENV ANDROID_SDK_TOOLS=8092744 \
@@ -28,43 +24,47 @@ ENV ANDROID_SDK_TOOLS=8092744 \
     SDK_URL="https://dl.google.com/android/repository"
 
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
-ENV SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/bin"
-
-ENV NDKVER=23
-ENV BUILDTOOLSVER=31
-
 ENV PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/cmdline-tools/bin"
 
-# download minimal Android SDK/NDK
-
+# download and install minimal Android SDK
 RUN echo "Install minimal Android SDK" && \
+    mkdir -p ${ANDROID_SDK_ROOT} && \
     wget --quiet --output-document=/opt/android-cmdline.zip ${SDK_URL}/commandlinetools-${OS}-${ANDROID_SDK_TOOLS}_latest.zip && \
-    unzip -q /opt/android-cmdline.zip -d /opt && \
-    mv /opt/cmdline-tools /opt/android-sdk
+    unzip -q /opt/android-cmdline.zip -d ${ANDROID_SDK_ROOT} && \
+    rm /opt/android-cmdline.zip
 
-RUN echo "Install Android latest cmdline-tools" && \
-    yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} 'cmdline-tools;latest' > /dev/null
+# install Android cmdline-tools;latest (uses bootstrap sdkmanager with --sdk_root)
+RUN yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} 'cmdline-tools;latest' > /dev/null
 
-RUN echo "Install Android NDK" && \
-    ndk=$(pkg="ndk;$NDKVER"; sdkmanager --list | grep ${pkg} | sed "s/^.*\($pkg\.[0-9\.]*\) .*$/\1/g" | tail -n 1) && \
-    yes | sdkmanager "${ndk}" > /dev/null
+# install NDK, cmake, build-tools, platform-tools
+# versions pinned explicitly (sdkmanager --list crashes under QEMU emulation)
+# update these periodically to track latest stable releases
+RUN yes | sdkmanager \
+    'ndk;29.0.14206865' \
+    'cmake;3.22.1' \
+    'build-tools;36.0.0' \
+    'platform-tools' > /dev/null
 
-RUN echo "Install Android cmake" && \
-    cmake=$(pkg="cmake"; sdkmanager --list | grep ${pkg} | sed "s/^.*\($pkg;[0-9\.]*\).*$/\1/g" | head -n 1) && \
-    yes | sdkmanager "${cmake}" > /dev/null
+# set NDK/cmake environment and add NDK/LLVM toolchain to PATH via /etc/profile.d
+# also write to /etc/environment for non-interactive shells
+RUN NDK_PATH=$(ls -d ${ANDROID_SDK_ROOT}/ndk/* | sort -V | tail -n 1) && \
+    CMAKE_PATH=$(ls -d ${ANDROID_SDK_ROOT}/cmake/*/bin | sort -V | tail -n 1) && \
+    PREBUILT=prebuilt/linux-x86_64 && \
+    echo "ANDROID_NDK_HOME=${NDK_PATH}" >> /etc/environment && \
+    echo "ANDROID_NDK_ROOT=${NDK_PATH}" >> /etc/environment && \
+    echo "export ANDROID_NDK_HOME=${NDK_PATH}" > /etc/profile.d/android.sh && \
+    echo "export ANDROID_NDK_ROOT=${NDK_PATH}" >> /etc/profile.d/android.sh && \
+    echo "export PATH=${NDK_PATH}/${PREBUILT}/bin:${NDK_PATH}/toolchains/llvm/${PREBUILT}/bin:${CMAKE_PATH}:\$PATH" >> /etc/profile.d/android.sh
 
-RUN echo "Install Android build-tools" && \
-    yes | sdkmanager 'build-tools;30.0.3' > /dev/null
-
-RUN echo "Fetch nova source code" && \
-    mkdir -p /nova && \
+# fetch nova source code
+RUN mkdir -p /nova && \
     cd /nova && \
-    repo init -u https://github.com/nova-video-player/aos-AVP -b nova -m v6.xml && \
+    repo init -u https://github.com/nova-video-player/aos-AVP -b nova -m v6_4.xml && \
     repo sync -j 4 && \
-    repo forall -c 'git checkout -t $REPO_REMOTE/$REPO_RREV' 
+    repo forall -c 'git checkout -t $REPO_REMOTE/$REPO_RREV'
 
 WORKDIR /nova
 
-#ENTRYPOINT ["make"] 
+#ENTRYPOINT ["make"]
 
 USER root
