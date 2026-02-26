@@ -1251,6 +1251,10 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
             if (!movies.isEmpty()) {
                 InBuilder inBuilder = new InBuilder(VideoStore.Video.VideoColumns.SCRAPER_M_ONLINE_ID);
                 for (BaseMovie movie : movies){
+                    if (movie.movie == null || movie.movie.ids == null || movie.movie.ids.tmdb == null) {
+                        if (log.isDebugEnabled()) log.debug("syncMoviesToDb: skipping movie with null tmdb id");
+                        continue;
+                    }
                     inBuilder.addParam(movie.movie.ids.tmdb);
                     if (log.isTraceEnabled()) log.trace("syncMoviesToDb: marking {}", movie.movie.title);
                 }
@@ -1278,6 +1282,10 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
             if (log.isDebugEnabled()) log.debug("syncShowsToDb: found {} shows to sync", shows.size());
             if (!shows.isEmpty()) {
                 for (BaseShow show : shows) {
+                    if (show.show == null || show.show.ids == null || show.show.ids.tmdb == null) {
+                        if (log.isDebugEnabled()) log.debug("syncShowsToDb: skipping show with null tmdb id");
+                        continue;
+                    }
                     for (BaseSeason season : show.seasons) {
                         InBuilder inBuilder = new InBuilder("number_episode");
                         for (BaseEpisode episode : season.episodes) {
