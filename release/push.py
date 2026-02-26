@@ -5,9 +5,18 @@ from configparser import ConfigParser
 import os
 import sys
 
-selfpath = os.path.dirname(sys.argv[0])
+selfpath = os.path.dirname(os.path.abspath(sys.argv[0]))
 config = ConfigParser()
 config.read(os.path.join(selfpath, "config.ini"))
+
+# Detect repo vs git submodule workspace
+# repo mode: push.py is at <workspace>/AVP/release/
+# submodule mode: push.py is at <workspace>/release/
+repo_marker = os.path.join(selfpath, '..', '..', '.repo')
+if os.path.isdir(repo_marker):
+    prefix = os.path.normpath(os.path.join(selfpath, '..', '..'))
+else:
+    prefix = os.path.normpath(os.path.join(selfpath, '..'))
 
 g = Github(config['github']['token'])
 
@@ -16,7 +25,8 @@ repo = g.get_organization("nova-video-player").get_repo("aos-AVP")
 print(repo.name)
 
 #changelog is in whatsnew
-with open('../../Video/src/noamazon/play/release-notes/en-US/internal.txt', 'r') as whatsnew:
+whatsnew_path = os.path.join(prefix, 'Video/src/noamazon/play/release-notes/en-US/internal.txt')
+with open(whatsnew_path, 'r') as whatsnew:
     changelog=whatsnew.read()
 #    changelog=whatsnew.read().replace('^', '- ')
 #    changelog=whatsnew.read().replace('\n', '')

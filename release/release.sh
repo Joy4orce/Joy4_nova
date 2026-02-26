@@ -1,7 +1,21 @@
 #!/bin/bash
 
+# Detect repo vs git submodule workspace
+# repo mode: release.sh is at <workspace>/AVP/release/
+# submodule mode: release.sh is at <workspace>/release/
+scriptdir="$(cd "$(dirname "$0")" && pwd)"
+if [ -d "$scriptdir/../../.repo" ]; then
+    # repo mode: go up two levels to workspace root
+    prefix="$(cd "$scriptdir/../.." && pwd)"
+    avp=$prefix/AVP
+else
+    # submodule mode: go up one level to workspace root
+    prefix="$(cd "$scriptdir/.." && pwd)"
+    avp=$prefix
+fi
+
 #version=$1
-version=$(grep " versionName = '" ../../Video/build.gradle | sed "s/^.*versionName = '\([0-9\.]*\)'.*$/\1/g")
+version=$(grep " versionName = '" $prefix/Video/build.gradle | sed "s/^.*versionName = '\([0-9\.]*\)'.*$/\1/g")
 major=$(echo $version | cut -d. -f1)
 minor=$(echo $version | cut -d. -f2)
 patch=$(echo $version | cut -d. -f3)
@@ -17,9 +31,6 @@ case `uname` in
   ;;
 esac
 
-cd ../..
-prefix=`pwd`
-avp=$prefix/AVP
 cd $avp
 
 echo "Uploading release v${version} to github..."
@@ -33,8 +44,8 @@ ret=0
 echo "build result: $ret"
 if [ "$ret" == "1" ]
 then
-  repo manifest -r > $bdir/manifest.xml
-  cd $prefix/AVP/release
+  $avp/release/gen-manifest.sh > $bdir/manifest.xml
+  cd $avp/release
   ls $bdir
   echo uploading
   ./push.py "v${version}" "v${version} release" $bdir
