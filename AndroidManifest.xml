@@ -1176,7 +1176,7 @@
             android:taskAffinity="archos.task.video"
             android:theme="@style/Theme.HelpOverlay" />
 
-        <service android:name="org.jupnp.android.AndroidUpnpServiceImpl" />
+        <service android:name="com.archos.mediacenter.filecoreextension.upnp2.NovaUpnpService" />
         <service android:name=".browser.TorrentObserverService" />
         <service
             android:name=".player.FloatingPlayerService"
