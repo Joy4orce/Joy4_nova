@@ -75,6 +75,7 @@ public class NfoMovieHandler extends BasicSubParseHandler {
     private static final int BACKDROPLARGE = 31;
     private static final int BACKDROPTHUMB = 32;
     private static final int WRITER = 33;
+    private static final int PLOT = 34;
 
     static {
         STRINGS.addKey("movie", ROOT_MOVIE);
@@ -82,6 +83,7 @@ public class NfoMovieHandler extends BasicSubParseHandler {
         STRINGS.addKey("rating", RATING);
         STRINGS.addKey("year", YEAR);
         STRINGS.addKey("outline", OUTLINE);
+        STRINGS.addKey("plot", PLOT);
         STRINGS.addKey("thumb", THUMB);
         STRINGS.addKey("mpaa", MPAA);
         STRINGS.addKey("id", ID);
@@ -120,6 +122,7 @@ public class NfoMovieHandler extends BasicSubParseHandler {
     private String mActorName, mActorRole;
     private boolean mInActor;
     private boolean mInFanart;
+    private boolean mHasPlot;
     private boolean mInSet;
     private int mInSetId;
     private String mInSetName, mInSetOverview, mInSetPosterLarge, mInSetPosterThumb, mInSetBackdropLarge, mInSetBackdropThumb;
@@ -139,6 +142,7 @@ public class NfoMovieHandler extends BasicSubParseHandler {
         mActorRole = null;
         mInActor = false;
         mInFanart = false;
+        mHasPlot = false;
         mInFileinfo = false;
         mInStreamdetails = false;
         mInVideo = false;
@@ -204,6 +208,7 @@ public class NfoMovieHandler extends BasicSubParseHandler {
                     case LASTPLAYED:
                     case BOOKMARK:
                     case RESUME:
+                    case PLOT:
                         return true;
                     // actor needs sub node parsing
                     case SET:
@@ -215,7 +220,7 @@ public class NfoMovieHandler extends BasicSubParseHandler {
                         mInSetPosterThumb = null;
                         mInSetBackdropLarge = null;
                         mInSetBackdropThumb = null;
-                        break;
+                        return true;
                     case ACTOR:
                         mInActor = true;
                         mActorName = null;
@@ -296,7 +301,18 @@ public class NfoMovieHandler extends BasicSubParseHandler {
                         mMovie.setYear(getInt());
                         break;
                     case OUTLINE:
-                        mMovie.setPlot(getString());
+                        if (!mHasPlot) {
+                            mMovie.setPlot(getString());
+                        } else {
+                            getString();
+                        }
+                        break;
+                    case PLOT:
+                        String plot = getString();
+                        if (!plot.isEmpty()) {
+                            mMovie.setPlot(plot);
+                            mHasPlot = true;
+                        }
                         break;
                     case THUMB:
                         mMoviePosterUrls.add(getString());
@@ -346,6 +362,11 @@ public class NfoMovieHandler extends BasicSubParseHandler {
                         break;
                     case SET:
                         mInSet = false;
+                        // Handle simple <set>Name</set> format
+                        String setText = getString();
+                        if (mInSetName == null && setText != null && !setText.trim().isEmpty()) {
+                            mInSetName = setText.trim();
+                        }
                         mMovie.setCollectionId(mInSetId);
                         mMovie.setCollectionName(mInSetName);
                         mMovie.setCollectionDescription(mInSetOverview);
