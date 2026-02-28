@@ -17,6 +17,7 @@
 [submodule "native/audiocompress"]
 	path = native/audiocompress
 	url = ../aos-audiocompress.git
+	branch = master
 [submodule "native/ffmpeg-android-builder"]
 	path = native/ffmpeg-android-builder
 	url = ../ffmpeg-android-builder-nobin.git
@@ -40,9 +41,11 @@
 [submodule "native/libyuv"]
 	path = native/libyuv
 	url = ../aos-libyuv.git
+	branch = master
 [submodule "native/libnativehelper"]
 	path = native/libnativehelper
 	url = ../aos-libnativehelper.git
+	branch = master
 [submodule "native/boost"]
 	path = native/boost
 	url = ../aos-boost-android-builder.git
@@ -53,6 +56,7 @@
 [submodule "native/torrentd"]
 	path = native/torrentd
 	url = ../torrentd-nobin.git
+	branch = master
 [submodule "native/prebuilt/ffmpeg"]
 	path = native/prebuilt/ffmpeg
 	url = ../prebuilt-ffmpeg.git
