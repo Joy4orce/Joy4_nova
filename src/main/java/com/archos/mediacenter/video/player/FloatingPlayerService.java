@@ -864,7 +864,6 @@ public class FloatingPlayerService extends Service implements PlayerService.Play
         if (mVolumeLevel != null && mAudioManager != null) {
             int volume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
             mVolumeLevel.setProgress(volume);
-            setMusicVolume(volume);
         }
     }
     private SeekBar.OnSeekBarChangeListener mVolumeLevelListener = new SeekBar.OnSeekBarChangeListener() {

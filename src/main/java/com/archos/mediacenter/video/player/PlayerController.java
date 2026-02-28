@@ -1735,7 +1735,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
             mVolumeLevel.setProgress(volume);
             if(mVolumeLevel2!=null)
                 mVolumeLevel2.setProgress(volume);
-            setMusicVolume(volume);
+            setVolumeBarMuteUI(volume == 0);
         }
     }
 

@@ -465,7 +465,7 @@ public class Player implements IPlayerControl,
                 if (mAudioFocusRequest != null) mAudioManager.abandonAudioFocusRequest(mAudioFocusRequest);
                 mAudioFocusRequest = null;
             } else {
-                mAudioManager.requestAudioFocus(afChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+                mAudioManager.abandonAudioFocus(afChangeListener);
             }
 
         }
