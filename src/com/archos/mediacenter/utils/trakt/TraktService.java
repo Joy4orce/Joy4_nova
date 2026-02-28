@@ -674,9 +674,11 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
             String whereR;
             for (PlaybackResponse video : videos){
                 if (video.movie != null) { // it is a movie
+                    if (video.movie.ids == null || video.movie.ids.tmdb == null) continue;
                     whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
                             "SELECT video_id FROM movie where " + VideoStore.Video.VideoColumns.SCRAPER_M_ONLINE_ID + "= " + video.movie.ids.tmdb+")";
                 } else { // it is an episode
+                    if (video.episode == null || video.episode.ids == null || video.episode.ids.tmdb == null) continue;
                     whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
                             "SELECT video_id FROM episode where " + VideoStore.Video.VideoColumns.SCRAPER_E_ONLINE_ID + "= " + video.episode.ids.tmdb+")";
                 }
@@ -926,9 +928,11 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
             String whereR;
             for (HistoryEntry video : traktWatched){
                 if (video.movie != null) { // it is a movie
+                    if (video.movie.ids == null || video.movie.ids.tmdb == null) continue;
                     whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
                             "SELECT video_id FROM movie where " + VideoStore.Video.VideoColumns.SCRAPER_M_ONLINE_ID + "= " + video.movie.ids.tmdb+")";
                 } else { // it is an episode
+                    if (video.episode == null || video.episode.ids == null || video.episode.ids.tmdb == null) continue;
                     whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
                             "SELECT video_id FROM episode where " + VideoStore.Video.VideoColumns.SCRAPER_E_ONLINE_ID + "= " + video.episode.ids.tmdb+")";
                 }
@@ -1005,9 +1009,11 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
             String whereR;
             for (HistoryEntry video : videos){
                 if (video.movie != null) { // it is a movie
+                    if (video.movie.ids == null || video.movie.ids.tmdb == null) continue;
                     whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
                             "SELECT video_id FROM movie where " + VideoStore.Video.VideoColumns.SCRAPER_M_ONLINE_ID + "= " + video.movie.ids.tmdb+")";
                 } else { // it is an episode
+                    if (video.episode == null || video.episode.ids == null || video.episode.ids.tmdb == null) continue;
                     whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
                             "SELECT video_id FROM episode where " + VideoStore.Video.VideoColumns.SCRAPER_E_ONLINE_ID + "= " + video.episode.ids.tmdb+")";
                 }
@@ -1075,9 +1081,11 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
             String whereR;
             for (PlaybackResponse video : traktVideos){
                 if (video.movie != null) { // it is a movie
+                    if (video.movie.ids == null || video.movie.ids.tmdb == null) continue;
                     whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
                             "SELECT video_id FROM movie where " + VideoStore.Video.VideoColumns.SCRAPER_M_ONLINE_ID + "= " + video.movie.ids.tmdb+")";
                 } else { // it is an episode
+                    if (video.episode == null || video.episode.ids == null || video.episode.ids.tmdb == null) continue;
                     whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
                             "SELECT video_id FROM episode where " + VideoStore.Video.VideoColumns.SCRAPER_E_ONLINE_ID + "= " + video.episode.ids.tmdb+")";
                 }
@@ -1169,9 +1177,11 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
             String whereR;
             for (PlaybackResponse video : videos){
                 if (video.movie != null) { // it is a movie
+                    if (video.movie.ids == null || video.movie.ids.tmdb == null) continue;
                     whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
                             "SELECT video_id FROM movie where " + VideoStore.Video.VideoColumns.SCRAPER_M_ONLINE_ID + "= " + video.movie.ids.tmdb+")";
                 } else { // it is an episode
+                    if (video.episode == null || video.episode.ids == null || video.episode.ids.tmdb == null) continue;
                     whereR = VideoStore.Video.VideoColumns._ID+" IN ("+
                             "SELECT video_id FROM episode where " + VideoStore.Video.VideoColumns.SCRAPER_E_ONLINE_ID + "= " + video.episode.ids.tmdb+")";
                 }
@@ -1859,9 +1869,13 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
                                 for(ListEntry onlineItem : traktListItems){
                                     if(videoItem.episodeId > 0
                                             && onlineItem.episode!=null
+                                            && onlineItem.episode.ids != null
+                                            && onlineItem.episode.ids.tmdb != null
                                             && onlineItem.episode.ids.tmdb.equals(videoItem.episodeId)
                                             || videoItem.movieId>0
                                             && onlineItem.movie!=null
+                                            && onlineItem.movie.ids != null
+                                            && onlineItem.movie.ids.tmdb != null
                                             && onlineItem.movie.ids.tmdb.equals(videoItem.movieId)){
                                         isIn = true;
                                         break;
@@ -1891,13 +1905,22 @@ public class TraktService extends Service implements DefaultLifecycleObserver {
                         for(ListEntry onlineItem : traktListItems){
                             if(onlineItem.episode == null && onlineItem.movie == null)
                                 continue; //skip everything that is not movies or episodes
+                            // skip entries without valid TMDb IDs
+                            if (onlineItem.movie != null && (onlineItem.movie.ids == null || onlineItem.movie.ids.tmdb == null))
+                                continue;
+                            if (onlineItem.episode != null && (onlineItem.episode.ids == null || onlineItem.episode.ids.tmdb == null))
+                                continue;
                             boolean isIn = false;
                             for(VideoStore.VideoList.VideoItem videoItem : localListItems){
                                 if(videoItem.episodeId > 0
                                         && onlineItem.episode!=null
+                                        && onlineItem.episode.ids != null
+                                        && onlineItem.episode.ids.tmdb != null
                                         && onlineItem.episode.ids.tmdb.equals(videoItem.episodeId)
                                         || videoItem.movieId>0
                                         && onlineItem.movie!=null
+                                        && onlineItem.movie.ids != null
+                                        && onlineItem.movie.ids.tmdb != null
                                         && onlineItem.movie.ids.tmdb.equals(videoItem.movieId)) {
                                     isIn = true;
                                     if(videoItem.syncStatus == VideoStore.List.SyncStatus.STATUS_DELETED) {
