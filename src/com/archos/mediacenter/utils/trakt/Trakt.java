@@ -302,23 +302,25 @@ public class Trakt {
     }
 
     public static accessToken getAccessToken(String code) throws AccountLockedError, ForbiddenError, ServiceUnavailableError {
+        retrofit2.Response<AccessToken> response = null;
         try {
             // Single-shot auth call (Trakt SDK returns a synchronous Response)
-            final retrofit2.Response<AccessToken> response = getTraktV2().exchangeCodeForAccessToken(code);
+            response = getTraktV2().exchangeCodeForAccessToken(code);
             if (response.isSuccessful() && response.body() != null) {
                 final accessToken mAccessToken = new accessToken();
                 mAccessToken.access_token = response.body().access_token;
                 mAccessToken.refresh_token = response.body().refresh_token;
                 if (log.isDebugEnabled()) log.debug("getAccessToken: access_token is {}", mAccessToken.access_token);
                 return mAccessToken;
-            } else {
-                log.error("getAccessToken error: code={}, message={}", response.code(), response.message());
-                if (response.code() == 403) throw new ForbiddenError();
-                if (response.code() == 423) throw new AccountLockedError();
-                if (response.code() == 503) throw new ServiceUnavailableError();
             }
         } catch (IOException | NullPointerException e) {
-            log.error("getAccessToken: caught IoException ", e);
+            log.error("getAccessToken: caught exception", e);
+        }
+        if (response != null && !response.isSuccessful()) {
+            log.error("getAccessToken error: code={}, message={}", response.code(), response.message());
+            if (response.code() == 403) throw new ForbiddenError();
+            if (response.code() == 423) throw new AccountLockedError();
+            if (response.code() == 503) throw new ServiceUnavailableError();
         }
         return null;
     }
@@ -329,9 +331,10 @@ public class Trakt {
      * @return deviceCode object with codes and verification URL, or null on error
      */
     public static deviceCode generateDeviceCode() throws AccountLockedError, ForbiddenError, ServiceUnavailableError {
+        retrofit2.Response<com.uwetrottmann.trakt5.entities.DeviceCode> response = null;
         try {
             // Single-shot auth call (Trakt SDK returns a synchronous Response)
-            final retrofit2.Response<com.uwetrottmann.trakt5.entities.DeviceCode> response = getTraktV2().generateDeviceCode();
+            response = getTraktV2().generateDeviceCode();
             if (response.isSuccessful() && response.body() != null) {
                 final deviceCode code = new deviceCode();
                 code.device_code = response.body().device_code;
@@ -341,14 +344,15 @@ public class Trakt {
                 code.interval = response.body().interval != null ? response.body().interval : 5;
                 if (log.isDebugEnabled()) log.debug("generateDeviceCode: user_code={}, verification_url={}", code.user_code, code.verification_url);
                 return code;
-            } else {
-                log.error("generateDeviceCode error: code={}, message={}", response.code(), response.message());
-                if (response.code() == 403) throw new ForbiddenError();
-                if (response.code() == 423) throw new AccountLockedError();
-                if (response.code() == 503) throw new ServiceUnavailableError();
             }
         } catch (IOException | NullPointerException e) {
             log.error("generateDeviceCode: caught exception", e);
+        }
+        if (response != null && !response.isSuccessful()) {
+            log.error("generateDeviceCode error: code={}, message={}", response.code(), response.message());
+            if (response.code() == 403) throw new ForbiddenError();
+            if (response.code() == 423) throw new AccountLockedError();
+            if (response.code() == 503) throw new ServiceUnavailableError();
         }
         return null;
     }
@@ -360,24 +364,26 @@ public class Trakt {
      * @return accessToken if user authorized, null if still pending or error
      */
     public static accessToken exchangeDeviceCodeForAccessToken(String deviceCode) throws AccountLockedError, ForbiddenError, ServiceUnavailableError {
+        retrofit2.Response<AccessToken> response = null;
         try {
             // Single-shot auth call (Trakt SDK returns a synchronous Response)
-            final retrofit2.Response<AccessToken> response = getTraktV2().exchangeDeviceCodeForAccessToken(deviceCode);
+            response = getTraktV2().exchangeDeviceCodeForAccessToken(deviceCode);
             if (response.isSuccessful() && response.body() != null) {
                 final accessToken mAccessToken = new accessToken();
                 mAccessToken.access_token = response.body().access_token;
                 mAccessToken.refresh_token = response.body().refresh_token;
                 if (log.isDebugEnabled()) log.debug("exchangeDeviceCodeForAccessToken: access_token obtained");
                 return mAccessToken;
-            } else {
-                // 400 = pending, 404 = not found, 410 = expired, 429 = polling too fast
-                if (log.isDebugEnabled()) log.debug("exchangeDeviceCodeForAccessToken: status={}", response.code());
-                if (response.code() == 403) throw new ForbiddenError();
-                if (response.code() == 423) throw new AccountLockedError();
-                if (response.code() == 503) throw new ServiceUnavailableError();
             }
         } catch (IOException | NullPointerException e) {
             if (log.isDebugEnabled()) log.debug("exchangeDeviceCodeForAccessToken: still pending or error", e);
+        }
+        if (response != null && !response.isSuccessful()) {
+            // 400 = pending, 404 = not found, 410 = expired, 429 = polling too fast
+            if (log.isDebugEnabled()) log.debug("exchangeDeviceCodeForAccessToken: status={}", response.code());
+            if (response.code() == 403) throw new ForbiddenError();
+            if (response.code() == 423) throw new AccountLockedError();
+            if (response.code() == 503) throw new ServiceUnavailableError();
         }
         return null;
     }
