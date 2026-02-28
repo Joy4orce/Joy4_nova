@@ -58,6 +58,7 @@ import android.widget.Toast;
 
 import com.archos.mediacenter.utils.RepeatingImageButton;
 import com.archos.mediacenter.utils.MediaUtils;
+import com.archos.mediacenter.video.CustomApplication;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.player.tvmenu.TVCardDialog;
 import com.archos.mediacenter.video.player.tvmenu.TVCardView;
@@ -71,6 +72,7 @@ import java.util.Date;
 import java.util.Formatter;
 import java.util.Locale;
 
+import com.archos.environment.ArchosFeatures;
 import static com.archos.environment.ArchosFeatures.isChromeOS;
 import static com.archos.mediacenter.video.utils.VideoPreferencesCommon.KEY_PLAYBACK_SPEED;
 
@@ -2211,20 +2213,33 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         }
 
             if (mVolumeBarEnabled) {
+                final boolean passThroughHardwareVolumeKeys = ArchosFeatures.isAndroidTV(mContext) && CustomApplication.isHdmiConnected();
                 switch(keyCode) {
                     case KeyEvent.KEYCODE_VOLUME_DOWN:
+                        // Let framework handle TV+HDMI keys so CEC/ARC controls external sink.
+                        if (passThroughHardwareVolumeKeys) return false;
+                        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                            changeVolumeBy(-1);
+                        }
+                        return true;
                     case KeyEvent.KEYCODE_D:
                         if (event.getAction() == KeyEvent.ACTION_DOWN) {
                             changeVolumeBy(-1);
                         }
                         return true;
                     case KeyEvent.KEYCODE_VOLUME_UP:
+                        if (passThroughHardwareVolumeKeys) return false;
+                        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                            changeVolumeBy(1);
+                        }
+                        return true;
                     case KeyEvent.KEYCODE_U:
                         if (event.getAction() == KeyEvent.ACTION_DOWN) {
                             changeVolumeBy(1);
                         }
                         return true;
                     case KeyEvent.KEYCODE_VOLUME_MUTE:
+                        if (passThroughHardwareVolumeKeys) return false;
                         if (event.getAction() == KeyEvent.ACTION_DOWN) {
                             setMusicVolume(0);
                             // Show volume slider
