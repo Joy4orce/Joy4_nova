@@ -111,10 +111,6 @@ public class MainActivityLeanback extends LeanbackActivity {
         // Update uimode/uimode_leanback to reflect we're in leanback mode
         UiChoiceDialog.updateUiModePreferencesInEditor(this, editor);
 
-        // Reset the Video Aspect Ratio on Startup
-        editor.putString("player_pref_auto_format_key", "-1");
-        editor.putString("player_pref_format_key", "0");
-
         // If we are starting the Browser again, we aren't unpausing a Video
         editor.putBoolean("user_paused_video", false);
 

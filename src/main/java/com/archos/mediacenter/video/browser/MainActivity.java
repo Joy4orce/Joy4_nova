@@ -270,12 +270,8 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
         LoaderUtils.mMustHideWatchedVideo = mPreferences.getBoolean("hide_watched", false);
         LoaderUtils.mSmartRecentlyRows = mPreferences.getBoolean("smart_recently_rows", false);
 
-        //Reset the Video Aspect Ratio on Startup.
-        SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putString("player_pref_auto_format_key","-1");
-        editor.putString("player_pref_format_key","0");
-        
         //If we are starting the Browser again, we aren't unpausing a Video
+        SharedPreferences.Editor editor = mPreferences.edit();
         editor.putBoolean("user_paused_video", false);
 
         //Reset Video brightness to System on Startup.
