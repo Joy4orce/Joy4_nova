@@ -563,6 +563,10 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         if (ArchosFeatures.isAndroidTV(this) && !PrivateMode.isActive()) {
             setNowPlayingCard();
         }
+        mPlayerState = PlayerState.PREPARING;
+        if (ArchosFeatures.isAndroidTV(this) && !PrivateMode.isActive()) {
+            updateNowPlayingState();
+        }
     }
 
     public Uri getStreamingUri() {
@@ -1352,6 +1356,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
     @Override
     public void onCompletion() {
         if (log.isDebugEnabled()) log.debug("onCompletion");
+        mPlayerState = PlayerState.STOPPED;
 
         if (ArchosFeatures.isAndroidTV(this) && !PrivateMode.isActive()) {
             updateNowPlayingState();
@@ -1385,6 +1390,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
     @Override
     public boolean onError(int errorCode, int errorQualCode, String msg) {
         if (log.isDebugEnabled()) log.debug("onError");
+        mPlayerState = PlayerState.STOPPED;
         if (ArchosFeatures.isAndroidTV(this) && !PrivateMode.isActive()) {
             updateNowPlayingState();
         }
@@ -1418,6 +1424,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
     @Override
     public void onPlay(int state) {
         if (log.isDebugEnabled()) log.debug("onPlay");
+        mPlayerState = PlayerState.PLAYING;
         if (state == PlayerController.STATE_NORMAL) {
             if (log.isDebugEnabled()) log.debug("onPlay: PlayerController.STATE_NORMAL -> startTrakt()");
             startTrakt();
@@ -1435,6 +1442,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
     @Override
     public void onPause(int state) {
         if (log.isDebugEnabled()) log.debug("onPause");
+        mPlayerState = PlayerState.PAUSED;
         saveVideoStateIfReady();
         if (state == PlayerController.STATE_NORMAL) {
             if (log.isDebugEnabled()) log.debug("onPause: normal state thus pauseTrakt()!");
@@ -1795,7 +1803,6 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
             mSession.setCallback(mediaSessionCallback);
             // deprecated and always true
             //mSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
-            mSession.setActive(true);
             // Set initial stopped state to avoid reporting undefined/playing state
             PlaybackStateCompat.Builder initialStateBuilder = new PlaybackStateCompat.Builder()
                     .setActions(getAvailableActions());
@@ -1803,7 +1810,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
             mSession.setPlaybackState(initialStateBuilder.build());
         }
 
-        mSession.setSessionActivity(pi);;
+        mSession.setSessionActivity(pi);
     }
 
     /**
