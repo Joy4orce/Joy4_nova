@@ -49,6 +49,7 @@
 [submodule "native/boost"]
 	path = native/boost
 	url = ../aos-boost-android-builder.git
+	branch = master
 [submodule "native/libtorrent-android-builder"]
 	path = native/libtorrent-android-builder
 	url = ../aos-libtorrent-android-builder.git
