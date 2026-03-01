@@ -49,6 +49,7 @@ import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.mediacenter.video.utils.WebUtils;
 import com.archos.environment.NetworkState;
+import com.archos.mediaprovider.video.NetworkAutoRefresh;
 
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -70,6 +71,7 @@ abstract public class BrowserCategory extends ListFragment {
     private static final String PREFERENCE_LAST_FRAGMENT = "preference_last_selected_fragment";
     private static final String PREFERENCE_LAST_PATH = "preference_last_selected_path";
     protected static final int ITEM_ID_BROWSER = 1;
+    protected static final int ITEM_ID_VIDEO_FOLDER = 7;
     protected static final int ITEM_ID_OFFSET = 7;
     protected static final int ITEM_ID_SMB = 2;
     protected static final int ITEM_ID_UPNP = 3;
@@ -357,6 +359,9 @@ abstract public class BrowserCategory extends ListFragment {
                 if(getActivity() instanceof MainActivity)
                     ((MainActivity) getActivity()).startPreference();
                 setSelection(mSelectedItemId); //restore selection
+            } else if (item.text == R.string.rescan){
+                NetworkAutoRefresh.forceRescan(getActivity());
+                setSelection(mSelectedItemId); //restore selection
             } else if (item.text == R.string.help_faq){
                 WebUtils.openWebLink(getActivity(),getString(R.string.faq_url));
             } else if (item.text == R.string.sponsor){
@@ -493,7 +498,15 @@ abstract public class BrowserCategory extends ListFragment {
         final boolean hasExternal = storageManager.hasExtStorage();
         final boolean isConnected = isConnected();
         if (hasExternal|| isConnected || NetworkState.isNetworkConnected(getActivity())) {
-            mCategoryList.add(getText(R.string.external_storage));
+            mCategoryList.add(getText(R.string.leanback_browsing));
+
+            {
+                ItemData itemData2 = new ItemData();
+                itemData2.icon = R.drawable.category_common_folder;
+                itemData2.text = R.string.root_storage;
+                itemData2.id = ITEM_ID_VIDEO_FOLDER;
+                mCategoryList.add(itemData2);
+            }
 
             if (hasExternal) {
                 for(String s : storageManager.getExtSdcards()) {
@@ -577,6 +590,10 @@ abstract public class BrowserCategory extends ListFragment {
         ItemData itemData = new ItemData();
         itemData.icon = R.drawable.android29_ic_settings;
         itemData.text = R.string.preferences;
+        mCategoryList.add(itemData);
+        itemData = new ItemData();
+        itemData.icon = R.drawable.android29_ic_rescan;
+        itemData.text = R.string.rescan;
         mCategoryList.add(itemData);
         itemData = new ItemData();
         itemData.icon = R.drawable.android29_ic_menu_help;

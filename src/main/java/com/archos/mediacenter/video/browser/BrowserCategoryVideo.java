@@ -73,7 +73,7 @@ public class BrowserCategoryVideo extends BrowserCategory implements androidx.ap
      */
     private boolean mNavigationItemListenerActive = true;
     private SharedPreferences.OnSharedPreferenceChangeListener mThemeChangeListener;
-    private static final int ITEM_ID_VIDEO_FOLDER = ITEM_ID_OFFSET + 0;
+    // ITEM_ID_VIDEO_FOLDER is defined in BrowserCategory
     private static final int ITEM_ID_MOVIES = ITEM_ID_OFFSET + 1;
     private static final int ITEM_ID_TV_SHOWS = ITEM_ID_OFFSET + 2;
     private static final int ITEM_ID_ALL_VIDEOS = ITEM_ID_OFFSET + 3;
@@ -218,11 +218,6 @@ public class BrowserCategoryVideo extends BrowserCategory implements androidx.ap
         itemData.text = R.string.not_played_yet_videos;
         categoryList.add(itemData);*/
 
-        itemData = new ItemData();
-        itemData.icon = R.drawable.category_common_folder;
-        itemData.text = R.string.video_folder;
-        itemData.id = ITEM_ID_VIDEO_FOLDER;
-        categoryList.add(itemData);
     }
 
 

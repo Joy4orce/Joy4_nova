@@ -72,6 +72,7 @@ import com.archos.mediacenter.video.browser.loader.NonScrapedVideosCountLoader;
 import com.archos.mediacenter.video.browser.loader.VideoLoader;
 import com.archos.mediacenter.video.browser.loader.WatchingUpNextLoader;
 import com.archos.mediaprovider.video.LoaderUtils;
+import com.archos.mediaprovider.video.NetworkAutoRefresh;
 import com.archos.mediacenter.video.leanback.adapter.object.Box;
 import com.archos.mediacenter.video.leanback.adapter.object.EmptyView;
 import com.archos.mediacenter.video.leanback.adapter.object.Icon;
@@ -811,6 +812,7 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
 
         mPreferencesRowAdapter = new ArrayObjectAdapter(new IconItemPresenter());
         mPreferencesRowAdapter.add(new Icon(Icon.ID.PREFERENCES, getString(R.string.preferences), R.drawable.ic_cog_outline));
+        mPreferencesRowAdapter.add(new Icon(Icon.ID.RESCAN, getString(R.string.rescan), R.drawable.filetype_new_rescan));
         mPreferencesRowAdapter.add(new Icon(Icon.ID.PRIVATE_MODE, getString(R.string.private_mode_is_on), getString(R.string.private_mode_is_off),
                                             R.drawable.ic_incognito,  R.drawable.ic_incognito_off, PrivateMode.isActive()));
         mPreferencesRowAdapter.add(new Icon(Icon.ID.LEGACY_UI, getString(R.string.leanback_legacy_ui), R.drawable.ic_tablet_cellphone));
@@ -1756,6 +1758,9 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
                             ((MainActivityLeanback)vActivity).startPreferencesActivity(); // I know this is ugly (and i'm ashamed...)
                         else
                             throw new IllegalStateException("Sorry developer, this ugly code can work with a MainActivityLeanback only for now!");
+                        break;
+                    case RESCAN:
+                        NetworkAutoRefresh.forceRescan(vActivity);
                         break;
                     case PRIVATE_MODE:
                         if (!PrivateMode.isActive() && PrivateMode.canShowDialog(vActivity))
