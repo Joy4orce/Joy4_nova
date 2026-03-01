@@ -562,7 +562,7 @@ abstract public class BrowserCategory extends ListFragment {
         // but offline capability is present in drive and provider is more generic
         // than cloud in reality. Perhaps think of better name
         ItemData itemData = new ItemData();
-        itemData.icon = R.drawable.category_common_network;
+        itemData.icon = R.drawable.cloud_24px;
         itemData.text = R.string.provider_folders;
         itemData.id = ITEM_ID_PROVIDER;
         mCategoryList.add(itemData);
