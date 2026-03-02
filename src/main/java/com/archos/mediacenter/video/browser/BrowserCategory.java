@@ -552,7 +552,7 @@ abstract public class BrowserCategory extends ListFragment {
             }
             if ( NetworkState.isNetworkConnected(getActivity())){
                 ItemData itemData = new ItemData();
-                itemData.icon = R.drawable.category_common_network;
+                itemData.icon = R.drawable.category_network_shortcut;
                 itemData.text = R.string.network_shortcuts;
                 itemData.id = ITEM_ID_NETWORK;
                 mCategoryList.add(itemData);
