@@ -50,6 +50,14 @@ public class VideoInfoCommonClass {
     final static String SEP = "  ";
 
 
+    public static String getParentPath(Video video) {
+        String path = video.getFriendlyPath();
+        if (path != null && path.contains("/")) {
+            return path.substring(0, path.lastIndexOf("/"));
+        }
+        return "";
+    }
+
     public static int getDarkerColor(int color) {
         float[] hsv = new float[3];
         Color.colorToHSV(color, hsv);

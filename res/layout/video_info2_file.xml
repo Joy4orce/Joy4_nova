@@ -32,10 +32,19 @@
 			android:paddingBottom="@dimen/video_info_margin_half">
 
 
-			<TextView android:id="@+id/fullpath"
+			<TextView android:id="@+id/file_name"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"
-				android:textSize="@dimen/video_info_medium_text"/>
+				android:textSize="@dimen/video_info_medium_text"
+				android:singleLine="false"/>
+
+			<TextView android:id="@+id/file_path"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:textSize="@dimen/video_info_small_text"
+				android:alpha="0.7"
+				android:singleLine="false"
+				android:ellipsize="end"/>
 
 			<TextView
 				android:id="@+id/file_error"

@@ -244,6 +244,7 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     //file info
     private View mFileInfoContent;
     private TextView mFileInfoHeader;
+    private TextView mFileNameTextView;
     private TextView mFilePathTextView;
     private TextView mDecoderTextView;
     private View mFileInfoContainerLoading;
@@ -431,7 +432,8 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
         mRemoteResumeButton.setOnClickListener(this);
         mSourceLayout = (LinearLayout)mRoot.findViewById(R.id.source_layout);
         mFileInfoContainer = (CardView)mRoot.findViewById(R.id.info_file_container);
-        mFilePathTextView = (TextView)mFileInfoContainer.findViewById(R.id.fullpath);
+        mFileNameTextView = (TextView)mFileInfoContainer.findViewById(R.id.file_name);
+        mFilePathTextView = (TextView)mFileInfoContainer.findViewById(R.id.file_path);
         mFileSize = (TextView)mRoot.findViewById(R.id.filesize);
         mFileError = (TextView)mRoot.findViewById(R.id.file_error);
         mDuration = (TextView)mRoot.findViewById(R.id.duration);
@@ -803,7 +805,8 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
 
             //fill usual info
 
-            mFilePathTextView.setText(video.getFilePath());
+            mFileNameTextView.setText(video.getFilenameNonCryptic());
+            mFilePathTextView.setText(VideoInfoCommonClass.getParentPath(video));
 
             updateActionButtons();
 
