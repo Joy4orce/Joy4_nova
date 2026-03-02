@@ -73,7 +73,6 @@ public abstract class BaseTags implements Parcelable {
     protected Map<String, String> mActors;
     protected Map<String, String> mSet; // for collection
     protected String mActorsFormatted;
-    protected SpannableString mSpannableActorsFormatted;
     protected List<String> mDirectors;
     protected List<String> mWriters;
     protected String mDirectorsFormatted;
@@ -175,43 +174,43 @@ public abstract class BaseTags implements Parcelable {
         }
     }
     
-    public SpannableString getSpannableActorsFormatted() {
-        ensureSpannableFormattedActors();
-        return mSpannableActorsFormatted;
-    }
-
-    private void ensureSpannableFormattedActors() {
-        if (mSpannableActorsFormatted == null && mActors != null && !mActors.isEmpty()) {
-            SpannableStringBuilder sb = new SpannableStringBuilder();
-            boolean firstTime = true;
-            for (Entry<String, String> item : mActors.entrySet()) {
-                if (firstTime) {
-                    firstTime = false;
-                } else {
-                    sb.append(", ");
-                }
-                String actor = item.getKey();
-                String role = item.getValue();
-                sb.append(actor);
-                if (role != null && !role.isEmpty()) {
-                    role = role.replaceAll("\\s*\\(.+\\)\\s*", "");
-                    String[] roles = role.split("(?<=[^\\/\\|])\\s*(?:\\/|\\|)\\s*(?=[^\\/\\|])");
-                    int color = Color.argb(164, 255, 255, 255);
-
-                    sb.append(" (");
-
-                    for (int i = 0; i < roles.length; i++) {
-                        sb.append(roles[i], new ForegroundColorSpan(color), 0);
-
-                        if (i != roles.length - 1)
-                            sb.append(" / ");
-                    }
-
-                    sb.append(')');
-                }
+    /**
+     * Returns spannable formatted actors with character names displayed at 2/3 alpha
+     * of the given text color.
+     * @param textColor the current text color of the view displaying the cast
+     */
+    public SpannableString getSpannableActorsFormatted(int textColor) {
+        if (mActors == null || mActors.isEmpty()) return null;
+        int roleColor = Color.argb(Color.alpha(textColor) * 2 / 3,
+                Color.red(textColor), Color.green(textColor), Color.blue(textColor));
+        SpannableStringBuilder sb = new SpannableStringBuilder();
+        boolean firstTime = true;
+        for (Entry<String, String> item : mActors.entrySet()) {
+            if (firstTime) {
+                firstTime = false;
+            } else {
+                sb.append(", ");
             }
-            mSpannableActorsFormatted = SpannableString.valueOf(sb);
+            String actor = item.getKey();
+            String role = item.getValue();
+            sb.append(actor);
+            if (role != null && !role.isEmpty()) {
+                role = role.replaceAll("\\s*\\(.+\\)\\s*", "");
+                String[] roles = role.split("(?<=[^\\/\\|])\\s*(?:\\/|\\|)\\s*(?=[^\\/\\|])");
+
+                sb.append(" (");
+
+                for (int i = 0; i < roles.length; i++) {
+                    sb.append(roles[i], new ForegroundColorSpan(roleColor), 0);
+
+                    if (i != roles.length - 1)
+                        sb.append(" / ");
+                }
+
+                sb.append(')');
+            }
         }
+        return SpannableString.valueOf(sb);
     }
 
     /** does nothing if mDirectorsFormatted is already set, otherwise builds from mDirectors */
