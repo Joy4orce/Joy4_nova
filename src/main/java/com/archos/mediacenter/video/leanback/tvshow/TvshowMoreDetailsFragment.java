@@ -326,8 +326,8 @@ public class TvshowMoreDetailsFragment extends DetailsFragmentWithLessTopOffset 
                 mPlotAndGenresRow = null;
             }
 
-            if (tags.getSpannableActorsFormatted()!=null) {
-                mCastRow = new CastRow(getString(R.string.scrap_cast), tags.getSpannableActorsFormatted(), "");
+            if (tags.getActorsFormatted()!=null) {
+                mCastRow = new CastRow(getString(R.string.scrap_cast), tags, "");
             }
             else {
                 mCastRow = null;

@@ -34,7 +34,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.SpannableString;
 import android.transition.Slide;
 import android.util.Pair;
 import android.view.Gravity;
@@ -1532,17 +1531,18 @@ public class VideoDetailsFragment extends DetailsFragmentWithLessTopOffset imple
                 }
 
                 // Cast
-                SpannableString cast = tags.getSpannableActorsFormatted();
+                BaseTags castTags = tags;
                 // If cast is null and this is an episode, get the cast of the Show
-                if (cast == null & tags instanceof EpisodeTags) {
+                if (tags.getActorsFormatted() == null && tags instanceof EpisodeTags) {
                     ShowTags showTags = ((EpisodeTags) tags).getShowTags();
-                    cast = showTags != null ? showTags.getSpannableActorsFormatted() : null;
+                    if (showTags != null && showTags.getActorsFormatted() != null)
+                        castTags = showTags;
                 }
                 // Keep it simple: we do not display the row if cast==null && directors!=null (very unlikely and not a big deal)
-                if (cast != null && cast.length() > 0) {
+                if (castTags.getActorsFormatted() != null && !castTags.getActorsFormatted().isEmpty()) {
                     if(mCastRow!=null&&mAdapter.indexOf(mCastRow)!=-1)
                         mAdapter.remove(mCastRow);
-                    mCastRow = new CastRow(getString(R.string.scrap_cast), cast, tags.getDirectorsFormatted());
+                    mCastRow = new CastRow(getString(R.string.scrap_cast), castTags, tags.getDirectorsFormatted());
                     mAdapter.add(mCastRow);
                 }
             }

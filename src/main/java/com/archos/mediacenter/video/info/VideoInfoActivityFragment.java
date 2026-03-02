@@ -24,6 +24,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -1803,14 +1804,15 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
                 }
                 setTextOrHideContainer(mPlotTextView, plot, mPlotTextView);
                 setTextOrHideContainer(mGenreTextView, genres, mGenreTextView);
-                // Cast
-                String cast = tags.getActorsFormatted();
+                // Cast - use spannable formatting with reduced alpha for character names
+                int castTextColor = mCastTextView.getCurrentTextColor();
+                CharSequence cast = tags.getSpannableActorsFormatted(castTextColor);
                 // If cast is null and this is an episode, get the cast of the Show
                 String studio = null;
 
                 if (cast == null & tags instanceof EpisodeTags) {
                     ShowTags showTags = ((EpisodeTags) tags).getShowTags();
-                    cast = showTags != null ? showTags.getActorsFormatted() : null;
+                    cast = showTags != null ? showTags.getSpannableActorsFormatted(castTextColor) : null;
                 }
                 setTextOrHideContainer(mCastTextView, cast, mCastTextView, mCastTextViewTitle);
                 setTextOrHideContainer(mScrapDirector, tags.getDirectorsFormatted(), mScrapDirector, mScrapDirectorTitle);
@@ -1901,7 +1903,11 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     }
 
     private void setTextOrHideContainer(TextView textView, String text, View... toHideOrShow) {
-        if(text!=null&&!text.isEmpty()) {
+        setTextOrHideContainer(textView, (CharSequence) text, toHideOrShow);
+    }
+
+    private void setTextOrHideContainer(TextView textView, CharSequence text, View... toHideOrShow) {
+        if(text!=null&&text.length()>0) {
             textView.setText(text);
             if(toHideOrShow!=null){
                 for(View v : toHideOrShow)
