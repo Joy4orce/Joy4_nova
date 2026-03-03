@@ -1344,6 +1344,9 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
     public void onPrepared() {
         if (log.isDebugEnabled()) log.debug("onPrepared()");
         mPlayerState = PlayerState.PREPARED;
+        if (ArchosFeatures.isAndroidTV(this) && !PrivateMode.isActive()) {
+            updateNowPlayingState();
+        }
         if(mPlayerFrontend!=null) {
             mPlayerFrontend.onPrepared();
         }
@@ -1806,7 +1809,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
             // Set initial stopped state to avoid reporting undefined/playing state
             PlaybackStateCompat.Builder initialStateBuilder = new PlaybackStateCompat.Builder()
                     .setActions(getAvailableActions());
-            initialStateBuilder.setState(PlaybackStateCompat.STATE_STOPPED, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0.0f);
+            initialStateBuilder.setState(PlaybackStateCompat.STATE_NONE, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0.0f);
             mSession.setPlaybackState(initialStateBuilder.build());
         }
 
@@ -1814,7 +1817,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
     }
 
     /**
-     * update state of now playing card to play / buffering / pause / stop
+     * update state of now playing card to play / buffering / pause / idle
      */
     private void updateNowPlayingState() {
         if(mSession==null)
@@ -1835,6 +1838,16 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
             PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
                     .setActions(getAvailableActions());
             stateBuilder.setState(PlaybackStateCompat.STATE_BUFFERING, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f);
+            mSession.setPlaybackState(stateBuilder.build());
+        }
+        else if (mPlayerState==PlayerState.PREPARED) {
+            // Video is prepared but not yet playing (e.g. during refresh rate switch)
+            if (!mSession.isActive()) {
+                mSession.setActive(true);
+            }
+            PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
+                    .setActions(getAvailableActions());
+            stateBuilder.setState(PlaybackStateCompat.STATE_PAUSED, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0.0f);
             mSession.setPlaybackState(stateBuilder.build());
         }
         else if (mPlayer != null && mPlayer.isPaused()) {
@@ -1860,7 +1873,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
 
         PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
                 .setActions(getAvailableActions());
-        stateBuilder.setState(PlaybackStateCompat.STATE_STOPPED, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0.0f);
+        stateBuilder.setState(PlaybackStateCompat.STATE_NONE, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0.0f);
         mSession.setPlaybackState(stateBuilder.build());
         mSession.setActive(false);
     }
