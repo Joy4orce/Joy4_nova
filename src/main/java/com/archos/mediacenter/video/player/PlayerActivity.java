@@ -444,11 +444,16 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 if (plugged) {
                     // update HDMI screen size
                     int[] size = readHdmiSize(mContext);
-                    if (size != null) {
-                        w = size[0];
-                        h = size[1];
-                        mSurfaceController.setHdmiPlugged(plugged, w, h);
+                    if (size == null) {
+                        // Some USB-C mirror outputs are not reported as FLAG_PRESENTATION displays.
+                        size = readFallbackDisplaySize();
+                        log.warn("HDMI plugged but no presentation display found, using fallback size=({},{})", size[0], size[1]);
                     }
+                    w = size[0];
+                    h = size[1];
+                }
+                if (mSurfaceController != null) {
+                    mSurfaceController.setHdmiPlugged(plugged, w, h);
                 }
             }
             else if(action.equals(PlayerService.PLAYER_SERVICE_STARTED)){
@@ -482,6 +487,13 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         }
         if (log.isDebugEnabled()) log.debug("readHdmiSize: no external HDMI display found.");
         return null;
+    }
+
+    private int[] readFallbackDisplaySize() {
+        DisplayMetrics metrics = new DisplayMetrics();
+        Display display = getWindowManager().getDefaultDisplay();
+        display.getRealMetrics(metrics);
+        return new int[] { metrics.widthPixels, metrics.heightPixels };
     }
 
     public void setUIExternalSurface(Surface uiSurface) {

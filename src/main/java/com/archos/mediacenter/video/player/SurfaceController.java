@@ -174,7 +174,7 @@ public class SurfaceController {
 
     public void setHdmiPlugged(boolean plugged, int hdmiWidth, int hdmiHeight) {
         if (log.isDebugEnabled()) log.debug("setHdmiPlugged: plugged={}, hdmi=({},{})", plugged, hdmiWidth, hdmiHeight);
-        if (plugged != mHdmiPlugged) {
+        if (plugged != mHdmiPlugged || (plugged && (mHdmiWidth != hdmiWidth || mHdmiHeight != hdmiHeight))) {
             mHdmiPlugged = plugged;
             mHdmiWidth = hdmiWidth;
             mHdmiHeight = hdmiHeight;
@@ -303,7 +303,7 @@ public class SurfaceController {
         //Get the applied cutout size, since it can be changed on the fly now.
         int cutoutLeft, cutoutTop, cutoutRight, cutoutBottom = 0;
         if (mFullScreenWithCutout) 
-            cutoutLeft = cutoutTop = cutoutRight = mCutoutBottom = 0;
+            cutoutLeft = cutoutTop = cutoutRight = cutoutBottom = 0;
         else {
             cutoutLeft = mCutoutLeft;
             cutoutTop = mCutoutTop;
@@ -368,7 +368,7 @@ public class SurfaceController {
                     if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: VideoFormat.ORIGINAL dcar<ar dch={}", dch);
                 } else {
                     //16:9 movie on 4:3 screen
-                    cutoutLeft = cutoutTop = cutoutRight = mCutoutBottom = 0;
+                    cutoutLeft = cutoutTop = cutoutRight = cutoutBottom = 0;
                     dcw = (int) (dch * ar);
                     if (log.isDebugEnabled()) log.debug("CONFIG updateSurface: VideoFormat.ORIGINAL dcar>=ar dcw={}", dcw);
                 }
