@@ -384,9 +384,14 @@ public class ShowScraper4 extends BaseScraper2 {
             Map<String, EpisodeTags> searchEpisodes = ShowIdEpisodes.getEpisodes(seasonKey, showId, tvEpisodes, tvSeasons, showTags, resultLanguage, adultScrape, getTmdb(), mContext);
             if (!searchEpisodes.isEmpty()) {
                 allEpisodes = searchEpisodes;
-                // put that result in cache.
-                if (log.isDebugEnabled()) log.debug("getDetailsInternal: sEpisodeCache put allEpisodes with key {}", episodeKey);
-                sEpisodeCache.put(seasonKey, allEpisodes);
+                // Only cache full season fetches, not single episode fetches, to avoid
+                // partial cache entries that cause subsequent lookups for other episodes to miss
+                if (episode == -1) {
+                    if (log.isDebugEnabled()) log.debug("getDetailsInternal: sEpisodeCache put allEpisodes with key {}", seasonKey);
+                    sEpisodeCache.put(seasonKey, allEpisodes);
+                } else {
+                    if (log.isDebugEnabled()) log.debug("getDetailsInternal: single episode fetch, not caching under season key {}", seasonKey);
+                }
 
                 SparseArray<ScraperImage> seasonPosters = sSeasonPosterCache.get(showKey);
                 if (seasonPosters == null) {
