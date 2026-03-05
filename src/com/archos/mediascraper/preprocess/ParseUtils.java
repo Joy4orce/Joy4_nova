@@ -47,7 +47,9 @@ public class ParseUtils {
         '’', '‘'
     };
 
-    public static final Pattern BRACKETS = Pattern.compile("[<({\\[].+?[>)}\\]]");
+    // Only match brackets preceded by whitespace or at start of string to preserve
+    // parenthesized content attached to words (e.g. "OVNI(s)" keeps "(s)")
+    public static final Pattern BRACKETS = Pattern.compile("(?<=\\s|^)[<({\\[].+?[>)}\\]]");
 
     // matches "[space or punctuation/brackets etc]year", year is group 1
     private static final Pattern YEAR_PATTERN = Pattern.compile("(.*)[\\s\\p{Punct}]((?:19|20)\\d{2})(?!\\d)");

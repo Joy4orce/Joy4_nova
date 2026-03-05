@@ -10,3 +10,5 @@ The.Incredibles.DVDSCR.XviD.cd1.avi|Movie|The Incredibles|9806
 The Matrix.mkv|Movie|The Matrix|603
 upпp://1540402479/0/2/2%2415/2%2415%240/Scream.2022.1080p.BluRay.x264.AAC5.1-[YT.MX].mkv|Movie|Scream|646385
 Wadjda (2013) MULTI VFi 1080p Bluray EAC3 5.1 x265-k7.mkv|Movie|Wadjda|129112
+# Parenthesized content attached to title should be preserved (issue #1665)
+OVNI(s).S01E06.FRENCH.1080p.BluRay.x264.DTS-HDMA.5.1.mkv|Show|OVNI(s)|115092
