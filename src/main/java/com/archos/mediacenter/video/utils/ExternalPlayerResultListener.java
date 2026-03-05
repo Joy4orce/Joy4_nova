@@ -161,6 +161,8 @@ public class ExternalPlayerResultListener implements ExternalPlayerWithResultSta
                 mVideoDbInfo.lastTimePlayed = Long.valueOf(System.currentTimeMillis() / 1000L);
                 if (position != -1) {
                     mVideoDbInfo.resume = position;
+                    if (mDuration > 0)
+                        mVideoDbInfo.duration = mDuration;
                     mIndexHelper.writeVideoInfo(mVideoDbInfo, true);
                 }
                 TorrentObserverService.staticExitProcess();
