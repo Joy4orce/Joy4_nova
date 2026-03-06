@@ -184,6 +184,19 @@ public class MovieScraper3 extends BaseScraper2 {
                 break;
         }
 
+        // Fallback: if year-constrained search returned no results, retry without year
+        // Handles cases where the filename year is inaccurate (e.g. 2023 vs actual release 2024)
+        if (searchInfo.getYear() != null && (searchResult.result == null || searchResult.result.isEmpty())) {
+            if (log.isDebugEnabled()) log.debug("getMatches2: no results with year {}, retrying without year", searchInfo.getYear());
+            searchResult = SearchMovie2.search(searchQuery, language, null, maxItems, getSearchService(), adultScrape);
+            if (searchResult.status == ScrapeStatus.OKAY && !searchResult.result.isEmpty()) {
+                for (SearchResult result : searchResult.result) {
+                    result.setScraper(this);
+                    result.setFile(searchInfo.getFile());
+                }
+            }
+        }
+
         //Return the rest we got.
         return new ScrapeSearchResult(searchResult.result, true, searchResult.status, searchResult.reason);
     }
