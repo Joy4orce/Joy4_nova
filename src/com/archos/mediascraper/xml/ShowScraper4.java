@@ -39,6 +39,7 @@ import com.archos.mediascraper.ShowTags;
 import com.archos.mediascraper.ShowUtils;
 import com.archos.mediascraper.preprocess.SearchInfo;
 import com.archos.mediascraper.preprocess.TvShowSearchInfo;
+import com.archos.filecorelibrary.FileUtils;
 import com.archos.mediascraper.themoviedb3.MyTmdb;
 import com.archos.mediascraper.themoviedb3.SearchShow;
 import com.archos.mediascraper.themoviedb3.SearchShowResult;
@@ -54,6 +55,8 @@ import com.archos.mediascraper.themoviedb3.ShowIdTvSearch;
 import com.archos.mediascraper.themoviedb3.ShowIdTvSearchResult;
 import com.uwetrottmann.tmdb2.entities.TvEpisode;
 import com.uwetrottmann.tmdb2.entities.TvSeason;
+
+import org.apache.commons.text.similarity.LevenshteinDistance;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -196,6 +199,46 @@ public class ShowScraper4 extends BaseScraper2 {
         // Post refactor, this info may be the exact same as above, just took a longer path to get it!
         int requestedSeason = Integer.parseInt(result.getExtra().getString(ShowUtils.SEASON, "0"));
         int requestedEpisode = Integer.parseInt(result.getExtra().getString(ShowUtils.EPNUM, "0"));
+
+        // Remap SxxE00 (special episode encoded in regular season) to S00Eyy via title matching
+        if (requestedEpisode == 0 && requestedSeason > 0 && result.getFile() != null) {
+            String filename = FileUtils.getFileNameWithoutExtension(result.getFile());
+            String episodeTitle = ShowUtils.extractEpisodeTitle(filename, requestedSeason, 0);
+            if (episodeTitle != null && !episodeTitle.isEmpty()) {
+                if (log.isDebugEnabled()) log.debug("getDetailsInternal: SxxE00 detected, extracted title '{}', attempting season 0 remapping", episodeTitle);
+                String resultLanguage0 = TextUtils.isEmpty(result.getLanguage()) ? "en" : result.getLanguage();
+                String cleanShowName0 = ShowUtils.cleanUpName(result.getOriginalTitle().toLowerCase());
+                int matchedEpisode = -1;
+
+                // Try matching in the configured language first
+                String season0Key = cleanShowName0 + "|0|all|" + resultLanguage0;
+                ShowIdSeasonSearchResult season0Result = ShowIdSeasonSearch.getSeasonShowResponse(season0Key, showId, 0, resultLanguage0, adultScrape, getTmdb());
+                if (season0Result.status == ScrapeStatus.OKAY && season0Result.tvSeason != null && season0Result.tvSeason.episodes != null) {
+                    matchedEpisode = fuzzyMatchEpisodeByTitle(episodeTitle, season0Result.tvSeason.episodes);
+                }
+
+                // Fallback to English if no match found and language is not already English
+                // (filename titles are almost always in English)
+                if (matchedEpisode < 0 && !"en".equals(resultLanguage0)) {
+                    if (log.isDebugEnabled()) log.debug("getDetailsInternal: no match in {}, retrying season 0 in English", resultLanguage0);
+                    String season0KeyEn = cleanShowName0 + "|0|all|en";
+                    ShowIdSeasonSearchResult season0ResultEn = ShowIdSeasonSearch.getSeasonShowResponse(season0KeyEn, showId, 0, "en", adultScrape, getTmdb());
+                    if (season0ResultEn.status == ScrapeStatus.OKAY && season0ResultEn.tvSeason != null && season0ResultEn.tvSeason.episodes != null) {
+                        matchedEpisode = fuzzyMatchEpisodeByTitle(episodeTitle, season0ResultEn.tvSeason.episodes);
+                    }
+                }
+
+                if (matchedEpisode >= 0) {
+                    log.info("getDetailsInternal: remapped S{}E00 '{}' -> S00E{}", requestedSeason, episodeTitle, matchedEpisode);
+                    requestedSeason = 0;
+                    requestedEpisode = matchedEpisode;
+                    season = 0;
+                    episode = matchedEpisode;
+                } else {
+                    if (log.isDebugEnabled()) log.debug("getDetailsInternal: no fuzzy match found in season 0 for title '{}'", episodeTitle);
+                }
+            }
+        }
 
         // Use OPTIONS values if available (for re-scraping), otherwise use SearchResult extras (for manual scraping)
         // Manual scraping doesn't set season/episode in OPTIONS but has them in SearchResult.extras
@@ -543,6 +586,56 @@ public class ShowScraper4 extends BaseScraper2 {
                 bundle.putParcelable(item.getKey(), item.getValue());
         }
         return bundle;
+    }
+
+    /**
+     * Fuzzy-matches an extracted episode title against TMDB season 0 episodes.
+     * Uses Levenshtein distance on lowercased titles with a threshold of 40% of the longer string length.
+     *
+     * @param extractedTitle the cleaned episode title from the filename
+     * @param episodes the list of episodes from TMDB season 0
+     * @return the matched episode number, or -1 if no match found
+     */
+    private static int fuzzyMatchEpisodeByTitle(String extractedTitle, List<TvEpisode> episodes) {
+        if (extractedTitle == null || extractedTitle.isEmpty() || episodes == null || episodes.isEmpty()) {
+            return -1;
+        }
+
+        LevenshteinDistance ld = new LevenshteinDistance();
+        String normalizedTitle = extractedTitle.toLowerCase(java.util.Locale.ROOT).trim();
+        int bestDistance = Integer.MAX_VALUE;
+        int bestEpisodeNumber = -1;
+
+        for (TvEpisode ep : episodes) {
+            if (ep.name == null || ep.episode_number == null) continue;
+            String epName = ep.name.toLowerCase(java.util.Locale.ROOT).trim();
+
+            int distance = ld.apply(normalizedTitle, epName);
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestEpisodeNumber = ep.episode_number;
+            }
+        }
+
+        // threshold: allow up to 40% of the longer string length as edit distance
+        if (bestEpisodeNumber >= 0) {
+            int maxLen = Math.max(normalizedTitle.length(), 1);
+            for (TvEpisode ep : episodes) {
+                if (ep.episode_number != null && ep.episode_number == bestEpisodeNumber && ep.name != null) {
+                    maxLen = Math.max(normalizedTitle.length(), ep.name.length());
+                    break;
+                }
+            }
+            int threshold = (int) Math.ceil(maxLen * 0.4);
+            if (bestDistance <= threshold) {
+                if (log.isDebugEnabled()) log.debug("fuzzyMatchEpisodeByTitle: matched '{}' to episode {} with distance {}/{}", extractedTitle, bestEpisodeNumber, bestDistance, threshold);
+                return bestEpisodeNumber;
+            } else {
+                if (log.isDebugEnabled()) log.debug("fuzzyMatchEpisodeByTitle: best match for '{}' was episode {} but distance {} exceeds threshold {}", extractedTitle, bestEpisodeNumber, bestDistance, threshold);
+            }
+        }
+
+        return -1;
     }
 
     public static boolean isShowAlreadyKnown(Integer showId, Context context) {

@@ -22,6 +22,7 @@ import com.archos.mediascraper.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -124,6 +125,100 @@ public class ParseUtils {
 
     private ParseUtils() {
         // static utilities
+    }
+
+    // Common garbage in movies names to determine where the garbage starts in the name
+    // tested against strings like "real movie name dvdrip 1080p power "
+    public static final String[] GARBAGE_LOWERCASE = {
+            " dvdrip ", " dvd rip ", "dvdscreener ", " dvdscr ", " dvd scr ",
+            " brrip ", " br rip ", " bdrip", " bd rip ", " blu ray ", " bluray ",
+            " hddvd ", " hd dvd ", " hdrip ", " hd rip ", " hdlight ", " minibdrip ",
+            " webrip ", " web rip ",
+            " 720p ", " 1080p ", " 1080i ", " 720 ", " 1080 ", " 480i ", " 2160p ", " 4k ", " 480p ", " 576p ", " 576i ", " 240p ", " 360p ", " 4320p ", " 8k ",
+            " hdtv ", " sdtv ", " m hd ", " ultrahd ", " mhd ",
+            " h264 ", " x264 ", " aac ", " ac3 ", " ogm ", " dts ", " hevc ", " x265 ", " av1 ",
+            " avi ", " mkv ", " xvid ", " divx ", " wmv ", " mpg ", " mpeg ", " flv ", " f4v ",
+            " asf ", " vob ", " mp4 ", " mov ",
+            " directors cut ", " dircut ", " readnfo ", " read nfo ", " repack ", " rerip ", " multi ", " remastered ",
+            " truefrench ", " srt ", " extended cut ",
+            " sbs ", " hsbs ", " side by side ", " sidebyside ", /* Side-By-Side 3d stuff */
+            " 3d ", " h sbs ", " h tb " , " tb ", " htb ", " top bot ", " topbot ", " top bottom ", " topbottom ", " tab ", " htab ", /* Top-Bottom 3d stuff */
+            " anaglyph ", " anaglyphe ", /* Anaglyph 3d stuff */
+            " truehd ", " atmos ", " uhd ", " hdr10+ ", " hdr10 ", " hdr ", " dolby ", " dts-x ", " dts-hd.ma ",
+            " hfr ",
+    };
+
+    // stuff that could be present in real names is matched with tight case sensitive syntax
+    // strings here will only match if separated by any of " .-_"
+    public static final String[] GARBAGE_CASESENSITIVE = {
+            "FRENCH", "TRUEFRENCH", "DUAL", "MULTISUBS", "MULTI", "MULTi", "SUBFORCED", "SUBFORCES", "UNRATED", "UNRATED[ ._-]DC", "EXTENDED", "IMAX",
+            "COMPLETE", "PROPER", "iNTERNAL", "INTERNAL",
+            "SUBBED", "ANiME", "LIMITED", "REMUX", "DCPRip",
+            "TS", "TC", "REAL", "HD", "DDR", "WEB",
+            "EN", "ENG", "FR", "ES", "IT", "NL", "VFQ", "VF", "VO", "VOF", "VOSTFR", "Eng",
+            "VOST", "VFF", "VF2", "VFI", "VFSTFR",
+    };
+
+    public static final Pattern[] GARBAGE_CASESENSITIVE_PATTERNS = new Pattern[GARBAGE_CASESENSITIVE.length];
+    static {
+        for (int i = 0; i < GARBAGE_CASESENSITIVE.length; i++) {
+            // case sensitive string wrapped in "space or . or _ or -", in the end either separator or end of line
+            GARBAGE_CASESENSITIVE_PATTERNS[i] = Pattern.compile("[ ._-]" + GARBAGE_CASESENSITIVE[i] + "(?:[ ._-]|$)");
+        }
+    }
+
+    /**
+     * assumes title is always first
+     * @return substring from start to first finding of any garbage pattern
+     */
+    public static String cutOffBeforeFirstMatch(String input, Pattern[] patterns) {
+        String remaining = input;
+        for (Pattern pattern : patterns) {
+            if (remaining.isEmpty()) return "";
+
+            Matcher matcher = pattern.matcher(remaining);
+            if (matcher.find()) {
+                remaining = remaining.substring(0, matcher.start());
+            }
+        }
+        return remaining;
+    }
+
+    /**
+     * assumes title is always first
+     * @param garbageStrings lower case strings
+     * @return substring from start to first finding of any garbage string
+     */
+    public static String cutOffBeforeFirstMatch(String input, String[] garbageStrings) {
+        // lower case input to test against lowercase strings
+        String inputLowerCased = input.toLowerCase(Locale.US);
+
+        int firstGarbage = input.length();
+
+        for (String garbage : garbageStrings) {
+            int garbageIndex = inputLowerCased.indexOf(garbage);
+            // if found, shrink to 0..index
+            if (garbageIndex > -1 && garbageIndex < firstGarbage)
+                firstGarbage = garbageIndex;
+        }
+
+        // return substring from input -> keep case
+        return input.substring(0, firstGarbage);
+    }
+
+    /**
+     * Cleans an extracted title fragment (e.g. episode title from filename) by applying
+     * the standard garbage-stripping pipeline: case-sensitive patterns, separator cleanup,
+     * then case-insensitive garbage words.
+     */
+    public static String cleanExtractedTitle(String raw) {
+        // strip case-sensitive garbage (FRENCH, MULTI, WEB, etc.)
+        String name = cutOffBeforeFirstMatch(raw, GARBAGE_CASESENSITIVE_PATTERNS);
+        // dots/underscores → spaces, acronyms, apostrophes
+        name = removeInnerAndOutterSeparatorJunk(name);
+        // strip case-insensitive garbage (1080p, x264, bluray, etc.)
+        name = cutOffBeforeFirstMatch(name + " ", GARBAGE_LOWERCASE).trim();
+        return name;
     }
 
     // matches "[space or punctuation/brackets etc]year", year is group 1

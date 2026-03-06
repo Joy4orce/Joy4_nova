@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -217,6 +218,34 @@ public final class ShowUtils {
 
     public static boolean isTvShow(String path) {
         return isTvShow(Uri.parse(path), null);
+    }
+
+    /**
+     * Extracts a clean episode title from the portion of the filename after SxxExx.
+     * For example, from "Doctor.Who.2024.S02E00.Joy.to.the.World.1080p.10bit.WEBRip.6CH.x265.HEVC-PSA"
+     * with season=2, episode=0, returns "Joy to the World".
+     *
+     * @param filename the filename without extension
+     * @param season the season number
+     * @param episode the episode number
+     * @return the cleaned episode title, or null if not found or empty
+     */
+    public static String extractEpisodeTitle(String filename, int season, int episode) {
+        // build SxxExx pattern to find in filename (case insensitive)
+        String sxePattern = String.format(Locale.ROOT, "S%02dE%02d", season, episode);
+        int idx = filename.toUpperCase(Locale.ROOT).indexOf(sxePattern.toUpperCase(Locale.ROOT));
+        if (idx < 0) return null;
+
+        // take everything after SxxExx
+        String remainder = filename.substring(idx + sxePattern.length());
+        if (remainder.isEmpty()) return null;
+
+        // strip leading separators
+        remainder = remainder.replaceAll("^[\\s._-]+", "");
+        if (remainder.isEmpty()) return null;
+
+        String cleaned = ParseUtils.cleanExtractedTitle(remainder);
+        return (cleaned == null || cleaned.isEmpty()) ? null : cleaned;
     }
 
     public static String urlEncode(String input) {
