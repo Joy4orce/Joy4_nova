@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteBlobTooBigException;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -350,6 +351,8 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                     int window = WINDOW_SIZE;
                     int count = 0;
                     do {
+                        int processedInBatch = 0;
+                        boolean overflowInBatch = false;
                         if (index + window > numberOfRows)
                             window = numberOfRows - index;
                         if (log.isDebugEnabled()) log.debug("startExporting: new batch fetching cursor from index{} over window {} entries, {}<={}", index, window, (index + window), numberOfRows);
@@ -358,8 +361,16 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
 
                         sNumberOfFilesRemainingToProcess = window;
 
-                        while (cursor.moveToNext() && (isForeground || isForceAfterNetworkScan) && !Thread.currentThread().isInterrupted()
+                        while ((isForeground || isForceAfterNetworkScan) && !Thread.currentThread().isInterrupted()
                                 && PreferenceManager.getDefaultSharedPreferences(AutoScrapeService.this).getBoolean(AutoScrapeService.KEY_ENABLE_AUTO_SCRAP, true)) {
+                            try {
+                                if (!cursor.moveToNext()) break;
+                            } catch (SQLiteBlobTooBigException e) {
+                                log.warn("startExporting: CursorWindow overflow, skipping one entry", e);
+                                overflowInBatch = true;
+                                break;
+                            }
+                            processedInBatch++;
                             Uri fileUri = Uri.parse(cursor.getString(cursor.getColumnIndex(VideoStore.MediaColumns.DATA)));
                             long movieID = cursor.getLong(cursor.getColumnIndex(VideoStore.Video.VideoColumns.SCRAPER_MOVIE_ID));
                             long episodeID = cursor.getLong(cursor.getColumnIndex(VideoStore.Video.VideoColumns.SCRAPER_EPISODE_ID));
@@ -390,7 +401,14 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                                     log.error("caught IOException: ", e);
                                 }
                         }
-                        index += window;
+                        if (overflowInBatch && processedInBatch == 0) {
+                            // Move forward even if the very first row in this batch is unreadable.
+                            processedInBatch = 1;
+                            if (sNumberOfFilesRemainingToProcess > 0) sNumberOfFilesRemainingToProcess--;
+                            if (sTotalNumberOfFilesRemainingToProcess > 0) sTotalNumberOfFilesRemainingToProcess--;
+                        }
+                        if (processedInBatch == 0) break;
+                        index += processedInBatch;
                         cursor.close();
                     } while (index < numberOfRows && (isForeground || isForceAfterNetworkScan) && !Thread.currentThread().isInterrupted());
                     LoaderUtils.setScrapeInProgress(false);
@@ -497,28 +515,62 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                             boolean shouldRescrapAll = sRescanAll;
                             boolean shouldRescanOnlyNotFound = sRescanOnlyNotFound;
 
-                            // (Re-)open cursor with current parameters
-                            if (cursor != null) cursor.close();
-                            cursor = getFileListCursor(shouldRescrapAll && shouldRescanOnlyNotFound ? PARAM_SCRAPED_NOT_FOUND :
+                            int scrapStatusParam = shouldRescrapAll && shouldRescanOnlyNotFound ? PARAM_SCRAPED_NOT_FOUND :
                                             scrapeOnlyMovies ? PARAM_MOVIES :
                                                     shouldRescrapAll ? PARAM_ALL :
-                                                            PARAM_NOT_SCRAPED,
-                                    BaseColumns._ID, null, null);
+                                                            PARAM_NOT_SCRAPED;
+
+                            // Get total number of rows first
+                            if (cursor != null) cursor.close();
+                            cursor = getFileListCursor(scrapStatusParam, null, null, null);
+                            int numberOfRows = cursor.getCount();
+                            cursor.close();
+                            cursor = null;
 
                             mNetworkOrScrapErrors = 0;
                             sNumberOfFilesScraped = 0;
                             sNumberOfFilesRemainingToProcess = 0;
                             sNumberOfFilesNotScraped = 0;
+                            int numberOfBlobRowsSkipped = 0;
                             restartOnNextRound = false;
 
                             //Get the number of rows remaining, and exit if nothing to do.
-                            int numberOfRows = cursor.getCount();
                             if (numberOfRows <= 0) {
                                 return;
                             }
                             sNumberOfFilesRemainingToProcess = numberOfRows;
                             sTotalNumberOfFilesRemainingToProcess = numberOfRows;
-                            while (cursor.moveToNext() && isEnable(AutoScrapeService.this) && (isForeground || isForceAfterNetworkScan) && !Thread.currentThread().isInterrupted()) {
+
+                            // Process in windowed batches using keyset pagination (_ID > lastSeenId)
+                            // to avoid CursorWindow overflow and ensure stable pagination
+                            // even when rows are modified during iteration
+                            long lastSeenId = -1;
+                            boolean hasMoreRows = true;
+                            while (hasMoreRows && isEnable(AutoScrapeService.this) && (isForeground || isForceAfterNetworkScan) && !Thread.currentThread().isInterrupted()) {
+                                if (cursor != null) cursor.close();
+                                cursor = getFileListCursorAfterId(scrapStatusParam, lastSeenId, WINDOW_SIZE);
+                                hasMoreRows = false;
+
+                            while (isEnable(AutoScrapeService.this) && (isForeground || isForceAfterNetworkScan) && !Thread.currentThread().isInterrupted()) {
+                                try {
+                                    if (!cursor.moveToNext()) break;
+                                } catch (SQLiteBlobTooBigException e) {
+                                    // Break out of this batch and skip the problematic row.
+                                    // Query only _ID column to avoid CursorWindow overflow on the skip query.
+                                    long skippedId = getNextIdAfter(scrapStatusParam, lastSeenId);
+                                    if (skippedId != -1) {
+                                        log.warn("startScraping: CursorWindow overflow, skipping _ID={}", skippedId, e);
+                                        lastSeenId = skippedId;
+                                        numberOfBlobRowsSkipped++;
+                                        if (sNumberOfFilesRemainingToProcess > 0) sNumberOfFilesRemainingToProcess--;
+                                        if (sTotalNumberOfFilesRemainingToProcess > 0) sTotalNumberOfFilesRemainingToProcess--;
+                                    } else {
+                                        log.warn("startScraping: CursorWindow overflow, no more rows after _ID={}", lastSeenId, e);
+                                    }
+                                    hasMoreRows = (skippedId != -1);
+                                    break;
+                                }
+                                hasMoreRows = true;
                                 // THIS IS THE HARD STOP, call setScrapeInProgress(false) from another place
                                 //in the app, like remove shortcut and I will stop the scrape for you.
                                 //Also checks network. We can scrape off 5G, but cant load local NFOs (obviously)
@@ -538,6 +590,7 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                                 Uri fileUri = Uri.parse(cursor.getString(cursor.getColumnIndex(VideoStore.MediaColumns.DATA)));
                                 Uri scrapUri = title == null || title.isEmpty() || title.equalsIgnoreCase("null") ? fileUri : Uri.parse("/" + title + ".mp4") ;
                                 long ID = cursor.getLong(cursor.getColumnIndex(BaseColumns._ID));
+                                lastSeenId = ID;
 
                                 //This get the info to reparse for UPNP, and grab the correct details.
                                 boolean reparseInfo = fileUri.toString().toLowerCase().startsWith("upnp");
@@ -736,21 +789,19 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                                 }
                                 //log.debug("startScraping: #filesProcessed={}/{} ({}), #scrapOrNetworkErrors={}, #notScraped={}, current batch #filesToProcess={}/{}", sNumberOfFilesScraped, numberOfRows, sTotalNumberOfFilesRemainingToProcess, mNetworkOrScrapErrors, sNumberOfFilesNotScraped, sNumberOfFilesRemainingToProcess, window);
                             }
+                            } // end of windowed batch while loop
 
-                            //Close sursor, and we will next open another one for the loop.
+                            //Close cursor, and we will next open another one for the loop.
+                            if (cursor != null) { cursor.close(); cursor = null; }
+
+                            // Load another cursor and get the row count
+                            cursor = getFileListCursor(scrapStatusParam, null, null, null);
+                            numberOfRows = cursor.getCount();
                             cursor.close();
                             cursor = null;
 
-                            // Load another cursor and get the row count
-                            cursor = getFileListCursor(shouldRescrapAll && shouldRescanOnlyNotFound ? PARAM_SCRAPED_NOT_FOUND :
-                                            scrapeOnlyMovies ? PARAM_MOVIES :
-                                                    shouldRescrapAll ? PARAM_ALL :
-                                                            PARAM_NOT_SCRAPED,
-                                    BaseColumns._ID, null, null);
-                            numberOfRows = cursor.getCount();
-
-                            //Restart the scrape if we have done exactly 1 window
-                            restartOnNextRound = (sNumberOfFilesScraped + sNumberOfFilesNotScraped != numberOfRows);
+                            // Restart only if we did not account for all rows still matching this mode.
+                            restartOnNextRound = (sNumberOfFilesScraped + sNumberOfFilesNotScraped + numberOfBlobRowsSkipped != numberOfRows);
                         } while (restartOnNextRound && (isForeground || isForceAfterNetworkScan) && !Thread.currentThread().isInterrupted() && PreferenceManager.getDefaultSharedPreferences(AutoScrapeService.this).getBoolean(AutoScrapeService.KEY_ENABLE_AUTO_SCRAP,true));
 
                         //Refresh the Channels in the UI
@@ -814,37 +865,61 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
             VideoStore.Video.VideoColumns.ARCHOS_MEDIA_SCRAPER_ID + ">=0 AND " +
                     VideoStore.Video.VideoColumns.SCRAPER_MOVIE_ID + " IS NOT NULL AND " + WHERE_BASE;
 
+    private String getWhereClause(int scrapStatusParam) {
+        switch (scrapStatusParam) {
+            case PARAM_NOT_SCRAPED:
+                return WHERE_NOT_SCRAPED;
+            case PARAM_SCRAPED:
+                return WHERE_SCRAPED;
+            case PARAM_ALL:
+                return WHERE_SCRAPED_ALL;
+            case PARAM_SCRAPED_NOT_FOUND:
+                return WHERE_SCRAPED_NOT_FOUND;
+            case PARAM_MOVIES:
+                return WHERE_MOVIES;
+            default:
+                return WHERE_BASE;
+        }
+    }
+
     private Cursor getFileListCursor(int scrapStatusParam, String sortOrder, Integer offset, Integer limit) {
         // Look for all the videos not yet processed and not located in the Camera folder
         final String cameraPath =  Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getPath() + "/Camera";
         String[] selectionArgs = new String[]{ cameraPath + "/%" };
-        String where  = null;
-        switch(scrapStatusParam){
-            case PARAM_NOT_SCRAPED:
-                where = WHERE_NOT_SCRAPED;
-                break;
-            case PARAM_SCRAPED:
-                where = WHERE_SCRAPED;
-                break;
-            case PARAM_ALL:
-                where = WHERE_SCRAPED_ALL;
-                break;
-            case PARAM_SCRAPED_NOT_FOUND:
-                where = WHERE_SCRAPED_NOT_FOUND;
-                break;
-            case PARAM_MOVIES:
-                where = WHERE_MOVIES;
-                break;
-            default:
-                where = WHERE_BASE;
-                break;
-        }
+        String where = getWhereClause(scrapStatusParam);
         final String LIMIT = ((offset != null) ? offset + ",": "") + ((limit != null) ? limit : "");
         if (limit != null || offset != null) {
             return getContentResolver().query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI.buildUpon().appendQueryParameter("limit", LIMIT).build(), SCRAPER_ACTIVITY_COLS, where, selectionArgs, sortOrder);
         } else {
             return getContentResolver().query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, SCRAPER_ACTIVITY_COLS, where, selectionArgs, sortOrder);
         }
+    }
+
+    private Cursor getFileListCursorAfterId(int scrapStatusParam, long afterId, int limit) {
+        final String cameraPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getPath() + "/Camera";
+        String where = getWhereClause(scrapStatusParam) + " AND " + BaseColumns._ID + ">?";
+        String[] selectionArgs = new String[]{ cameraPath + "/%", String.valueOf(afterId) };
+        return getContentResolver().query(
+                VideoStore.Video.Media.EXTERNAL_CONTENT_URI.buildUpon().appendQueryParameter("limit", String.valueOf(limit)).build(),
+                SCRAPER_ACTIVITY_COLS, where, selectionArgs, BaseColumns._ID);
+    }
+
+    private long getNextIdAfter(int scrapStatusParam, long afterId) {
+        final String cameraPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getPath() + "/Camera";
+        String where = getWhereClause(scrapStatusParam) + " AND " + BaseColumns._ID + ">?";
+        String[] selectionArgs = new String[]{ cameraPath + "/%", String.valueOf(afterId) };
+        String[] idOnly = new String[]{ BaseColumns._ID };
+        Cursor c = getContentResolver().query(
+                VideoStore.Video.Media.EXTERNAL_CONTENT_URI.buildUpon().appendQueryParameter("limit", "1").build(),
+                idOnly, where, selectionArgs, BaseColumns._ID);
+        long nextId = -1;
+        if (c != null) {
+            if (c.moveToFirst()) {
+                nextId = c.getLong(0);
+            }
+            c.close();
+        }
+        return nextId;
     }
 
     @Override
