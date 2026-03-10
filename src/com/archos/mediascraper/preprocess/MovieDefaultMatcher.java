@@ -25,38 +25,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Calendar;
+import java.util.regex.Pattern;
 
 import static com.archos.mediascraper.preprocess.ParseUtils.BRACKETS;
+import static com.archos.mediascraper.preprocess.ParseUtils.extractYearAnywhere;
 import static com.archos.mediascraper.preprocess.ParseUtils.isPlausibleYear;
 import static com.archos.mediascraper.preprocess.ParseUtils.removeAfterEmptyParenthesis;
-import static com.archos.mediascraper.preprocess.ParseUtils.extractYearAnywhere;
-import static com.archos.mediascraper.preprocess.ParseUtils.yearExtractor;
-import static com.archos.mediascraper.preprocess.ParseUtils.yearExtractorEndString;
 
 /**
- * Matches everything. Tries to strip away all junk, not very reliable.
+ * Matches Movies
  * <p>
- * Process is as follows:
- * <ul>
- * <li> Start with filename without extension: "100. [DVD]Starship_Troopers_1995.-HDrip--IT"
- * <li> Remove potential starting numbering of collections "[DVD]Starship_Troopers_1995.-HDrip--IT"
- * <li> Extract last year if any: "[DVD]Starship_Troopers_.-HDrip--IT"
- * <li> Remove anything in brackets: "Starship_Troopers_.-HDrip--IT"
- * <li> Assume from here on that the title is first followed by junk
- * <li> Trim CasE sensitive junk: "Starship_Troopers_.-HDrip" ("it" could be part of the movie name, "IT" probably not)
- * <li> Remove separators: "Starship Troopers HDrip"
- * <li> Trim junk case insensitive: "Starship Troopers"
- * </ul>
+ * Title & Year specifically
  */
 class MovieDefaultMatcher implements InputMatcher {
     private static final Logger log = LoggerFactory.getLogger(MovieDefaultMatcher.class);
 
+    private static final MovieDefaultMatcher INSTANCE = new MovieDefaultMatcher();
+
     public static MovieDefaultMatcher instance() {
         return INSTANCE;
     }
-
-    private static final MovieDefaultMatcher INSTANCE =
-            new MovieDefaultMatcher();
 
     private MovieDefaultMatcher() {
         // singleton
@@ -64,13 +52,11 @@ class MovieDefaultMatcher implements InputMatcher {
 
     @Override
     public boolean matchesFileInput(Uri fileInput, Uri simplifiedUri) {
-        // this is the fallback matcher that matches everything
         return true;
     }
 
     @Override
     public boolean matchesUserInput(String userInput) {
-        // this is the fallback matcher that matches everything
         return true;
     }
 
@@ -78,7 +64,8 @@ class MovieDefaultMatcher implements InputMatcher {
     public SearchInfo getFileInputMatch(Uri file, Uri simplifiedUri) {
         if(simplifiedUri!=null)
             file = simplifiedUri;
-        return getMatch(FileUtils.getFileNameWithoutExtension(file), file);
+        String input = FileUtils.getFileNameWithoutExtension(file);
+        return getMatch(input, file);
     }
 
     @Override
@@ -86,23 +73,24 @@ class MovieDefaultMatcher implements InputMatcher {
         return getMatch(userInput, file);
     }
 
+    private static final Pattern KNOWN_EXTENSIONS = Pattern.compile("\\.(mkv|avi|mp4|mov|wmv|flv|mpg|mpeg|vob|asf|divx|f4v|ts|m2ts|m4v|webm|ogv|3gp)$", Pattern.CASE_INSENSITIVE);
+
     private static SearchInfo getMatch(String input, Uri file) {
-        String name = input;
+        // Strip known video extensions (input may still have one from getUserInputMatch or tests)
+        String name = KNOWN_EXTENSIONS.matcher(input).replaceFirst("");
+        if (log.isDebugEnabled()) log.debug("getMatch input: {}", name);
         final int currentYear = Calendar.getInstance().get(Calendar.YEAR);
 
-        // Strip out starting numbering for collections "1. ", "1) ", "1 - ", "1.-.", "1._"... but not "1.Foo" or "1-Foo"
+        // Capture original name after extension removal but before numbering/year stripping
+        String originalName = name; 
+
+        // Strip out starting numbering for collections "1. ", "1) ", "1 - "... restricted to 3 digits
         name = ParseUtils.removeNumbering(name);
-        // Strip out starting numbering for collections "1-"
         name = ParseUtils.removeNumberingDash(name);
 
-        // Strip out everything else in brackets <[{( .. )})>, most of the time teams names, etc
-        name = StringUtils.replaceAll(name, "", BRACKETS);
-
-        String originalName = name; // Capture after basic cleanup but before year stripping
-
-        // extract the last year from the string
         String year = null;
         boolean yearConfident = false;
+        boolean yearAtStart = false;
 
         // Step 1: try parenthesisYearExtractor - if matches, it's a confident release year
         Pair<String, String> nameYear = ParseUtils.parenthesisYearExtractor(name);
@@ -112,49 +100,32 @@ class MovieDefaultMatcher implements InputMatcher {
             yearConfident = true;
         }
 
-        // Step 2: fallback to non-parentheses extractors (not confident)
-        if (year == null || year.isEmpty()) {
-            // matches "[space or punctuation/brackets etc]year", year is group 1
-            // "[\\s\\p{Punct}]((?:19|20)\\d{2})(?!\\d)"
-            nameYear = yearExtractor(name);
-            if (isPlausibleYear(nameYear.second, nameYear.first, currentYear)) {
-                name = nameYear.first;
-                year = nameYear.second;
-            }
+        // Step 2: remove everything in brackets
+        if (year == null) {
+            name = StringUtils.replaceAll(name, "", BRACKETS);
+        } else {
+            name = removeAfterEmptyParenthesis(name);
+            name = StringUtils.replaceAll(name, "", BRACKETS);
         }
 
-        // Fallback: if yearExtractor didn't find year, try yearExtractorEndString
-        // Handles cases like "Movie.Title.2023" where year is at end
-        if (year == null || year.isEmpty()) {
-            nameYear = yearExtractorEndString(name);
-            if (isPlausibleYear(nameYear.second, nameYear.first, currentYear)) {
-                name = nameYear.first;
-                year = nameYear.second;
-            }
-        }
-
-        // Fallback: if no year found at end, try at the beginning
-        // Handles cases like "2001 A Space Odyssey"
-        if (year == null || year.isEmpty()) {
-            nameYear = ParseUtils.extractYearStartString(name, currentYear);
-            if (isPlausibleYear(nameYear.second, nameYear.first, currentYear)) {
-                name = nameYear.first;
-                year = nameYear.second;
-            }
-        }
-
-        // Final fallback: scan anywhere for a plausible 4-digit year, even if attached
+        // Step 3: Backwards-looping "Anywhere" extraction (Leeroy's logic)
         if (year == null || year.isEmpty()) {
             nameYear = extractYearAnywhere(name, currentYear);
-            if (isPlausibleYear(nameYear.second, nameYear.first, currentYear)) {
-                name = nameYear.first;
-                year = nameYear.second;
+            if (nameYear.second != null) {
+                // Determine if year was at start
+                int cutIndex = name.indexOf(nameYear.second);
+                if (cutIndex == 0) {
+                    // Identified at start - strip from 'name' but keep 'yearAtStart' for scraper logic
+                    name = nameYear.first; // Remainder (cleaned)
+                    year = nameYear.second;
+                    yearAtStart = true;
+                } else {
+                    // Identified in middle/end - strip from 'name'
+                    name = nameYear.first;
+                    year = nameYear.second;
+                }
             }
         }
-
-        // remove junk behind () that was containing year
-        // applies to movieName (1928) junk -> movieName () junk -> movieName
-        name = removeAfterEmptyParenthesis(name);
 
         // strip away known case sensitive garbage
         name = ParseUtils.cutOffBeforeFirstMatch(name, ParseUtils.GARBAGE_CASESENSITIVE_PATTERNS);
@@ -163,16 +134,18 @@ class MovieDefaultMatcher implements InputMatcher {
         name = ParseUtils.removeInnerAndOutterSeparatorJunk(name);
 
         // append a " " to aid next step
-        // > "Foo bar 1080p AC3 " to find e.g. " AC3 "
         name = name + " ";
 
         // try to remove more garbage, this time " garbage " syntax
-        // method will compare with lowercase name automatically
         name = ParseUtils.cutOffBeforeFirstMatch(name, ParseUtils.GARBAGE_LOWERCASE);
 
         name = name.trim();
-        originalName = ParseUtils.removeInnerAndOutterSeparatorJunk(originalName).trim();
-        return new MovieSearchInfo(file, name, year, originalName, yearConfident);
+        // Clean originalName through the same garbage pipeline so it can be used as a TMDB query
+        // (year stays embedded for "unstripped" searches per SCRAPE.md)
+        originalName = ParseUtils.cutOffBeforeFirstMatch(originalName, ParseUtils.GARBAGE_CASESENSITIVE_PATTERNS);
+        originalName = ParseUtils.removeInnerAndOutterSeparatorJunk(originalName);
+        originalName = ParseUtils.cutOffBeforeFirstMatch(originalName + " ", ParseUtils.GARBAGE_LOWERCASE).trim();
+        return new MovieSearchInfo(file, name, year, originalName, yearConfident, yearAtStart);
     }
 
     @Override

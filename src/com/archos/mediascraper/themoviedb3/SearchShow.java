@@ -30,8 +30,6 @@ import java.io.IOException;
 
 import retrofit2.Response;
 
-import static com.archos.mediascraper.preprocess.ParseUtils.yearExtractor;
-
 // Search Show for name query for year in language (ISO 639-1 code)
 public class SearchShow {
     private static final Logger log = LoggerFactory.getLogger(SearchShow.class);

@@ -40,9 +40,10 @@ public class ParseUtils {
     private static final Pattern ACRONYM_DOTS = Pattern.compile("(?<=(\\b|[._])\\p{Lu})[.](?=\\p{Lu}([.]|$))");
 
     /* Matches "1. ", "1) ", "1 - ", "1.-.", "1._"... but not "1.Foo" (could be a starting date with space) or "1-Foo" ..*/
-    private static final Pattern LEADING_NUMBERING = Pattern.compile("^(\\d+([.)][\\s\\p{Punct}]+|\\s+\\p{Punct}[\\p{Punct}\\s]*))*");
+    // Restrict to max 3 digits to avoid matching years at the start of filenames
+    private static final Pattern LEADING_NUMBERING = Pattern.compile("^(\\d{1,3}([.)][\\s\\p{Punct}]+|\\s+\\p{Punct}[\\p{Punct}\\s]*))*");
     // Matches "1-Foo" to be used with movies only because clashes with 24-s01e01 check with find . -type f -regex '.*/[0-9]+-[^/]*'
-    private static final Pattern LEADING_NUMBERING_DASH = Pattern.compile("^(\\d+([-]|\\s+\\p{Punct}[\\p{Punct}\\s]*))*");
+    private static final Pattern LEADING_NUMBERING_DASH = Pattern.compile("^(\\d{1,3}([-]|\\s+\\p{Punct}[\\p{Punct}\\s]*))*");
 
     /** besides the plain ' there is the typographic ’ and ‘ which is actually not an apostrophe */
     private static final char[] ALTERNATE_APOSTROPHES = new char[] {
@@ -53,19 +54,23 @@ public class ParseUtils {
     // parenthesized content attached to words (e.g. "OVNI(s)" keeps "(s)")
     public static final Pattern BRACKETS = Pattern.compile("(?<=\\s|^)[<({\\[].+?[>)}\\]]");
 
-    // matches "[space or punctuation/brackets etc]year", year is group 1
-    private static final Pattern YEAR_PATTERN = Pattern.compile("(.*)[\\s\\p{Punct}]((?:19|20)\\d{2})(?!\\d)");
+    // isolated 4-digit number. Avoid resolutions like 1920x1080 or codecs.
+    private static final Pattern YEAR_ANYWHERE_PATTERN = Pattern.compile("(?<![\\d\\p{L}])(\\d{4})(?![\\d\\p{L}])");
+
     private static final Pattern YEAR_PATTERN_END_STRING = Pattern.compile("(.*)[\\s\\p{Punct}]((?:19|20)\\d{2})(?!\\d)$");
-    private static final Pattern YEAR_ANYWHERE_PATTERN = Pattern.compile("\\b(\\d{4})\\b");
-    private static final Pattern PARENTHESIS_YEAR_PATTERN = Pattern.compile("(.*)[\\s\\p{Punct}]+\\(((?:19|20)\\d{2})\\)");
+    
+    // matches "(year)" — uses reluctant quantifier so the first parenthesized year wins
+    private static final Pattern PARENTHESIS_YEAR_PATTERN = Pattern.compile("(.*?)[\\s\\p{Punct} ]*\\(((?:19|20)\\d{2})\\)(.*)");
+    
     public static final int MIN_YEAR = 1906;
 
     // Strip out everything after empty parenthesis (after year pattern removal)
     // i.e. movieName (1969) garbage -> movieName () garbage -> movieName
-    private static final Pattern EMPTY_PARENTHESIS_PATTERN = Pattern.compile("(.*)[\\s\\p{Punct}]+([(][)])");
+    private static final Pattern EMPTY_PARENTHESIS_PATTERN = Pattern.compile("(.*)[\\s\\p{Punct}]+([(][)])(.*)");
 
     // full list of possible countries of origin is available here https://api.themoviedb.org/3/configuration/countries?api_key=051012651ba326cf5b1e2f482342eaa2
-    private static final Pattern COUNTRY_OF_ORIGIN = Pattern.compile("(.*)[\\s\\p{Punct}]+\\(((US|UK|FR))\\)");
+    private static final Pattern COUNTRY_OF_ORIGIN = Pattern.compile("(.*)[\\s\\p{Punct}]+\\(((US|UK|FR))\\)(.*)");
+
 
     /**
      * Removes leading numbering like "1. A Movie" => "A Movie",
@@ -98,28 +103,14 @@ public class ParseUtils {
         return StringUtils.replaceAll(result, " ", MULTI_NON_CHARACTER_PATTERN).trim();
     }
 
-    // remove all what is after empty parenthesis
-    // only apply to movieName (1928) junk -> movieName () junk -> movieName, junk can be null
-    public static String removeAfterEmptyParenthesis2(String input) {
-        Pair<String, String> result = twoPatternExtractor2(input, EMPTY_PARENTHESIS_PATTERN);
-        if (log.isDebugEnabled()) log.debug("removeAfterEmptyParenthesis input: {} output {}", input, result.first);
-        return result.first;
-    }
-
     public static String removeAfterEmptyParenthesis(String input) {
         if (log.isDebugEnabled()) log.debug("removeAfterEmptyParenthesis input: {}", input);
         Matcher matcher = EMPTY_PARENTHESIS_PATTERN.matcher(input);
-        int start = 0;
-        int stop = 0;
-        boolean found = false;
-        while (matcher.find()) {
+        if (matcher.find()) {
             if (log.isDebugEnabled()) log.debug("removeAfterEmptyParenthesis: pattern found");
-            found = true;
-            start = matcher.start(1);
+            // Keep everything before the empty parenthesis (end of group 1 = the title part)
+            input = matcher.group(1);
         }
-        // get the first match and extract it from the string
-        if (found)
-            input = input.substring(0, start);
         if (log.isDebugEnabled()) log.debug("removeAfterEmptyParenthesis remove junk after (): {}", input);
         return input;
     }
@@ -136,6 +127,7 @@ public class ParseUtils {
             " hddvd ", " hd dvd ", " hdrip ", " hd rip ", " hdlight ", " minibdrip ",
             " webrip ", " web rip ",
             " 720p ", " 1080p ", " 1080i ", " 720 ", " 1080 ", " 480i ", " 2160p ", " 4k ", " 480p ", " 576p ", " 576i ", " 240p ", " 360p ", " 4320p ", " 8k ",
+            " 1920x1080 ", " 1280x720 ", " 3840x2160 ", " 1280x800 ", " 1024x768 ", " 720x480 ", " 720x576 ",
             " hdtv ", " sdtv ", " m hd ", " ultrahd ", " mhd ",
             " h264 ", " x264 ", " aac ", " ac3 ", " ogm ", " dts ", " hevc ", " x265 ", " av1 ",
             " avi ", " mkv ", " xvid ", " divx ", " wmv ", " mpg ", " mpeg ", " flv ", " f4v ",
@@ -222,63 +214,11 @@ public class ParseUtils {
         return name;
     }
 
-    // matches "[space or punctuation/brackets etc]year", year is group 1
-    // "[\\s\\p{Punct}]((?:19|20)\\d{2})(?!\\d)"
-    public static Pair<String, String> yearExtractor(String input) {
-        if (log.isDebugEnabled()) log.debug("yearExtractor input: {}", input);
-        return twoPatternExtractor2(input, YEAR_PATTERN);
-    }
-
-    public static Pair<String, String> yearExtractorEndString(String input) {
-        if (log.isDebugEnabled()) log.debug("yearExtractor input: {}", input);
-        return twoPatternExtractor2(input, YEAR_PATTERN_END_STRING);
-    }
-
-    private static final Pattern YEAR_PATTERN_START_STRING = Pattern.compile("^((?:19|20)\\d{2})[\\s\\p{Punct}](.*)");
-
-    public static Pair<String, String> extractYearStartString(String input, int currentYear) {
-        if (log.isDebugEnabled()) log.debug("extractYearStartString input: {}", input);
-        Matcher matcher = YEAR_PATTERN_START_STRING.matcher(input);
-        if (matcher.find()) {
-            String candidateYear = matcher.group(1);
-            String possibleName = matcher.group(2);
-            if (isValidYear(candidateYear, currentYear)) {
-                if (possibleName.trim().length() >= 2) {
-                    String name = possibleName.trim();
-                    if (log.isDebugEnabled()) log.debug("extractYearStartString found year: {}, name: {}", candidateYear, name);
-                    return new Pair<>(name, candidateYear);
-                }
-            }
-        }
-        return new Pair<>(input, null);
-    }
-
-    public static Pair<String, String> extractYearAnywhere(String input, int currentYear) {
-        if (log.isDebugEnabled()) log.debug("extractYearAnywhere input: {}", input);
-        String reversed = new StringBuilder(input).reverse().toString();
-        Matcher matcher = YEAR_ANYWHERE_PATTERN.matcher(reversed);
-        while (matcher.find()) {
-            String candidateYear = new StringBuilder(matcher.group(1)).reverse().toString();
-            String possibleName = input.substring(0, Math.max(0, input.length() - matcher.start() - 4));
-            
-            if (isValidYear(candidateYear, currentYear)) {
-                if (possibleName.trim().length() >= 2) {
-                    String name = possibleName.trim();
-                    if (log.isDebugEnabled()) log.debug("extractYearAnywhere found year: {}, name: {}", candidateYear, name);
-                    return new Pair<>(name, candidateYear);
-                }
-                // Valid year but invalid name -> break per Leeroy's logic
-                break;
-            }
-        }
-        return new Pair<>(input, null);
-    }
-
     public static boolean isValidYear(String year, int currentYear) {
         if (year == null || year.isEmpty()) return false;
         try {
             int parsedYear = Integer.parseInt(year);
-            return parsedYear >= MIN_YEAR && parsedYear <= currentYear;
+            return parsedYear >= MIN_YEAR && parsedYear <= currentYear + 1;
         } catch (NumberFormatException e) {
             return false;
         }
@@ -297,26 +237,73 @@ public class ParseUtils {
         return isPlausibleYear(year, remainingName, Calendar.getInstance().get(Calendar.YEAR));
     }
 
-    // matches "[space or punctuation/brackets etc](year)", year is group 1
+    public static Pair<String, String> yearExtractorEndString(String input) {
+        if (log.isDebugEnabled()) log.debug("yearExtractorEndString input: {}", input);
+        return twoPatternExtractor(input, YEAR_PATTERN_END_STRING, 3);
+    }
+
+    // matches "(year)" — uses reluctant quantifier so the first parenthesized year wins
     public static Pair<String, String> parenthesisYearExtractor(String input) {
         if (log.isDebugEnabled()) log.debug("parenthesisYearExtractor input: {}", input);
-        return twoPatternExtractor2(input, PARENTHESIS_YEAR_PATTERN);
+        return twoPatternExtractor(input, PARENTHESIS_YEAR_PATTERN, 3);
     }
 
     // matches country of origin ((US|UK|FR)), country is group 1
+    // COUNTRY_OF_ORIGIN has an extra group for the inner capture, so "after" is group 4
     public static Pair<String, String> getCountryOfOrigin(String input) {
-        String countryOfOrigin = null;
         if (log.isDebugEnabled()) log.debug("getCountryOfOrigin input: {}", input);
-        return twoPatternExtractor2(input, COUNTRY_OF_ORIGIN);
+        return twoPatternExtractor(input, COUNTRY_OF_ORIGIN, 4);
     }
 
-    public static Pair<String, String> twoPatternExtractor2(String input, Pattern pattern) {
-        if (log.isDebugEnabled()) log.debug("twoPatternExtractor2 input: {}", input);
+    public static Pair<String, String> extractYearAnywhere(String input, int currentYear) {
+        if (log.isDebugEnabled()) log.debug("extractYearAnywhere input: {}", input);
+        String reversed = new StringBuilder(input).reverse().toString();
+        Matcher matcher = YEAR_ANYWHERE_PATTERN.matcher(reversed);
+        
+        while (matcher.find()) {
+            String candidateYear = new StringBuilder(matcher.group(1)).reverse().toString();
+            int cutIndex = input.length() - matcher.start() - 4;
+            
+            if (isValidYear(candidateYear, currentYear)) {
+                // Heuristic: only strip if it leaves at least 2 characters.
+                if (cutIndex >= 2) {
+                    // Year is at middle/end
+                    String name = input.substring(0, cutIndex).trim();
+                    if (log.isDebugEnabled()) log.debug("extractYearAnywhere found year at middle/end: {}, name: {}", candidateYear, name);
+                    return new Pair<>(name, candidateYear);
+                } else if (cutIndex == 0) {
+                    // Year is at start
+                    String remainder = input.substring(4).trim();
+                    // Clean up remainder (remove leading punctuation if any)
+                    remainder = removeInnerAndOutterSeparatorJunk(remainder);
+                    if (remainder.length() >= 2) {
+                        if (log.isDebugEnabled()) log.debug("extractYearAnywhere found year at start: {}, remainder: {}", candidateYear, remainder);
+                        return new Pair<>(remainder, candidateYear);
+                    }
+                }
+                // Valid year but remainder too short (< 2) -> break per Leeroy's logic
+                break;
+            }
+        }
+        return new Pair<>(input, null);
+    }
+
+    /**
+     * Extracts a value from a pattern with groups: (before)(value)(after).
+     * @param input the string to match against
+     * @param pattern regex with group 1 = before, group 2 = extracted value
+     * @param afterGroup the group index containing text after the extracted value (0 if none)
+     * @return Pair of (remaining input, extracted value) or (input, null) if no match
+     */
+    public static Pair<String, String> twoPatternExtractor(String input, Pattern pattern, int afterGroup) {
+        if (log.isDebugEnabled()) log.debug("twoPatternExtractor input: {}", input);
         String isolated = null;
         Matcher matcher = pattern.matcher(input);
         if (matcher.find()) {
-            input =  matcher.group(1);
             isolated = matcher.group(2);
+            String before = matcher.group(1);
+            String after = (afterGroup > 0 && matcher.groupCount() >= afterGroup) ? matcher.group(afterGroup) : "";
+            input = (before != null ? before : "") + (after != null ? after : "");
         }
         if (log.isDebugEnabled()) log.debug("twoPatternExtractor output: {} isolated: {}", input, isolated);
         return new Pair<>(input, isolated);

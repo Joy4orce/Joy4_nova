@@ -30,8 +30,6 @@ import java.util.List;
 
 import retrofit2.Response;
 
-import static com.archos.mediascraper.preprocess.ParseUtils.yearExtractor;
-
 // Search Movie for name query for year in language (ISO 639-1 code)
 // does not include_adult (Toggle the inclusion of adult titles)
 public class SearchMovie2 {

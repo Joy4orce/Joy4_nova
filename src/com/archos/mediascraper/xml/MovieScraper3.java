@@ -30,6 +30,7 @@ import com.archos.mediascraper.SearchResult;
 import com.archos.mediascraper.TagsFactory;
 import com.archos.mediascraper.preprocess.MovieSearchInfo;
 import com.archos.mediascraper.preprocess.SearchInfo;
+import com.archos.mediascraper.preprocess.SearchPreprocessor;
 import com.archos.mediascraper.themoviedb3.CollectionInfo;
 import com.archos.mediascraper.themoviedb3.CollectionResult;
 import com.archos.mediascraper.themoviedb3.ImageConfiguration;
@@ -136,25 +137,36 @@ public class MovieScraper3 extends BaseScraper2 {
         ScrapeStatus status = ScrapeStatus.NOT_FOUND;
         Throwable reason = null;
 
-        String[] candidates = {
-                // prefer the cleaned name (without year) over the display suggestion (which may append year)
-                searchInfo.getName(),
-                searchInfo.getSearchSuggestion()
-        };
+        // Candidate building logic:
+        class SearchCandidate {
+            String query;
+            String year;
+            SearchCandidate(String q, String y) { this.query = q; this.year = y; }
+        }
+        List<SearchCandidate> candidates = new ArrayList<>();
 
-        for (String searchQuery : candidates) {
-            if (searchQuery == null || searchQuery.isBlank() || searchQuery.contains("null")) continue;
-            if (log.isDebugEnabled()) log.debug("getMatches2: trying candidate '{}'", searchQuery);
-
-            // Logic: if useUnifiedScoring is true (year in title scenario), 
-            // we search candidate 0 (cleaned name) WITH year constraint,
-            // and candidate 1 (suggestion) WITHOUT year constraint.
-            String yearToUse = searchInfo.getYear();
-            if (useUnifiedScoring && searchQuery.equals(searchInfo.getSearchSuggestion())) {
-                yearToUse = null;
+        if (useUnifiedScoring) {
+            if (searchInfo.isYearAtStart()) {
+                // Scenario A: Year at Start -> try full title first, then remainder with year filter
+                candidates.add(new SearchCandidate(searchInfo.getOriginalName(), null));
+                candidates.add(new SearchCandidate(searchInfo.getName(), searchInfo.getYear()));
+            } else {
+                // Scenario B: Year at End/Middle -> try remainder with year filter first, then full title
+                candidates.add(new SearchCandidate(searchInfo.getName(), searchInfo.getYear()));
+                candidates.add(new SearchCandidate(searchInfo.getOriginalName(), null));
             }
+        } else {
+            // Standard cases: cleaned name with year (if any) first, then fallback to suggestion
+            candidates.add(new SearchCandidate(searchInfo.getName(), searchInfo.getYear()));
+            candidates.add(new SearchCandidate(searchInfo.getSearchSuggestion(), null));
+        }
 
-            String reversed = new StringBuilder(searchQuery).reverse().toString();
+        for (SearchCandidate candidate : candidates) {
+            String searchQuery = candidate.query;
+            String yearToUse = candidate.year;
+            
+            if (searchQuery == null || searchQuery.isBlank() || searchQuery.contains("null")) continue;
+            if (log.isDebugEnabled()) log.debug("getMatches2: trying candidate '{}' with year {}", searchQuery, yearToUse);
 
             SearchMovieResult searchResult = null;
             if (searchInfo.scrapeFromDB) {
@@ -179,6 +191,7 @@ public class MovieScraper3 extends BaseScraper2 {
                 for (int i = 0; i < (searchInfo.aggressiveScan ? 4 : 1); i++ ){
                     if (log.isDebugEnabled()) log.debug("getMatches2: searching TMDB for '{}' with year {}", searchQuery, yearToUse);
                     searchResult = SearchMovie2.search(searchQuery, language, yearToUse, maxItems, getSearchService(), adultScrape);
+                    
                     //Check result and try again if we need to.
                     if (searchResult.status == ScrapeStatus.OKAY && (searchResult.result != null && !searchResult.result.isEmpty())) {
                         for (SearchResult result : searchResult.result) {
@@ -192,14 +205,13 @@ public class MovieScraper3 extends BaseScraper2 {
                         //Only if its over 3 words. (Stop false positives on small titles like "The")
                         if (searchQuery.split("[\\s\\-_.]+").length > 4) {
                             //Grab the one word off.
+                            String reversed = new StringBuilder(searchQuery).reverse().toString();
                             Pattern sepPattern = Pattern.compile("[\\s\\-_.]");
                             Matcher matcher = sepPattern.matcher(reversed);
                             if (matcher.find()) {
                                 searchQuery = searchQuery.substring(0, searchQuery.length() - matcher.start() - 1).trim();
-                                reversed = new StringBuilder(searchQuery).reverse().toString();
                             }
-                        } else
-                            break;          //NOT OVER 3 WORDS. DONT SEARCH AGAIN
+                        } else break; //NOT OVER 3 WORDS. DONT SEARCH AGAIN
                     } else {
                         if (searchResult.status != ScrapeStatus.NOT_FOUND) {
                             status = searchResult.status;
@@ -210,11 +222,19 @@ public class MovieScraper3 extends BaseScraper2 {
                 }
             }
 
-            // Fallback: if year-constrained search returned no results, retry without year
-            // Handles cases where the filename year is inaccurate (e.g. 2023 vs actual release 2024)
-            if (yearToUse != null && (allResults.isEmpty())) {
-                if (log.isDebugEnabled()) log.debug("getMatches2: no results with year {}, retrying without year for candidate {}", yearToUse, searchQuery);
-                searchResult = SearchMovie2.search(searchQuery, language, null, maxItems, getSearchService(), adultScrape);
+            // If we found results and we're NOT doing unified scoring, we can stop early
+            if (!allResults.isEmpty() && !useUnifiedScoring) {
+                if (log.isDebugEnabled()) log.debug("getMatches2: found results for '{}', stopping early", searchQuery);
+                break;
+            }
+        }
+
+        // Fallback: if no results found with year constraint, retry primary candidate without year
+        if (allResults.isEmpty()) {
+            SearchCandidate primary = candidates.get(0);
+            if (primary.year != null && primary.query != null && !primary.query.isBlank() && !primary.query.contains("null")) {
+                if (log.isDebugEnabled()) log.debug("getMatches2: fallback trying '{}' without year", primary.query);
+                SearchMovieResult searchResult = SearchMovie2.search(primary.query, language, null, maxItems, getSearchService(), adultScrape);
                 if (searchResult.status == ScrapeStatus.OKAY && searchResult.result != null && !searchResult.result.isEmpty()) {
                     for (SearchResult result : searchResult.result) {
                         result.setScraper(this);
@@ -223,12 +243,6 @@ public class MovieScraper3 extends BaseScraper2 {
                     allResults.addAll(searchResult.result);
                     status = ScrapeStatus.OKAY;
                 }
-            }
-
-            // If we found results and we're NOT doing unified scoring, we can stop early
-            if (!allResults.isEmpty() && !useUnifiedScoring) {
-                if (log.isDebugEnabled()) log.debug("getMatches2: found results for '{}', stopping early", searchQuery);
-                break;
             }
         }
 
@@ -239,7 +253,7 @@ public class MovieScraper3 extends BaseScraper2 {
         // UNIFIED SCORING:
         // If we have multiple results (likely from both stripped and unstripped queries),
         // we re-calculate the distance against the most complete reference title we have.
-        String referenceName = searchInfo.getOriginalName() != null ? searchInfo.getOriginalName() : searchInfo.getSearchSuggestion();
+        String referenceName = searchInfo.getOriginalName() != null ? searchInfo.getOriginalName() : searchInfo.getName();
         if (log.isDebugEnabled()) log.debug("getMatches2: unified scoring against reference '{}'", referenceName);
         
         org.apache.commons.text.similarity.LevenshteinDistance levenshteinDistance = new org.apache.commons.text.similarity.LevenshteinDistance();

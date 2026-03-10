@@ -109,14 +109,12 @@ public class ScraperIntegrationTest {
                     // Print parsed details
                     if (info.isTvShow()) {
                         TvShowSearchInfo tvShowInfo = (TvShowSearchInfo) info;
-                        System.out.println("  Parsed Show Name: " + tvShowInfo.getShowName());
-                        System.out.println("  Parsed Year: " + tvShowInfo.getFirstAiredYear());
-                        System.out.println("  Search Suggestion: " + tvShowInfo.getSearchSuggestion());
+                        System.out.println(String.format("  -> PREPROCESSED: Name='%s' Year=%s S%02dE%02d Suggestion='%s'", 
+                            tvShowInfo.getShowName(), tvShowInfo.getFirstAiredYear(), tvShowInfo.getSeason(), tvShowInfo.getEpisode(), tvShowInfo.getSearchSuggestion()));
                     } else {
                         MovieSearchInfo movieInfo = (MovieSearchInfo) info;
-                        System.out.println("  Parsed Name: " + movieInfo.getName());
-                        System.out.println("  Parsed Year: " + movieInfo.getYear());
-                        System.out.println("  Search Suggestion: " + movieInfo.getSearchSuggestion());
+                        System.out.println(String.format("  -> PREPROCESSED: Name='%s' Year=%s Suggestion='%s'", 
+                            movieInfo.getName(), movieInfo.getYear(), movieInfo.getSearchSuggestion()));
                     }
                     
                     // Verify type detection
