@@ -86,6 +86,8 @@ public class MainActivityLeanback extends LeanbackActivity {
         
         ((CustomApplication) getApplication()).loadLocale();
 
+        super.onCreate(savedInstanceState);
+
         // Check if user disabled "Always start in TV interface" - if so, redirect to phone UI
         if (!UiChoiceDialog.applicationIsInLeanbackMode(this)) {
             if (log.isDebugEnabled()) log.debug("onCreate: User disabled leanback mode, redirecting to MainActivity");
@@ -101,8 +103,6 @@ public class MainActivityLeanback extends LeanbackActivity {
             finish();
             return;
         }
-
-        super.onCreate(savedInstanceState);
 
         // Batch all SharedPreferences operations into single apply
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
