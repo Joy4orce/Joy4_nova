@@ -303,18 +303,24 @@ public class Trakt {
 
     public static accessToken getAccessToken(String code) throws AccountLockedError, ForbiddenError, ServiceUnavailableError {
         retrofit2.Response<AccessToken> response = null;
-        try {
-            // Single-shot auth call (Trakt SDK returns a synchronous Response)
-            response = getTraktV2().exchangeCodeForAccessToken(code);
-            if (response.isSuccessful() && response.body() != null) {
-                final accessToken mAccessToken = new accessToken();
-                mAccessToken.access_token = response.body().access_token;
-                mAccessToken.refresh_token = response.body().refresh_token;
-                if (log.isDebugEnabled()) log.debug("getAccessToken: access_token is {}", mAccessToken.access_token);
-                return mAccessToken;
+        for (int attempt = 0; attempt < MAX_TRIAL; attempt++) {
+            response = null;
+            try {
+                response = getTraktV2().exchangeCodeForAccessToken(code);
+                if (response.isSuccessful() && response.body() != null) {
+                    final accessToken mAccessToken = new accessToken();
+                    mAccessToken.access_token = response.body().access_token;
+                    mAccessToken.refresh_token = response.body().refresh_token;
+                    if (log.isDebugEnabled()) log.debug("getAccessToken: access_token is {}", mAccessToken.access_token);
+                    return mAccessToken;
+                }
+                break; // got a response, no need to retry
+            } catch (IOException | NullPointerException e) {
+                log.error("getAccessToken: caught exception (attempt {}/{})", attempt + 1, MAX_TRIAL, e);
+                if (attempt < MAX_TRIAL - 1) {
+                    try { Thread.sleep(WAIT_BEFORE_NEXT_TRIAL); } catch (InterruptedException ignored) {}
+                }
             }
-        } catch (IOException | NullPointerException e) {
-            log.error("getAccessToken: caught exception", e);
         }
         if (response != null && !response.isSuccessful()) {
             log.error("getAccessToken error: code={}, message={}", response.code(), response.message());
