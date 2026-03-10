@@ -137,8 +137,6 @@ public class VideoStoreImportService extends Service implements Handler.Callback
             Intent serviceIntent = new Intent(context, VideoStoreImportService.class);
             serviceIntent.setAction(action);
             serviceIntent.setData(broadcast.getData());
-            if(broadcast.getExtras()!=null)
-                serviceIntent.putExtras(broadcast.getExtras()); //in case we have an extra... such as "recordLogExtra"
             if (log.isDebugEnabled()) log.debug("startIfHandles: apps is foreground startService and pass intent to self");
             ArchosUtils.addBreadcrumb(SentryLevel.INFO, "VideoStoreImportService.startIfHandles", "apps is foreground mContext.startService and pass intent to self");
             context.startService(serviceIntent);
