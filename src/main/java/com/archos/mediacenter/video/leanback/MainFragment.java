@@ -1535,7 +1535,28 @@ public class MainFragment extends BrowseSupportFragment implements LoaderManager
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) { }
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        switch (cursorLoader.getId()) {
+            case LOADER_ID_WATCHING_UP_NEXT -> {
+                if (mWatchingUpNextAdapter != null) mWatchingUpNextAdapter.changeCursor(null);
+            }
+            case LOADER_ID_LAST_ADDED -> {
+                if (mLastAddedAdapter != null) mLastAddedAdapter.changeCursor(null);
+            }
+            case LOADER_ID_LAST_PLAYED -> {
+                if (mLastPlayedAdapter != null) mLastPlayedAdapter.changeCursor(null);
+            }
+            case LOADER_ID_ALL_MOVIES -> {
+                if (mMoviesAdapter != null) mMoviesAdapter.changeCursor(null);
+            }
+            case LOADER_ID_ALL_TV_SHOWS -> {
+                if (mTvshowsAdapter != null) mTvshowsAdapter.changeCursor(null);
+            }
+            case LOADER_ID_ALL_ANIMES -> {
+                if (mAnimesAdapter != null) mAnimesAdapter.changeCursor(null);
+            }
+        }
+    }
 
     private enum InitFocus {
         NOT_FOCUSED, NO_NEED_FOCUS, NEED_FOCUS, FOCUSED

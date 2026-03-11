@@ -350,6 +350,7 @@ public class TvshowFragment extends DetailsFragmentWithLessTopOffset implements 
     @Override
     public void onDestroyView() {
         if (DBG) Log.d(TAG, "onDestroyView");
+        clearSeasonAdapters();
         mOverlay.destroy();
         super.onDestroyView();
     }
@@ -432,7 +433,7 @@ public class TvshowFragment extends DetailsFragmentWithLessTopOffset implements 
                     mRowsAdapter.removeItems(i, 1);
             }
 
-            mSeasonAdapters = null;
+            clearSeasonAdapters();
 
             if (mFullScraperTagsTask!=null) {
                 mFullScraperTagsTask.cancel(true);
@@ -461,9 +462,22 @@ public class TvshowFragment extends DetailsFragmentWithLessTopOffset implements 
             // Clear the rows
             mRowsAdapter.removeItems(0, mRowsAdapter.size());
 
-            mSeasonAdapters = null;
+            clearSeasonAdapters();
             mHasDetailRow = false;
         }
+    }
+
+    private void clearSeasonAdapters() {
+        if (mSeasonAdapters == null) {
+            return;
+        }
+        for (int i = 0; i < mSeasonAdapters.size(); i++) {
+            CursorObjectAdapter seasonAdapter = mSeasonAdapters.valueAt(i);
+            if (seasonAdapter != null) {
+                seasonAdapter.changeCursor(null);
+            }
+        }
+        mSeasonAdapters = null;
     }
 
     private void slightlyDelayedFinish() {
@@ -597,6 +611,16 @@ public class TvshowFragment extends DetailsFragmentWithLessTopOffset implements 
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        if (cursorLoader.getId() == SEASONS_LOADER_ID) {
+            clearSeasonAdapters();
+            return;
+        }
+        if (mSeasonAdapters != null) {
+            CursorObjectAdapter seasonAdapter = mSeasonAdapters.get(cursorLoader.getId());
+            if (seasonAdapter != null) {
+                seasonAdapter.changeCursor(null);
+            }
+        }
     }
 
     //--------------------------------------------

@@ -269,6 +269,9 @@ public class SeasonFragment extends BrowseSupportFragment implements LoaderManag
 
     @Override
     public void onDestroyView() {
+        if (mSeasonsAdapter != null) {
+            mSeasonsAdapter.changeCursor(null);
+        }
         mOverlay.destroy();
         // Unregister theme change listener
         if (mThemeChangeListener != null) {
@@ -378,6 +381,9 @@ public class SeasonFragment extends BrowseSupportFragment implements LoaderManag
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        if (mSeasonsAdapter != null) {
+            mSeasonsAdapter.changeCursor(null);
+        }
     }
     
     @Override

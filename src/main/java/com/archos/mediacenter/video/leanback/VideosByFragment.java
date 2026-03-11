@@ -134,6 +134,8 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
     @Override
     public void onDestroyView() {
         if (log.isDebugEnabled()) log.debug("onDestroyView");
+        clearRowAdapters();
+        mCurrentCategoriesCursor = null;
         mOverlay.destroy();
         // Unregister theme change listener
         if (mThemeChangeListener != null) {
@@ -265,6 +267,24 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
         if (log.isDebugEnabled()) log.debug("onLoaderReset");
+        if (cursorLoader.getId() == -1) {
+            mCurrentCategoriesCursor = null;
+            return;
+        }
+        CursorObjectAdapter adapter = mAdaptersMap.get(cursorLoader.getId());
+        if (adapter != null) {
+            adapter.changeCursor(null);
+        }
+    }
+
+    private void clearRowAdapters() {
+        for (int i = 0; i < mAdaptersMap.size(); i++) {
+            CursorObjectAdapter adapter = mAdaptersMap.valueAt(i);
+            if (adapter != null) {
+                adapter.changeCursor(null);
+            }
+        }
+        mAdaptersMap.clear();
     }
 
     private boolean isCategoriesListModified(Cursor oldCursor, Cursor newCursor) {
@@ -308,7 +328,7 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
         int listOfMovieIdsColumn = c.getColumnIndex(MoviesByLoader.COLUMN_LIST_OF_MOVIE_IDS);
 
         mRowsAdapter.clear();
-        mAdaptersMap.clear();
+        clearRowAdapters();
         
         // NOTE: A first version was using a CursorObjectAdapter for the rows.
         // The problem was that when any DB update occurred (resume point...) I found no way
