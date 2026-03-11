@@ -88,4 +88,9 @@ public class MoviesByYearFragment extends VideosByFragment {
         return SORT_PARAM_KEY;
     }
 
+    @Override
+    protected boolean shouldDeferRowLoadersDuringBackgroundWork() {
+        return true;
+    }
+
 }

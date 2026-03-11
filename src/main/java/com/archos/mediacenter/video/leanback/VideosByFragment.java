@@ -37,6 +37,9 @@ import androidx.preference.PreferenceManager;
 import com.archos.mediacenter.video.R;
 import com.archos.mediacenter.video.browser.adapters.mappers.VideoCursorMapper;
 import com.archos.mediacenter.video.browser.loader.MoviesByLoader;
+import com.archos.mediaprovider.ImportState;
+import com.archos.mediaprovider.video.LoaderUtils;
+import com.archos.mediaprovider.video.NetworkScannerReceiver;
 import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.mediacenter.video.browser.loader.MoviesLoader;
@@ -78,6 +81,8 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
      * keep a reference of the cursor containing the categories to check if there is actually an update when we get a new one
      */
     private Cursor mCurrentCategoriesCursor;
+    private boolean mRowsLoadDeferred;
+    private boolean mBackgroundWorkWasOngoing;
 
     private String mDefaultSort;
 
@@ -95,6 +100,10 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
     abstract protected String item2SortOrder(int item);
     abstract protected int sortOrder2Item(String sortOrder);
     abstract protected String getSortOrderParamKey();
+
+    protected boolean shouldDeferRowLoadersDuringBackgroundWork() {
+        return false;
+    }
 
     public VideosByFragment() {
         this(MoviesLoader.DEFAULT_SORT);
@@ -148,6 +157,7 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
     public void onResume() {
         if (log.isDebugEnabled()) log.debug("onResume");
         super.onResume();
+        mBackgroundWorkWasOngoing = isBackgroundWorkOngoing();
         mOverlay.resume();
     }
 
@@ -208,7 +218,9 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
                                     mSortOrder = item2SortOrder(mSortOrderItem);
                                     // Save the sort mode
                                     mPrefs.edit().putString(getSortOrderParamKey(), mSortOrder).commit();
-                                    loadCategoriesRows(mCurrentCategoriesCursor);
+                                    boolean deferRowLoaders = shouldDeferRowLoadersDuringBackgroundWork() && isBackgroundWorkOngoing();
+                                    loadCategoriesRows(mCurrentCategoriesCursor, !deferRowLoaders);
+                                    mRowsLoadDeferred = deferRowLoaders;
                                 }
                                 dialog.dismiss();
                             }
@@ -238,19 +250,33 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
             if (log.isDebugEnabled()) log.debug("onLoadFinished: activity null exiting");
             return;
         }
+        boolean backgroundWorkOngoing = isBackgroundWorkOngoing();
+        if (mRowsLoadDeferred && mBackgroundWorkWasOngoing && !backgroundWorkOngoing) {
+            if (log.isDebugEnabled()) log.debug("onLoadFinished: background work finished, forcing category reload");
+            mBackgroundWorkWasOngoing = false;
+            LoaderManager.getInstance(this).restartLoader(-1, null, this);
+            return;
+        }
+        mBackgroundWorkWasOngoing = backgroundWorkOngoing;
         // List of categories
         if (cursorLoader.getId() == -1) {
             // Empty view visibility
             mEmptyView.setVisibility(c.getCount() > 0 ? View.GONE : View.VISIBLE);
+            boolean deferRowLoaders = shouldDeferRowLoadersDuringBackgroundWork() && backgroundWorkOngoing;
+            if (deferRowLoaders && mRowsLoadDeferred && mRowsAdapter.size() > 0) {
+                mCurrentCategoriesCursor = c;
+                return;
+            }
             if (mCurrentCategoriesCursor != null) {
-                if (!isCategoriesListModified(mCurrentCategoriesCursor, c)) {
+                if (!mRowsLoadDeferred && !isCategoriesListModified(mCurrentCategoriesCursor, c)) {
                     // no actual modification, no need to rebuild all the rows
                     mCurrentCategoriesCursor = c; // keep the reference to the new cursor because the old one won't be valid anymore
                     return;
                 }
             }
             mCurrentCategoriesCursor = c;
-            loadCategoriesRows(c);
+            loadCategoriesRows(c, !deferRowLoaders);
+            mRowsLoadDeferred = deferRowLoaders;
             if (STOP_LOADING) cursorLoader.stopLoading();
         }
         // One of the row
@@ -269,6 +295,8 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
         if (log.isDebugEnabled()) log.debug("onLoaderReset");
         if (cursorLoader.getId() == -1) {
             mCurrentCategoriesCursor = null;
+            mRowsLoadDeferred = false;
+            mBackgroundWorkWasOngoing = false;
             return;
         }
         CursorObjectAdapter adapter = mAdaptersMap.get(cursorLoader.getId());
@@ -318,7 +346,7 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
         return false;
     }
 
-    private void loadCategoriesRows(Cursor c) {
+    private void loadCategoriesRows(Cursor c, boolean loadSubsetRows) {
         if (c == null) {
             if (log.isDebugEnabled()) log.debug("loadCategoriesRows: cursor null exiting");
             return;
@@ -353,15 +381,17 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
             rows.add(new ListRow(subsetId, new HeaderItem(subsetName), subsetAdapter));
             mAdaptersMap.append(subsetId, subsetAdapter);
 
-            // Start the loader manager for this row
-            Bundle args = new Bundle();
-            args.putString("ids", listOfMovieIds);
-            args.putString("sort", mSortOrder);
-            // cf. https://github.com/nova-video-player/aos-AVP/issues/141
-            try {
-                LoaderManager.getInstance(this).restartLoader(subsetId, args, this);
-            } catch (Exception e) {
-                log.warn("caught exception in loadCategoriesRows ",e);
+            if (loadSubsetRows) {
+                // Start the loader manager for this row
+                Bundle args = new Bundle();
+                args.putString("ids", listOfMovieIds);
+                args.putString("sort", mSortOrder);
+                // cf. https://github.com/nova-video-player/aos-AVP/issues/141
+                try {
+                    LoaderManager.getInstance(this).restartLoader(subsetId, args, this);
+                } catch (Exception e) {
+                    log.warn("caught exception in loadCategoriesRows ",e);
+                }
             }
 
             c.moveToNext();
@@ -370,6 +400,12 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
         mRowsAdapter.addAll(0,rows);
         // unregister observer to not get notifications of content change
         if (UNREGISTER_OBSERVERS) mRowsAdapter.unregisterAllObservers();
+    }
+
+    private boolean isBackgroundWorkOngoing() {
+        return NetworkScannerReceiver.isScannerWorking()
+                || LoaderUtils.getScrapeInProgress()
+                || ImportState.VIDEO.isInitialImport();
     }
 
     private void updateBackground() {

@@ -36,6 +36,7 @@ public class EpisodesByDateLoader extends MoviesByLoader {
         mContext = context;
         mSortOrder = DEFAULT_SORT;
         mDateView = dateView;
+        if (VideoLoader.VIDEOBY_THROTTLE) setUpdateThrottle(VideoLoader.VIDEOBY_THROTTLE_DELAY);
         setSelection(getSelection(context));
     }
 
@@ -43,6 +44,7 @@ public class EpisodesByDateLoader extends MoviesByLoader {
         super(context);
         mSortOrder = sortOrder;
         mDateView = dateView;
+        if (VideoLoader.VIDEOBY_THROTTLE) setUpdateThrottle(VideoLoader.VIDEOBY_THROTTLE_DELAY);
         setSelection(getSelection(context));
     }
 
