@@ -43,10 +43,12 @@ import com.archos.mediacenter.video.leanback.CompatibleCursorMapperConverter;
 import com.archos.mediacenter.video.leanback.VideoViewClickedListener;
 import com.archos.mediacenter.video.leanback.overlay.Overlay;
 import com.archos.mediacenter.video.leanback.presenter.PosterImageCardPresenter;
+import com.archos.mediaprovider.ImportState;
+import com.archos.mediaprovider.video.LoaderUtils;
+import com.archos.mediaprovider.video.NetworkScannerReceiver;
 import com.archos.mediacenter.video.player.PrivateMode;
 import com.archos.mediacenter.video.utils.PrivateModeUIHelper;
 import com.archos.mediacenter.video.tvshow.TvshowSortOrderEntries;
-import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +80,8 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
      * keep a reference of the cursor containing the categories to check if there is actually an update when we get a new one
      */
     private Cursor mCurrentCategoriesCursor;
+    private boolean mRowsLoadDeferred;
+    private boolean mBackgroundWorkWasOngoing;
 
     private String mDefaultSort;
 
@@ -95,6 +99,10 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
     abstract protected String item2SortOrder(int item);
     abstract protected int sortOrder2Item(String sortOrder);
     abstract protected String getSortOrderParamKey();
+
+    protected boolean shouldDeferRowLoadersDuringBackgroundWork() {
+        return false;
+    }
 
     public TvshowsByFragment() {
         this(TvshowSortOrderEntries.DEFAULT_SORT);
@@ -143,6 +151,7 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
     @Override
     public void onResume() {
         super.onResume();
+        mBackgroundWorkWasOngoing = isBackgroundWorkOngoing();
         mOverlay.resume();
     }
 
@@ -204,7 +213,9 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
                                     mSortOrder = item2SortOrder(mSortOrderItem);
                                     // Save the sort mode
                                     mPrefs.edit().putString(getSortOrderParamKey(), mSortOrder).commit();
-                                    loadCategoriesRows(mCurrentCategoriesCursor);
+                                    boolean deferRowLoaders = shouldDeferRowLoadersDuringBackgroundWork() && isBackgroundWorkOngoing();
+                                    loadCategoriesRows(mCurrentCategoriesCursor, !deferRowLoaders);
+                                    mRowsLoadDeferred = deferRowLoaders;
                                 }
                                 dialog.dismiss();
                             }
@@ -229,21 +240,35 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor c) {
         if (getActivity() == null) return;
+        boolean backgroundWorkOngoing = isBackgroundWorkOngoing();
+        if (mRowsLoadDeferred && mBackgroundWorkWasOngoing && !backgroundWorkOngoing) {
+            mBackgroundWorkWasOngoing = false;
+            LoaderManager.getInstance(this).restartLoader(-1, null, this);
+            return;
+        }
+        mBackgroundWorkWasOngoing = backgroundWorkOngoing;
         // List of categories
         if (cursorLoader.getId() == -1) {
-
-            // Empty view visibility
+            boolean deferRowLoaders = shouldDeferRowLoadersDuringBackgroundWork() && backgroundWorkOngoing;
+            if (deferRowLoaders) {
+                showDeferredLoadingState();
+                mCurrentCategoriesCursor = c;
+                mRowsLoadDeferred = true;
+                return;
+            }
+            mEmptyView.setText(R.string.you_have_no_tv_shows);
             mEmptyView.setVisibility(c.getCount() > 0 ? View.GONE : View.VISIBLE);
 
             if (mCurrentCategoriesCursor != null) {
-                if (!isCategoriesListModified(mCurrentCategoriesCursor, c)) {
+                if (!mRowsLoadDeferred && !isCategoriesListModified(mCurrentCategoriesCursor, c)) {
                     // no actual modification, no need to rebuild all the rows
                     mCurrentCategoriesCursor = c; // keep the reference to the new cursor because the old one won't be valid anymore
                     return;
                 }
             }
             mCurrentCategoriesCursor = c;
-            loadCategoriesRows(c);
+            loadCategoriesRows(c, !deferRowLoaders);
+            mRowsLoadDeferred = deferRowLoaders;
         }
         // One of the row
         else {
@@ -256,6 +281,16 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        if (cursorLoader.getId() == -1) {
+            mCurrentCategoriesCursor = null;
+            mRowsLoadDeferred = false;
+            mBackgroundWorkWasOngoing = false;
+            return;
+        }
+        CursorObjectAdapter adapter = mAdaptersMap.get(cursorLoader.getId());
+        if (adapter != null) {
+            adapter.changeCursor(null);
+        }
     }
 
 
@@ -290,14 +325,14 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
         return false;
     }
 
-    private void loadCategoriesRows(Cursor c) {
+    private void loadCategoriesRows(Cursor c, boolean loadSubsetRows) {
         if (c == null) return;
         int subsetIdColumn = c.getColumnIndex(TvshowsByAlphaLoader.COLUMN_SUBSET_ID);
         int subsetNameColumn = c.getColumnIndex(TvshowsByAlphaLoader.COLUMN_SUBSET_NAME);
         int listOfTvshowIdsColumn = c.getColumnIndex(TvshowsByAlphaLoader.COLUMN_LIST_OF_TVSHOWS_IDS);
 
         mRowsAdapter.clear();
-        mAdaptersMap.clear();
+        clearRowAdapters();
 
         // NOTE: A first version was using a CursorObjectAdapter for the rows.
         // The problem was that when any DB update occurred (resume point...) I found no way
@@ -321,21 +356,45 @@ public abstract class TvshowsByFragment extends BrowseSupportFragment implements
             rows.add(new ListRow(subsetId, new HeaderItem(subsetName), subsetAdapter));
             mAdaptersMap.append(subsetId, subsetAdapter);
 
-            // Start the loader manager for this row
-            Bundle args = new Bundle();
-            args.putString("ids", listOfTvshowIds);
-            args.putString("sort", mSortOrder);
-            // cf. https://github.com/nova-video-player/aos-AVP/issues/141
-            try {
-                LoaderManager.getInstance(this).restartLoader(subsetId, args, this);
-            } catch (Exception e) {
-                log.warn("caught exception in loadCategoriesRows ",e);
+            if (loadSubsetRows) {
+                // Start the loader manager for this row
+                Bundle args = new Bundle();
+                args.putString("ids", listOfTvshowIds);
+                args.putString("sort", mSortOrder);
+                // cf. https://github.com/nova-video-player/aos-AVP/issues/141
+                try {
+                    LoaderManager.getInstance(this).restartLoader(subsetId, args, this);
+                } catch (Exception e) {
+                    log.warn("caught exception in loadCategoriesRows ",e);
+                }
             }
-
             c.moveToNext();
         }
 
         mRowsAdapter.addAll(0,rows);
+    }
+
+    private void clearRowAdapters() {
+        for (int i = 0; i < mAdaptersMap.size(); i++) {
+            CursorObjectAdapter adapter = mAdaptersMap.valueAt(i);
+            if (adapter != null) {
+                adapter.changeCursor(null);
+            }
+        }
+        mAdaptersMap.clear();
+    }
+
+    private void showDeferredLoadingState() {
+        mRowsAdapter.clear();
+        clearRowAdapters();
+        mEmptyView.setText(R.string.not_available_during_media_scanning);
+        mEmptyView.setVisibility(View.VISIBLE);
+    }
+
+    private boolean isBackgroundWorkOngoing() {
+        return NetworkScannerReceiver.isScannerWorking()
+                || LoaderUtils.getScrapeInProgress()
+                || ImportState.VIDEO.isInitialImport();
     }
 
     private void updateBackground() {

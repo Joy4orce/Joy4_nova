@@ -86,4 +86,9 @@ public class TvshowsByGenreFragment extends TvshowsByFragment {
         return SORT_PARAM_KEY;
     }
 
+    @Override
+    protected boolean shouldDeferRowLoadersDuringBackgroundWork() {
+        return true;
+    }
+
 }

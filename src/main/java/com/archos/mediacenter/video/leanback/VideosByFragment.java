@@ -260,13 +260,15 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
         mBackgroundWorkWasOngoing = backgroundWorkOngoing;
         // List of categories
         if (cursorLoader.getId() == -1) {
-            // Empty view visibility
-            mEmptyView.setVisibility(c.getCount() > 0 ? View.GONE : View.VISIBLE);
             boolean deferRowLoaders = shouldDeferRowLoadersDuringBackgroundWork() && backgroundWorkOngoing;
-            if (deferRowLoaders && mRowsLoadDeferred && mRowsAdapter.size() > 0) {
+            if (deferRowLoaders) {
+                showDeferredLoadingState();
                 mCurrentCategoriesCursor = c;
+                mRowsLoadDeferred = true;
                 return;
             }
+            mEmptyView.setText(R.string.you_have_no_movies);
+            mEmptyView.setVisibility(c.getCount() > 0 ? View.GONE : View.VISIBLE);
             if (mCurrentCategoriesCursor != null) {
                 if (!mRowsLoadDeferred && !isCategoriesListModified(mCurrentCategoriesCursor, c)) {
                     // no actual modification, no need to rebuild all the rows
@@ -400,6 +402,13 @@ public abstract class VideosByFragment extends BrowseSupportFragment implements 
         mRowsAdapter.addAll(0,rows);
         // unregister observer to not get notifications of content change
         if (UNREGISTER_OBSERVERS) mRowsAdapter.unregisterAllObservers();
+    }
+
+    private void showDeferredLoadingState() {
+        mRowsAdapter.clear();
+        clearRowAdapters();
+        mEmptyView.setText(R.string.not_available_during_media_scanning);
+        mEmptyView.setVisibility(View.VISIBLE);
     }
 
     private boolean isBackgroundWorkOngoing() {
