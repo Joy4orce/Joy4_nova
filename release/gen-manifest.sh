@@ -6,7 +6,7 @@
 
 set -e
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 prefix=$(pwd)
 
 # Detect repo vs git submodule workspace
@@ -41,12 +41,12 @@ get_url() {
 # Get current commit SHA of a submodule
 get_revision() {
     local path="$1"
-    git -C "$path" rev-parse HEAD
+    git ls-tree HEAD "$path" | awk '{print $3}'
 }
 
-# Parent repo (AVP) info - read from AVP subdirectory
-avp_revision=$(git -C AVP rev-parse HEAD)
-avp_branch=$(git -C AVP branch --show-current)
+# Parent repo (AVP) info
+avp_revision=$(get_revision "AVP")
+avp_branch=$(get_branch "AVP")
 
 cat <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
