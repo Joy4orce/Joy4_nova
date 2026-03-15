@@ -97,8 +97,9 @@ public class SearchMovie2 {
                     }
                 }
             }
-        } catch (IOException e) {
-            log.error("searchMovie: caught IOException");
+        } catch (IOException | InterruptedException e) {
+            log.error("searchMovie: caught {}", e.getClass().getSimpleName());
+            if (e instanceof InterruptedException) Thread.currentThread().interrupt();
             if (log.isDebugEnabled()) log.debug(e.getMessage(), e);
             myResult.result = SearchMovieResult.EMPTY_LIST;
             myResult.status = ScrapeStatus.ERROR_PARSER;
