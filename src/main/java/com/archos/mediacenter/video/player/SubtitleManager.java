@@ -622,9 +622,11 @@ public class SubtitleManager {
         if (mSubtitleLayout != null) return;
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mSubtitleLayout = inflater.inflate(R.layout.subtitle_layout, mPlayerView, false);
+        if (mSubtitleLayout == null) return;
         mSubtitleSpacer = (SubtitleSpacerView) mSubtitleLayout.findViewById(R.id.subtitle_spacer);
         mSubtitleGfxView = (SubtitleGfxView) mSubtitleLayout.findViewById(R.id.subtitle_gfx_view);
         mSubtitleTxtView = (Subtitle3DTextView) mSubtitleLayout.findViewById(R.id.subtitle_txt_view);
+        if (mSubtitleSpacer == null || mSubtitleGfxView == null || mSubtitleTxtView == null) return;
         mSubtitleTxtView.setScreenSize(mScreenWidth, mScreenHeight);
         mSubtitleTxtView.setUIMode(mUiMode);
         mSubtitleSpacerParams = mSubtitleSpacer.getLayoutParams();

@@ -620,6 +620,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         int layoutID=R.layout.player_controller;
         mControllerView = inflater.inflate(layoutID, null);
+        if (mControllerView == null) return;
 
         mControllerView.setOnTouchListener(this);
         mControllerView.setOnGenericMotionListener(this);
@@ -650,8 +651,11 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         }
 
 
+        if (mControllerView == null) return;
+
         playerControllersContainer = (FrameLayout)mControllerView.findViewById(R.id.playerControllersContainer);
-        playerControllersContainer.addView(mControllerViewLeft);
+        if (playerControllersContainer != null && mControllerViewLeft != null)
+            playerControllersContainer.addView(mControllerViewLeft);
 
         if (log.isDebugEnabled()) log.debug("CONFIG attachWindow: layout WxH {}x{}", mLayoutWidth, mLayoutHeight);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(mLayoutWidth, mLayoutHeight);
