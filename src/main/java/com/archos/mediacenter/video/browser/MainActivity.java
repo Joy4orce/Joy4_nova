@@ -243,10 +243,11 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
         } else {
             setTheme(R.style.ArchosThemeBlueNoActionBar);
         }
+        // requestWindowFeature() must be called before applyWindowTheme() since
+        // setBackgroundDrawable() can install the decor view on older API levels
+        requestWindowFeature(Window.FEATURE_OPTIONS_PANEL);
         themeManager.applyWindowTheme(this);
         ((CustomApplication) getApplication()).loadLocale();
-        //CustomApplication.loadLocale(getResources());
-        requestWindowFeature(Window.FEATURE_OPTIONS_PANEL);
         this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
         super.onCreate(savedInstanceState);
 
