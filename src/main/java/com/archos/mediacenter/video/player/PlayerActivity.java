@@ -3521,7 +3521,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 mVideoInfo.subtitleTrack == -1 || mVideoInfo.subtitleTrack >= mVideoInfo.nbSubtitles) {
             return false;
         }
-        return mPlayer.getVideoMetadata().getSubtitleTrack(mVideoInfo.subtitleTrack).isGfx;
+        VideoMetadata.SubtitleTrack sub = mPlayer.getVideoMetadata().getSubtitleTrack(mVideoInfo.subtitleTrack);
+        return sub != null && sub.isGfx;
     }
 
     public boolean isCurrentSubtrackNone() {
@@ -3585,7 +3586,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                     if (log.isDebugEnabled()) log.debug("onTrackSelected: saved audioTrack {} to database", mVideoInfo.audioTrack);
                 }
             } else if (at == null || !at.supported){
-                mErrorMsg = at.format;
+                mErrorMsg = (at != null) ? at.format : "";
                 myShowDialog(DIALOG_CODEC_NOT_SUPPORTED);
             }
         } else if (Objects.equals(trackInfoController, mSubtitleInfoController)) {
@@ -3998,6 +3999,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             String trackName = null;
             for (int i = 0; i < nbTrack; ++i) {
                 VideoMetadata.AudioTrack audio = vMetadata.getAudioTrack(i);
+                if (audio == null)
+                    continue;
                 if (log.isDebugEnabled()) log.debug("onAudioMetadataUpdated: name={}, language={}, format={}", audio.name, audio.language, audio.format);
                 trackName = generateTrackName(mContext, audio.name, audio.language, audio.format, true);
                 CharSequence name = trackName;
@@ -4036,12 +4039,15 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 mVideoInfo.nbSubtitles = nbTrack; // nbSubtitles does not capture none track
                 String lang = null;
                 for (int i = 0; i < nbTrack; ++i) {
+                    SubtitleTrack track = vMetadata.getSubtitleTrack(i);
+                    if (track == null)
+                        continue;
                     // name comes from IMediaPlayer (avos) and if not internal it says SRT/VTT generic, infer the name from path
                     // infer language from path if path is provided
-                    if (vMetadata.getSubtitleTrack(i).isExternal) {
+                    if (track.isExternal) {
                         // external subtitle get name from file
-                        lang = getSubLanguageFromSubPathAndVideoPath(mContext, vMetadata.getSubtitleTrack(i).path, vMetadata.getFile().getPath());
-                        if (log.isDebugEnabled()) log.debug("onSubtitleMetadataUpdated: extsub name={}, path={}, videoPath={}, isExternal={}, langFromPath={}", vMetadata.getSubtitleTrack(i).name, vMetadata.getSubtitleTrack(i).path, vMetadata.getFile().getPath(), vMetadata.getSubtitleTrack(i).isExternal, lang);
+                        lang = getSubLanguageFromSubPathAndVideoPath(mContext, track.path, vMetadata.getFile().getPath());
+                        if (log.isDebugEnabled()) log.debug("onSubtitleMetadataUpdated: extsub name={}, path={}, videoPath={}, isExternal={}, langFromPath={}", track.name, track.path, vMetadata.getFile().getPath(), track.isExternal, lang);
                         if (lang != null) {
                             if (log.isDebugEnabled()) log.debug("onSubtitleMetadataUpdated: extsub name might not be null add track name with lang={}", lang);
                             mSubtitleInfoController.addTrack(lang, true);
@@ -4051,10 +4057,9 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                         }
                     } else {
                         // internal subtitle get name from name
-                    if (log.isDebugEnabled()) log.debug("onSubtitleMetadataUpdated: intsub add track name with name={} replacing language code in {}", vMetadata.getSubtitleTrack(i).name, vMetadata.getSubtitleTrack(i).language);
-                    SubtitleTrack track = vMetadata.getSubtitleTrack(i);
-                    String format = VideoUtils.getSubtitleFormatLabel(mContext, track.format);
-                    mSubtitleInfoController.addTrack(generateTrackName(mContext, track.name, track.language, format, false), false);
+                        if (log.isDebugEnabled()) log.debug("onSubtitleMetadataUpdated: intsub add track name with name={} replacing language code in {}", track.name, track.language);
+                        String format = VideoUtils.getSubtitleFormatLabel(mContext, track.format);
+                        mSubtitleInfoController.addTrack(generateTrackName(mContext, track.name, track.language, format, false), false);
                     }
                 }
                 mSubtitleInfoController.addSeparator();
