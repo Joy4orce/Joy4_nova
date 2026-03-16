@@ -55,6 +55,15 @@ public class TraktDeviceAuthActivity extends AppCompatActivity {
     private boolean mIsTv = false;
     private OAuthDialog mOAuthDialog;
 
+    private void resetDeviceCodeViews() {
+        if (mVerificationUrlText != null) {
+            mVerificationUrlText.setText("");
+        }
+        if (mUserCodeText != null) {
+            mUserCodeText.setText("");
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +82,7 @@ public class TraktDeviceAuthActivity extends AppCompatActivity {
         mStatusText = findViewById(R.id.status_message);
         mProgressBar = findViewById(R.id.progress_bar);
         mCancelButton = findViewById(R.id.cancel_button);
+        resetDeviceCodeViews();
 
         mCancelButton.setOnClickListener(v -> {
             stopPolling();
@@ -168,6 +178,7 @@ public class TraktDeviceAuthActivity extends AppCompatActivity {
     private void onAuthenticationFailed(String message) {
         if (log.isDebugEnabled()) log.debug("onAuthenticationFailed: {}", message);
         stopPolling();
+        mDeviceCode = null;
 
         if (!mIsTv) {
             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
@@ -183,6 +194,7 @@ public class TraktDeviceAuthActivity extends AppCompatActivity {
         mCancelButton.setText(R.string.trakt_signin);
         mCancelButton.setOnClickListener(v -> {
             // Retry
+            resetDeviceCodeViews();
             mProgressBar.setVisibility(View.VISIBLE);
             mStatusText.setText(R.string.trakt_device_auth_waiting);
             mCancelButton.setText(android.R.string.cancel);
@@ -226,6 +238,7 @@ public class TraktDeviceAuthActivity extends AppCompatActivity {
         private boolean mAccountLocked = false;
         private boolean mForbidden = false;
         private boolean mServiceUnavailable = false;
+        private boolean mMalformedResponse = false;
 
         @Override
         protected Trakt.deviceCode doInBackground(Void... params) {
@@ -239,6 +252,9 @@ public class TraktDeviceAuthActivity extends AppCompatActivity {
                 return null;
             } catch (Trakt.ServiceUnavailableError e) {
                 mServiceUnavailable = true;
+                return null;
+            } catch (Trakt.InvalidDeviceCodeResponseError e) {
+                mMalformedResponse = true;
                 return null;
             }
         }
@@ -256,6 +272,7 @@ public class TraktDeviceAuthActivity extends AppCompatActivity {
                 // Start polling
                 startPolling();
             } else {
+                resetDeviceCodeViews();
                 log.error("Failed to generate device code");
                 if (mAccountLocked) {
                     onAuthenticationFailed(getString(R.string.trakt_account_locked));
@@ -263,6 +280,8 @@ public class TraktDeviceAuthActivity extends AppCompatActivity {
                     onAuthenticationFailed("HTTP Error 403 - Forbidden");
                 } else if (mServiceUnavailable) {
                     onAuthenticationFailed("HTTP Error 503 - Service Unavailable (Trakt down?)");
+                } else if (mMalformedResponse) {
+                    onAuthenticationFailed(getString(R.string.trakt_device_auth_invalid_code));
                 } else {
                     onAuthenticationFailed(getString(R.string.trakt_device_auth_error));
                 }
