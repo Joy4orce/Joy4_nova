@@ -301,6 +301,13 @@ public class Trakt {
         public int interval;
     }
 
+    public static class InvalidDeviceCodeResponseError extends Exception {
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
     public static accessToken getAccessToken(String code) throws AccountLockedError, ForbiddenError, ServiceUnavailableError {
         retrofit2.Response<AccessToken> response = null;
         for (int attempt = 0; attempt < MAX_TRIAL; attempt++) {
@@ -336,12 +343,21 @@ public class Trakt {
      * Display the user_code and verification_url to the user, then poll with the device_code.
      * @return deviceCode object with codes and verification URL, or null on error
      */
-    public static deviceCode generateDeviceCode() throws AccountLockedError, ForbiddenError, ServiceUnavailableError {
+    public static deviceCode generateDeviceCode() throws AccountLockedError, ForbiddenError, ServiceUnavailableError, InvalidDeviceCodeResponseError {
         retrofit2.Response<com.uwetrottmann.trakt5.entities.DeviceCode> response = null;
         try {
             // Single-shot auth call (Trakt SDK returns a synchronous Response)
             response = getTraktV2().generateDeviceCode();
             if (response.isSuccessful() && response.body() != null) {
+                if (isBlank(response.body().device_code)
+                        || isBlank(response.body().user_code)
+                        || isBlank(response.body().verification_url)) {
+                    log.error("generateDeviceCode: invalid successful response missing fields device_code={}, user_code={}, verification_url={}",
+                            !isBlank(response.body().device_code),
+                            !isBlank(response.body().user_code),
+                            !isBlank(response.body().verification_url));
+                    throw new InvalidDeviceCodeResponseError();
+                }
                 final deviceCode code = new deviceCode();
                 code.device_code = response.body().device_code;
                 code.user_code = response.body().user_code;
