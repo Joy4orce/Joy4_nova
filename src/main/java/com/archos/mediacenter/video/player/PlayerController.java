@@ -2217,7 +2217,7 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         }
 
             if (mVolumeBarEnabled) {
-                final boolean passThroughHardwareVolumeKeys = ArchosFeatures.isAndroidTV(mContext) && CustomApplication.isHdmiConnected();
+                final boolean passThroughHardwareVolumeKeys = ArchosFeatures.isAndroidTV(mContext);
                 switch(keyCode) {
                     case KeyEvent.KEYCODE_VOLUME_DOWN:
                         // Let framework handle TV+HDMI keys so CEC/ARC controls external sink.
