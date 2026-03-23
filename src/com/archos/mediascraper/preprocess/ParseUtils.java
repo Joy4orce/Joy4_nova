@@ -41,9 +41,10 @@ public class ParseUtils {
 
     /* Matches "1. ", "1) ", "1 - ", "1.-.", "1._"... but not "1.Foo" (could be a starting date with space) or "1-Foo" ..*/
     // Restrict to max 3 digits to avoid matching years at the start of filenames
-    private static final Pattern LEADING_NUMBERING = Pattern.compile("^(\\d{1,3}([.)][\\s\\p{Punct}]+|\\s+\\p{Punct}[\\p{Punct}\\s]*))*");
+    // Also restrict punctuation to avoid matching "300 (2007)" as numbering "300 ("
+    private static final Pattern LEADING_NUMBERING = Pattern.compile("^(\\d{1,3}([.)][\\s\\p{Punct}]+|\\s+[\\p{Punct}&&[^\\[({]][\\p{Punct}\\s]*))*");
     // Matches "1-Foo" to be used with movies only because clashes with 24-s01e01 check with find . -type f -regex '.*/[0-9]+-[^/]*'
-    private static final Pattern LEADING_NUMBERING_DASH = Pattern.compile("^(\\d{1,3}([-]|\\s+\\p{Punct}[\\p{Punct}\\s]*))*");
+    private static final Pattern LEADING_NUMBERING_DASH = Pattern.compile("^(\\d{1,3}([-]|\\s+[\\p{Punct}&&[^\\[({]][\\p{Punct}\\s]*))*");
 
     /** besides the plain ' there is the typographic ’ and ‘ which is actually not an apostrophe */
     private static final char[] ALTERNATE_APOSTROPHES = new char[] {
