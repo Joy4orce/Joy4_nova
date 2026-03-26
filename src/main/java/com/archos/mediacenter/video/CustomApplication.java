@@ -72,6 +72,7 @@ import com.archos.mediacenter.video.utils.VideoPreferencesCommon;
 import com.archos.medialib.LibAvos;
 import com.archos.mediaprovider.video.NetworkAutoRefresh;
 import com.archos.mediaprovider.video.VideoStoreImportReceiver;
+import com.archos.mediascraper.MediaScraper;
 import com.archos.mediascraper.ScraperImage;
 import com.jakewharton.threetenabp.AndroidThreeTen;
 import com.squareup.picasso.Picasso;
@@ -85,6 +86,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.beans.PropertyChangeListener;
 import java.security.Provider;
 import java.security.Security;
@@ -647,10 +649,12 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             );
         }
 
-        // Set the dimension of the posters to save
-        ScraperImage.setGeneralPosterSize(
-                getResources().getDimensionPixelSize(R.dimen.details_poster_width),
-                getResources().getDimensionPixelSize(R.dimen.details_poster_height));
+        // Removed: was downscaling posters to details view dimensions (160dp x 240dp),
+        // discarding quality from TMDb w780 downloads. Posters are now saved at original
+        // downloaded resolution and ImageView handles display-time scaling.
+        //ScraperImage.setGeneralPosterSize(
+        //        getResources().getDimensionPixelSize(R.dimen.details_poster_width),
+        //        getResources().getDimensionPixelSize(R.dimen.details_poster_height));
 
         BASEDIR = Environment.getExternalStorageDirectory().getPath()+"Android/data/"+getPackageName();
 
@@ -1231,6 +1235,31 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                     .commit();
         }
          */
+
+        // Upgraded from 6.4.31 and below: TMDb image sizes changed (posters w342->w780, stills w342->w300,
+        // thumbs w154->w185). Clear download caches only — poster/still storage files are still referenced
+        // by the database and will be naturally replaced at higher quality when videos are re-scraped.
+        if ((novaPreviousVersionArray[0] < 6) ||
+            (novaPreviousVersionArray[0] == 6 && novaPreviousVersionArray[1] < 4) ||
+            (novaPreviousVersionArray[0] == 6 && novaPreviousVersionArray[1] == 4 && novaPreviousVersionArray[2] <= 31)) {
+            log.info("upgradeActions: clearing image download caches for TMDb image quality upgrade");
+            clearDirectory(MediaScraper.getImageCacheDirectory(context));
+            clearDirectory(MediaScraper.getPictureCacheDirectory(context));
+        }
+    }
+
+    /** Deletes all files in a directory without removing the directory itself */
+    private static void clearDirectory(File dir) {
+        if (dir != null && dir.isDirectory()) {
+            File[] files = dir.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    if (f.isFile()) {
+                        f.delete();
+                    }
+                }
+            }
+        }
     }
 
     public static CustomApplication getApplication() {
