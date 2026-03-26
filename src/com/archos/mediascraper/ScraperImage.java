@@ -41,8 +41,8 @@ public class ScraperImage {
     private static final Logger log = LoggerFactory.getLogger(ScraperImage.class);
 
     // ratio is 1.5, match poster width of TMDB: there is no rescaling if image size lower or equal to defined dimension for posters and screen size for backdrops
-    public static int POSTER_WIDTH = 342; //240
-    public static int POSTER_HEIGHT = 513; // 360
+    public static int POSTER_WIDTH = 780;
+    public static int POSTER_HEIGHT = 1170;
 
     // 780x439 64K or 300x169 16K or 185x104 8K or 92x52 4K
     public static int PICTURE_WIDTH = 300;
@@ -50,12 +50,12 @@ public class ScraperImage {
 
     // cf. https://www.themoviedb.org/talk/5abcef779251411e97025408 and formats available https://api.themoviedb.org/3/configuration?api_key=051012651ba326cf5b1e2f482342eaa2
     final static String TMDB_IMAGE_URL = "https://image.tmdb.org/t/p/";
-    final static String POSTER_THUMB = "w154";
-    final static String POSTER_LARGE = "w342";
+    final static String POSTER_THUMB = "w185";
+    final static String POSTER_LARGE = "w780";
     final static String BACKDROP_THUMB = "w300";
     final static String BACKDROP_LARGE = "w1280";
-    final static String STILL_THUMB = "w154"; // w780
-    final static String STILL_LARGE = "w342"; // w780
+    final static String STILL_THUMB = "w185";
+    final static String STILL_LARGE = "w300";
     // for poster
     public final static String TMPT = TMDB_IMAGE_URL + POSTER_THUMB;
     public final static String TMPL = TMDB_IMAGE_URL + POSTER_LARGE;
@@ -594,6 +594,15 @@ public class ScraperImage {
         }
         boolean saveOk = ImageScaler.scale(imageSource, targetName, maxWidth, maxHeight, type.scaleType);
         if (log.isDebugEnabled()) log.debug("saveSizedImage: going through ImageScaler to convert {} -> {} went {}", imageSource.getPath(), targetName, saveOk);
+        // delete cached download after successful save to avoid storing the image twice
+        // (cache is only a temporary download buffer, all subsequent accesses use the saved storage file)
+        if (saveOk && "file".equals(imageSource.getScheme())) {
+            File cachedFile = new File(imageSource.getPath());
+            if (cachedFile.exists()) {
+                if (log.isDebugEnabled()) log.debug("saveSizedImage: deleting cached file {}", cachedFile.getPath());
+                cachedFile.delete();
+            }
+        }
         if (log.isTraceEnabled()) if (dbgTimer != null) log.trace("saveSizedImage: {}download() in total", dbgTimer.total());
         return saveOk;
     }
