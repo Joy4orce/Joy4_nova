@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.SystemClock;
 
 import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.DefaultLifecycleObserver;
@@ -83,10 +84,10 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
     // window size used to split queries to db
     private final static int WINDOW_SIZE = 2500;
 
-    static int sNumberOfFilesRemainingToProcess = 0;
-    static int sTotalNumberOfFilesRemainingToProcess = 0;
-    static int sNumberOfFilesScraped = 0;
-    static int sNumberOfFilesNotScraped = 0;
+    static volatile int sNumberOfFilesRemainingToProcess = 0;
+    static volatile int sTotalNumberOfFilesRemainingToProcess = 0;
+    static volatile int sNumberOfFilesScraped = 0;
+    static volatile int sNumberOfFilesNotScraped = 0;
     public static String KEY_ENABLE_AUTO_SCRAP ="enable_auto_scrap_key";
     public static String KEY_SCRAPE_FROM_DB ="scrape_from_database_key";
     private final static String[] SCRAPER_ACTIVITY_COLS = {
@@ -124,6 +125,9 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
     private static int networkScanCount = 0;
     private static final Object networkScanLock = new Object();
     private static final String PREF_IS_SCRAPE_DIRTY = "is_scrape_dirty";
+    private static final long OBSERVER_REFRESH_THROTTLE_MS = 1500L;
+    private static final Object observerRefreshLock = new Object();
+    private static long sLastObserverRefreshAtMs = 0L;
 
     /**
      * Ugly implementation based on a static variable, guessing that there is only one instance at a time (seems to be true...)
@@ -445,27 +449,59 @@ public class AutoScrapeService extends Service implements DefaultLifecycleObserv
                 if (PreferenceManager.getDefaultSharedPreferences(appContext).getBoolean(KEY_ENABLE_AUTO_SCRAP, true) && (isForeground || isForceAfterNetworkScan)) {
                     // Check if a scraping operation is already in progress
                     if (LoaderUtils.getScrapeInProgress()) {
-                        if (log.isTraceEnabled()) log.trace("registerObserver.onChange: already scraping, not launching service!");
+                        if (!shouldRefreshProgressCount()) {
+                            if (log.isTraceEnabled()) {
+                                log.trace("registerObserver.onChange: scraping in progress, skip count refresh due to throttle");
+                            }
+                            return;
+                        }
+                        int pendingCount = getPendingNotScrapedCount(appContext);
+                        if (pendingCount > 0 && pendingCount > sTotalNumberOfFilesRemainingToProcess) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("registerObserver.onChange: scraping in progress, refresh remaining count {} -> {}", sTotalNumberOfFilesRemainingToProcess, pendingCount);
+                            }
+                            sTotalNumberOfFilesRemainingToProcess = pendingCount;
+                        } else if (log.isTraceEnabled()) {
+                            log.trace("registerObserver.onChange: already scraping, pendingCount={}, currentRemaining={}", pendingCount, sTotalNumberOfFilesRemainingToProcess);
+                        }
                         return;
                     }
 
                     // Look for all the videos not yet processed and not located in the Camera folder
-                    String[] selectionArgs = new String[]{ Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getPath() + "/Camera" + "/%" };
-                    Cursor cursor = appContext.getContentResolver().query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, SCRAPER_ACTIVITY_COLS, WHERE_NOT_SCRAPED, selectionArgs, null);
-
-                    if (cursor != null) {
-                        final int cursorGetCount = cursor.getCount();
-                        if (cursorGetCount > 0) {
-                            if (log.isDebugEnabled()) log.debug("registerObserver: onChange getting {} videos not yet scraped, launching service.", cursorGetCount);
-                            AutoScrapeService.startService(appContext);
-                        } else {
-                            if (log.isDebugEnabled()) log.debug("registerObserver: onChange getting {} videos not yet scraped -> not launching service!", cursorGetCount);
-                        }
-                        cursor.close();
+                    int pendingCount = getPendingNotScrapedCount(appContext);
+                    if (pendingCount > 0) {
+                        if (log.isDebugEnabled()) log.debug("registerObserver: onChange getting {} videos not yet scraped, launching service.", pendingCount);
+                        AutoScrapeService.startService(appContext);
+                    } else {
+                        if (log.isDebugEnabled()) log.debug("registerObserver: onChange getting {} videos not yet scraped -> not launching service!", pendingCount);
                     }
                 }
             }
         });
+    }
+
+    private static boolean shouldRefreshProgressCount() {
+        long now = SystemClock.elapsedRealtime();
+        synchronized (observerRefreshLock) {
+            if (now - sLastObserverRefreshAtMs < OBSERVER_REFRESH_THROTTLE_MS) {
+                return false;
+            }
+            sLastObserverRefreshAtMs = now;
+            return true;
+        }
+    }
+
+    private static int getPendingNotScrapedCount(Context context) {
+        String[] selectionArgs = new String[]{ Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getPath() + "/Camera" + "/%" };
+        Cursor cursor = context.getContentResolver().query(VideoStore.Video.Media.EXTERNAL_CONTENT_URI, SCRAPER_ACTIVITY_COLS, WHERE_NOT_SCRAPED, selectionArgs, null);
+        if (cursor == null) {
+            return 0;
+        }
+        try {
+            return cursor.getCount();
+        } finally {
+            cursor.close();
+        }
     }
 
     public static boolean isEnable(Context context) {
