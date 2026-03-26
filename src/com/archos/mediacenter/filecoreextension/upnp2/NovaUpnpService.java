@@ -20,9 +20,13 @@ import org.jupnp.UpnpServiceConfiguration;
 import org.jupnp.android.AndroidUpnpServiceConfiguration;
 import org.jupnp.android.AndroidUpnpServiceImpl;
 import org.jupnp.model.ServerClientTokens;
+import org.jupnp.transport.impl.ServletStreamServerConfigurationImpl;
+import org.jupnp.transport.impl.ServletStreamServerImpl;
 import org.jupnp.transport.impl.jetty.JettyStreamClientImpl;
 import org.jupnp.transport.impl.jetty.StreamClientConfigurationImpl;
+import org.jupnp.transport.spi.NetworkAddressFactory;
 import org.jupnp.transport.spi.StreamClient;
+import org.jupnp.transport.spi.StreamServer;
 
 /**
  * Custom jUPnP service implementation that uses Nova-specific configuration
@@ -48,6 +52,13 @@ public class NovaUpnpService extends AndroidUpnpServiceImpl {
                                 return tokens.toString();
                             }
                         });
+            }
+
+            @Override
+            public StreamServer createStreamServer(NetworkAddressFactory networkAddressFactory) {
+                return new ServletStreamServerImpl(new ServletStreamServerConfigurationImpl(
+                        NovaJettyServletContainer.INSTANCE,
+                        networkAddressFactory.getStreamListenPort()));
             }
         };
     }
