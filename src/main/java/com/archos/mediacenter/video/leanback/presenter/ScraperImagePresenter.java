@@ -149,7 +149,7 @@ public abstract class ScraperImagePresenter extends Presenter {
         String imageUrl = getImageUrl(image);
 
         if (mBigMode)
-            imageUrl = image.getLargeUrl().replace("/w342/", "/w780/");
+            imageUrl = image.getLargeUrl().replace("/" + ScraperImage.POSTER_LARGE + "/", "/original/");
 
         return imageUrl;
     }
