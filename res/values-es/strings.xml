@@ -977,6 +977,7 @@ Experimental: puede no funcionar en todas las configuraciones.</string>
     <string name="add_to_list">Añadir a la lista</string>
     <string name="no_resume_available">Actualmente la reanudación no está disponible</string>
     <string name="no_list_detected">No se ha detectado ninguna lista. La lista puede ser creada agregando nuevos elementos directamente desde la información de vídeo, o puede sincronizarse con su cuenta trakt.</string>
+    <string name="not_available_during_media_scanning">No disponible durante la exploración de medios.</string>
     <string name="premium_already_purchased">La versión Premium ya ha sido comprada</string>
     <string name="remove_from_list">Eliminar de la lista</string>
     <string name="warning_swdec">Advertencia: ¡La descodificación por hardware está desactivada!</string>

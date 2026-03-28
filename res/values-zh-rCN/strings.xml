@@ -973,6 +973,7 @@
     <string name="add_to_list">添加至列表</string>
     <string name="no_resume_available">当前没有可用的播放进度</string>
     <string name="no_list_detected">当前未检测到列表。可以通过直接从视频信息中添加新项目创建列表，或者可以与您的 trakt 帐户同步。</string>
+    <string name="not_available_during_media_scanning">在媒体扫描期间不可用。</string>
     <string name="premium_already_purchased">已购买高级版</string>
     <string name="remove_from_list">从列表中删除</string>
     <string name="warning_swdec">警告：硬件解码已禁用！</string>
