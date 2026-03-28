@@ -269,6 +269,10 @@ public class LibAvos {
         nativeSetAudioInterface(audio_interface);
     }
 
+    public static void setAudioDecoder(int audioDecoder) {
+        nativeSetAudioDecoder(audioDecoder);
+    }
+
     public static void setCodepage(int codepage) {
         if (DBG) Log.d(TAG, "setCodepage: " + codepage);
         nativeSetCodepage(codepage);
@@ -284,6 +288,10 @@ public class LibAvos {
 
     public static void setHdmiSupportedAudioCodecs(long hdmiAudioCodecsFlag) {
         nativeSetHdmiSupportedAudioCodecs(hdmiAudioCodecsFlag);
+    }
+
+    public static void setMediaCodecAudioCapabilities(long mediaCodecAudioCapabilities) {
+        nativeSetMediaCodecAudioCapabilities(mediaCodecAudioCapabilities);
     }
 
     public static void setMaxPcmChannels(int maxChannels) {
@@ -356,6 +364,8 @@ public class LibAvos {
 
     private static native void nativeSetAudioInterface(int audio_interface);
 
+    private static native void nativeSetAudioDecoder(int audioDecoder);
+
     private static native void nativeSetCodepage(int codepage);
 
     private static native void nativeSetOutputSampleRate(int sampleRate);
@@ -363,6 +373,7 @@ public class LibAvos {
     private static native void nativeSetPassthrough(int forcePassthrough);
 
     private static native void nativeSetHdmiSupportedAudioCodecs(long hdmiAudioCodecsFlag);
+    private static native void nativeSetMediaCodecAudioCapabilities(long mediaCodecAudioCapabilities);
     private static native void nativeSetMaxPcmChannels(int maxChannels);
     private static native void nativeSetPcmChannelMasks(int[] channelMasks);
 
@@ -397,4 +408,8 @@ public class LibAvos {
     public static final int MP_AUDIO_INTERFACE_ANY = 0;
     public static final int MP_AUDIO_INTERFACE_AUDIOTRACK = 1;
     public static final int MP_AUDIO_INTERFACE_OPENSLES = 2;
+    // audio decoder preference
+    public static final int MP_AUDIO_DECODER_AUTO = 0;
+    public static final int MP_AUDIO_DECODER_FFMPEG = 1;
+    public static final int MP_AUDIO_DECODER_MEDIACODEC = 2;
 }
