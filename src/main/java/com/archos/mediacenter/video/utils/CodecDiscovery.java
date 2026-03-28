@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 import com.archos.mediacenter.video.CustomApplication;
 import com.archos.mediacenter.video.R;
@@ -38,6 +39,69 @@ public class CodecDiscovery {
 
 	public static boolean isCodecTypeSupported(String codecType, boolean allowSwCodec) {
 		return isCodecTypeSupported(codecType, allowSwCodec, MediaCodecList.REGULAR_CODECS);
+	}
+
+	public static long getMediaCodecAudioCapabilities(boolean allowSwCodec) {
+		long flags = 0;
+		final MediaCodecInfo[] codecInfos;
+		try {
+			MediaCodecList codecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+			codecInfos = codecList.getCodecInfos();
+		} catch (RuntimeException e) {
+			log.warn("getMediaCodecAudioCapabilities: MediaCodecList query failed", e);
+			return 0;
+		}
+
+		for (MediaCodecInfo codecInfo : codecInfos) {
+			if (codecInfo.isEncoder() || (!allowSwCodec && isSwCodec(codecInfo))) {
+				continue;
+			}
+
+			String[] types = codecInfo.getSupportedTypes();
+			for (String type : types) {
+				String mime = type.toLowerCase(Locale.US);
+				switch (mime) {
+					case "audio/ac3":
+						flags |= 1L << 5;
+						break;
+					case "audio/eac3":
+						flags |= 1L << 6;
+						break;
+					case "audio/eac3-joc":
+						flags |= 1L << 6;
+						flags |= 1L << 18;
+						break;
+					case "audio/vnd.dts":
+					case "audio/dts":
+						flags |= 1L << 7;
+						break;
+					case "audio/vnd.dts.hd":
+					case "audio/dts-hd":
+						flags |= 1L << 8;
+						flags |= 1L << 29;
+						break;
+					case "audio/mpeg":
+						flags |= 1L << 9;
+						break;
+					case "audio/mp4a-latm":
+						flags |= 1L << 10;
+						break;
+					case "audio/true-hd":
+					case "audio/truehd":
+						flags |= 1L << 14;
+						break;
+					case "audio/opus":
+						flags |= 1L << 20;
+						break;
+					default:
+						break;
+				}
+			}
+		}
+
+		if (log.isDebugEnabled()) log.debug("getMediaCodecAudioCapabilities: allowSwCodec={} flags={}", allowSwCodec, flags);
+
+		return flags;
 	}
 
 	public static void displaySupportsDoVi(boolean isSupported) {

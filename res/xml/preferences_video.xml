@@ -50,6 +50,15 @@
             android:summary="@string/audio_interface_choice_summary"
             android:title="@string/audio_interface_choice_title"
             app:iconSpaceReserved="false"/>
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/audio_decoder_choice_entries"
+            android:entryValues="@array/audio_decoder_choice_entryvalues"
+            android:key="audio_decoder_choice"
+            android:persistent="true"
+            android:summary="@string/audio_decoder_choice_summary"
+            android:title="@string/audio_decoder_choice_title"
+            app:iconSpaceReserved="false"/>
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="enable_cutout_mode_short_edges"

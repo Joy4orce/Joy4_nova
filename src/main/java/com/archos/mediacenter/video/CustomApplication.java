@@ -65,6 +65,7 @@ import com.archos.mediacenter.video.picasso.SmbRequestHandler;
 import com.archos.mediacenter.video.picasso.ThumbnailRequestHandler;
 import com.archos.mediacenter.video.player.PrivateMode;
 import com.archos.mediacenter.video.player.PlayerActivity;
+import com.archos.mediacenter.video.utils.CodecDiscovery;
 import com.archos.mediacenter.video.utils.LocaleConfigParser;
 import com.archos.mediacenter.video.utils.OpenSubtitlesApiHelper;
 import com.archos.mediacenter.video.utils.TrustingOkHttp3Downloader;
@@ -123,6 +124,8 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private static AudioDeviceCallback mAudioDeviceCallback;
     private static boolean isIecEncapsulationCapable = false;
     private static boolean isDirectPcmMultichannelCapable = false;
+    private static long mediaCodecAudioCapabilityFlag = 0;
+    private static boolean mediaCodecAudioCapabilityFlagInitialized = false;
     public static final long allHdmiAudioCodecs = 0b11111111111111111111111111111111;
     private static boolean hasManageExternalStoragePermissionInManifest = false;
     public static boolean isManageExternalStoragePermissionInManifest() { return hasManageExternalStoragePermissionInManifest; }
@@ -372,6 +375,27 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             return hdmiAudioEncodingFlag;
         }
         return spdifAudioEncodingFlag;
+    }
+
+    private static synchronized void refreshMediaCodecAudioCapabilities(String reason) {
+        if (Build.VERSION.SDK_INT < 23) {
+            mediaCodecAudioCapabilityFlag = 0;
+            mediaCodecAudioCapabilityFlagInitialized = true;
+            return;
+        }
+
+        mediaCodecAudioCapabilityFlag = CodecDiscovery.getMediaCodecAudioCapabilities(false);
+        mediaCodecAudioCapabilityFlagInitialized = true;
+        if (log != null) {
+            log.info("refreshMediaCodecAudioCapabilities({}): {}", reason, getSupportedAudioCodecs(mediaCodecAudioCapabilityFlag));
+        }
+    }
+
+    public static long getMediaCodecAudioCapabilitiesFlag() {
+        if (!mediaCodecAudioCapabilityFlagInitialized) {
+            refreshMediaCodecAudioCapabilities("lazy");
+        }
+        return mediaCodecAudioCapabilityFlag;
     }
 
     private static SambaDiscovery mSambaDiscovery = null;

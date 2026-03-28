@@ -826,6 +826,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             } else {
                 LibAvos.setHdmiSupportedAudioCodecs(CustomApplication.getNativeAudioCodecsFlag());
             }
+            LibAvos.setMediaCodecAudioCapabilities(CustomApplication.getMediaCodecAudioCapabilitiesFlag());
             mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             // note enable_downmix_androidtv and disable_downmix are the opposite same settings but only one applies to androidTV
             // this is done on purpose to respect logic of presentation and default value

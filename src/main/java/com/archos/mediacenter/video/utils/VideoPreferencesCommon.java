@@ -180,6 +180,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
     public static final String KEY_UI_LANG_SYSTEM = "syst";
     public static final String KEY_DEC_CHOICE = "dec_choice";
     public static final String KEY_AUDIO_INTERFACE_CHOICE = "audio_interface_choice";
+    public static final String KEY_AUDIO_DECODER_CHOICE = "audio_decoder_choice";
     public static final String KEY_SUBTITLES_HIDE = "subtitles_hide_default";
     public static final String KEY_SUBTITLES_FAV_LANG = "favSubLang";
     public static final String KEY_AUDIO_TRACK_FAV_LANG = "favAudioLang";
