@@ -247,7 +247,7 @@ public class MovieScraper3 extends BaseScraper2 {
         }
 
         if (allResults.isEmpty()) {
-            return new ScrapeSearchResult(null, true, status, reason);
+            return new ScrapeSearchResult(allResults, true, status, reason);
         }
 
         // UNIFIED SCORING:
