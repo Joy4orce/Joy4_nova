@@ -414,6 +414,8 @@ public class AvosMediaPlayer implements IMediaPlayer {
 
     public native boolean setAudioTrack(int stream);
 
+    public native void refreshAudioOutput();
+
     public native void setAudioFilter(int n, int night_on);
 
     public native void setAvDelay(int delay);

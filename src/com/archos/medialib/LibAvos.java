@@ -294,6 +294,14 @@ public class LibAvos {
         nativeSetMediaCodecAudioCapabilities(mediaCodecAudioCapabilities);
     }
 
+    public static void setSpatializerCapabilities(int spatializerCapabilities) {
+        nativeSetSpatializerCapabilities(spatializerCapabilities);
+    }
+
+    public static void setSpatializerEnabled(boolean enabled) {
+        nativeSetSpatializerEnabled(enabled);
+    }
+
     public static void setMaxPcmChannels(int maxChannels) {
         nativeSetMaxPcmChannels(maxChannels);
     }
@@ -374,6 +382,8 @@ public class LibAvos {
 
     private static native void nativeSetHdmiSupportedAudioCodecs(long hdmiAudioCodecsFlag);
     private static native void nativeSetMediaCodecAudioCapabilities(long mediaCodecAudioCapabilities);
+    private static native void nativeSetSpatializerCapabilities(int spatializerCapabilities);
+    private static native void nativeSetSpatializerEnabled(boolean enabled);
     private static native void nativeSetMaxPcmChannels(int maxChannels);
     private static native void nativeSetPcmChannelMasks(int[] channelMasks);
 

@@ -571,6 +571,9 @@ public class AndroidMediaPlayer extends MediaPlayer implements IMediaPlayer,
         return false;
     }
 
+    public void refreshAudioOutput() throws IllegalStateException {
+    }
+
     public void checkSubtitles() {
     }
 

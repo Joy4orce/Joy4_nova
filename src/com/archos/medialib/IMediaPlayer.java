@@ -102,6 +102,8 @@ public interface IMediaPlayer {
 
     public boolean setAudioTrack(int stream) throws IllegalStateException;
 
+    public void refreshAudioOutput() throws IllegalStateException;
+
     public void checkSubtitles() throws IllegalStateException;
 
     public boolean setSubtitleTrack(int stream) throws IllegalStateException;
