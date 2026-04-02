@@ -684,7 +684,6 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             if (fileUtilsQ == null) fileUtilsQ = FileUtilsQ.getInstance(mContext);
         }).start();
 
-        Trakt.initApiKeys(this);
         new Thread() {
             public void run() {
                 this.setPriority(Thread.MIN_PRIORITY);
@@ -730,17 +729,6 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                 }
             };
 
-        launchSambaDiscovery();
-
-        // init HttpImageManager manager.
-        mHttpImageManager = new HttpImageManager(HttpImageManager.createDefaultMemoryCache(), 
-                new FileSystemPersistence(BASEDIR));
-
-        // Note: we do not init UPnP here, we wait for the user to enter the network view
-
-        NetworkAutoRefresh.init(this);
-        //init credentials db
-        NetworkCredentialsDatabase.getInstance().loadCredentials(this);
         ArchosUtils.setGlobalContext(this.getApplicationContext());
         // only launch BootupRecommandation if on AndroidTV and before Android O otherwise target TV channels
         if(ArchosFeatures.isAndroidTV(this) && Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
@@ -749,12 +737,6 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         if (log.isTraceEnabled()) log.trace("onCreate: manifest permissions {}", Arrays.toString(getPermissions(mContext)));
         hasManageExternalStoragePermissionInManifest = hasPermission("android.permission.MANAGE_EXTERNAL_STORAGE", mContext);
         if (log.isTraceEnabled()) log.trace("onCreate: has permission android.permission.MANAGE_EXTERNAL_STORAGE {}", hasManageExternalStoragePermissionInManifest);
-
-        updateVersionState(this);
-        if (openSubtitlesApiHelper == null) openSubtitlesApiHelper = OpenSubtitlesApiHelper.getInstance();
-        //makeUseOpenSubtitlesRestApi(PreferenceManager.getDefaultSharedPreferences(this).getBoolean(VideoPreferencesCommon.KEY_OPENSUBTITILES_REST_API, true));
-
-        upgradeActions(mContext);
 
         // Amazon has an "optional" check that when opening IEC61937, the content is stereo
         // It is pushed into some weird vendor callbacks, I have no idea what they are supposed to mean
@@ -770,13 +752,34 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         }
 
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        if (Build.VERSION.SDK_INT >= 23) {
-            // Detect initial audio devices (include HDMI ARC/eARC)
-            refreshAudioOutputCapabilities("onCreate");
-        } else {
-            // only set hasSpdif since hasHdmi should be caught by the broadcast receiver and be valid for lower APIs
-            hasSpdif = true;
-        }
+
+        // init HttpImageManager manager (requires main thread Looper for internal Handler)
+        mHttpImageManager = new HttpImageManager(HttpImageManager.createDefaultMemoryCache(),
+                new FileSystemPersistence(BASEDIR));
+
+        // NetworkAutoRefresh.init requires main thread (LifecycleRegistry.addObserver)
+        NetworkAutoRefresh.init(this);
+
+        // Defer heavy initialization to a background thread to speed up cold start
+        final Context appContext = mContext;
+        final CustomApplication app = this;
+        new Thread("nova-deferred-init") {
+            public void run() {
+                Trakt.initApiKeys(appContext);
+                launchSambaDiscovery();
+                NetworkCredentialsDatabase.getInstance().loadCredentials(appContext);
+                updateVersionState(appContext);
+                if (openSubtitlesApiHelper == null) openSubtitlesApiHelper = OpenSubtitlesApiHelper.getInstance();
+                upgradeActions(appContext);
+                if (Build.VERSION.SDK_INT >= 23) {
+                    refreshAudioOutputCapabilities("onCreate");
+                    refreshMediaCodecAudioCapabilities("onCreate");
+                    refreshSpatializerCapabilities("onCreate");
+                } else {
+                    hasSpdif = true;
+                }
+            }
+        }.start();
     }
 
     private void launchSambaDiscovery() {
