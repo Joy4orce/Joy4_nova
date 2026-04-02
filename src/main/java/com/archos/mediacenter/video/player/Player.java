@@ -958,6 +958,12 @@ public class Player implements IPlayerControl,
         }
     }
 
+    public void refreshAudioOutput() {
+        if (isInPlaybackState()) {
+            mMediaPlayer.refreshAudioOutput();
+        }
+    }
+
     private void handleMetadata(IMediaPlayer mp) {
         if (log.isDebugEnabled()) log.debug("handleMetadata");
         MediaMetadata data = mp.getMediaMetadata(IMediaPlayer.METADATA_ALL,

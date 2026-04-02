@@ -126,6 +126,8 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     private static boolean isDirectPcmMultichannelCapable = false;
     private static long mediaCodecAudioCapabilityFlag = 0;
     private static boolean mediaCodecAudioCapabilityFlagInitialized = false;
+    private static int spatializerCapabilities = 0;
+    private static boolean spatializerCapabilitiesInitialized = false;
     public static final long allHdmiAudioCodecs = 0b11111111111111111111111111111111;
     private static boolean hasManageExternalStoragePermissionInManifest = false;
     public static boolean isManageExternalStoragePermissionInManifest() { return hasManageExternalStoragePermissionInManifest; }
@@ -381,13 +383,21 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         if (Build.VERSION.SDK_INT < 23) {
             mediaCodecAudioCapabilityFlag = 0;
             mediaCodecAudioCapabilityFlagInitialized = true;
+            if (log != null && log.isDebugEnabled()) {
+                log.debug("refreshMediaCodecAudioCapabilities({}): API {} < 23, no MediaCodec audio capability scan",
+                        reason, Build.VERSION.SDK_INT);
+            }
             return;
         }
 
         mediaCodecAudioCapabilityFlag = CodecDiscovery.getMediaCodecAudioCapabilities(false);
         mediaCodecAudioCapabilityFlagInitialized = true;
         if (log != null) {
-            log.info("refreshMediaCodecAudioCapabilities({}): {}", reason, getSupportedAudioCodecs(mediaCodecAudioCapabilityFlag));
+            String capabilities = getSupportedAudioCodecs(mediaCodecAudioCapabilityFlag);
+            log.info("refreshMediaCodecAudioCapabilities({}): flags=0x{} codecs={}",
+                    reason,
+                    Long.toHexString(mediaCodecAudioCapabilityFlag),
+                    capabilities.isEmpty() ? "<none>" : capabilities);
         }
     }
 
@@ -396,6 +406,34 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
             refreshMediaCodecAudioCapabilities("lazy");
         }
         return mediaCodecAudioCapabilityFlag;
+    }
+
+    private static synchronized void refreshSpatializerCapabilities(String reason) {
+        if (Build.VERSION.SDK_INT < 32) {
+            spatializerCapabilities = 0;
+            spatializerCapabilitiesInitialized = true;
+            if (log != null && log.isDebugEnabled()) {
+                log.debug("refreshSpatializerCapabilities({}): API {} < 32, no Spatializer support",
+                        reason, Build.VERSION.SDK_INT);
+            }
+            return;
+        }
+
+        spatializerCapabilities = CodecDiscovery.getSpatializerCapabilities(mContext);
+        spatializerCapabilitiesInitialized = true;
+        if (log != null) {
+            log.info("refreshSpatializerCapabilities({}): flags=0x{} state={}",
+                    reason,
+                    Integer.toHexString(spatializerCapabilities),
+                    CodecDiscovery.getSpatializerCapabilitiesDescription(mContext, spatializerCapabilities));
+        }
+    }
+
+    public static int getSpatializerCapabilities() {
+        if (!spatializerCapabilitiesInitialized) {
+            refreshSpatializerCapabilities("lazy");
+        }
+        return spatializerCapabilities;
     }
 
     private static SambaDiscovery mSambaDiscovery = null;
@@ -847,6 +885,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                         }
                     }
                     refreshAudioOutputCapabilities("devicesAdded");
+                    refreshSpatializerCapabilities("devicesAdded");
                 }
                 @Override
                 public void onAudioDevicesRemoved(AudioDeviceInfo[] removedDevices) {
@@ -856,6 +895,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                         }
                     }
                     refreshAudioOutputCapabilities("devicesRemoved");
+                    refreshSpatializerCapabilities("devicesRemoved");
                 }
             };
             mAudioManager.registerAudioDeviceCallback(mAudioDeviceCallback, null);
@@ -884,6 +924,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                 // Prefer scanning AudioManager output devices (which include HDMI_ARC/HDMI_EARC).
                 if (Build.VERSION.SDK_INT >= 23 && mAudioManager != null) {
                     refreshAudioOutputCapabilities("ACTION_HDMI_AUDIO_PLUG");
+                    refreshSpatializerCapabilities("ACTION_HDMI_AUDIO_PLUG");
                     // If system reports plugged but device scan didn't find HDMI, fall back to intent values.
                     if (isPlugged && !hasHdmi) {
                         hasHdmi = true;

@@ -15,8 +15,12 @@
 package com.archos.mediacenter.video.utils;
 
 import android.content.Context;
+import android.media.AudioAttributes;
+import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
+import android.media.Spatializer;
 import android.os.Build;
 
 import org.slf4j.Logger;
@@ -32,6 +36,11 @@ import com.archos.mediacenter.video.player.Player;
 public class CodecDiscovery {
 
 	private static final Logger log = LoggerFactory.getLogger(CodecDiscovery.class);
+	public static final int SPATIALIZER_CAP_SUPPORTED = 1;
+	public static final int SPATIALIZER_CAP_AVAILABLE = 1 << 1;
+	public static final int SPATIALIZER_CAP_ENABLED = 1 << 2;
+	public static final int SPATIALIZER_CAP_CAN_SPATIALIZE_5_1 = 1 << 3;
+	public static final int SPATIALIZER_CAP_CAN_SPATIALIZE_7_1 = 1 << 4;
 
 	// log4j/logback not possible since used from native it seems
 	private static boolean isDoViDisabled = false;
@@ -102,6 +111,44 @@ public class CodecDiscovery {
 		if (log.isDebugEnabled()) log.debug("getMediaCodecAudioCapabilities: allowSwCodec={} flags={}", allowSwCodec, flags);
 
 		return flags;
+	}
+
+	public static int getSpatializerCapabilities(Context context) {
+		if (Build.VERSION.SDK_INT < 32 || context == null) {
+			return 0;
+		}
+		try {
+			AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+			if (audioManager == null) {
+				return 0;
+			}
+			return Api32.getSpatializerCapabilities(audioManager);
+		} catch (RuntimeException e) {
+			log.warn("getSpatializerCapabilities: spatializer query failed", e);
+			return 0;
+		}
+	}
+
+	public static String getSpatializerCapabilitiesDescription(Context context, int capabilities) {
+		if (Build.VERSION.SDK_INT < 32) {
+			return "unsupported (API " + Build.VERSION.SDK_INT + ")";
+		}
+		if ((capabilities & SPATIALIZER_CAP_SUPPORTED) == 0) {
+			return "not supported";
+		}
+		StringBuilder sb = new StringBuilder("supported");
+		sb.append((capabilities & SPATIALIZER_CAP_AVAILABLE) != 0 ? ", available" : ", unavailable");
+		sb.append((capabilities & SPATIALIZER_CAP_ENABLED) != 0 ? ", enabled" : ", disabled");
+		if ((capabilities & SPATIALIZER_CAP_CAN_SPATIALIZE_5_1) != 0) {
+			sb.append(", 5.1=yes");
+		}
+		if ((capabilities & SPATIALIZER_CAP_CAN_SPATIALIZE_7_1) != 0) {
+			sb.append(", 7.1=yes");
+		}
+		if ((capabilities & (SPATIALIZER_CAP_CAN_SPATIALIZE_5_1 | SPATIALIZER_CAP_CAN_SPATIALIZE_7_1)) == 0) {
+			sb.append(", multichannel=no");
+		}
+		return sb.toString();
 	}
 
 	public static void displaySupportsDoVi(boolean isSupported) {
@@ -254,10 +301,58 @@ public class CodecDiscovery {
 				technicalInfo += "\n" + context.getResources().getString(R.string.spdif_audio_capabilities) + " " + spdifAudioCodecs;
 		}
 
+		String mediaCodecAudioCodecs = CustomApplication.getSupportedAudioCodecs(CustomApplication.getMediaCodecAudioCapabilitiesFlag());
+		if (!mediaCodecAudioCodecs.isEmpty())
+			technicalInfo += "\n" + context.getResources().getString(R.string.mediacodec_audio_capabilities) + " " + mediaCodecAudioCodecs;
+
+		technicalInfo += "\n" + context.getResources().getString(R.string.spatialization_capabilities) + " "
+				+ getSpatializerCapabilitiesDescription(context, CustomApplication.getSpatializerCapabilities());
+
 		int maxAudioChannelCount = CustomApplication.getMaxAudioChannelCount();
 		if (maxAudioChannelCount > 0)
 			technicalInfo += "\n" + context.getResources().getString(R.string.max_audio_channels) + " " + maxAudioChannelCount;
 		return technicalInfo;
+	}
+
+	@androidx.annotation.RequiresApi(32)
+	private static final class Api32 {
+		private static int getSpatializerCapabilities(AudioManager audioManager) {
+			Spatializer spatializer = audioManager.getSpatializer();
+			if (spatializer == null) {
+				return 0;
+			}
+			int capabilities = 0;
+			if (spatializer.getImmersiveAudioLevel() != Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE) {
+				capabilities |= SPATIALIZER_CAP_SUPPORTED;
+			}
+			if (spatializer.isAvailable()) {
+				capabilities |= SPATIALIZER_CAP_AVAILABLE;
+			}
+			if (spatializer.isEnabled()) {
+				capabilities |= SPATIALIZER_CAP_ENABLED;
+			}
+			AudioAttributes audioAttributes = new AudioAttributes.Builder()
+					.setUsage(AudioAttributes.USAGE_MEDIA)
+					.setContentType(AudioAttributes.CONTENT_TYPE_MOVIE)
+					.build();
+			AudioFormat format51 = new AudioFormat.Builder()
+					.setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+					.setSampleRate(48000)
+					.setChannelMask(AudioFormat.CHANNEL_OUT_5POINT1)
+					.build();
+			if (spatializer.canBeSpatialized(audioAttributes, format51)) {
+				capabilities |= SPATIALIZER_CAP_CAN_SPATIALIZE_5_1;
+			}
+			AudioFormat format71 = new AudioFormat.Builder()
+					.setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+					.setSampleRate(48000)
+					.setChannelMask(AudioFormat.CHANNEL_OUT_7POINT1_SURROUND)
+					.build();
+			if (spatializer.canBeSpatialized(audioAttributes, format71)) {
+				capabilities |= SPATIALIZER_CAP_CAN_SPATIALIZE_7_1;
+			}
+			return capabilities;
+		}
 	}
 
 }

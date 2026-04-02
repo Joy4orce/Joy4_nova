@@ -183,6 +183,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     private static final String KEY_PLAYER_PROJECTOR_MODE = "player_projector_mode_key";
     private static final String KEY_AUDIO_FILT = "pref_audio_filt_int_key"; // used to be "pref_audio_filt_key", containing a string
     private static final String KEY_AUDIO_FILT_NIGHT = "pref_audio_filt_night_int_key";
+    private static final String KEY_SPATIALIZATION_ENABLED = "player_spatialization_enabled";
     private static final String KEY_NOTIFICATIONS_MODE = "notifications_mode";
     private static final String KEY_NETWORK_BOOKMARKS = "network_bookmarks";
     private static final String KEY_LOCK_ROTATION = "pref_lock_rotation";
@@ -221,6 +222,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     private static final int MENU_PREFERENCES = 305;
     private static final int MENU_AUDIO_DELAY_ID = 306;
     private static final int MENU_AUDIO_SPEED_ID = 307;
+    private static final int MENU_SPATIALIZATION_ID = 308;
 
     // Notification types (keep in sync with res/values/arrays.xml:pref_notification_mode_entries)
     private static final int NOTIFICATION_MODE_ALL = 0;
@@ -455,6 +457,10 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 if (mSurfaceController != null) {
                     mSurfaceController.setHdmiPlugged(plugged, w, h);
                 }
+                invalidateOptionsMenu();
+                if (isTVMode) {
+                    refreshAudioTracksTVMenu();
+                }
             }
             else if(action.equals(PlayerService.PLAYER_SERVICE_STARTED)){
                 if(mIsReadytoStart)
@@ -467,6 +473,74 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
     public boolean isPluggedOnTv() {
         return (TVUtils.isTV(this) || mHdmiPlugged);
+    }
+
+    private boolean isSpatializationSupportedByPlatform() {
+        int capabilities = CustomApplication.getSpatializerCapabilities();
+        return Build.VERSION.SDK_INT >= 32
+                && (capabilities & CodecDiscovery.SPATIALIZER_CAP_SUPPORTED) != 0
+                && (capabilities & CodecDiscovery.SPATIALIZER_CAP_AVAILABLE) != 0
+                && (capabilities & (CodecDiscovery.SPATIALIZER_CAP_CAN_SPATIALIZE_5_1
+                | CodecDiscovery.SPATIALIZER_CAP_CAN_SPATIALIZE_7_1)) != 0;
+    }
+
+    private boolean isSpatializationToggleAvailable() {
+        return isSpatializationSupportedByPlatform()
+                && Integer.parseInt(mPreferences.getString("force_audio_passthrough_multiple", "0")) == 0;
+    }
+
+    private boolean isSpatializationPreferenceEnabled() {
+        return mPreferences.getBoolean(KEY_SPATIALIZATION_ENABLED, true);
+    }
+
+    private boolean isSpatializationEnabledForPlayback() {
+        return isSpatializationToggleAvailable() && isSpatializationPreferenceEnabled();
+    }
+
+    private void applySpatializationPreferenceToAvos() {
+        if (LibAvos.isAvailable()) {
+            LibAvos.setSpatializerEnabled(isSpatializationEnabledForPlayback());
+        }
+    }
+
+    private void applyDownmixPreferenceToAvos() {
+        if (!LibAvos.isAvailable()) {
+            return;
+        }
+        int passthroughMode = Integer.parseInt(mPreferences.getString("force_audio_passthrough_multiple", "0"));
+        if (passthroughMode > 0) {
+            LibAvos.setDownmix(0);
+            return;
+        }
+        if (isSpatializationEnabledForPlayback()) {
+            LibAvos.setDownmix(0);
+            return;
+        }
+        if (ArchosFeatures.isAndroidTV(this)) {
+            LibAvos.setDownmix(mPreferences.getBoolean("enable_downmix_androidtv", false) ? 1 : 0);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+                && mPreferences.getBoolean("disable_downmix", false)) {
+            LibAvos.setDownmix(0);
+        } else {
+            LibAvos.setDownmix(1);
+        }
+    }
+
+    private void setSpatializationPreferenceEnabled(boolean enabled) {
+        mPreferences.edit().putBoolean(KEY_SPATIALIZATION_ENABLED, enabled).apply();
+        applySpatializationPreferenceToAvos();
+        applyDownmixPreferenceToAvos();
+        if (mPlayer != null && mPlayer.isInPlaybackState()) {
+            mPlayer.refreshAudioOutput();
+        }
+        invalidateOptionsMenu();
+        if (isTVMode) {
+            refreshAudioTracksTVMenu();
+        }
+    }
+
+    private void toggleSpatializationPreference() {
+        setSpatializationPreferenceEnabled(!isSpatializationPreferenceEnabled());
     }
 
     public static int[] readHdmiSize(Context context) {
@@ -827,7 +901,9 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 LibAvos.setHdmiSupportedAudioCodecs(CustomApplication.getNativeAudioCodecsFlag());
             }
             LibAvos.setMediaCodecAudioCapabilities(CustomApplication.getMediaCodecAudioCapabilitiesFlag());
+            LibAvos.setSpatializerCapabilities(CustomApplication.getSpatializerCapabilities());
             mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            applySpatializationPreferenceToAvos();
             // note enable_downmix_androidtv and disable_downmix are the opposite same settings but only one applies to androidTV
             // this is done on purpose to respect logic of presentation and default value
             float audioSpeed;
@@ -859,26 +935,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             LibAvos.setAudioSpeed(audioSpeed); // set audio speed playback (does nothing if audio speed not enabled)
             LibAvos.setDynamicAudioDelay(mPreferences.getBoolean(VideoPreferencesCommon.KEY_ENABLE_DYNAMIC_AUDIO_DELAY, true)); // set dynamic audio delay estimation (default enabled)
             LibAvos.parserSyncMode(Integer.parseInt(mPreferences.getString(KEY_PARSER_SYNC_MODE,"0"))); // set lavc parser sync mode (0: PTS, 1 samples)
-            // Check passthrough mode - downmix must be disabled when passthrough is active
-            int passthroughMode = Integer.parseInt(mPreferences.getString("force_audio_passthrough_multiple","0"));
-            if (passthroughMode > 0) {
-                // Passthrough is enabled - disable downmix as audio is sent raw to receiver
-                LibAvos.setDownmix(0);
-            } else {
-                // Passthrough disabled - use user preference for downmix
-                if (ArchosFeatures.isAndroidTV(this)) {
-                    if (mPreferences.getBoolean("enable_downmix_androidtv", false))
-                        LibAvos.setDownmix(1);
-                    else
-                        LibAvos.setDownmix(0);
-                } else {
-                    // Android is recent enough not to require downmix on phones/tablets if enabled
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && mPreferences.getBoolean("disable_downmix", false))
-                        LibAvos.setDownmix(0);
-                    else
-                        LibAvos.setDownmix(1);
-                }
-            }
+            applyDownmixPreferenceToAvos();
         }
 
         //if not started from floating player, we have to stop our video
@@ -1945,6 +2002,18 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                     }
                 });
 
+                final TVMenuItem tvmiSpatialization = mAudioTracksTVMenu.createAndAddTVSwitchableMenuItem(
+                        getResources().getString(R.string.spatialization_capabilities),
+                        isSpatializationPreferenceEnabled());
+                tvmiSpatialization.setDisabled(!isSpatializationToggleAvailable());
+                tvmiSpatialization.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        toggleSpatializationPreference();
+                        tvmiSpatialization.setChecked(isSpatializationPreferenceEnabled());
+                    }
+                });
+
                 mAudioTracksTVMenu.createAndAddSeparator();
 
                 final TVMenuItem tvmi3 = mAudioTracksTVMenu.createAndAddTVMenuItem(getText(R.string.player_pref_subtitle_delay_title).toString(), false, false);
@@ -2301,6 +2370,13 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             }
             // disable playback speed if passthrough is enabled and Android M+ (API23+)
             menuItem.setVisible(mPreferences.getBoolean(KEY_PLAYBACK_SPEED,false) && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) && Integer.parseInt(mPreferences.getString("force_audio_passthrough_multiple","-1"))<=0);
+            menuItem = menu.add(MENU_OTHER_GROUP, MENU_SPATIALIZATION_ID, Menu.NONE, R.string.spatialization_capabilities);
+            if (menuItem != null) {
+                menuItem.setCheckable(true);
+                menuItem.setChecked(isSpatializationPreferenceEnabled());
+                menuItem.setEnabled(isSpatializationToggleAvailable());
+                menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+            }
             menuItem = menu.add(MENU_OTHER_GROUP, MENU_S3D_ID, Menu.NONE, R.string.pref_s3d_mode_title);
             if (menuItem != null) {
                 menuItem.setIcon(R.drawable.ic_menu_3d);
@@ -2344,6 +2420,10 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             mBookmarkMenuItem.setVisible(canSetBookmark());
         if (menu.findItem(MENU_S3D_ID) != null)
             menu.findItem(MENU_S3D_ID).setVisible(isStereoEffectOn());
+        if (menu.findItem(MENU_SPATIALIZATION_ID) != null) {
+            menu.findItem(MENU_SPATIALIZATION_ID).setChecked(isSpatializationPreferenceEnabled());
+            menu.findItem(MENU_SPATIALIZATION_ID).setEnabled(isSpatializationToggleAvailable());
+        }
         /*if(menu.findItem(MENU_WINDOW_MODE)!=null)
             menu.findItem(MENU_WINDOW_MODE).setVisible(mPreferences.getBoolean(KEY_ADVANCED_VIDEO_ENABLED, false));*/
         return super.onPrepareOptionsMenu(menu);
@@ -2507,6 +2587,11 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             }
             case MENU_AUDIO_SPEED_ID: {
                 myShowDialog(DIALOG_AUDIO_SPEED);
+                return true;
+            }
+            case MENU_SPATIALIZATION_ID: {
+                toggleSpatializationPreference();
+                item.setChecked(isSpatializationPreferenceEnabled());
                 return true;
             }
             case MENU_S3D_ID: {

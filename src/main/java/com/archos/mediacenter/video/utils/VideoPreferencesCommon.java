@@ -480,6 +480,14 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         }
     }
 
+    private void updateAudioDecoderChoiceState(boolean passthroughEnabled) {
+        if (mAudioDecoderChoicePreferences == null) {
+            return;
+        }
+        mAudioDecoderChoicePreferences.setEnabled(!passthroughEnabled);
+        mAudioDecoderChoicePreferences.setSelectable(!passthroughEnabled);
+    }
+
     /**
      * Remove Mode 1 (IEC61937) from the passthrough mode preference list
      * Used when device doesn't support ENCODING_IEC61937
@@ -607,8 +615,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             mForceAudioPassthrough.setEnabled(passthroughEnabled);
             mPlaybackSpeed.setEnabled(!passthroughEnabled);
             mPlaybackSpeed.setSelectable(!passthroughEnabled);
-            mAudioDecoderChoicePreferences.setEnabled(!passthroughEnabled);
-            mAudioDecoderChoicePreferences.setSelectable(!passthroughEnabled);
+            updateAudioDecoderChoiceState(passthroughEnabled);
             // Audio speed audiotrack should be non-selectable when playback speed is non-selectable
             mAudioSpeedAudiotrack.setSelectable(!passthroughEnabled);
             // Disable downmix should be non-selectable when passthrough is enabled
@@ -620,8 +627,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
                 mForceAudioPassthrough.setEnabled(newPassthroughEnabled);
                 mPlaybackSpeed.setEnabled(!newPassthroughEnabled);
                 mPlaybackSpeed.setSelectable(!newPassthroughEnabled);
-                mAudioDecoderChoicePreferences.setEnabled(!newPassthroughEnabled);
-                mAudioDecoderChoicePreferences.setSelectable(!newPassthroughEnabled);
+                updateAudioDecoderChoiceState(newPassthroughEnabled);
                 // Audio speed audiotrack should be non-selectable when playback speed is non-selectable
                 mAudioSpeedAudiotrack.setSelectable(!newPassthroughEnabled);
                 // Disable downmix should be non-selectable when passthrough is enabled
@@ -638,8 +644,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             }
             mPlaybackSpeed.setEnabled(true);
             mPlaybackSpeed.setSelectable(true);
-            mAudioDecoderChoicePreferences.setEnabled(true);
-            mAudioDecoderChoicePreferences.setSelectable(true);
+            updateAudioDecoderChoiceState(false);
             // Audio speed audiotrack is selectable when playback speed is selectable
             mAudioSpeedAudiotrack.setSelectable(true);
             // Disable downmix is selectable when passthrough is not supported
@@ -1593,6 +1598,11 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
                     activity.recreate();
                 }
             }
+        } else if (key.equals("force_audio_passthrough_multiple") || key.equals(KEY_FORCE_AUDIO_PASSTHROUGH)) {
+            boolean passthroughEnabled = !"0".equals(sharedPreferences.getString("force_audio_passthrough_multiple", "0"));
+            updateAudioDecoderChoiceState(passthroughEnabled);
+            boolean frameTimingEnabled = sharedPreferences.getBoolean("enable_android_frame_timing", false);
+            updateDynamicAudioDelayState(passthroughEnabled, frameTimingEnabled);
         }
     }
 
