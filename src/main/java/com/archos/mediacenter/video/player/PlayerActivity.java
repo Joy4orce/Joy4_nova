@@ -2004,13 +2004,13 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
                 final TVMenuItem tvmiSpatialization = mAudioTracksTVMenu.createAndAddTVSwitchableMenuItem(
                         getResources().getString(R.string.spatialization_capabilities),
-                        isSpatializationPreferenceEnabled());
+                        isSpatializationEnabledForPlayback());
                 tvmiSpatialization.setDisabled(!isSpatializationToggleAvailable());
                 tvmiSpatialization.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         toggleSpatializationPreference();
-                        tvmiSpatialization.setChecked(isSpatializationPreferenceEnabled());
+                        tvmiSpatialization.setChecked(isSpatializationEnabledForPlayback());
                     }
                 });
 
@@ -2373,7 +2373,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             menuItem = menu.add(MENU_OTHER_GROUP, MENU_SPATIALIZATION_ID, Menu.NONE, R.string.spatialization_capabilities);
             if (menuItem != null) {
                 menuItem.setCheckable(true);
-                menuItem.setChecked(isSpatializationPreferenceEnabled());
+                menuItem.setChecked(isSpatializationEnabledForPlayback());
                 menuItem.setEnabled(isSpatializationToggleAvailable());
                 menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
             }
@@ -2421,7 +2421,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         if (menu.findItem(MENU_S3D_ID) != null)
             menu.findItem(MENU_S3D_ID).setVisible(isStereoEffectOn());
         if (menu.findItem(MENU_SPATIALIZATION_ID) != null) {
-            menu.findItem(MENU_SPATIALIZATION_ID).setChecked(isSpatializationPreferenceEnabled());
+            menu.findItem(MENU_SPATIALIZATION_ID).setChecked(isSpatializationEnabledForPlayback());
             menu.findItem(MENU_SPATIALIZATION_ID).setEnabled(isSpatializationToggleAvailable());
         }
         /*if(menu.findItem(MENU_WINDOW_MODE)!=null)
@@ -2591,7 +2591,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             }
             case MENU_SPATIALIZATION_ID: {
                 toggleSpatializationPreference();
-                item.setChecked(isSpatializationPreferenceEnabled());
+                item.setChecked(isSpatializationEnabledForPlayback());
                 return true;
             }
             case MENU_S3D_ID: {

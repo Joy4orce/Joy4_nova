@@ -808,7 +808,7 @@
     <string name="audio_interface_audiotrack">Force Audiotrack</string>
     <string name="audio_interface_any">Default logic</string>
     <string name="mediacodec_audio_capabilities">MediaCodec audio capabilities</string>
-    <string name="spatialization_capabilities">Spatialization</string>
+    <string name="spatialization_capabilities">Platform spatialization</string>
 
     <string name="preferences_user_interface">User Interface</string>
     <string name="preferences_display_resume_box_summary">Display or hide the button resuming the latest video in the main screen</string>
