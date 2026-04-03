@@ -131,22 +131,28 @@ public class CodecDiscovery {
 
 	public static String getSpatializerCapabilitiesDescription(Context context, int capabilities) {
 		if (Build.VERSION.SDK_INT < 32) {
-			return "unsupported (API " + Build.VERSION.SDK_INT + ")";
+			return context.getString(R.string.status_unsupported_api, Build.VERSION.SDK_INT);
 		}
 		if ((capabilities & SPATIALIZER_CAP_SUPPORTED) == 0) {
-			return "not supported";
+			return context.getString(R.string.status_not_supported);
 		}
-		StringBuilder sb = new StringBuilder("supported");
-		sb.append((capabilities & SPATIALIZER_CAP_AVAILABLE) != 0 ? ", available" : ", unavailable");
-		sb.append((capabilities & SPATIALIZER_CAP_ENABLED) != 0 ? ", enabled" : ", disabled");
-		if ((capabilities & SPATIALIZER_CAP_CAN_SPATIALIZE_5_1) != 0) {
-			sb.append(", 5.1=yes");
-		}
-		if ((capabilities & SPATIALIZER_CAP_CAN_SPATIALIZE_7_1) != 0) {
-			sb.append(", 7.1=yes");
-		}
+		StringBuilder sb = new StringBuilder(context.getString(R.string.status_supported));
+		sb.append(", ");
+		sb.append((capabilities & SPATIALIZER_CAP_AVAILABLE) != 0
+				? context.getString(R.string.status_available)
+				: context.getString(R.string.status_unavailable));
+		sb.append(", ");
+		sb.append((capabilities & SPATIALIZER_CAP_ENABLED) != 0
+				? context.getString(R.string.status_enabled)
+				: context.getString(R.string.status_disabled));
+		sb.append(", 5.1 ");
+		sb.append((capabilities & SPATIALIZER_CAP_CAN_SPATIALIZE_5_1) != 0 ? "✓" : "✕");
+		sb.append(", 7.1 ");
+		sb.append((capabilities & SPATIALIZER_CAP_CAN_SPATIALIZE_7_1) != 0 ? "✓" : "✕");
 		if ((capabilities & (SPATIALIZER_CAP_CAN_SPATIALIZE_5_1 | SPATIALIZER_CAP_CAN_SPATIALIZE_7_1)) == 0) {
-			sb.append(", multichannel=no");
+			sb.append(", ");
+			sb.append(context.getString(R.string.status_multichannel));
+			sb.append(" ✕");
 		}
 		return sb.toString();
 	}
@@ -303,9 +309,9 @@ public class CodecDiscovery {
 
 		String mediaCodecAudioCodecs = CustomApplication.getSupportedAudioCodecs(CustomApplication.getMediaCodecAudioCapabilitiesFlag());
 		if (!mediaCodecAudioCodecs.isEmpty())
-			technicalInfo += "\n" + context.getResources().getString(R.string.mediacodec_audio_capabilities) + " " + mediaCodecAudioCodecs;
+			technicalInfo += "\n" + context.getResources().getString(R.string.mediacodec_audio_capabilities) + ": " + mediaCodecAudioCodecs;
 
-		technicalInfo += "\n" + context.getResources().getString(R.string.spatialization_capabilities) + " "
+		technicalInfo += "\n" + context.getResources().getString(R.string.spatialization_capabilities) + ": "
 				+ getSpatializerCapabilitiesDescription(context, CustomApplication.getSpatializerCapabilities());
 
 		int maxAudioChannelCount = CustomApplication.getMaxAudioChannelCount();

@@ -93,10 +93,12 @@ import com.archos.mediacenter.video.browser.filebrowsing.BrowserByFolder;
 import com.archos.mediacenter.video.browser.subtitlesmanager.SubtitleManager;
 import com.archos.mediacenter.video.leanback.CompatibleCursorMapperConverter;
 import com.archos.mediacenter.video.picasso.ThumbnailRequestHandler;
+import com.archos.mediacenter.video.player.Player;
 import com.archos.mediacenter.video.player.PlayerService;
 import com.archos.mediacenter.video.player.PrivateMode;
 import com.archos.mediacenter.video.utils.DbUtils;
 import com.archos.mediacenter.video.utils.DelayedBackgroundLoader;
+import com.archos.mediacenter.video.utils.CodecDiscovery;
 import com.archos.mediacenter.video.utils.ExternalPlayerResultListener;
 import com.archos.mediacenter.video.utils.ThemeManager;
 import com.archos.mediacenter.video.utils.ExternalPlayerWithResultStarter;
@@ -127,11 +129,11 @@ import com.archos.mediacenter.video.utils.VideoUtils;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 
 import static com.archos.mediacenter.video.browser.subtitlesmanager.ISO639codes.generateTrackName;
 import static com.archos.mediacenter.video.browser.subtitlesmanager.ISO639codes.replaceLanguageCodeInString;
@@ -247,6 +249,14 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
     private TextView mFileNameTextView;
     private TextView mFilePathTextView;
     private TextView mDecoderTextView;
+    private View mTechnicalDisplayInfoRow;
+    private TextView mTechnicalInfoTextView;
+    private View mTechnicalHdmiInfoRow;
+    private TextView mTechnicalHdmiInfoTextView;
+    private View mTechnicalMediaCodecInfoRow;
+    private TextView mTechnicalMediaCodecInfoTextView;
+    private View mTechnicalSpatializationInfoRow;
+    private TextView mTechnicalSpatializationInfoTextView;
     private View mFileInfoContainerLoading;
     private View mFileInfoAudioVideoContainer;
     private TextView mAudioTrackTextView;
@@ -417,6 +427,14 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
         mFileInfoHeader = (TextView) mRoot.findViewById(R.id.file_info_header);
         mFileInfoHeader.setOnClickListener(this);
         mDecoderTextView = (TextView) mRoot.findViewById(R.id.video_decoder);
+        mTechnicalDisplayInfoRow = mRoot.findViewById(R.id.technical_display_info_row);
+        mTechnicalInfoTextView = (TextView) mRoot.findViewById(R.id.technical_info);
+        mTechnicalHdmiInfoRow = mRoot.findViewById(R.id.technical_hdmi_info_row);
+        mTechnicalHdmiInfoTextView = (TextView) mRoot.findViewById(R.id.technical_hdmi_info);
+        mTechnicalMediaCodecInfoRow = mRoot.findViewById(R.id.technical_mediacodec_info_row);
+        mTechnicalMediaCodecInfoTextView = (TextView) mRoot.findViewById(R.id.technical_mediacodec_info);
+        mTechnicalSpatializationInfoRow = mRoot.findViewById(R.id.technical_spatialization_info_row);
+        mTechnicalSpatializationInfoTextView = (TextView) mRoot.findViewById(R.id.technical_spatialization_info);
         mSubtitleHeader  = (TextView) mRoot.findViewById(R.id.subtitle_header);
         mSubtitleHeader.setOnClickListener(this);
         mSubtitleContent  =  mRoot.findViewById(R.id.subtitle_content);
@@ -507,7 +525,9 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
             else
                 mVideoMetadateCache = new HashMap<>();
             mSelectCurrentVideo = bundle.getBoolean(EXTRA_FORCE_VIDEO_SELECTION,false);
-            mIsLaunchFromPlayer = getActivity().getIntent().getExtras().getBoolean(EXTRA_LAUNCHED_FROM_PLAYER, false);
+            Bundle intentExtras = getActivity().getIntent().getExtras();
+            mIsLaunchFromPlayer = intentExtras != null && intentExtras.getBoolean(EXTRA_LAUNCHED_FROM_PLAYER, false);
+            updateTechnicalInfoVisibility();
             Video video = (Video) bundle.get(EXTRA_VIDEO);
             if(video == null){
 
@@ -725,6 +745,51 @@ public class VideoInfoActivityFragment extends Fragment implements LoaderManager
 
     private void setBackdropToApplicationBackground() {
         mApplicationBackdrop = (ImageView) mRoot.findViewById(R.id.backdrop);
+    }
+
+    private void updateTechnicalInfoVisibility() {
+        if (mTechnicalDisplayInfoRow == null || mTechnicalInfoTextView == null) {
+            return;
+        }
+        if (mIsLaunchFromPlayer) {
+            String hdrMode = Player.getHdr(getContext());
+            List<String> displayLines = new ArrayList<>();
+            displayLines.add(getString(R.string.supported_refresh_rates) + " " + CustomApplication.getSupportedRefreshRates() + " \u2192 " + Player.getRefreshRate() + " / " + Player.getFps());
+            displayLines.add(getString(R.string.hdr_capability) + " " + CodecDiscovery.getHdrScreenCapabilities(getContext()) + (hdrMode.isEmpty() ? "" : " \u2192 " + hdrMode));
+            int maxAudioChannelCount = CustomApplication.getMaxAudioChannelCount();
+            if (maxAudioChannelCount > 0) {
+                displayLines.add(getString(R.string.max_audio_channels) + " " + maxAudioChannelCount);
+            }
+            setTextOrHideContainer(mTechnicalInfoTextView, TextUtils.join("\n", displayLines), mTechnicalDisplayInfoRow);
+
+            List<String> hdmiLines = new ArrayList<>();
+            String hdmiAudioCodecs = CustomApplication.getSupportedAudioCodecs(CustomApplication.getHdmiOnlyAudioCodecsFlag());
+            if (!hdmiAudioCodecs.isEmpty()) {
+                hdmiLines.add(getString(R.string.hdmi_audio_capabilities) + " " + hdmiAudioCodecs);
+            }
+            if (CustomApplication.isSpdifConnected()) {
+                String spdifAudioCodecs = CustomApplication.getSupportedAudioCodecs(CustomApplication.getSpdifOnlyAudioCodecsFlag());
+                if (!spdifAudioCodecs.isEmpty()) {
+                    hdmiLines.add(getString(R.string.spdif_audio_capabilities) + " " + spdifAudioCodecs);
+                }
+            }
+            setTextOrHideContainer(mTechnicalHdmiInfoTextView, TextUtils.join("\n", hdmiLines), mTechnicalHdmiInfoRow);
+
+            String mediaCodecAudioCodecs = CustomApplication.getSupportedAudioCodecs(CustomApplication.getMediaCodecAudioCapabilitiesFlag());
+            setTextOrHideContainer(mTechnicalMediaCodecInfoTextView,
+                    mediaCodecAudioCodecs.isEmpty() ? null : getString(R.string.mediacodec_audio_capabilities) + ": " + mediaCodecAudioCodecs,
+                    mTechnicalMediaCodecInfoRow);
+
+            setTextOrHideContainer(mTechnicalSpatializationInfoTextView,
+                    getString(R.string.spatialization_capabilities) + ": "
+                            + CodecDiscovery.getSpatializerCapabilitiesDescription(getContext(), CustomApplication.getSpatializerCapabilities()),
+                    mTechnicalSpatializationInfoRow);
+        } else {
+            mTechnicalDisplayInfoRow.setVisibility(View.GONE);
+            mTechnicalHdmiInfoRow.setVisibility(View.GONE);
+            mTechnicalMediaCodecInfoRow.setVisibility(View.GONE);
+            mTechnicalSpatializationInfoRow.setVisibility(View.GONE);
+        }
     }
 
     private void setBackground() {
