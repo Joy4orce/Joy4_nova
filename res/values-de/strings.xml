@@ -722,6 +722,11 @@
     <string name="dec_android">Android MediaPlayer</string>
     <string name="audio_interface_choice_title">Audio-Schnittstelle auswählen</string>
     <string name="audio_interface_choice_summary">Erweiterte Einstellung, kann die Audio-Dekodierung unterbrechen.</string>
+    <string name="audio_decoder_choice_title">Audio-Decodierer auswählen</string>
+    <string name="audio_decoder_choice_summary">Legt fest, ob die Audio-Dekodierung FFmpeg oder MediaCodec bevorzugt.</string>
+    <string name="audio_decoder_auto">Automatisch</string>
+    <string name="audio_decoder_prefer_ffmpeg">FFmpeg bevorzugen</string>
+    <string name="audio_decoder_prefer_mediacodec">MediaCodec bevorzugen</string>
     <string name="audio_interface_opensles">OpenSL ES erzwingen</string>
     <string name="audio_interface_audiotrack">Audiospur erzwingen</string>
     <string name="audio_interface_any">Standardlogik</string>
@@ -835,6 +840,7 @@
     <string name="trakt_device_auth_waiting">Warte auf Authorisierung…</string>
     <string name="trakt_device_auth_success">Erfolgreich verbunden!</string>
     <string name="trakt_device_auth_error">Authentifizierung fehlgeschlagen. Bitte erneut versuchen.</string>
+    <string name="trakt_device_auth_invalid_code">Fehler beim Abrufen eines gültigen Gerätecodes von Trakt. Bitte erneut versuchen.</string>
     <string name="trakt_device_auth_timeout">Code ist abgelaufen. Bitte erneut versuchen.</string>
     <string name="trakt_account_locked">Trakt-Konto gesperrt. Auf trakt.tv entsperren oder später erneut versuchen.</string>
     <string name="connect_trakt">Mit Trakt verbinden</string>

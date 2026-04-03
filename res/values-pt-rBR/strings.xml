@@ -723,6 +723,11 @@
     <string name="dec_android">MediaPlayer Android</string>
     <string name="audio_interface_choice_title">Escolher interface de áudio</string>
     <string name="audio_interface_choice_summary">Preferência avançada, pode quebrar a decodificação de áudio.</string>
+    <string name="audio_decoder_choice_title">Escolher decodificador</string>
+    <string name="audio_decoder_choice_summary">Controla se a decodificação de áudio prefere FFmpeg ou MediaCodec.</string>
+    <string name="audio_decoder_auto">Automático</string>
+    <string name="audio_decoder_prefer_ffmpeg">Preferir FFmpeg</string>
+    <string name="audio_decoder_prefer_mediacodec">MediaCodec preferencial</string>
     <string name="audio_interface_opensles">Forçar OpenSL ES</string>
     <string name="audio_interface_audiotrack">Forçar Audiotrack</string>
     <string name="audio_interface_any">Lógica padrão</string>
@@ -836,6 +841,7 @@
     <string name="trakt_device_auth_waiting">Aguardando autorização...</string>
     <string name="trakt_device_auth_success">Conectado com sucesso!</string>
     <string name="trakt_device_auth_error">Falha na Autenticação. Por favor, tente novamente.</string>
+    <string name="trakt_device_auth_invalid_code">Não foi possível obter um código de dispositivo válido do Trakt. Tente novamente.</string>
     <string name="trakt_device_auth_timeout">Código expirado. Por favor, tente novamente.</string>
     <string name="trakt_account_locked">Conta Trakt bloqueada. Desbloqueie no trakt.tv ou tente mais tarde.</string>
     <string name="connect_trakt">Conectar um Trakt</string>

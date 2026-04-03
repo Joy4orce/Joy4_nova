@@ -733,6 +733,11 @@
     <string name="dec_android">Android MediaPlayer</string>
     <string name="audio_interface_choice_title">Wybierz interfejs audio</string>
     <string name="audio_interface_choice_summary">Zaawansowane ustawienia, mogą uszkodzić dekodowanie wideo.</string>
+    <string name="audio_decoder_choice_title">Wybierz dekoder audio</string>
+    <string name="audio_decoder_choice_summary">Określa czy dekodować audio za pomocą oprogramowania (FFmpeg), czy sprzętu (MediaCodec)</string>
+    <string name="audio_decoder_auto">Automatycznie</string>
+    <string name="audio_decoder_prefer_ffmpeg">Preferuj FFmpeg</string>
+    <string name="audio_decoder_prefer_mediacodec">Preferuj MediaCodec</string>
     <string name="audio_interface_opensles">Wymuś OpenSL ES</string>
     <string name="audio_interface_audiotrack">Wymuś ścieżkę dźwięku</string>
     <string name="audio_interface_any">Domyślna logika</string>
@@ -835,10 +840,10 @@
     <string name="trakt_sync_collection_title">Synchronizuj seriale i filmy</string>
     <string name="trakt_sync_trakt_resume_title">Synchronizuj pozycję wznowienia Trakt.tv</string>
     <string name="trakt_sync_trakt_resume">Użyj pozycji wznawiania Trakt, gdy jest bardziej zaawansowana niż lokalna</string>
-    <string name="trakt_force_push_title">Wymuś ponowne przesłanie do Trakt.tv</string>
-    <string name="trakt_force_push_summary">Jednorazowe przesłanie statusu filmu do Trakt.tv</string>
+    <string name="trakt_force_push_title">Wymuś ponowny eksport do Trakt.tv</string>
+    <string name="trakt_force_push_summary">Jednorazowy eksport danych do Trakt.tv</string>
     <string name="trakt_force_pull_title">Wymuś ponowny import z Trakt.tv</string>
-    <string name="trakt_force_pull_summary">Jednorazowy import z Trakt.tv</string>
+    <string name="trakt_force_pull_summary">Jednorazowy import danych z Trakt.tv</string>
     <string name="trakt_sync_collection_summary">Automatycznie dodaj wszystkie materiały z biblioteki Nova do swojej kolekcji Trakt</string>
     <string name="trakt_toast_syncing">Synchronizowanie z Trakt&#8230;</string>
     <string name="trakt_device_auth_step1">1. Na telefonie lub komputerze przejdź do:</string>
@@ -846,6 +851,7 @@
     <string name="trakt_device_auth_waiting">Oczekiwanie na autoryzację…</string>
     <string name="trakt_device_auth_success">Połączenie udane!</string>
     <string name="trakt_device_auth_error">Uwierzytelnianie nieudane. Spróbuj ponownie.</string>
+    <string name="trakt_device_auth_invalid_code">Nie udało się uzyskać poprawnego kodu urządzenia z Trakt. Spróbuj ponownie.</string>
     <string name="trakt_device_auth_timeout">Kod wygasł. Spróbuj ponownie.</string>
     <string name="trakt_account_locked">Konto Trakt zablokowane. Odblokuj na Trakt.tv lub spróbuj później.</string>
     <string name="connect_trakt">Połącz z Trakt.tv</string>
@@ -996,7 +1002,7 @@
     <string name="loading">Wczytywanie…</string>
     <string name="connecting">Łączenie…</string>
     <string name="refreshrate_failed">Nie udało się ustawić wybranej częstotliwości odświeżania</string>
-    <string name="sponsor">Sponsoruj odtwarzacz Nova</string>
+    <string name="sponsor">Wesprzyj Nova</string>
     <string name="enable_sponsor_title">Włącz link sponsora Nova</string>
     <string name="enable_sponsor_summary">Włącz link sponsora dla darowizn: każda pomoc jest ważna.</string>
     <string name="hdr_capability">Funkcje ekranu HDR:</string>

@@ -731,6 +731,8 @@
     <string name="audio_interface_opensles">Forcer OpenSL ES</string>
     <string name="audio_interface_audiotrack">Forcer Audiotrack</string>
     <string name="audio_interface_any">Logique par défaut</string>
+    <string name="mediacodec_audio_capabilities">Capacités audio MediaCodec</string>
+    <string name="spatialization_capabilities">Spatialisation système</string>
     <string name="preferences_user_interface">Interface utilisateur</string>
     <string name="preferences_display_resume_box_summary">Afficher ou cacher le bouton de reprise de la dernière vidéo dans l\'écran principal</string>
     <string name="preferences_display_resume_box">Afficher le bouton de reprise de la vidéo</string>

@@ -718,6 +718,11 @@
     <string name="dec_android">安卓媒体播放器</string>
     <string name="audio_interface_choice_title">选择音频接口</string>
     <string name="audio_interface_choice_summary">高级首选项，可能会破坏音频解码。</string>
+    <string name="audio_decoder_choice_title">选择音频解码器</string>
+    <string name="audio_decoder_choice_summary">控制音频解码优先使用 FFmpeg 还是 MediaCodec。</string>
+    <string name="audio_decoder_auto">自动</string>
+    <string name="audio_decoder_prefer_ffmpeg">优先使用 FFmpeg</string>
+    <string name="audio_decoder_prefer_mediacodec">优先使用 MediaCodec</string>
     <string name="audio_interface_opensles">强制使用 OpenSL ES模式</string>
     <string name="audio_interface_audiotrack">强制使用音轨模式</string>
     <string name="audio_interface_any">默认逻辑</string>
@@ -831,6 +836,7 @@
     <string name="trakt_device_auth_waiting">正在等待授权…</string>
     <string name="trakt_device_auth_success">连接成功！</string>
     <string name="trakt_device_auth_error">身份验证失败。请重试。</string>
+    <string name="trakt_device_auth_invalid_code">无法从 Trakt 获取有效的设备代码。请重试。</string>
     <string name="trakt_device_auth_timeout">代码已过期。请重试。</string>
     <string name="trakt_account_locked">Trakt 账号已锁定。请前往 trakt.tv 解锁或稍后重试。</string>
     <string name="connect_trakt">连接到 Trakt</string>

@@ -733,6 +733,11 @@
     <string name="dec_android">MediaPlayer pre Android</string>
     <string name="audio_interface_choice_title">Vybrať zvukové rozhranie</string>
     <string name="audio_interface_choice_summary">Rozšírené preferencie, môžu narušiť dekódovanie zvuku.</string>
+    <string name="audio_decoder_choice_title">Vyberte zvukový dekodér</string>
+    <string name="audio_decoder_choice_summary">Určuje, či sa pri dekódovaní zvuku uprednostňuje FFmpeg alebo MediaCodec.</string>
+    <string name="audio_decoder_auto">Automaticky</string>
+    <string name="audio_decoder_prefer_ffmpeg">Preferovať FFmpeg</string>
+    <string name="audio_decoder_prefer_mediacodec">Preferovať MediaCodec</string>
     <string name="audio_interface_opensles">Vynútiť OpenSL ES</string>
     <string name="audio_interface_audiotrack">Vynútiť Audiotrack</string>
     <string name="audio_interface_any">Predvolené správanie</string>
@@ -846,6 +851,7 @@
     <string name="trakt_device_auth_waiting">Čakám na autorizáciu...</string>
     <string name="trakt_device_auth_success">Pripojenie úspešné!</string>
     <string name="trakt_device_auth_error">Overenie sa nepodarilo. Skúste to znovu.</string>
+    <string name="trakt_device_auth_invalid_code">Nepodarilo sa získať platný kód zariadenia od služby Trakt. Skúste to prosím znova.</string>
     <string name="trakt_device_auth_timeout">Kód vypršal. Skúste to znovu.</string>
     <string name="trakt_account_locked">Účet Trakt je uzamknutý. Odomknite ho na trakt.tv alebo to skúste neskôr.</string>
     <string name="connect_trakt">Pripojiť sa k Trakt</string>
@@ -988,6 +994,7 @@
     <string name="add_to_list">Pridať do zoznamu</string>
     <string name="no_resume_available">Nie je k dispozícii žiadna pozícia pre obnovu</string>
     <string name="no_list_detected">V súčasnosti nie je zistený žiadny zoznam. Zoznam je možné vytvoriť pridaním nových položiek priamo z informácií o videu alebo ho možno synchronizovať s kontom Trakt.</string>
+    <string name="not_available_during_media_scanning">Túto funkciu nie je možné používať počas skenovania médií.</string>
     <string name="premium_already_purchased">Prémiová verzia už bola zakúpená</string>
     <string name="remove_from_list">Odstrániť zo zoznamu</string>
     <string name="warning_swdec">Varovanie: hardvérové dekódovanie je vypnuté!</string>
