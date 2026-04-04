@@ -642,7 +642,7 @@ public class ShowTags extends VideoTags {
 
     public static SearchShowResult getEpisodeResultIfAlreadyKnown(Context context, String searchQuery, String season, String episode, Uri fileUri) {
         ContentResolver contentResolver = context.getContentResolver();
-        String[] baseProjection = {ScraperStore.Episode.ID, ScraperStore.EpisodeShowCombined.SHOW_NAME, ScraperStore.Episode.NAME};
+        String[] baseProjection = {ScraperStore.EpisodeShowCombined.SCRAPER_ID, ScraperStore.EpisodeShowCombined.SHOW_NAME, ScraperStore.EpisodeShowCombined.EPISODE_NAME};
 
         //No Slash on the Query, i AM NOT tmdb!
         if (searchQuery.startsWith("/"))
@@ -657,18 +657,14 @@ public class ShowTags extends VideoTags {
         if (cursor != null) {
             try {
                 if (cursor.moveToFirst()) {
-                    //Get the columns, so we can grab the data.
-                    int idxVideoId = cursor.getColumnIndexOrThrow(ScraperStore.Episode.ID);
-                    int idxName = cursor.getColumnIndexOrThrow(ScraperStore.Episode.NAME);
-
                     //Create a Search Result and populate it.
                     SearchShowResult myResult = new SearchShowResult();
                     SearchResult result = new SearchResult();
                     result.setTvShow();
                     result.setFile(fileUri);
-                    result.setId((int) cursor.getLong(idxVideoId));
-                    result.setOriginalTitle( cursor.getString(idxName));
-                    result.setTitle(cursor.getString(idxName));
+                    result.setId((int) cursor.getLong(0));
+                    result.setOriginalTitle(cursor.getString(2));
+                    result.setTitle(cursor.getString(2));
                     result.setOriginSearchEpisode(Integer.parseInt(episode));
                     result.setOriginSearchSeason(Integer.parseInt(season));
                     result.fromDB = true;
