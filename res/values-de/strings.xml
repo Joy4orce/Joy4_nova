@@ -730,6 +730,8 @@
     <string name="audio_interface_opensles">OpenSL ES erzwingen</string>
     <string name="audio_interface_audiotrack">Audiospur erzwingen</string>
     <string name="audio_interface_any">Standardlogik</string>
+    <string name="mediacodec_audio_capabilities">MediaCodec Audio-Funktionen</string>
+    <string name="spatialization_capabilities">Plattform-Spatialisierung</string>
     <string name="preferences_user_interface">Benutzeroberfläche</string>
     <string name="preferences_display_resume_box_summary">Button zum Fortsetzen des letzten Videos auf dem Hauptbildschirm anzeigen oder ausblenden</string>
     <string name="preferences_display_resume_box">Wiederherstellungsfeld anzeigen</string>

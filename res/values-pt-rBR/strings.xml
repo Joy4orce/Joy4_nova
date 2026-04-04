@@ -731,6 +731,15 @@
     <string name="audio_interface_opensles">Forçar OpenSL ES</string>
     <string name="audio_interface_audiotrack">Forçar Audiotrack</string>
     <string name="audio_interface_any">Lógica padrão</string>
+    <string name="technical_information">Informação Técnica</string>
+    <string name="status_unsupported_api">não suportado (API %1$d)</string>
+    <string name="status_not_supported">não suportada</string>
+    <string name="status_supported">suportado</string>
+    <string name="status_available">disponível</string>
+    <string name="status_unavailable">indisponível</string>
+    <string name="status_enabled">ativado</string>
+    <string name="status_disabled">desativado</string>
+    <string name="status_multichannel">Multicanal</string>
     <string name="preferences_user_interface">Interface de usuário</string>
     <string name="preferences_display_resume_box_summary">Exibir ou ocultar o botão de retomar o vídeo mais recente na tela principal</string>
     <string name="preferences_display_resume_box">Exibir caixa de resumo</string>
