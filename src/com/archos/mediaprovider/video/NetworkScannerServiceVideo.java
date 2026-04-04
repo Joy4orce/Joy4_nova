@@ -557,18 +557,18 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
             PreferenceManager.getDefaultSharedPreferences(this).edit().putInt(mRecordOnFailPreference, -1).commit();//unable to reach server
         }
 
-        // Check if this is part of a multi-folder scan BEFORE decrementing
+        // Decrement the counter and trigger scraping only when the last pending network scan completes.
         int scanCountBefore = com.archos.mediascraper.AutoScrapeService.getNetworkScanCount();
-        boolean isMultiFolderScan = scanCountBefore > 0;
-
-        // Decrement network scan counter for both success and failure paths
         com.archos.mediascraper.AutoScrapeService.decrementNetworkScanCount();
-        if (log.isDebugEnabled()) log.debug("doScan: decremented network scan count, was multi-folder: {}", isMultiFolderScan);
+        int remainingScans = com.archos.mediascraper.AutoScrapeService.getNetworkScanCount();
+        if (log.isDebugEnabled()) {
+            log.debug("doScan: decremented network scan count, count before: {}, remaining scans: {}",
+                    scanCountBefore, remainingScans);
+        }
 
-        // If this was a standalone scan (not part of multi-folder), start AutoScrapeService
-        if (!isMultiFolderScan && f != null && com.archos.mediascraper.AutoScrapeService.isEnable(this)) {
-            if (log.isDebugEnabled()) log.debug("doScan: standalone scan completed, starting AutoScrapeService");
-            com.archos.mediascraper.AutoScrapeService.startService(this);
+        if (remainingScans == 0 && f != null && com.archos.mediascraper.AutoScrapeService.isEnable(this)) {
+            if (log.isDebugEnabled()) log.debug("doScan: all network scans completed, starting AutoScrapeService");
+            com.archos.mediascraper.AutoScrapeService.startServiceAfterNetworkScan(this);
         }
 
         if (log.isDebugEnabled()) {
