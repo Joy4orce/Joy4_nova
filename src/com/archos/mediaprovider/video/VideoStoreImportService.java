@@ -173,7 +173,6 @@ public class VideoStoreImportService extends Service implements Handler.Callback
         n = createNotification();
         if (log.isDebugEnabled()) log.debug("onCreate: create notification + startService {}", NOTIFICATION_ID);
         ArchosUtils.addBreadcrumb(SentryLevel.INFO, "VideoStoreImportService.onCreate", "created notification + startService " + NOTIFICATION_ID + " notification null? " + (n == null));
-        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
         // importer logic
         mImporter = new VideoStoreImportImpl(this);
         // setup background worker thread
