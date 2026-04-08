@@ -42,8 +42,8 @@ public enum ImportState {
     public void setState(State state) {
         mLock.lock();
         try {
-            if (mAndroidScanning) {
-                // ignore
+            if (mAndroidScanning && state != State.IDLE) {
+                // ignore non-IDLE transitions while Android MediaScanner is active
                 if (log.isDebugEnabled()) log.debug("Android scanning: not setting {}", state.name());
             } else {
                 setStateLocked(state);
