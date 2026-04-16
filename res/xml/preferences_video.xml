@@ -190,13 +190,6 @@
             android:digits="0123456789"
             app:iconSpaceReserved="false"/>
         <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="enable_android_frame_timing"
-            android:persistent="true"
-            android:summary="@string/enable_android_frame_timing_summary"
-            android:title="@string/enable_android_frame_timing"
-            app:iconSpaceReserved="false"/>
-        <CheckBoxPreference
             android:defaultValue="false"
             android:key="allow_3rd_party_player"
             android:persistent="true"

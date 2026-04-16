@@ -1278,10 +1278,6 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                     .apply();
             PreferenceManager.getDefaultSharedPreferences(context)
                     .edit()
-                    .putBoolean(PlayerActivity.KEY_ENABLE_ANDROID_FRAME_TIMING, true)
-                    .apply();
-            PreferenceManager.getDefaultSharedPreferences(context)
-                    .edit()
                     .putBoolean(VideoPreferencesCommon.KEY_ENABLE_DYNAMIC_AUDIO_DELAY, true)
                     .apply();
             PreferenceManager.getDefaultSharedPreferences(context)

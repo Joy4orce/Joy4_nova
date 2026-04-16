@@ -250,7 +250,6 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
     private CheckBoxPreference mEnableCutoutModeShortEdge = null;
     private CheckBoxPreference mEnableCutBothSidesX = null;
     private CheckBoxPreference mActivate3DTVSwitch = null;
-    private CheckBoxPreference mEnableAndroidFrameTiming = null;
     private PreferenceCategory mAdvancedPreferences = null;
     private PreferenceCategory mScraperCategory = null;
     private ListPreference mSubtitlesFavLangPreferences = null;
@@ -586,7 +585,6 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         mPlaybackSpeed = (CheckBoxPreference) findPreference(KEY_PLAYBACK_SPEED);
         mAudioSpeedAudiotrack = (CheckBoxPreference) findPreference(KEY_AUDIO_SPEED_AUDIOTRACK);
         mEnableDynamicAudioDelay = (CheckBoxPreference) findPreference(KEY_ENABLE_DYNAMIC_AUDIO_DELAY);
-        mEnableAndroidFrameTiming = (CheckBoxPreference) findPreference("enable_android_frame_timing");
         mDisableDownmix = (CheckBoxPreference) findPreference("disable_downmix");
         mEnableDownmixATV = (CheckBoxPreference) findPreference("enable_downmix_androidtv");
         final ListPreference mForceAudioPassthroughMultiple = (ListPreference) findPreference("force_audio_passthrough_multiple");
@@ -632,8 +630,6 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
                 mAudioSpeedAudiotrack.setSelectable(!newPassthroughEnabled);
                 // Disable downmix should be non-selectable when passthrough is enabled
                 mDisableDownmix.setSelectable(!newPassthroughEnabled);
-                boolean currentFrameTimingEnabled = mEnableAndroidFrameTiming.isChecked();
-                updateDynamicAudioDelayState(newPassthroughEnabled, currentFrameTimingEnabled);
                 return true;
             });
         } else {
@@ -653,14 +649,6 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
             updateDynamicAudioDelayState(false, frameTimingEnabled);
         }
 
-        // Set up listener for frame timing changes
-        mEnableAndroidFrameTiming.setOnPreferenceChangeListener((preference, newValue) -> {
-            boolean newFrameTimingEnabled = (Boolean) newValue;
-            boolean currentPassthroughEnabled = isPassthroughSupported &&
-                !"0".equals(mSharedPreferences.getString("force_audio_passthrough_multiple", "0"));
-            updateDynamicAudioDelayState(currentPassthroughEnabled, newFrameTimingEnabled);
-            return true;
-        });
         mStreamBufferSize = (EditTextPreference) findPreference(KEY_STREAM_BUFFER_SIZE);
         mStreamMaxIFrameSize = (EditTextPreference) findPreference(KEY_STREAM_MAX_IFRAME_SIZE);
         mActivate3DTVSwitch = (CheckBoxPreference) findPreference(KEY_ACTIVATE_3D_SWITCH);
