@@ -20,6 +20,7 @@ import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsH
 import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsHdr10Plus;
 import static com.archos.mediacenter.video.utils.CodecDiscovery.displaySupportsHdrHLG;
 import static com.archos.mediacenter.video.utils.CodecDiscovery.getHdrScreenCapabilities;
+import static com.archos.mediacenter.video.utils.CodecDiscovery.resetHdrCapabilities;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -1389,6 +1390,7 @@ public class Player implements IPlayerControl,
     }
 
     private void setHdrCapabilities() {
+        resetHdrCapabilities();
         if (mWindow != null) {
 
             View v = mWindow.getDecorView();

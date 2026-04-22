@@ -197,6 +197,11 @@ public class CodecDiscovery {
 		}
 	}
 
+	public static void resetHdrCapabilities() {
+		if (log.isDebugEnabled()) log.debug("resetHdrCapabilities");
+		hdrCapabilities = 0;
+	}
+
 	// [None, HDR10, HDR HLG, HDR10+, Dolby Vision] based on display capabilities
 
 	public static String getHdrScreenCapabilities(Context context) {
