@@ -145,6 +145,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
     public static final String KEY_FORCE_SW = "force_software_decoding";
     public static final String KEY_FORCE_AUDIO_PASSTHROUGH = "force_passthrough";
     public static final String KEY_PARSER_SYNC_MODE = "parser_sync_mode";
+    public static final String KEY_DOLBY_VISION_MODE = "dolby_vision_mode";
     public static final String KEY_DISABLE_DOLBY_VISION = "disable_dolby_vision";
     public static final String KEY_STREAM_BUFFER_SIZE = "stream_buffer_size";
     public static final String KEY_STREAM_MAX_IFRAME_SIZE = "stream_max_iframe_size";
@@ -550,6 +551,7 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
         addPreferencesFromResource(R.xml.preferences_video);
 
         mSharedPreferences = getPreferenceManager().getSharedPreferences();
+        migrateDolbyVisionPreference(mSharedPreferences);
         mSharedPreferences.registerOnSharedPreferenceChangeListener(this);
         final Preference pref = (Preference) findPreference(KEY_VIDEO_OS);
         pref.setEnabled(true);
@@ -1271,6 +1273,19 @@ public class VideoPreferencesCommon implements OnSharedPreferenceChangeListener 
                 }
             });
         }
+    }
+
+    private static String getDolbyVisionModeValue(boolean isDisabled) {
+        return isDisabled ? "off" : "auto";
+    }
+
+    private void migrateDolbyVisionPreference(SharedPreferences sharedPreferences) {
+        if (sharedPreferences.contains(KEY_DOLBY_VISION_MODE) || !sharedPreferences.contains(KEY_DISABLE_DOLBY_VISION)) {
+            return;
+        }
+
+        String doViModeValue = getDolbyVisionModeValue(sharedPreferences.getBoolean(KEY_DISABLE_DOLBY_VISION, false));
+        sharedPreferences.edit().putString(KEY_DOLBY_VISION_MODE, doViModeValue).apply();
     }
 
     private int findLanguageIndex(List<String> languageEntryValues, String language) {

@@ -498,8 +498,25 @@ public class Player implements IPlayerControl,
             return;
         }
 
-        boolean isDoViDisabled = PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean(VideoPreferencesCommon.KEY_DISABLE_DOLBY_VISION, false);
-        CodecDiscovery.disableDoVi(isDoViDisabled); // could be an autoswitch based on HDR DoVi screen capability
+        int doViMode = CodecDiscovery.DOVI_MODE_AUTO;
+        try {
+            String doViModeValue = PreferenceManager.getDefaultSharedPreferences(mContext)
+                    .getString(VideoPreferencesCommon.KEY_DOLBY_VISION_MODE, null);
+            if ("off".equals(doViModeValue)) {
+                doViMode = CodecDiscovery.DOVI_MODE_OFF;
+            } else if ("force".equals(doViModeValue)) {
+                doViMode = CodecDiscovery.DOVI_MODE_FORCE;
+            } else if (doViModeValue == null) {
+                boolean isDoViDisabled = PreferenceManager.getDefaultSharedPreferences(mContext)
+                        .getBoolean(VideoPreferencesCommon.KEY_DISABLE_DOLBY_VISION, false);
+                doViMode = isDoViDisabled ? CodecDiscovery.DOVI_MODE_OFF : CodecDiscovery.DOVI_MODE_AUTO;
+            }
+        } catch (ClassCastException e) {
+            boolean isDoViDisabled = PreferenceManager.getDefaultSharedPreferences(mContext)
+                    .getBoolean(VideoPreferencesCommon.KEY_DISABLE_DOLBY_VISION, false);
+            doViMode = isDoViDisabled ? CodecDiscovery.DOVI_MODE_OFF : CodecDiscovery.DOVI_MODE_AUTO;
+        }
+        CodecDiscovery.setDoViMode(doViMode);
 
         // we shouldn't clear the target state, because somebody might have
         // called start() previously

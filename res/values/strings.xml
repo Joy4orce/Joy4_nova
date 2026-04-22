@@ -610,6 +610,8 @@
     <string name="preferences_tv_refreshrate_switch_disabled">Disabled</string>
     <string name="preferences_tv_refreshrate_switch_mode_selection">Display mode selection matching video fps</string>
     <string name="preferences_tv_refreshrate_switch_match_frame_rate">Android 12+ frame rate matching feature</string>
+    <string name="preference_dolby_vision_mode">Dolby Vision mode</string>
+    <string name="preference_force_dolby_vision">Force Dolby Vision</string>
     <string name="preference_remove_dolby_vision">Disable dolby vision</string>
     <string name="preference_remove_dolby_vision_summary">Use standard video codecs over dolby vision ones</string>
     <string name="preference_cutout_short_edges">Fullscreen video with display cutouts</string>

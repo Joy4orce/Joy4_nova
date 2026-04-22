@@ -36,6 +36,9 @@ import com.archos.mediacenter.video.player.Player;
 public class CodecDiscovery {
 
 	private static final Logger log = LoggerFactory.getLogger(CodecDiscovery.class);
+	public static final int DOVI_MODE_AUTO = 0;
+	public static final int DOVI_MODE_OFF = 1;
+	public static final int DOVI_MODE_FORCE = 2;
 	public static final int SPATIALIZER_CAP_SUPPORTED = 1;
 	public static final int SPATIALIZER_CAP_AVAILABLE = 1 << 1;
 	public static final int SPATIALIZER_CAP_ENABLED = 1 << 2;
@@ -43,7 +46,8 @@ public class CodecDiscovery {
 	public static final int SPATIALIZER_CAP_CAN_SPATIALIZE_7_1 = 1 << 4;
 
 	// log4j/logback not possible since used from native it seems
-	private static boolean isDoViDisabled = false;
+	private static volatile boolean isDoViDisabled = false;
+	private static volatile int doViMode = DOVI_MODE_AUTO;
 	private static int hdrCapabilities = 0; // bitmask 0: none, 1: HDR10, 2: HLG, 4: HDR10+, 8: Dolby Vision
 
 	public static boolean isCodecTypeSupported(String codecType, boolean allowSwCodec) {
@@ -233,7 +237,17 @@ public class CodecDiscovery {
 
 	public static void disableDoVi(boolean isDisabled) {
 		if (log.isDebugEnabled()) log.debug("disableDovi={}", isDisabled);
-		isDoViDisabled = isDisabled;
+		setDoViMode(isDisabled ? DOVI_MODE_OFF : DOVI_MODE_AUTO);
+	}
+
+	public static void setDoViMode(int mode) {
+		if (log.isDebugEnabled()) log.debug("setDoViMode={}", mode);
+		doViMode = mode;
+		isDoViDisabled = (mode == DOVI_MODE_OFF);
+	}
+
+	public static int getDoViMode() {
+		return doViMode;
 	}
 
 	private static boolean isCodecTypeSupported(String codecType, boolean allowSwCodec, int kind) {
@@ -256,6 +270,7 @@ public class CodecDiscovery {
 		if (Build.VERSION.SDK_INT < 27) return null;
 		MediaCodecList codecList = new MediaCodecList(MediaCodecList.ALL_CODECS);
 		MediaCodecInfo[] codecInfos = codecList.getCodecInfos();
+		String firstSupportedCodec = null;
 		for (MediaCodecInfo codecInfo : codecInfos) {
 			// Ignore encoders
 			if (codecInfo.isEncoder()) {
@@ -263,6 +278,9 @@ public class CodecDiscovery {
 			}
 
 			if (isCodecInfoSupported(codecInfo, mimeType, false)) {
+				if (firstSupportedCodec == null) {
+					firstSupportedCodec = codecInfo.getName();
+				}
 				MediaCodecInfo.CodecCapabilities capabilities = codecInfo.getCapabilitiesForType(mimeType);
 				if (capabilities != null) {
 					if (capabilities.profileLevels != null) {
@@ -275,6 +293,10 @@ public class CodecDiscovery {
 					}
 				}
 			}
+		}
+		if (doViMode == DOVI_MODE_FORCE && "video/dolby-vision".equalsIgnoreCase(mimeType) && firstSupportedCodec != null) {
+			if (log.isDebugEnabled()) log.debug("getCodecForProfile: forcing first Dolby Vision codec {}", firstSupportedCodec);
+			return firstSupportedCodec;
 		}
 		return null;
 	}

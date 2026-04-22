@@ -236,6 +236,18 @@
         <item>Dolby Vision</item>
     </string-array>
 
+    <string-array name="pref_dolby_vision_mode_entries">
+        <item>@string/ui_mode_auto</item>
+        <item>@string/preference_remove_dolby_vision</item>
+        <item>@string/preference_force_dolby_vision</item>
+    </string-array>
+
+    <string-array name="pref_dolby_vision_mode_values" translatable="false">
+        <item>auto</item>
+        <item>off</item>
+        <item>force</item>
+    </string-array>
+
     <string-array name="theme_selection_entries" translatable="false">
         <item>@string/theme_blue</item>
         <item>@string/theme_black</item>
