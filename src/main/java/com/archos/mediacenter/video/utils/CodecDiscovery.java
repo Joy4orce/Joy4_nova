@@ -159,26 +159,42 @@ public class CodecDiscovery {
 
 	public static void displaySupportsDoVi(boolean isSupported) {
 		if (log.isDebugEnabled()) log.debug("displaySupportsDoVi={}", isSupported);
-		// set bit 3 of hdrCapabilities to 1 if display supports Dolby Vision
-		hdrCapabilities |= 8;
+		// Set bit 3 of hdrCapabilities if display supports Dolby Vision.
+		if (isSupported) {
+			hdrCapabilities |= 8;
+		} else {
+			hdrCapabilities &= ~8;
+		}
 	}
 
 	public static void displaySupportsHdr10(boolean isSupported) {
 		if (log.isDebugEnabled()) log.debug("displaySupportsHdr10={}", isSupported);
-		// set bit 1 of hdrCapabilities to 1 if display supports HDR10
-		hdrCapabilities |= 1;
+		// Set bit 1 of hdrCapabilities if display supports HDR10.
+		if (isSupported) {
+			hdrCapabilities |= 1;
+		} else {
+			hdrCapabilities &= ~1;
+		}
 	}
 
 	public static void displaySupportsHdrHLG(boolean isSupported) {
         if (log.isDebugEnabled()) log.debug("displaySupportsHdrHLG={}", isSupported);
-		// set bit 2 of hdrCapabilities to 1 if display supports HLG
-		hdrCapabilities |= 2;
+		// Set bit 2 of hdrCapabilities if display supports HLG.
+		if (isSupported) {
+			hdrCapabilities |= 2;
+		} else {
+			hdrCapabilities &= ~2;
+		}
 	}
 
 	public static void displaySupportsHdr10Plus(boolean isSupported) {
         if (log.isDebugEnabled()) log.debug("displaySupportsHdr10Plus={}", isSupported);
-		// set bit 4 of hdrCapabilities to 1 if display supports HDR10+
-		hdrCapabilities |= 4;
+		// Set bit 4 of hdrCapabilities if display supports HDR10+.
+		if (isSupported) {
+			hdrCapabilities |= 4;
+		} else {
+			hdrCapabilities &= ~4;
+		}
 	}
 
 	// [None, HDR10, HDR HLG, HDR10+, Dolby Vision] based on display capabilities
