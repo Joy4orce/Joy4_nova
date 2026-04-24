@@ -24,7 +24,7 @@
     <string name="refresh_servers_list">Odśwież listę serwerów</string>
     <!-- Menu item to enable network shares -->
     <string name="enable_network_shares">Włącz zasoby sieciowe</string>
-    <string name="initial_scan">Wstępne skanowanie</string>
+    <string name="initial_scan">Skanowanie wstępne</string>
     <!-- Library screen, menu item -->
     <string name="search_title">Szukaj</string>
     <!-- Default name of track that doesn't have a name in the metadata -->
@@ -320,7 +320,7 @@
     <string name="pref_play_mode_entry_repeat_single">Potwórz pojedynczy</string>
     <string name="pref_play_mode_entry_binge">Odcinek po odcinku</string>
     <string name="pref_audio_parameters_title">Dźwięk</string>
-    <string name="pref_audio_filt_title">Wzmocnienie dźwięku</string>
+    <string name="pref_audio_filt_title">Wzmocnienie</string>
     <string name="pref_audio_filt_night_mode">Tryb nocny</string>
     <string name="ui_mode_auto">Automatycznie</string>
     <string name="ui_mode_tv">TV</string>
@@ -417,7 +417,7 @@
     <string name="subtitles_wizard_empty_list_help">Nie znaleziono plików napisów. Musisz skopiować co najmniej jeden plik napisów do tego folderu, aby powiązać go z filmem %s.</string>
     <string name="subtitles_wizard_cache">Pamięć podręczna</string>
     <!-- Subloader -->
-    <string name="get_subtitles_online">Pobierz napisy online</string>
+    <string name="get_subtitles_online">Pobierz napisy z sieci</string>
     <string name="toast_subloader_sub_found">Znaleziono napisy dla tego języka</string>
     <string name="toast_subloader_sub_not_found">Nie znaleziono napisów dla tego języka</string>
     <string name="toast_subloader_service_unreachable">Przerwa w działaniu serwisu z napisami</string>
@@ -428,7 +428,7 @@
     <string name="dialog_subloader_success">Znaleziono napisy dla:</string>
     <string name="dialog_subloader_fails">Nie znaleziono napisów dla:</string>
     <string name="sub_force_all_title">Wymuś pobranie napisów</string>
-    <string name="sub_force_all">Wszystkie filmy mają już co najmniej jedne napisy. Czy chcesz wymusić pobranie nowych?</string>
+    <string name="sub_force_all">Wszystkie filmy mają już, co najmniej jedne, napisy. Czy chcesz wymusić pobranie nowych?</string>
     <string name="dialog_subloader_nonetwork_title">Brak połączenia z internetem</string>
     <string name="dialog_subloader_nonetwork_message">Do pobrania napisów wymagane jest połączenie z internetem</string>
     <string name="dialog_subloader_connecting">Łączenie z www.opensubtitles.com…</string>
@@ -529,7 +529,7 @@
     <string name="preferences_force_software_decoding_summary">Jeśli jakieś filmy nie są odtwarzane poprawnie, spróbuj włączyć tę opcję</string>
     <string name="preferences_force_audio_passthrough">Przekazywanie audio</string>
     <string name="preferences_force_audio_passthrough_disabled">Wyłączone (zalecane)</string>
-    <string name="preferences_force_audio_passthrough_enable">Hermetyzacja Nova audio (eksperymentalna)</string>
+    <string name="preferences_force_audio_passthrough_enable">Hermetyzacja Nova audio. ⚠️ Funkcja eksperymentalna</string>
     <string name="preferences_force_audio_passthrough_enable2">Hermetyzacja systemu audio</string>
     <string name="preferences_force_audio_passthrough_ac3">Uniwersalne (przekodowanie AC3)</string>
     <string name="preferences_force_audio_passthrough_summary">Wysyłaj skompresowany dźwięk przez HDMI lub S/PDIF. ⚠️ Funkcja eksperymentalna, może powodować utratę synchronizacji dźwięku z obrazem</string>
@@ -546,19 +546,19 @@
     <string name="preferences_playback_speed">Prędkość odtwarzania</string>
     <string name="preferences_playback_speed_summary">Włącz możliwość zmiany prędkości odtwarzania. ⚠️ Funkcja eksperymentalna, może powodować brak płynności odtwarzania wideo</string>
     <string name="preferences_audio_speed_audiotrack">Użyj AudioTrack do kontroli prędkości odtwarzania</string>
-    <string name="preferences_audio_speed_audiotrack_summary">Użyj AudioTrack zamiast filtra atempo FFmpeg do kontroli prędkości odtwarzania. Eksperymentalne: może nie działać na wszystkich konfiguracjach</string>
+    <string name="preferences_audio_speed_audiotrack_summary">Użyj AudioTrack zamiast filtra atempo FFmpeg do kontroli prędkości odtwarzania. ⚠️ Funkcja eksperymentalna, może nie działać na wszystkich konfiguracjach</string>
     <string name="preferences_enable_dynamic_audio_delay_title">Dynamiczne szacowanie opóźnienia audio/wideo</string>
     <string name="preferences_enable_dynamic_audio_delay_summary">Użyj dynamicznego szacowania opóźnienia dla lepszej synchronizacji audio/wideo (dla połączenia BT). Wyłącz, jeśli występują problemy z synchronizacją</string>
-    <string name="preferences_disable_downmix_title">Wyłącz downmix dźwięku</string>
+    <string name="preferences_disable_downmix_title">Wyłącz wymuszanie dźwięku stereo</string>
     <string name="preferences_disable_downmix_summary">Zawsze dekoduj wszystkie kanały i niech Android decyduje o sposobie miksowania (możliwa utrata kanałów dialogowych)</string>
     <string name="preferences_enable_downmix_androidtv_title">Wymuś dźwięk stereo</string>
-    <string name="preferences_enable_downmix_androidtv_summary">Zawsze miksuj ścieżkę dźwiękową wielu kanałów do stereo (wybierz, jeśli kanały głosowe nie są słyszalne)</string>
+    <string name="preferences_enable_downmix_androidtv_summary">Zawsze miksuj ścieżkę dźwiękową do stereo (wybierz, jeśli kanały głosowe nie są słyszalne)</string>
     <string name="preferences_allow_3rd_party_player">Zezwól na używanie innego odtwarzacza wideo</string>
     <string name="preferences_allow_3rd_party_player_summary">Inne kompatybilne aplikacje będą proponowane przez system Android podczas uruchamiania odtwarzania wideo. Pamiętaj, że niektóre funkcje nie będą działać (wznawianie, zakładki, itp.)</string>
     <string name="preference_tv_3d_automatic_switch">Włącz automatyczne przełączanie TV 3D</string>
     <string name="preference_tv_3d_automatic_switch_summary">Użyj tej funkcji tylko wtedy, gdy telewizor obsługuje 3D</string>
     <string name="enable_android_frame_timing">Włącz synchronizację ramek systemu Android</string>
-    <string name="enable_android_frame_timing_summary">Przekaż Androidowi synchronizację klatek, aby zapewnić płynniejsze odtwarzanie (eksperymentalne)</string>
+    <string name="enable_android_frame_timing_summary">Przekaż Androidowi synchronizację klatek, aby zapewnić płynniejsze odtwarzanie. ⚠️ Funkcja eksperymentalna</string>
     <string name="hide_watched_videos">Ukryj obejrzane filmy</string>
     <string name="hide_watched_videos_summary">Ukryj filmy z biblioteki mediów, jeśli są oznaczone jako obejrzane</string>
     <string name="enable_projector_mode">Włącz tryb projektora</string>
@@ -581,10 +581,10 @@
     <string name="subtitles_credentials_title">Dane logowania OpenSubtitles</string>
     <string name="subtitles_credentials_summary">Podaj dane logowania do OpenSubtitles, aby pobierać napisy</string>
     <string name="preferences_languages">Język pobieranych napisów</string>
-    <string name="summary_list_preference_primary">Pobieraj napisy w swoim języku</string>
+    <string name="summary_list_preference_primary">Wybierz języki, w których chcesz pobrać napisy</string>
     <string name="favSubLang_title">Język napisów</string>
     <string name="favSubLang_summary">Wybierz preferowany język napisów</string>
-    <string name="favAudioLang_title">Preferowany język dźwięku</string>
+    <string name="favAudioLang_title">Preferowany język ścieżki dźwiękowej</string>
     <string name="favAudioLang_summary">Wybierz swój ulubiony język ścieżki dźwiękowej</string>
     <string name="ui_language_title">Wybierz język interfejsu</string>
     <string name="UiLang_title">Język interfejsu</string>
@@ -739,8 +739,19 @@
     <string name="audio_decoder_prefer_ffmpeg">Preferuj FFmpeg</string>
     <string name="audio_decoder_prefer_mediacodec">Preferuj MediaCodec</string>
     <string name="audio_interface_opensles">Wymuś OpenSL ES</string>
-    <string name="audio_interface_audiotrack">Wymuś ścieżkę dźwięku</string>
+    <string name="audio_interface_audiotrack">Wymuś ścieżkę dźwiękową</string>
     <string name="audio_interface_any">Domyślna logika</string>
+    <string name="mediacodec_audio_capabilities">Funkcje audio MediaCodec</string>
+    <string name="spatialization_capabilities">Przestrzenność</string>
+    <string name="technical_information">Informacje techniczne</string>
+    <string name="status_unsupported_api">nieobsługiwane (API %1$d)</string>
+    <string name="status_not_supported">nieobsługiwane</string>
+    <string name="status_supported">obsługiwane</string>
+    <string name="status_available">dostępne</string>
+    <string name="status_unavailable">niedostępne</string>
+    <string name="status_enabled">włączone</string>
+    <string name="status_disabled">wyłączone</string>
+    <string name="status_multichannel">wielokanałowy</string>
     <string name="preferences_user_interface">Interfejs użytkownika</string>
     <string name="preferences_display_resume_box_summary">Wyświetl lub ukryj przycisk wznawiający najnowsze wideo na ekranie głównym</string>
     <string name="preferences_display_resume_box">Wyświetl pole wznowienia</string>
@@ -774,7 +785,7 @@
     <string name="preferences_anime_sort_order_summary">Wybierz porządek sortowania animacji</string>
     <string name="preferences_anime_sort_order_title">Porządek sortowania filmów animowanych</string>
     <string name="codepage_title">Kodowanie napisów</string>
-    <string name="codepage_summary">Ustaw kodowanie używane w napisach tekstowych</string>
+    <string name="codepage_summary">Ustaw kodowanie używane w napisach</string>
     <string name="codepage_default">Język urządzenia %s</string>
     <string name="codepage_874">Tajski(CP874)</string>
     <string name="codepage_932">Japoński (Shift-JIS, EUC-JP)</string>

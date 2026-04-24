@@ -145,12 +145,15 @@
             android:summary="@string/preference_tv_refreshrate_switch_summary"
             android:title="@string/preference_tv_refreshrate_switch"
             app:iconSpaceReserved="false"/>
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="disable_dolby_vision"
+        <ListPreference
+            android:defaultValue="auto"
+            android:dialogTitle="@string/preference_dolby_vision_mode"
+            android:entries="@array/pref_dolby_vision_mode_entries"
+            android:entryValues="@array/pref_dolby_vision_mode_values"
+            android:key="dolby_vision_mode"
             android:persistent="true"
-            android:summary="@string/preference_remove_dolby_vision_summary"
-            android:title="@string/preference_remove_dolby_vision"
+            android:title="@string/preference_dolby_vision_mode"
+            app:useSimpleSummaryProvider="true"
             app:iconSpaceReserved="false"/>
         <ListPreference
             android:dialogTitle="@string/favAudioLang_title"

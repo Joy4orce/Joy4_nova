@@ -726,6 +726,17 @@
     <string name="audio_interface_opensles">强制使用 OpenSL ES模式</string>
     <string name="audio_interface_audiotrack">强制使用音轨模式</string>
     <string name="audio_interface_any">默认逻辑</string>
+    <string name="mediacodec_audio_capabilities">MediaCodec 音频功能</string>
+    <string name="spatialization_capabilities">平台空间化</string>
+    <string name="technical_information">技术信息</string>
+    <string name="status_unsupported_api">不受支持（API %1$d）</string>
+    <string name="status_not_supported">不支持</string>
+    <string name="status_supported">支持</string>
+    <string name="status_available">可用</string>
+    <string name="status_unavailable">不可用</string>
+    <string name="status_enabled">已启用</string>
+    <string name="status_disabled">已禁用</string>
+    <string name="status_multichannel">多声道</string>
     <string name="preferences_user_interface">用户界面</string>
     <string name="preferences_display_resume_box_summary">在主屏幕上显示或隐藏“恢复播放最近视频”的按钮</string>
     <string name="preferences_display_resume_box">显示恢复播放窗口</string>
