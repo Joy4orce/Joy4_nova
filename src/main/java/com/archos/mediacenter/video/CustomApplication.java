@@ -134,6 +134,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
 
     private static int [] novaVersionArray;
     private static int [] novaPreviousVersionArray;
+    private static boolean novaVersionStateInitialized = false;
     private static String novaLongVersion;
     private static String novaShortVersion;
     private static int novaVersionCode = -1;
@@ -763,12 +764,12 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         // Defer heavy initialization to a background thread to speed up cold start
         final Context appContext = mContext;
         final CustomApplication app = this;
+        updateVersionState(appContext);
         new Thread("nova-deferred-init") {
             public void run() {
                 Trakt.initApiKeys(appContext);
                 launchSambaDiscovery();
                 NetworkCredentialsDatabase.getInstance().loadCredentials(appContext);
-                updateVersionState(appContext);
                 if (openSubtitlesApiHelper == null) openSubtitlesApiHelper = OpenSubtitlesApiHelper.getInstance();
                 upgradeActions(appContext);
                 if (Build.VERSION.SDK_INT >= 23) {
@@ -1108,7 +1109,9 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         return mHttpImageManager;
     }
 
-    private static void updateVersionState(Context context) {
+    private static synchronized void updateVersionState(Context context) {
+        if (novaVersionStateInitialized) return;
+        if (context == null) return;
         try {
             //this code gets current version-code (after upgrade it will show new versionCode)
             PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
@@ -1156,8 +1159,15 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                 sharedPreferences.edit().putString("previous_versionName", "0.0.0").commit();
             }
         } catch (PackageManager.NameNotFoundException e) {
+            novaVersionArray = emptyVersionArray();
+            novaPreviousVersionArray = emptyVersionArray();
             log.error("updateVersionState: caught NameNotFoundException", e);
         }
+        novaVersionStateInitialized = true;
+    }
+
+    private static int[] emptyVersionArray() {
+        return new int[] { 0, 0, 0, 0, 0, 0, 0, 0};
     }
 
     // takes version major.minor.revision-YYYYMMDD.HHMMSS and convert it into an integer array
@@ -1178,6 +1188,9 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     }
 
     public static String getChangelog(Context context) {
+        if (novaPreviousVersionArray == null || novaVersionArray == null) {
+            updateVersionState(context);
+        }
         if (log.isDebugEnabled()) log.debug("getChangelog: {}->{}", novaPreviousVersionArray[0], novaVersionArray[0]);
         if (novaPreviousVersionArray[0] > 0 && novaPreviousVersionArray[0] <= 5 && novaVersionArray[0] > 5)
             return context.getResources().getString(R.string.v5_v6_upgrade_info);
