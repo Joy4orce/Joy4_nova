@@ -58,7 +58,7 @@ public class VideoUtils {
 
     public static final String ALLOWED_VIEW_MODES_EXTRA = "allowed_view_modes";
 
-    private static final String[] VIDEO_MIME_TYPES_ARRAY = {"video/", "application/x-bittorrent"};
+    private static final String[] VIDEO_MIME_TYPES_ARRAY = {"video/", "audio/", "application/x-bittorrent", "application/ogg"};
 
     // keep in sync with com.archos.mediaprovider.ArchosMediaFile
     private static final String[] SUBTITLES_ARRAY = { "srt", "smi", "ssa", "ass", "srr", "idx", "sub", "mpl", "txt", "vtt"};

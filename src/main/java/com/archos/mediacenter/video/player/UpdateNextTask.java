@@ -329,7 +329,7 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
                             for (int i = 0; i < files.size(); i++) {
                                 if (files.get(i).isFile()) {
                                     String mimeType = files.get(i).getMimeType();
-                                    if (mimeType != null && mimeType.startsWith("video/"))
+                                    if (mimeType != null && (mimeType.startsWith("video/") || mimeType.startsWith("audio/")))
                                         filteredList.add(files.get(i));
                                 }
                             }

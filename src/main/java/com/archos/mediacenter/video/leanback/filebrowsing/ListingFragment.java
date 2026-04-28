@@ -581,7 +581,7 @@ public abstract class ListingFragment extends MyVerticalGridFragment implements 
                     else {
                         String mimeType = file.getMimeType();
                         if (mimeType!=null) {
-                            if (mimeType.startsWith("video/")||mimeType.equals("application/x-bittorrent")) {
+                            if (mimeType.startsWith("video/") || mimeType.startsWith("audio/") || mimeType.equals("application/x-bittorrent")) {
                                 Uri thumbnailUri = null;// Get upnp thumbnail if available
                                 if (file instanceof UpnpFile2) {
                                     thumbnailUri = ((UpnpFile2)file).getThumbnailUri();
