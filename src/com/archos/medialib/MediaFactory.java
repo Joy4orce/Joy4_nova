@@ -157,6 +157,19 @@ public class MediaFactory {
     }
 
     public static IMediaPlayer createPlayer(Context ctx, boolean forceSoftwareDecoding) {
+        return createPlayer(ctx, forceSoftwareDecoding, false);
+    }
+
+    /**
+     * @param preferAndroidPlayer when true, return Android's MediaPlayer regardless of
+     * preferences. Used for audio-only files where the AVOS native player does not start
+     * playback (it expects a video stream).
+     */
+    public static IMediaPlayer createPlayer(Context ctx, boolean forceSoftwareDecoding, boolean preferAndroidPlayer) {
+        if (preferAndroidPlayer) {
+            if (DBG) Log.d(TAG, "new AndroidMediaPlayer (audio-only override)");
+            return new AndroidMediaPlayer(ctx);
+        }
         if (preInit(ctx, true, forceSoftwareDecoding)) {
             if (DBG) Log.d(TAG, "new AvosMediaPlayer");
             return new AvosMediaPlayer();
