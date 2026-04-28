@@ -422,6 +422,7 @@ public class AndroidMediaPlayer extends MediaPlayer implements IMediaPlayer,
             mProxy = SmbProxy.setDataSource(uri, this, headers);
             return;
         }
+        rememberLocalPath(uri);
         super.setDataSource(context, uri, headers);
     }
 
@@ -433,7 +434,20 @@ public class AndroidMediaPlayer extends MediaPlayer implements IMediaPlayer,
             mProxy = SmbProxy.setDataSource(uri, this, null);
             return;
         }
+        rememberLocalPath(uri);
         super.setDataSource(context, uri);
+    }
+
+    /**
+     * For local file URIs, capture the on-disk path so addAllTimedTexts() can
+     * locate sibling subtitle files (e.g. song.mp3 -> song.srt).
+     */
+    private void rememberLocalPath(Uri uri) {
+        if (uri == null) return;
+        String scheme = uri.getScheme();
+        if ("file".equalsIgnoreCase(scheme)) {
+            mVideoPath = uri.getPath();
+        }
     }
 
     @Override
