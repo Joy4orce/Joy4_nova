@@ -225,7 +225,7 @@
     <string name="scraper_notification_title">온라인에서 정보 검색 중</string>
     <string name="scraper_notification_progress">"%2$d개 중 %1$d개 처리 완료</string>
     <string name="scraper_no_episode_found">에피소드를 찾을 수 없음</string>
-    <string name="scraper_suggest_message">'온라인에서 정보 검색' 메뉴로 동영상의 포스터와 정보를 검색할 수 있습니다.</string>
+    <string name="scraper_suggest_message">\'온라인에서 정보 검색\' 메뉴로 동영상의 포스터와 정보를 검색할 수 있습니다.</string>
     <string name="scraper_no_movie_text">현재 영화에 대한 포스터와 설명이 없습니다</string>
     <string name="scraper_no_movie_button_label">온라인에서 영화 정보 검색</string>
     <string name="scraper_no_tv_show_text">현재 TV 프로그램에 대한 포스터와 설명이 없습니다</string>
