@@ -463,4 +463,186 @@
 
     <!-- Audio support (added strings) -->
     <string name="info_tab_audio">오디오</string>
+
+    <!-- Preferences -->
+    <string name="preferences">설정</string>
+    <string name="preferences_about">정보</string>
+    <string name="preferences_video_about">정보</string>
+    <string name="preferences_video_advanced">고급</string>
+    <string name="preferences_video_advanced_quit_title">일반 설정</string>
+    <string name="preferences_video_advanced_quit_summary">일반 설정으로 돌아가기</string>
+    <string name="preferences_video_licenses">라이선스</string>
+    <string name="preferences_user_interface">사용자 인터페이스</string>
+    <string name="preferences_leanback_user_interface">TV 사용자 인터페이스</string>
+    <string name="preferences_category_video">동영상</string>
+    <string name="category_languages">자막</string>
+    <string name="category_trakt">Trakt</string>
+
+    <string name="ui_language_title">사용자 인터페이스 언어 선택</string>
+    <string name="ui_mode_title">사용자 인터페이스 모드</string>
+    <string name="ui_mode_summary">TV 또는 태블릿/스마트폰 UI 중 선택</string>
+    <string name="theme_selection_title">색상 테마</string>
+    <string name="theme_selection_summary">선호하는 색상 테마 선택</string>
+    <string name="interface_size">인터페이스 크기</string>
+    <string name="interface_size_summary">사용자 인터페이스가 너무 작거나 크면 변경하십시오</string>
+
+    <string name="always_leanback_on_tv">항상 TV 인터페이스로 시작</string>
+    <string name="always_leanback_on_tv_summary">앱을 항상 TV 인터페이스로 시작합니다. TV에서 일반 UI로 시작하려면 끄십시오.</string>
+
+    <string name="enable_auto_scrap">새 동영상의 정보를 자동으로 가져오기</string>
+    <string name="enable_adult_scrap_title">성인 동영상 스크레이핑</string>
+    <string name="enable_adult_scrap_summary">성인 동영상 정보 가져오기 활성화 (기본 비활성)</string>
+    <string name="enable_scrape_from_db_title">이미 스크레이핑된 정보 사용</string>
+    <string name="enable_scrape_from_db_summary">중복 동영상이 발견되면 이미 스크레이핑된 정보를 사용합니다. 첫 스크레이핑을 빠르게 하려면 끄십시오!</string>
+    <string name="rescrap_all_title">전체 다시 스크레이핑</string>
+    <string name="rescrap_all_movies_title">모든 영화 다시 스크레이핑</string>
+    <string name="rescrap_all_collections_title">모든 컬렉션 다시 스크레이핑</string>
+    <string name="scraper_language_title">동영상 설명 언어</string>
+    <string name="scraper_language_summary">동영상 설명을 다운로드할 언어 설정</string>
+
+    <string name="enable_sponsor_title">Nova 후원 링크 활성화</string>
+    <string name="enable_sponsor_summary">기부를 위한 후원 링크를 활성화합니다. 모든 기여가 도움이 됩니다.</string>
+    <string name="upgrade_to_add_free_version">광고 제거 버전으로 업그레이드</string>
+
+    <string name="hide_controls_on_pause">일시정지 시 컨트롤 숨김</string>
+    <string name="hide_controls_on_pause_summary">동영상이 일시정지되면 5초 후 플레이어 컨트롤을 숨깁니다.</string>
+    <string name="hide_watched_videos">시청한 동영상 숨김</string>
+    <string name="hide_watched_videos_summary">라이브러리에서 시청 표시된 동영상을 숨깁니다.</string>
+
+    <string name="enable_projector_mode">프로젝터 모드 활성화</string>
+    <string name="enable_projector_mode_summary">프로젝터로 보기 위해 동영상을 화면 상단에 재생합니다.</string>
+    <string name="reset_brightness_on_start">동영상 밝기 기억</string>
+    <string name="reset_brightness_on_start_summary">앱 실행 시 마지막 사용한 밝기 설정을 기억합니다. 시스템 밝기를 사용하려면 끄십시오.</string>
+
+    <string name="preference_cutout_short_edges">디스플레이 컷아웃 영역 사용</string>
+    <string name="preference_cutout_short_edges_summary">컷아웃이 있는 디스플레이에서 가로 전체화면 동영상 허용</string>
+    <string name="preference_enable_cutout_both_sidesx">양쪽을 동일하게 잘라내기</string>
+    <string name="preference_enable_cutout_both_sidesx_summary">화면이 대칭이 되도록 양쪽을 동일하게 잘라냅니다.</string>
+    <string name="preference_dolby_vision_mode">돌비 비전 모드</string>
+    <string name="preference_tv_refreshrate_switch">자동 주사율 전환 활성화</string>
+    <string name="preference_tv_refreshrate_switch_summary">동영상 프레임 레이트에 맞춰 화면 주사율을 자동 전환하여 저더 현상을 줄입니다 (기기에 따라 동작이 다를 수 있음)</string>
+
+    <string name="audio_decoder_choice_title">오디오 디코더 선택</string>
+    <string name="audio_decoder_choice_summary">오디오 디코딩 시 FFmpeg 또는 MediaCodec 중 선호 항목을 제어합니다.</string>
+    <string name="audio_interface_choice_title">오디오 인터페이스 선택</string>
+    <string name="audio_interface_choice_summary">고급 설정으로, 오디오 디코딩이 손상될 수 있습니다.</string>
+    <string name="dec_choice_title">디코더 선택</string>
+    <string name="dec_choice_summary">고급 설정으로, 비디오 디코딩이 손상될 수 있습니다.</string>
+    <string name="preferences_force_software_decoding">소프트웨어 디코딩 강제</string>
+    <string name="preferences_force_software_decoding_summary">일부 동영상이 제대로 재생되지 않을 때 시도하십시오</string>
+
+    <string name="preferences_force_audio_passthrough">오디오 패스스루</string>
+    <string name="preferences_force_audio_passthrough_summary">HDMI 또는 S/PDIF로 압축 오디오 전송. ⚠ 실험적 — A/V 동기화 문제가 발생할 수 있습니다</string>
+    <string name="preferences_force_passthrough">오디오 패스스루 강제</string>
+    <string name="preferences_force_passthrough_summary">패스스루가 활성화된 경우, AV 리시버 지원 여부 확인 없이 강제로 사용합니다</string>
+    <string name="preferences_disable_downmix_title">스테레오 다운믹스 비활성화</string>
+    <string name="preferences_disable_downmix_summary">모든 채널을 디코딩하고 다운믹스를 Android에 맡깁니다 (음성 채널이 손실될 수 있음)</string>
+    <string name="preferences_enable_downmix_androidtv_title">스테레오 다운믹스 강제</string>
+    <string name="preferences_enable_downmix_androidtv_summary">멀티 채널 오디오를 항상 스테레오로 다운믹스합니다 (음성 채널이 들리지 않을 때 선택)</string>
+    <string name="preferences_enable_dynamic_audio_delay_title">동적 오디오/비디오 지연 보정</string>
+    <string name="preferences_enable_dynamic_audio_delay_summary">동적 지연 추정으로 A/V 동기화 향상 (특히 블루투스 헤드셋). 동기화 문제 시 비활성화하십시오.</string>
+    <string name="preferences_audio_speed_audiotrack">재생 속도에 AudioTrack 사용</string>
+    <string name="preferences_audio_speed_audiotrack_summary">FFmpeg atempo 필터 대신 AudioTrack을 사용해 재생 속도를 조절합니다. 실험적 — 일부 환경에서 동작하지 않을 수 있습니다.</string>
+    <string name="preferences_playback_speed">재생 속도 조절 활성화</string>
+    <string name="preferences_playback_speed_summary">재생 속도 변경 기능을 활성화합니다. ⚠ 실험적 — 영상이 끊길 수 있습니다</string>
+    <string name="preferences_parser_sync_mode">파서 동기화 모드</string>
+    <string name="preferences_parser_sync_mode_summary">lavc 파서의 동기화 모드. ⚠ 실험적 — A/V 누적 지연이 발생할 수 있습니다</string>
+
+    <string name="preferences_stream_buffer_size_title">스트림 버퍼 크기</string>
+    <string name="preferences_stream_buffer_size_summary">버퍼링 문제 해결을 위해 파서 앞단에서 사용하는 캐시 크기 (MB)</string>
+    <string name="preferences_stream_max_iframe_size_title">최대 i-frame 크기</string>
+    <string name="preferences_stream_max_iframe_size_summary">압축된 i-frame의 최대 크기 (MB)</string>
+
+    <string name="codepage_title">자막 인코딩</string>
+    <string name="codepage_summary">텍스트 자막에 사용할 인코딩 설정</string>
+    <string name="subtitles_hide_default">기본적으로 자막 숨김</string>
+    <string name="subtitles_hide_default_summary">기본으로 자막을 숨기려면 선택하십시오</string>
+    <string name="preferences_languages">자막 다운로드 언어</string>
+    <string name="summary_list_preference_primary">자막 다운로드에 사용할 언어 선택</string>
+    <string name="subtitles_credentials_title">OpenSubtitles 자격 증명</string>
+    <string name="subtitles_credentials_summary">자막 다운로드를 위해 opensubtitles 자격 증명을 입력하십시오</string>
+
+    <string name="preferences_display_resume_box">이어보기 박스 표시</string>
+    <string name="preferences_display_resume_box_summary">메인 화면에서 최근 동영상 이어보기 버튼을 표시 또는 숨김</string>
+    <string name="preferences_show_watching_up_next_row">시청 중 / 다음 회차 행 표시</string>
+    <string name="preferences_show_watching_up_next_row_summary">현재 시청 중과 다음 회차 동영상 행을 표시합니다</string>
+    <string name="preferences_show_last_added_row">최근 추가됨 행 표시</string>
+    <string name="preferences_show_last_added_row_summary">최근 추가된 미디어 행을 표시합니다</string>
+    <string name="preferences_show_last_played_row">최근 재생됨 행 표시</string>
+    <string name="preferences_show_last_played_row_summary">최근 재생한 미디어 행을 표시합니다</string>
+    <string name="preferences_reset_last_played_row">최근 재생 행 재설정</string>
+    <string name="preferences_show_all_movies_row">모든 영화 행 표시</string>
+    <string name="preferences_show_all_movies_row_summary">영화 카테고리 행 대신 모든 영화 행을 표시합니다</string>
+    <string name="preferences_show_all_tv_shows_row">모든 TV 프로그램 행 표시</string>
+    <string name="preferences_show_all_tv_shows_row_summary">TV 프로그램 카테고리 행 대신 모든 TV 프로그램 행을 표시합니다</string>
+    <string name="preferences_show_all_animes_row">모든 애니메이션 행 표시</string>
+    <string name="preferences_show_all_animes_row_summary">애니메이션 카테고리 행 대신 모든 애니메이션 영화 행을 표시합니다</string>
+    <string name="preferences_separate_animation_from_movies">애니메이션을 영화/TV에서 분리</string>
+    <string name="preferences_separate_animation_from_movies_summary">애니메이션을 영화 및 TV 프로그램에서 분리하고 별도 행을 추가합니다</string>
+    <string name="preferences_movie_sort_order_title">전체 영화 행 정렬</string>
+    <string name="preferences_movie_sort_order_summary">전체 영화 행의 정렬 순서 선택</string>
+    <string name="preferences_anime_sort_order_title">전체 애니메이션 행 정렬</string>
+    <string name="preferences_anime_sort_order_summary">전체 애니메이션 행의 정렬 순서 선택</string>
+    <string name="preferences_tv_show_sort_order_title">전체 TV 프로그램 행 정렬</string>
+    <string name="preferences_tv_show_sort_order_summary">전체 TV 프로그램 행의 정렬 순서 선택</string>
+    <string name="pref_smart_recently_rows_title">스마트 최근 카테고리</string>
+    <string name="pref_declutter_home_rows_summary">최근 추가됨에 미시청 항목만 표시하고 최근 재생됨 중복을 방지합니다</string>
+
+    <string name="network_bookmarks">네트워크의 이어보기 / 북마크</string>
+    <string name="network_bookmarks_summary">가능한 경우 네트워크의 이어보기 및 북마크 위치를 저장 및 확인합니다</string>
+    <string name="network_nfo_parse">.nfo 파일 처리</string>
+    <string name="network_nfo_parse_summary">(다시) 스캔할 때 Kodi의 .nfo 파일을 읽어 미디어 정보 및 포스터를 수집합니다.</string>
+    <string name="network_thumbnails">원격 썸네일 생성</string>
+    <string name="network_thumbnails_summary">포스터가 없을 때 원격 동영상에서 썸네일을 생성합니다</string>
+    <string name="preferences_network_mobile_vpn_title">모바일 연결에서 네트워크 공유 사용</string>
+    <string name="preferences_network_mobile_vpn_summary">VPN 환경에서만 사용하고 데이터 사용량에 주의하십시오.</string>
+    <string name="preferences_network_prefer_vpn_title">VPN 네트워크 우선</string>
+    <string name="preferences_network_prefer_vpn_summary">로컬 네트워크 인터페이스 대신 VPN을 우선 사용합니다.</string>
+
+    <string name="share_folders_smb_disable_mdns_discovery">SMB mDNS 검색 끄기</string>
+    <string name="share_folders_smb_disable_mdns_discovery_summary">일부 기기에서 Wi-Fi가 불안정하면 mDNS 검색을 끄십시오.</string>
+    <string name="share_folders_smb_disable_tcp_discovery">SMB TCP 검색 끄기</string>
+    <string name="share_folders_smb_disable_tcp_discovery_summary">일부 기기에서 Wi-Fi가 불안정하면 TCP 검색을 끄십시오.</string>
+    <string name="share_folders_smb_disable_udp_discovery">SMB UDP 검색 끄기</string>
+    <string name="share_folders_smb_disable_udp_discovery_summary">일부 기기(예: Fire 10 HD)에서 Wi-Fi가 불안정하면 UDP 검색을 끄십시오.</string>
+    <string name="share_folders_smb_resolv">SMB 리졸버 순서</string>
+    <string name="share_folders_smb_resolv_summary">BCAST, DNS 활성화 (기본값: DNS, BCAST). 서버 해석 실패 또는 SMB 속도 저하 시 변경하십시오.</string>
+    <string name="share_folders_smbj">더 빠른 SMB(SMB2+) 구현 사용</string>
+    <string name="share_folders_smbj_summary">SMB 처리량을 높이지만 프로토콜 v2 이상만 지원합니다</string>
+    <string name="share_folders_sshj">새 SFTP 구현 사용</string>
+    <string name="share_folders_sshj_summary">SFTP 링크에 새 SFTP 구현을 사용합니다</string>
+    <string name="samba_settings_title">Samba 설정</string>
+    <string name="samba_settings_summary">Samba 관련 고급 설정</string>
+
+    <string name="db_export_manual_title">미디어 데이터베이스 내보내기</string>
+    <string name="db_export_manual_summary">디버그용으로 media.db 파일을 /sdcard 로 내보내기</string>
+    <string name="media_library_export_title">미디어 라이브러리 + 자격 증명 + 단축경로 내보내기</string>
+    <string name="media_library_export_summary">media.db, 네트워크 자격 증명 (SMB/FTP/SFTP), 네트워크 단축경로, 캐시된 모든 이미지를 zip 파일로 내보냅니다</string>
+    <string name="media_library_import_title">미디어 라이브러리 + 자격 증명 + 단축경로 가져오기</string>
+    <string name="media_library_import_summary">이전에 내보낸 zip 파일에서 media.db, 네트워크 자격 증명, 네트워크 단축경로, 캐시된 이미지를 가져옵니다</string>
+    <string name="nfo_export_manual_title">이미 스크레이핑된 동영상 내보내기</string>
+    <string name="nfo_export_manual_summary">이미 스크레이핑된 모든 동영상의 .nfo 파일을 내보냅니다</string>
+
+    <string name="trakt_signin_title">로그인</string>
+    <string name="trakt_signin_dialog_title">로그인</string>
+    <string name="trakt_wipe_title">Trakt.tv 로그아웃</string>
+    <string name="trakt_live_scrobbling_title">실시간 스크로블러</string>
+    <string name="trakt_live_scrobbling_summary">시청 중인 동영상을 Trakt 에 공유합니다</string>
+    <string name="trakt_force_pull_title">Trakt 에서 강제 다시 가져오기</string>
+    <string name="trakt_force_pull_summary">시청 상태와 이어보기 위치를 Trakt 에서 1회 가져옵니다</string>
+    <string name="trakt_force_push_title">Trakt 로 강제 다시 업로드</string>
+    <string name="trakt_force_push_summary">시청 상태와 이어보기 위치를 Trakt 로 1회 업로드합니다</string>
+    <string name="trakt_sync_collection_title">TV 프로그램 및 영화 컬렉션 동기화</string>
+    <string name="trakt_sync_collection_summary">Nova 라이브러리의 모든 동영상을 Trakt 컬렉션에 자동으로 추가합니다</string>
+    <string name="trakt_sync_trakt_resume_title">Trakt 이어보기 위치 동기화</string>
+    <string name="trakt_sync_trakt_resume">로컬보다 더 진행된 경우 Trakt 이어보기 위치를 사용합니다</string>
+    <string name="trakt_getfull_summary">Trakt 스크로블러는 유료 버전에서만 사용 가능합니다</string>
+
+    <string name="torrent_category">토렌트</string>
+    <string name="torrent_path">다운로드 경로</string>
+    <string name="torrent_blocklist">차단 목록</string>
+
+    <string name="preferences_video_os_text">자막 제공:</string>
+    <string name="preferences_video_tmdb_text">영화/TV 프로그램 정보 제공:</string>
+    <string name="preferences_video_trakt_text">동영상 스크로블러 제공:</string>
 </resources>

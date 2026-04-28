@@ -713,6 +713,11 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
             }
         }
         showControlBar(mControlBarShowing);
+        if (mAudioOnly) {
+            // Layout is now ready — pin the controller for audio-mode (or always-pin) playback.
+            mHandler.removeMessages(MSG_FADE_OUT);
+            show(FLAG_SIDE_ALL_EXCEPT_UNLOCK_INSTRUCTIONS, 0);
+        }
     }
 
     private void adjustView() {

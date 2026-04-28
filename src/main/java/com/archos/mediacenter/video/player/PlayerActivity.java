@@ -3114,6 +3114,10 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             mProgressView.setVisibility(View.GONE);
             PlayerService.sPlayerService.setAudioFilt();
             mPlayerController.start();
+            // After the player is fully prepared, force-show the controller so the
+            // seek bar / play-pause are reachable even if earlier show() calls were
+            // no-ops (e.g. during onCreate before the layout was attached).
+            mPlayerController.setAudioOnly(mIsAudioOnly);
             // Now that the video is loaded, Video info should be avalaible
             if (mInfoMenuItem != null) {
                 mInfoMenuItem.setVisible(mStreamingUri != null);
