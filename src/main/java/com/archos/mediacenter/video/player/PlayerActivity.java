@@ -734,6 +734,9 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         mResumeFromLast = false;
 
         mPlayer = new Player(mContext, getWindow(), mSurfaceController, false);
+        // Audio-only files: use Android's MediaPlayer because the AVOS native player
+        // refuses to start playback when there is no video stream.
+        mPlayer.setPreferAndroidPlayer(isAudioOnlyIntent(getIntent()));
 
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.N_MR1){ //detect any kind of rotation, even from 270 to 90°
             mDisplayListener = new DisplayManager.DisplayListener() {

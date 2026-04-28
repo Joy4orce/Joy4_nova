@@ -130,6 +130,9 @@ public class Player implements IPlayerControl,
     private int         mSurfaceWidth;
     private int         mSurfaceHeight;
     private IMediaPlayer mMediaPlayer;
+    // When true, MediaFactory uses Android's MediaPlayer instead of AVOS — needed for
+    // audio-only files (mp3/flac/etc.) since AVOS expects a video stream.
+    private boolean     mPreferAndroidPlayer = false;
     private int         mVideoWidth;
     private int         mVideoHeight;
     private double      mVideoAspect;
@@ -361,6 +364,14 @@ public class Player implements IPlayerControl,
     public void setWindow(Window window){
         mWindow = window;
     }
+
+    /**
+     * When true, the next openVideo() will use Android's MediaPlayer instead of AVOS.
+     * Set this for audio-only files (mp3/flac/etc.) before calling setVideoURI().
+     */
+    public void setPreferAndroidPlayer(boolean prefer) {
+        mPreferAndroidPlayer = prefer;
+    }
     public void setSurfaceController(SurfaceController surfaceController){
         if(surfaceController == mSurfaceController)
             return;
@@ -493,7 +504,9 @@ public class Player implements IPlayerControl,
     };
 
     public void openVideo() {
-        if (mUri == null || (mSurfaceHolder == null && mVideoTexture == null)) {
+        // Audio-only playback uses Android's MediaPlayer and does not need a video
+        // surface, so skip the surface readiness check in that case.
+        if (mUri == null || (!mPreferAndroidPlayer && mSurfaceHolder == null && mVideoTexture == null)) {
             // not ready for playback just yet, will try again later
             return;
         }
@@ -528,7 +541,7 @@ public class Player implements IPlayerControl,
         }
         new Thread(() -> {
             try {
-                mMediaPlayer = MediaFactory.createPlayer(mContext, mForceSoftwareDecoding);
+                mMediaPlayer = MediaFactory.createPlayer(mContext, mForceSoftwareDecoding, mPreferAndroidPlayer);
                 mMediaPlayer.setOnPreparedListener(this);
                 mMediaPlayer.setOnCompletionListener(this);
                 mMediaPlayer.setOnInfoListener(this);
