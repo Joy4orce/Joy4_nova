@@ -1,11 +1,11 @@
 [submodule "Video"]
 	path = Video
-	url = ../aos-Video.git
-	branch = v6.4
+	url = https://github.com/Joy4orce/nova-audio-Video.git
+	branch = feature/audio-support
 [submodule "MediaLib"]
 	path = MediaLib
-	url = ../aos-MediaLib.git
-	branch = v6.4
+	url = https://github.com/Joy4orce/nova-audio-MediaLib.git
+	branch = feature/audio-support
 [submodule "FileCoreLibrary"]
 	path = FileCoreLibrary
 	url = ../aos-FileCoreLibrary.git
