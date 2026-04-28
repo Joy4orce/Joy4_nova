@@ -157,6 +157,7 @@ public class PermissionChecker {
                             new String[]{
                                     Manifest.permission.READ_MEDIA_VIDEO,
                                     Manifest.permission.READ_MEDIA_IMAGES,
+                                    Manifest.permission.READ_MEDIA_AUDIO,
                                     Manifest.permission.POST_NOTIFICATIONS,
                                     Manifest.permission.RECORD_AUDIO,
                                     //Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC,
@@ -175,6 +176,7 @@ public class PermissionChecker {
                                 new String[]{
                                         Manifest.permission.READ_MEDIA_VIDEO,
                                         Manifest.permission.READ_MEDIA_IMAGES,
+                                        Manifest.permission.READ_MEDIA_AUDIO,
                                         Manifest.permission.POST_NOTIFICATIONS,
                                         Manifest.permission.RECORD_AUDIO
                                 },
