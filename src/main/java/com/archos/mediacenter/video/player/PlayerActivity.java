@@ -604,9 +604,10 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         );
         mContext = this;
 
-        // Detect audio-only playback from the launching intent. Used to skip
-        // forced landscape and to keep the playback controller pinned.
-        mIsAudioOnly = isAudioOnlyIntent(getIntent());
+        // Always pin the controller and skip the forced-landscape behavior, regardless
+        // of whether the file is audio or video — the user wants a free-rotation player
+        // with a permanently visible playback bar.
+        mIsAudioOnly = true;
 
         // Detect if we're being used as an external player
         detectExternalPlayerMode();
@@ -1471,8 +1472,9 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     protected void onNewIntent(Intent intent) {
         if (log.isDebugEnabled()) log.debug("onNewIntent: {}", intent);
         setIntent(intent);
-        mIsAudioOnly = isAudioOnlyIntent(intent);
-        if (mPlayerController != null) mPlayerController.setAudioOnly(mIsAudioOnly);
+        // Re-apply pinned-controller / no-rotation-lock behavior on intent swap.
+        mIsAudioOnly = true;
+        if (mPlayerController != null) mPlayerController.setAudioOnly(true);
         setLockRotation(mLockRotation);
         if(mWasInPictureInPicture) {
             if (PlayerService.sPlayerService != null) {

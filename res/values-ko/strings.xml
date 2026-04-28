@@ -17,122 +17,450 @@
 */
 -->
 <resources xmlns:tools="http://schemas.android.com/tools" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2" tools:ignore="MissingTranslation">
-    <!-- Menu item that takes the user back to the top level screen of the music player -->
+
+    <!-- Top-level navigation -->
     <string name="goto_start">라이브러리</string>
-    <!-- Menu item that takes the user to the "now playing" screen of the music player -->
-    <!-- Menu item to refresh servers list -->
-    <string name="refresh_servers_list">서버목록 새로고침</string>
-    <!-- Menu item to enable network shares -->
-    <string name="enable_network_shares"></string>
-    <!-- Library screen, menu item -->
+    <string name="refresh_servers_list">서버 목록 새로고침</string>
+    <string name="enable_network_shares">네트워크 공유 사용</string>
+    <string name="initial_scan">초기 스캔</string>
     <string name="search_title">검색</string>
-    <!-- Default name of track that doesn't have a name in the metadata -->
-    <string name="unknown_track_name">알수없음</string>
-    <!-- Toast after turning shuffle on -->
-    <!-- Toast after turning shuffle off -->
-    <!-- Toast after turning single repeat on -->
-    <!-- Context menu item -->
+    <string name="unknown_track_name">알 수 없음</string>
+
+    <!-- Context menu -->
     <string name="info">정보</string>
-    <!-- Context menu item -->
     <string name="play_selection">재생</string>
-    <!-- Context menu item -->
-    <!-- Context menu item -->
-    <!-- Dialog box button -->
-    <!--The fast scroll thumb will show one character from this string depending on the position in the list -->
+    <string name="multiple_selection">여러 개 선택</string>
+    <string name="play_from_beginning">처음부터 재생</string>
     <string name="fast_scroll_alphabet"> ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
-    <!-- The string used in file/folder infos dialog. -->
-    <string name="info_duration">재생시간:</string>
-    <!-- Infos dialog tabs -->
+
+    <!-- Info dialog -->
+    <string name="info_duration">재생 시간</string>
+    <string name="video_sources">소스</string>
     <string name="info_tab_movie">영화</string>
-    <!-- COVER ROLL -->
-    <string name="recently_added">최근 추가된 항목</string>
-    <string name="recently_added_videos">최근 추가된 항목</string>
-    <string name="recently_played">최근 재생된 항목</string>
-    <string name="recently_played_videos">최근 재생된 항목</string>
-    <!-- The string used in main storage list -->
-    <string name="external_storage">외부메모리</string>
-    <string name="internal_storage">내부메모리</string>
-    <string name="sd_card_storage">SD카드</string>
+    <string name="info_tab_show">시리즈</string>
+    <string name="info_tab_episode">에피소드</string>
+    <string name="info_tab_video">동영상</string>
+    <string name="info_tab_file">파일 정보</string>
+    <string name="info_tab_backdrop_chooser">배경 선택</string>
+    <string name="info_tab_poster_chooser">포스터 선택</string>
+    <string name="info_tab_share">공유</string>
+    <string name="info_menu_backdrop_select">배경</string>
+    <string name="info_menu_series_backdrop_select">시리즈 배경</string>
+    <string name="info_menu_poster_select">다른 포스터 선택</string>
+    <string name="info_menu_series_poster_select">다른 포스터 선택</string>
+
+    <!-- Cover roll / shelves -->
+    <string name="watching_up_next">시청 중 / 다음 회차</string>
+    <string name="recently_added">최근 추가됨</string>
+    <string name="recently_added_videos">최근 추가됨</string>
+    <string name="recently_played">최근 재생됨</string>
+    <string name="recently_played_videos">최근 재생됨</string>
+    <string name="new_and_unwatched">새로운 항목</string>
+    <string name="new_and_unwatched_videos">새로운 항목</string>
+    <string name="keep_watching">이어서 보기</string>
+    <string name="keep_watching_videos">이어서 보기</string>
+    <string name="video_lists">재생목록</string>
+
+    <!-- Storage list -->
+    <string name="external_storage">외부 저장소</string>
+    <string name="internal_storage">내부 저장소</string>
+    <string name="network_storage">네트워크</string>
+    <string name="sd_card_storage">SD 카드</string>
     <string name="usb_host_storage">외장 드라이브</string>
+    <string name="other_storage">드라이브</string>
     <string name="network_media_servers">미디어 서버 (UPnP)</string>
-    <string name="network_shared_folders">공유폴더 (SMB)</string>
-    <string name="recordings_storage">녹음</string>
+    <string name="network_shared_folders">공유 폴더 (SMB)</string>
+    <string name="network_connected_as">%s 으로 연결됨</string>
+    <string name="network_guest">게스트</string>
+    <string name="sftp_folders">FTP</string>
+    <string name="network_jcifs">Samba (실험적)</string>
+    <string name="network_cling">UPNP (실험적)</string>
+    <string name="recordings_storage">녹화</string>
     <string name="root_storage">내부 저장공간</string>
     <string name="cannot_list">콘텐츠를 표시할 수 없습니다.</string>
-    <!-- VIDEO -->
-    <string name="upnp_not_allowed">UPNP 서버에 액세스할 수 없습니다. 먼저 액세스 설정을 변경하십시오.</string>
-    <!-- for small screens -->
-    <!-- Generic strings for Movies or TV shows -->
-    <!-- Specific strings for TV shows -->
-    <!-- To be translated only in case there is a localized IMDB -->
-    <!-- VIDEO COVER ROLL -->
-    <!-- Media Center -->
+
+    <!-- Library categories -->
+    <string name="videos">동영상</string>
+    <string name="all_videos">모든 동영상</string>
+    <string name="not_played_yet_videos">아직 보지 않음</string>
+    <string name="video_folder">폴더</string>
+    <string name="movies">영화</string>
+    <string name="animes">애니메이션</string>
+    <string name="all_movies">모든 영화</string>
+    <string name="all_movies_format">모든 영화  -  %d</string>
+    <string name="all_animes_format">애니메이션 영화  -  %d</string>
+    <string name="all_collections">모든 컬렉션</string>
+    <string name="all_collections_format">모든 컬렉션  -  %d</string>
+    <string name="all_collection_watched">컬렉션 모두 시청 완료</string>
+    <string name="all_collection_unwatched">시청하지 않은 컬렉션</string>
+    <plurals name="n_movies_watched">
+        <item quantity="other">영화 %d편 시청 완료</item>
+    </plurals>
+    <string name="not_watched_movies_format">시청하지 않음  -  %d</string>
+    <string name="not_watched_animes_format">시청하지 않음  -  %d</string>
+    <string name="no_movie_watched">시청한 영화 없음</string>
+    <string name="all_movies_watched">모든 영화 시청 완료</string>
+
+    <string name="movies_by_alpha">영화 (가나다순)</string>
+    <string name="movies_by_genre">영화 (장르별)</string>
+    <string name="movies_by_rating">영화 (평점순)</string>
+    <string name="movie_collections">컬렉션</string>
+    <string name="anime_collections">애니메이션 컬렉션</string>
+    <string name="movies_by_year">영화 (연도순)</string>
+    <string name="all_tv_shows">TV 프로그램</string>
+    <string name="all_tvshows">모든 TV 프로그램</string>
+    <string name="all_animes">모든 애니메이션 영화</string>
+    <string name="all_animes_row">모든 애니메이션</string>
+    <string name="all_animeshows">모든 애니메이션 TV 프로그램</string>
+    <string name="animes_by_alpha">애니메이션 영화 (가나다순)</string>
+    <string name="animes_by_genre">애니메이션 영화 (장르별)</string>
+    <string name="animes_by_rating">애니메이션 영화 (평점순)</string>
+    <string name="animes_by_year">애니메이션 영화 (연도순)</string>
+    <string name="all_tvshows_format">모든 TV 프로그램  -  %d</string>
+    <string name="not_watched_tvshows_format">시청하지 않음  -  %d</string>
+    <string name="all_animeshows_format">애니메이션 TV 프로그램  -  %d</string>
+    <string name="not_watched_animeshows_format">시청하지 않음  -  %d</string>
+    <string name="all_seasons">모든 시즌</string>
+    <string name="tvshows_by_alpha">TV 프로그램 (가나다순)</string>
+    <string name="tvshows_by_genre">TV 프로그램 (장르별)</string>
+    <string name="tvshows_by_rating">TV 프로그램 (평점순)</string>
+    <string name="animation_shows_by_alpha">애니메이션 시리즈 (가나다순)</string>
+    <string name="episodes_by_date">에피소드 (날짜순)</string>
+    <string name="date_view_week">주</string>
+    <string name="date_view_month">월</string>
+    <string name="date_view_year">년</string>
+    <string name="all_movies_and_tv_shows">영화 및 TV 프로그램</string>
+    <string name="non_scraped_videos">정보 없는 동영상</string>
+
+    <string name="no_server">미디어 서버를 찾을 수 없습니다</string>
+    <string name="cannot_open_video">이 동영상을 열 수 없습니다</string>
+    <string name="confirm_delete">정말 삭제하시겠습니까?</string>
+    <string name="deleting">삭제 중입니다…</string>
+    <string name="cannot_delete_directory">폴더를 삭제할 수 없습니다</string>
+    <string name="cannot_delete_file">파일을 삭제할 수 없습니다</string>
+    <string name="directory_deleted">폴더가 삭제되었습니다</string>
+    <string name="file_deleted">파일이 삭제되었습니다</string>
+    <string name="resume">이어서 재생</string>
+    <string name="remote_resume">원격 이어서 재생</string>
+    <string name="bookmark">북마크</string>
+    <string name="delete">삭제</string>
+    <string name="confirm_delete_short">삭제 확인</string>
+    <string name="delete_resume">이어보기 정보 삭제</string>
+    <string name="delete_bookmark">북마크 삭제</string>
+    <string name="mark_as_watched">시청함으로 표시</string>
+    <string name="mark_as_not_watched">시청 안 함으로 표시</string>
+    <string name="upnp_not_allowed">이 UPnP 서버에 접근할 권한이 없습니다. 먼저 접근 설정을 변경하십시오.</string>
+
+    <string name="scrap_no_info">이 동영상에 대한 영화/TV 프로그램 정보가 없습니다.</string>
+    <string name="scrap_remove">정보 제거</string>
+    <string name="scrap_remove_short">제거</string>
+    <string name="scrap_change">모든 에피소드 정보 변경</string>
+    <string name="scrap_series_change">시리즈 정보 변경</string>
+    <string name="scrap_change_confirmation">"%1$s"의 모든 에피소드를\n"%2$s"으로 바꾸시겠습니까?</string>
+    <string name="scrap_change_title">모든 에피소드 수정 중</string>
+    <string name="scrap_change_initializing">초기화 중…</string>
+    <string name="scrap_change_finalizing">마무리 중…</string>
+    <string name="scrap_get_title">정보 가져오는 중</string>
+
+    <string name="scrap_director">감독</string>
+    <string name="scrap_writer">작가</string>
+    <string name="scrap_director_format">감독: %s</string>
+    <string name="scrap_writer_format">작가: %s</string>
+    <string name="scrap_rating">평점</string>
+    <string name="scrap_rating_format">평점: %s</string>
+    <string name="scrap_year">연도</string>
+    <string name="scrap_year_format">연도: %d</string>
+    <string name="scrap_studio">스튜디오</string>
+    <string name="scrap_plot">줄거리</string>
+    <string name="scrap_trailer">예고편</string>
+    <string name="scrap_cast">출연</string>
+    <string name="scrap_cast_format">출연: %s</string>
+    <string name="scrap_genre">장르</string>
+    <string name="scrap_genre_format">장르: %s</string>
+    <string name="scrap_genre_title">장르</string>
+    <string name="scrap_aired">방영일</string>
+    <string name="scrap_aired_format">방영일: %s</string>
+    <string name="scrap_guests">게스트</string>
+    <string name="scrap_premiered">첫 방영</string>
+
+    <string name="show_network">방송사</string>
+    <string name="episode_name">에피소드</string>
+    <string name="episode_season">시즌</string>
+    <string name="episode_specials">스페셜</string>
+    <string name="episode_identification">시즌 %1$d 에피소드 %2$d</string>
+    <string name="season_identification">시즌 %1$d</string>
+    <string name="next_episode">다음 에피소드</string>
+    <string name="list_episodes">에피소드 목록</string>
+    <string name="how_to_mark_season_watched">시즌을 클릭하면 모든 에피소드를 시청/미시청으로 표시할 수 있습니다</string>
+    <string name="how_to_unindex_season">시즌을 클릭하면 모든 에피소드를 라이브러리에서 제거합니다</string>
+    <string name="how_to_delete_season">시즌을 클릭하면 모든 에피소드를 삭제합니다</string>
+    <string name="mark_show_watched">모든 에피소드를 시청/미시청으로 표시</string>
+    <string name="unindex_show">모든 에피소드를 라이브러리에서 제거</string>
+    <string name="delete_show">모든 에피소드 삭제</string>
+    <string name="no_episode_watched">시청한 에피소드 없음</string>
+    <string name="all_episodes_watched">모든 에피소드 시청 완료</string>
+    <plurals name="n_episodes_watched">
+        <item quantity="other">에피소드 %d편 시청 완료</item>
+    </plurals>
+
+    <string name="scrap_processing">메타데이터 가져오는 중…</string>
+    <string name="scrap_no_network">네트워크에 연결되지 않았습니다.</string>
+    <string name="scrap_enable_network_first">"이 기능을 사용하려면 먼저 네트워크에 연결하십시오."</string>
+    <string name="scrap_failed">온라인 데이터베이스에서 영화를 찾을 수 없습니다.</string>
+    <string name="start_auto_scraper_activity">온라인에서 정보 검색</string>
+    <string name="scraper_settigns">포스터 및 정보</string>
+    <string name="scrap_status_initial">대기 중</string>
+    <string name="scrap_status_busy">검색 중…</string>
+    <string name="scrap_status_success">업데이트됨</string>
+    <string name="scrap_status_failed">정보를 찾을 수 없음</string>
+    <string name="scrap_status_rejected">정보 제거됨</string>
+    <string name="scrap_status_unknown">알 수 없음</string>
+    <string name="scraper_abort_request">정말 검색을 중단하시겠습니까?</string>
+    <string name="scraper_no_files">처리할 파일이 없습니다</string>
+    <string name="scraper_no_new_files">처리할 새 파일이 없습니다</string>
+    <string name="scraper_no_new_files_in_folder">이 폴더에 처리할 새 파일이 없습니다</string>
+    <string name="scraper_folder_no_files">이전에 정보를 찾지 못한 동영상이 %d개 남아 있습니다.</string>
+    <string name="scraper_folder_no_file">이전에 정보를 찾지 못한 동영상이 한 개 남아 있습니다.</string>
+    <string name="scraper_folder_try_again">다시 시도하시겠습니까?</string>
+    <string name="scraper_notification_title">온라인에서 정보 검색 중</string>
+    <string name="scraper_notification_progress">"%2$d개 중 %1$d개 처리 완료</string>
+    <string name="scraper_no_episode_found">에피소드를 찾을 수 없음</string>
+    <string name="scraper_suggest_message">'온라인에서 정보 검색' 메뉴로 동영상의 포스터와 정보를 검색할 수 있습니다.</string>
+    <string name="scraper_no_movie_text">현재 영화에 대한 포스터와 설명이 없습니다</string>
+    <string name="scraper_no_movie_button_label">온라인에서 영화 정보 검색</string>
+    <string name="scraper_no_tv_show_text">현재 TV 프로그램에 대한 포스터와 설명이 없습니다</string>
+    <string name="scraper_no_tv_show_button_label">온라인에서 TV 프로그램 정보 검색</string>
+
+    <string name="storage">저장소</string>
+    <string name="rescan_storage">저장소 다시 스캔</string>
+    <string name="rescanning">저장소를 다시 스캔하는 중</string>
+    <string name="rescan_storage_summary">내부, SD 카드, USB 저장소를 다시 스캔합니다</string>
+    <string name="preference_display_all_files">브라우저에 모든 파일 표시</string>
+    <string name="preference_display_all_files_summary">동영상이 아닌 파일도 표시합니다</string>
+    <string name="info_processing">미디어 속성 확인 중…</string>
+    <string name="info_video">동영상</string>
+    <string name="info_audio">오디오</string>
+    <string name="info_audio_vbr">VBR</string>
+    <string name="info_plugin_required">(플러그인 필요)</string>
+    <string name="info_subtitle">자막</string>
+    <string name="info_resume">이어보기 위치</string>
+    <string name="info_bookmark">북마크 위치</string>
+    <string name="info_file">파일 정보</string>
+    <string name="use_remote_resume">네트워크 이어보기 위치를 사용하시겠습니까?</string>
+
+    <string name="you_have_no_recently_added_video">최근 추가된 동영상이 없습니다</string>
+    <string name="you_have_no_recently_played_video">최근 재생된 동영상이 없습니다</string>
+    <string name="you_have_no_video">동영상이 없습니다</string>
+    <string name="you_have_no_video_yet">동영상 검색 중…</string>
+    <string name="you_have_no_movies">영화가 없습니다</string>
+    <string name="you_have_no_animes">애니메이션 영화가 없습니다</string>
+    <string name="you_have_no_movie_collections">컬렉션이 없습니다</string>
+    <string name="you_have_no_anime_collections">애니메이션 컬렉션이 없습니다</string>
+    <string name="you_have_no_tv_shows">TV 프로그램이 없습니다</string>
+    <string name="you_have_no_anime_shows">애니메이션 TV 프로그램이 없습니다</string>
+    <string name="you_have_no_non_scraped_videos">정보 없는 동영상이 없습니다</string>
+
+    <plurals name="Nmovies">
+        <item quantity="other"><xliff:g id="count">%d</xliff:g>개의 영화</item>
+    </plurals>
+    <plurals name="Nepisodes">
+        <item quantity="other"><xliff:g id="count">%d</xliff:g>개의 에피소드</item>
+    </plurals>
+    <plurals name="Nseasons">
+        <item quantity="other"><xliff:g id="count">%d</xliff:g>개의 시즌</item>
+    </plurals>
+
+    <string name="mediacenterlabel">미디어 센터</string>
+
+    <string name="view_mode">표시 모드</string>
+    <string name="view_mode_list">목록</string>
+    <string name="view_mode_grid">포스터</string>
+    <string name="view_mode_details">자세히</string>
+    <string name="switch_to_list">목록</string>
+    <string name="switch_to_grid">그리드</string>
+
     <!-- VideoPlayer -->
-    <string name="player_loading_video">비디오 로딩중 \u2026</string>
+    <string name="player_track">트랙</string>
+    <string name="player_loading_video">동영상 로딩 중…</string>
     <string name="player_audio_track_toast">오디오 트랙:</string>
     <string name="player_subtitle_track_toast">자막 트랙:</string>
-    <string name="player_bookmark_set">북마크 설정</string>
-    <string name="player_pref_subtitle_delay_title">씽크시간</string>
+    <string name="player_bookmark_set">북마크 설정 위치:</string>
+    <string name="player_pref_subtitle_delay_title">자막 지연</string>
+    <string name="player_pref_audio_speed_title">재생 속도</string>
+    <string name="floating_player_restore">복원</string>
+    <string name="floating_player_play">재생</string>
+    <string name="floating_player_pause">일시정지</string>
+    <string name="player_pref_audio_delay_title">오디오 지연</string>
+    <string name="now_playing">재생 중</string>
+    <string name="player_window_mode">창 모드</string>
     <string name="pref_play_mode_title">재생 모드</string>
-    <string name="pref_play_mode_entry_single">1번만 재생</string>
-    <string name="pref_play_mode_entry_folder">폴더내의 파일만 1회 재생</string>
-    <string name="pref_play_mode_entry_repeat_folder">폴더반복</string>
-    <string name="pref_play_mode_entry_repeat_single">파일반복</string>
+    <string name="pref_play_mode_entry_single">한 번만</string>
+    <string name="pref_play_mode_entry_folder">폴더 안 한 번</string>
+    <string name="pref_play_mode_entry_repeat_folder">폴더 반복</string>
+    <string name="pref_play_mode_entry_repeat_single">한 곡 반복</string>
+    <string name="pref_play_mode_entry_binge">몰아보기</string>
     <string name="pref_audio_parameters_title">사운드</string>
+    <string name="pref_audio_filt_title">오디오 부스트</string>
+    <string name="pref_audio_filt_night_mode">야간 모드</string>
+    <string name="ui_mode_auto">자동</string>
+    <string name="ui_mode_tv">TV</string>
+    <string name="ui_mode_normal">태블릿/스마트폰</string>
+    <string name="pref_s3d_mode_title">3D 모드</string>
+    <string name="pref_s3d_mode_entry_sbs">좌우</string>
+    <string name="pref_s3d_mode_entry_topbottom">위아래</string>
+    <string name="pref_s3d_mode_entry_anaglyph">애너글리프</string>
+    <string name="pref_s3d_mode_entry_off">끔</string>
+
     <string name="menu_info">정보</string>
+    <string name="menu_subtitles">자막 트랙</string>
+    <string name="menu_audio">오디오 트랙</string>
+    <string name="menu_lock_player">플레이어 잠금</string>
     <string name="menu_bookmark">북마크 설정</string>
     <string name="menu_brightness_settings">밝기</string>
     <string name="menu_player_settings">설정</string>
-    <!-- Subtitles/Audio languages -->
-    <!-- Subtitles in filename HI = Hearing Impaired -->
-    <!-- Subtitles in filename SDH = Subtitles for the Deaf and Hard of Hearing -->
-    <!-- opensubtitles REST API not recognized languages ea=Spanish (LA)|ex=Extremaduran|me=Montenegrin|ma=Manipuri|pr=Dari|sp=Spanish (EU)|sx=Santali|sy=Syriac|tp=Toki Pona|ze=Chinese bilingual -->
+    <string name="menu_change_folder">폴더 변경</string>
+    <string name="menu_change_folder_details">시작할 폴더 선택</string>
+
+    <string name="unlock_instructions">아이콘을 길게 눌러 잠금 해제</string>
+    <string name="seek_to_percentage">%s%% 로 이동</string>
+    <string name="set_audio_speed_to">재생 속도 %s</string>
+
+    <string name="subs_HI">청각 장애인용</string>
+    <string name="subs_SDH">청각 장애인용 자막 (SDH)</string>
+
     <!-- Player errors -->
-    <string name="player_err_cantplayvideo">비디오를 재생할 수 없습니다.</string>
-    <string name="player_err_file">비디오 파일이 존재하지 않습니다.</string>
-    <string name="player_err_sizetoobig">비디오 크기가 너무 큽니다.</string>
-    <string name="player_err_unknown">알 수없는 오류입니다.</string>
-    <string name="player_err_critical">미디어 플레이어 오류가 발행하였습니다.</string>
+    <string name="player_err_cantplayvideo">동영상을 재생할 수 없습니다.</string>
+    <string name="player_err_cantplaysound">오디오 트랙을 재생할 수 없습니다.</string>
+    <string name="audiocodec_not_supported">이 오디오 형식(<xliff:g id="codec">%s</xliff:g>)은 지원되지 않습니다.</string>
+    <string name="videocodec_not_supported">이 비디오 형식(<xliff:g id="codec">%s</xliff:g>)은 지원되지 않습니다.</string>
+    <string name="player_err_file">동영상 파일이 존재하지 않습니다.</string>
+    <string name="player_err_sizetoobig">동영상 크기가 너무 큽니다.</string>
+    <string name="player_err_unknown">알 수 없는 오류입니다.</string>
+    <string name="player_err_critical">미디어 플레이어 오류가 발생했습니다.</string>
     <string name="player_err_forcodec">코덱</string>
-    <string name="player_err_notinterleaved">비디오와 오디오 스트림이 인터리브되지 않았습니다..</string>
+    <string name="player_err_notinterleaved">비디오와 오디오 스트림이 인터리브되지 않았습니다.</string>
     <string name="player_err_codec">코덱</string>
     <string name="player_err_isnotsupported">지원되지 않습니다.</string>
-    <string name="player_err_fileNoLicense">이 파일에 대한 라이센스를 찾을 수 없습니다.</string>
-    <string name="player_err_fileerror">파일 손상되었거나 완전하지 않습니다.</string>
+    <string name="player_err_fileNoLicense">이 파일에 대한 라이선스를 찾을 수 없습니다.</string>
+    <string name="player_err_fileerror">파일이 손상되었거나 완전하지 않습니다.</string>
     <string name="player_err_connection_failed">연결에 실패했습니다.</string>
     <string name="player_err_video_decoder_error">비디오 디코더 오류:</string>
-    <string name="player_err_interlaced">비월주사</string>
+    <string name="player_err_qpel_and_gmc">"Quarter Pixel" 및 "GMC"</string>
+    <string name="player_err_profile_and_level">"Profile" 및 "Level"</string>
+    <string name="player_err_interlaced">인터레이스</string>
+
     <!-- Player plug-in -->
     <string name="player_plugin_cinema_title">시네마 플러그인</string>
     <string name="player_plugin_cinema">시네마 플러그인 (DVD, MPEG-2, AC3)</string>
-    <string name="player_plugin_video_msg">이 파일은<g xmlns="urn:oasis:names:tc:xliff:document:1.2" id="video">%1$s</g>비디오 포맷을 포함합니다. </string>
-    <string name="player_plugin_audio_msg">이 파일은<g xmlns="urn:oasis:names:tc:xliff:document:1.2" id="audio">%1$s</g>오디오 포맷을 포함합니다. </string>
-    <string name="player_plugin_video_audio_msg">이 파일은<g xmlns="urn:oasis:names:tc:xliff:document:1.2" id="video">%1$s</g>비디오 포맷과<g xmlns="urn:oasis:names:tc:xliff:document:1.2" id="audio">%2$s</g>오디오 포맷을 포함합니다. </string>
-    <string name="player_plugin_purchase_msg">You need to purchase the<g xmlns="urn:oasis:names:tc:xliff:document:1.2" id="plugin">%1$s</g></string>
-    <string name="player_plugin_purchase">스토어로 이동합니다.</string>
+    <string name="player_plugin_ac3_title">AC3 플러그인</string>
+    <string name="player_plugin_ac3">AC3 플러그인</string>
+    <string name="player_plugin_mpeg2_title">MPEG-2 플러그인</string>
+    <string name="player_plugin_mpeg2">MPEG-2 플러그인 (DVD)</string>
+    <string name="player_plugin_video_msg">이 파일에는 <xliff:g id="video">%1$s</xliff:g> 비디오 형식이 포함되어 있습니다.</string>
+    <string name="player_plugin_audio_msg">이 파일에는 <xliff:g id="audio">%1$s</xliff:g> 오디오 형식이 포함되어 있습니다.</string>
+    <string name="player_plugin_video_audio_msg">이 파일에는 <xliff:g id="video">%1$s</xliff:g> 비디오 형식과 <xliff:g id="audio">%2$s</xliff:g> 오디오 형식이 포함되어 있습니다.</string>
+    <string name="player_plugin_purchase_msg"><xliff:g id="plugin">%1$s</xliff:g>을(를) 구매해야 합니다</string>
+    <string name="player_plugin_purchase">스토어로 이동</string>
+    <string name="player_plugin_purchase_archos_msg">www.archos.com 에서 추가 코덱 플러그인을 구매할 수 있습니다.</string>
+    <string name="player_plugin_purchase_google_play_msg">Google Play에서 추가 코덱 플러그인을 구매할 수 있습니다.</string>
+    <string name="player_plugin_purchase_google_play_button">Google Play로 이동</string>
+    <string name="plugin_update_required_title">코덱 업데이트 필요</string>
+    <string name="plugin_update_required_message">Nova Video Player에 추가 코덱이 이미 설치되어 있는 것 같습니다.\n\n새 버전의 Nova Video Player는 이 코덱들의 업데이트가 필요합니다.\n\nGoogle Play로 이동하여 코덱을 업데이트 후 다시 설치하십시오.</string>
+
     <!-- Subtitles wizard -->
-    <string name="subtitles_wizard_no_files">자막 파일을 찾을 수 없습니다.</string>
-    <string name="subtitles_wizard_current_files">최근 사용한 자막 파일:</string>
-    <string name="subtitles_wizard_available_files">사용 가능한 자막 파일:</string>
-    <string name="subtitles_wizard_associate">이 파일을 비디오로 연결합니다.</string>
-    <string name="subtitles_wizard_delete">이 파일을 삭제합니다.</string>
-    <string name="subtitles_wizard_empty_list">파일을 찾을 수 없습니다.</string>
-    <string name="subtitles_wizard_add_files">이 비디오를 연결하기 위해이 폴더에 더 많은 자막 파일을 복사할 수 있습니다.</string>
-    <string name="subtitles_wizard_help">%s 비디오로 연결할 자막파일을 하나 선택하십시오. 선택된 파일의 파일명은 동영상의 파일명과 동일하게 변경됩니다.</string>
+    <string name="get_subtitles_on_drive">저장소에서 자막 선택</string>
+    <string name="subtitles_wizard_no_files">자막 파일을 찾을 수 없습니다</string>
+    <string name="subtitles_wizard_current_files">현재 자막 파일</string>
+    <string name="subtitles_wizard_available_files">사용 가능한 자막 파일</string>
+    <string name="subtitles_wizard_associate">이 파일을 동영상과 연결</string>
+    <string name="subtitles_wizard_delete">이 파일 삭제</string>
+    <string name="subtitles_wizard_empty_list">파일을 찾을 수 없습니다</string>
+    <string name="subtitles_wizard_add_files">이 동영상과 연결하려면 자막 파일을 이 폴더에 더 복사하십시오.</string>
+    <string name="subtitles_wizard_help">동영상 %s 와 연결할 자막 파일을 선택하십시오. 파일 이름이 동영상 이름과 동일하게 변경됩니다.</string>
+    <string name="subtitles_wizard_empty_list_help">자막 파일을 찾을 수 없습니다. 동영상 %s 와 연결하려면 먼저 자막 파일을 이 폴더에 복사해야 합니다.</string>
+    <string name="subtitles_wizard_cache">캐시</string>
+
     <!-- Subloader -->
-    <!-- Subtitle Settings Dialog -->
-    <!-- Subtitle Delay Dialog -->
-    <!-- Browser.CommonDetailsView -->
-    <!-- Add a space after the right quote
-    because the right part of the quote is
-    not visible otherwise -->
-    <!-- torrent -->
-    <!-- Shortcuts -->
-    <!-- Preferences -->
-    <!--  Title of the video picker activity. -->
-    <!-- Archos File Info -->
-    <!-- Help overlay -->
-    <!-- Info dialog, not indexed file -->
-    <!-- Brightness -->
-    <!--  Nfo File parsing -->
+    <string name="get_subtitles_online">온라인 자막 받기</string>
+    <string name="toast_subloader_sub_found">이 언어의 자막 트랙을 찾았습니다</string>
+    <string name="toast_subloader_sub_not_found">이 언어의 자막 트랙을 찾을 수 없습니다</string>
+    <string name="toast_subloader_service_unreachable">자막 웹 서비스에 접속할 수 없습니다</string>
+    <string name="menu_subloader_allfolder">누락된 자막 받기</string>
+    <string name="dialog_subloader_copying">자막 복사 중…</string>
+    <string name="dialog_subloader_downloading">자막 다운로드 중…</string>
+    <string name="dialog_subloader_sumup">다운로드 완료</string>
+    <string name="dialog_subloader_success">다음 항목의 자막을 찾음:</string>
+    <string name="dialog_subloader_fails">다음 항목의 자막을 찾지 못함:</string>
+    <string name="sub_force_all_title">자막 다운로드 강제 실행</string>
+    <string name="sub_force_all">모든 동영상에 이미 자막 트랙이 하나 이상 있습니다. 새 자막 트랙을 강제로 다운로드하시겠습니까?</string>
+    <string name="dialog_subloader_nonetwork_title">인터넷 연결 없음</string>
+    <string name="dialog_subloader_nonetwork_message">자막을 다운로드하려면 인터넷 연결이 필요합니다</string>
+    <string name="dialog_subloader_connecting">opensubtitles 서비스에 연결 중…</string>
+    <string name="opensubtitles_quota_download_remaining">OpenSubtitles 다운로드 한도: %2$d 중 %1$d 남음</string>
+    <string name="dialog_subloader_credentials">Opensubtitles 자격 증명</string>
+    <string name="dialog_subloader_credentials_empty">유효한 사용자 이름과 비밀번호를 입력해야 합니다!</string>
+    <string name="toast_subloader_credentials_empty">더 많은 자막을 받으려면 설정에서 opensubtitles 자격 증명을 입력하십시오</string>
+    <string name="toast_subloader_login_failed">opensubtitles 자격 증명이 잘못되었거나 서비스를 사용할 수 없습니다</string>
+    <string name="toast_subloader_quota_exceeded">OpenSubtitles 다운로드 한도를 초과했습니다</string>
+    <string name="opensubtitles_quota_reset_time_remaining">한도가 %s 후 초기화됩니다</string>
+
+    <!-- Subtitle Settings -->
+    <string name="subtitle_settings_title">자막 설정</string>
+    <string name="subtitle_sample_text">"샘플"</string>
+    <string name="subtitle_size_text">크기:</string>
+    <string name="subtitle_style_text">스타일:</string>
+    <string name="subtitle_vert_text">세로 위치:</string>
+    <string name="subtitle_outline">외곽선 자막</string>
+    <string name="subtitle_delay_speed">속도 조정</string>
+    <string name="subtitle_delay_radio_none">없음</string>
+    <string name="subtitle_delay_radio_ntsc2pal">자막이 너무 빠름</string>
+    <string name="subtitle_delay_radio_pal2ntsc">자막이 너무 느림</string>
+
+    <string name="quotation_format">&#x201C;%s&#x201D;&#x2003;</string>
+
+    <!-- Permissions -->
+    <string name="error_permission">권한이 부족합니다</string>
+    <string name="error_permission_storage">Nova Video Player가 로컬 동영상을 읽으려면 저장소 권한이 필요합니다. 권한을 허용해 주세요.</string>
+    <string name="error_permission_all_file_access">Nova Video Player가 로컬 동영상/NFO 파일을 제대로 관리하려면 모든 외부 저장소 관리 권한이 필요합니다. 권한을 허용해 주세요.</string>
+    <string name="allow">허용</string>
+
+    <!-- Common -->
+    <string name="ok">확인</string>
+    <string name="cancel">취소</string>
+    <string name="yes">예</string>
+    <string name="no">아니요</string>
+    <string name="close">닫기</string>
+    <string name="back">뒤로</string>
+    <string name="next">다음</string>
+    <string name="previous">이전</string>
+    <string name="save">저장</string>
+    <string name="apply">적용</string>
+    <string name="add">추가</string>
+    <string name="remove">제거</string>
+    <string name="rename">이름 바꾸기</string>
+    <string name="refresh">새로고침</string>
+    <string name="loading">로딩 중…</string>
+    <string name="error">오류</string>
+    <string name="warning">경고</string>
+    <string name="settings">설정</string>
+    <string name="help">도움말</string>
+    <string name="about">정보</string>
+    <string name="version">버전</string>
+    <string name="username">사용자 이름</string>
+    <string name="password">비밀번호</string>
+    <string name="login">로그인</string>
+    <string name="logout">로그아웃</string>
+    <string name="filter">필터</string>
+    <string name="sort_by">정렬 기준</string>
+    <string name="ascending">오름차순</string>
+    <string name="descending">내림차순</string>
+    <string name="size">크기</string>
+    <string name="name">이름</string>
+    <string name="date">날짜</string>
+    <string name="length">길이</string>
+    <string name="all">전체</string>
+    <string name="none">없음</string>
+
+    <!-- Audio support (added strings) -->
+    <string name="info_tab_audio">오디오</string>
 </resources>
