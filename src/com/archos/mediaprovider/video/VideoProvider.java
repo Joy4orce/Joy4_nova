@@ -750,7 +750,12 @@ public class VideoProvider extends ContentProvider implements DefaultLifecycleOb
         switch (match) {
             case VIDEO_MEDIA:
                 out.table = VideoOpenHelper.FILES_TABLE_NAME;
-                where = FileColumns.MEDIA_TYPE + "=" + FileColumns.MEDIA_TYPE_VIDEO;
+                // Audio support: include audio entries in the "video" content URI so
+                // both audio and video items show up in the library and are reachable
+                // via the existing player code path.
+                where = FileColumns.MEDIA_TYPE + " IN ("
+                        + FileColumns.MEDIA_TYPE_VIDEO + ","
+                        + FileColumns.MEDIA_TYPE_AUDIO + ")";
                 break;
 
             case VIDEO_MEDIA_ID:

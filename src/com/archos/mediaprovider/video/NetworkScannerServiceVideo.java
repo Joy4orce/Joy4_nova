@@ -739,7 +739,9 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
         /** checks if the file should be scanned */
         private static boolean isValidType(int fileType) {
             if (!SCAN_MEDIA_ONLY) return true;
-            return ArchosMediaFile.isVideoFileType(fileType) || ArchosMediaFile.isSubtitleFileType(fileType);
+            return ArchosMediaFile.isVideoFileType(fileType)
+                    || ArchosMediaFile.isAudioFileType(fileType)
+                    || ArchosMediaFile.isSubtitleFileType(fileType);
         }
 
         /** gets the ArchosMediaFile fileType int */
@@ -940,6 +942,9 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
                     // add videos & subtitles to their lists
                     switch (mediaType) {
                         case VideoStore.Files.FileColumns.MEDIA_TYPE_VIDEO:
+                        case VideoStore.Files.FileColumns.MEDIA_TYPE_AUDIO:
+                            // Audio entries are matched against subtitles the same way as
+                            // videos so external .srt/.ass files next to an mp3 are picked up.
                             videos.add(Pair.create(ArchosMediaFile.getFileTitle(file), Long.valueOf(id)));
                             break;
                         case VideoStore.Files.FileColumns.MEDIA_TYPE_SUBTITLE:
@@ -1159,7 +1164,8 @@ public class NetworkScannerServiceVideo extends Service implements Handler.Callb
             }
             storage_id = storageId;
 
-            if (media_type == FileColumns.MEDIA_TYPE_VIDEO) {
+            if (media_type == FileColumns.MEDIA_TYPE_VIDEO
+                    || media_type == FileColumns.MEDIA_TYPE_AUDIO) {
                 /* Extract some info from the file name */
                 VideoNameProcessor.ExtractedInfo nameInfo = VideoNameProcessor.extractInfoFromPath(f.getUri().toString());
                 video_stereo = nameInfo.stereoType;

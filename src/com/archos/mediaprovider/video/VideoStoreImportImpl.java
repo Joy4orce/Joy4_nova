@@ -266,7 +266,8 @@ public class VideoStoreImportImpl {
                         }
                     }
                 }
-                if (job.mMediaType == FileColumns.MEDIA_TYPE_VIDEO) {
+                if (job.mMediaType == FileColumns.MEDIA_TYPE_VIDEO
+                        || job.mMediaType == FileColumns.MEDIA_TYPE_AUDIO) {
                     /* Process the FileName for more information */
                     ContentValues cvExtra = VideoNameProcessor.extractValuesFromPath(path);
                     operations.add(
@@ -309,7 +310,10 @@ public class VideoStoreImportImpl {
                 if (!isNoMediaPath(path) && !blacklist.isBlacklistedManual(mPath)) {
                 //if (!isNoMediaPath(path) && !blacklist.isBlacklisted(mPath)) {
                     if (ArchosMediaFile.isAudioFileType(mMft.fileType)) {
+                        // Audio support: index audio files like videos so they appear in the
+                        // media library and can be played back with subtitle support.
                         mediaType = FileColumns.MEDIA_TYPE_AUDIO;
+                        retrieve = true;
                     } else if (ArchosMediaFile.isVideoFileType(mMft.fileType)) {
                         mediaType = FileColumns.MEDIA_TYPE_VIDEO;
                         retrieve = true;
@@ -474,6 +478,16 @@ public class VideoStoreImportImpl {
 
         if (log.isDebugEnabled()) log.debug("fromRetrieverService: Scanning metadata of: {}", path);
         switch (job.mMediaType) {
+            case FileColumns.MEDIA_TYPE_AUDIO:
+                // Audio files: extract minimal metadata (duration/title/audio props)
+                // so they can be played by the same pipeline as video files.
+                extract(cv, metadata, VideoColumns.DURATION, IMediaMetadataRetriever.METADATA_KEY_DURATION, "0");
+                extract(cv, metadata, VideoColumns.ARCHOS_SAMPLERATE, IMediaMetadataRetriever.METADATA_KEY_SAMPLE_RATE, "0");
+                extract(cv, metadata, VideoColumns.ARCHOS_NUMBER_OF_CHANNELS, IMediaMetadataRetriever.METADATA_KEY_NUMBER_OF_CHANNELS, "0");
+                extract(cv, metadata, VideoColumns.ARCHOS_AUDIO_WAVE_CODEC, IMediaMetadataRetriever.METADATA_KEY_AUDIO_WAVE_CODEC, "0");
+                extract(cv, metadata, VideoColumns.ARCHOS_AUDIO_BITRATE, IMediaMetadataRetriever.METADATA_KEY_AUDIO_BITRATE, "0");
+                extract(cv, metadata, FileColumns.TITLE, IMediaMetadataRetriever.METADATA_KEY_TITLE, defaultTitle);
+                break;
             case FileColumns.MEDIA_TYPE_VIDEO:
                 extract(cv, metadata, VideoColumns.ARCHOS_ENCODING_PROFILE, IMediaMetadataRetriever.METADATA_KEY_ENCODING_PROFILE, "0");
                 extract(cv, metadata, VideoColumns.ARCHOS_FRAMES_PER_THOUSAND_SECONDS, IMediaMetadataRetriever.METADATA_KEY_FRAMES_PER_THOUSAND_SECONDS, "0");
