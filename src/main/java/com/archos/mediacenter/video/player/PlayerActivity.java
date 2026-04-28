@@ -367,6 +367,10 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     private int mForceAudioTrack = -1;
     private static boolean mLockRotation;
     private static boolean mIsRotationLocked;
+    // True when the current playback item is an audio-only file (mp3/flac/etc.).
+    // Used to skip the forced-landscape behavior and to keep the controller
+    // visible since there are no video frames to show.
+    private boolean mIsAudioOnly;
     private static int mLockedRotation;
     private boolean mForceSWDecoding;
     private boolean mStopped;
@@ -600,6 +604,10 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         );
         mContext = this;
 
+        // Detect audio-only playback from the launching intent. Used to skip
+        // forced landscape and to keep the playback controller pinned.
+        mIsAudioOnly = isAudioOnlyIntent(getIntent());
+
         // Detect if we're being used as an external player
         detectExternalPlayerMode();
 
@@ -714,6 +722,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
         mPlayerController = new PlayerController(mContext, getWindow(), (ViewGroup)mRootView, mSurfaceController, this, actionBar);
         mPlayerController.setVideoTitleEnabled(true);
+        mPlayerController.setAudioOnly(mIsAudioOnly);
 
         mAudioInfoController = new TrackInfoController(mContext, getLayoutInflater(), menuAnchor, actionBar);
         mAudioInfoController.setListener(this);
@@ -1381,7 +1390,38 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         };
     }
 
+    private static boolean isAudioOnlyIntent(Intent intent) {
+        if (intent == null) return false;
+        String type = intent.getType();
+        if (type != null && type.startsWith("audio/")) return true;
+        Uri data = intent.getData();
+        if (data != null) {
+            String path = data.getLastPathSegment();
+            if (path != null) {
+                int dot = path.lastIndexOf('.');
+                if (dot >= 0) {
+                    String ext = path.substring(dot + 1).toLowerCase(java.util.Locale.US);
+                    switch (ext) {
+                        case "mp3": case "mp2": case "mpga": case "m4a": case "m4b":
+                        case "wav": case "flac": case "ogg": case "oga": case "aac":
+                        case "wma": case "amr": case "awb": case "mka":
+                        case "wv": case "tta": case "opus":
+                            return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private void setLockRotation(boolean avpLock) {
+        if (mIsAudioOnly) {
+            // Audio-only playback has no video surface to orient — let the user keep
+            // their natural orientation instead of snapping to landscape.
+            mIsRotationLocked = false;
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            return;
+        }
         Display display = getWindowManager().getDefaultDisplay();
         int rotation = display.getRotation();
         if (log.isDebugEnabled()) log.debug("CONFIG setLockRotation, rotation status: {}, i.e. {}", rotation, getHumanReadableRotation(rotation));
@@ -1431,6 +1471,9 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     protected void onNewIntent(Intent intent) {
         if (log.isDebugEnabled()) log.debug("onNewIntent: {}", intent);
         setIntent(intent);
+        mIsAudioOnly = isAudioOnlyIntent(intent);
+        if (mPlayerController != null) mPlayerController.setAudioOnly(mIsAudioOnly);
+        setLockRotation(mLockRotation);
         if(mWasInPictureInPicture) {
             if (PlayerService.sPlayerService != null) {
                 PlayerService.sPlayerService.stopAndSaveVideoState();

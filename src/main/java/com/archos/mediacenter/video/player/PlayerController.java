@@ -940,8 +940,22 @@ public class PlayerController implements View.OnTouchListener, OnGenericMotionLi
         }
         setOSDVisibility(true, flags);
 
+        if (mAudioOnly) {
+            // No video frames to show — keep the controller pinned so the user can
+            // always reach the seek bar / pause / volume.
+            return;
+        }
         if ((timeout == 5000) || (timeout != 0 && Player.sPlayer.isPlaying())) {
             sendFadeOut(timeout);
+        }
+    }
+
+    private boolean mAudioOnly = false;
+    public void setAudioOnly(boolean audioOnly) {
+        mAudioOnly = audioOnly;
+        if (audioOnly) {
+            mHandler.removeMessages(MSG_FADE_OUT);
+            show(FLAG_SIDE_ALL_EXCEPT_UNLOCK_INSTRUCTIONS, 0);
         }
     }
 
