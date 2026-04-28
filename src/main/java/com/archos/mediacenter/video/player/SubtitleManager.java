@@ -69,6 +69,8 @@ public class SubtitleManager {
     private int                 mSubtitleVPos = 10;
     private int                 mSubtitleVPosPixel;
     private int                 mSubtitleEvadedVPos;
+    // minimum bottom padding (px) to keep subtitles above the player control bar
+    private int                 mSubtitleMinPaddingBottomPx;
     SpannableStringBuilder      mSpannableStringBuilder = null;
     TextShadowSpan              mTextShadowSpan = null;
     private boolean mIsSubtitleGfx = false;
@@ -574,6 +576,7 @@ public class SubtitleManager {
         mWindow = window;
         mRes = context.getResources();
         mForbidWindow = forbidWindow;
+        mSubtitleMinPaddingBottomPx = mRes.getDimensionPixelSize(R.dimen.subtitles_paddingBottom);
         mSubtitlePosHintDrawable = ContextCompat.getDrawable(context, com.archos.mediacenter.video.R.drawable.subtitle_baseline);
     }
 
@@ -631,6 +634,8 @@ public class SubtitleManager {
         mSubtitleTxtView.setUIMode(mUiMode);
         mSubtitleSpacerParams = mSubtitleSpacer.getLayoutParams();
         if (log.isDebugEnabled()) log.debug("attachWindow: mSubtitleSpacerParams.height={}", mSubtitleSpacerParams.height);
+        if (mIsSubtitleGfx && SubtitleGfxView.RECT_COORDINATES) mSubtitleEvadedVPos = 0;
+        else mSubtitleEvadedVPos = Math.max(mSubtitleEvadedVPos, mSubtitleMinPaddingBottomPx);
         mSubtitleSpacerParams.height = mSubtitleEvadedVPos;
         setUIExternalSurface(mUiSurface);
 
@@ -823,7 +828,7 @@ public class SubtitleManager {
 
     private void setVerticalPositionInternal (int pos) {
         if (mIsSubtitleGfx && SubtitleGfxView.RECT_COORDINATES) mSubtitleEvadedVPos = 0;
-        else mSubtitleEvadedVPos = pos;
+        else mSubtitleEvadedVPos = Math.max(pos, mSubtitleMinPaddingBottomPx);
         if (mSubtitleSpacer == null) return;
         mSubtitleSpacerParams.height = mSubtitleEvadedVPos;
         if (log.isDebugEnabled()) log.debug("setVerticalPositionInternal: new Height {}", mSubtitleSpacerParams.height);
