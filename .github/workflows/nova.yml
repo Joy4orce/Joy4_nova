@@ -1,10 +1,9 @@
-# check what is installed in ubuntu-latest https://github.com/actions/virtual-environments
-name: NOVA CI
+# Builds a debug APK with audio file playback support and uploads it as a workflow artifact.
+name: NOVA CI (audio fork)
 on:
   push:
-    branches: [ nova ]
-  pull_request:
-    branches: [ nova ]
+    branches: [ feature/audio-support ]
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,12 +27,20 @@ jobs:
         sudo chmod a+x /usr/local/bin/repo
     - name: retrieve full nova source
       run: |
+         git config --global user.email "powertjsl@gmail.com"
+         git config --global user.name "Joy4orce"
          mkdir nova
          cd nova
-         repo init -u https://github.com/nova-video-player/aos-AVP -b nova -m v6_4.xml
+         repo init -u https://github.com/Joy4orce/nova-audio-AVP -b feature/audio-support -m v6_4.xml
          repo sync -j 4
-         repo forall -c 'git checkout -t $REPO_REMOTE/$REPO_RREV'
-    - name: build
+         repo forall -c 'git checkout -t $REPO_REMOTE/$REPO_RREV || true'
+    - name: build debug apk
       run: |
         cd nova/Video
-        ./gradlew aNR
+        ./gradlew assembleNoamazonDebug --no-daemon --stacktrace
+    - name: upload apk
+      uses: actions/upload-artifact@v4
+      with:
+        name: nova-audio-debug-apk
+        path: nova/Video/build/outputs/apk/**/*.apk
+        if-no-files-found: error

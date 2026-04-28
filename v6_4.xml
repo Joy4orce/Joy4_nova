@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
-  <remote name="github" fetch="." />
+  <remote name="github" fetch="https://github.com/nova-video-player/" />
+  <remote name="joyfork" fetch="https://github.com/Joy4orce/" />
 
   <default revision="master" remote="github" />
 
-  <project path="AVP" name="aos-AVP" revision="nova" >
+  <project path="AVP" name="nova-audio-AVP" remote="joyfork" revision="feature/audio-support" >
     <copyfile src="Makefile" dest="Makefile" />
   </project>
 
-  <project path="Video" name="aos-Video" revision="v6.4" />
-  <project path="MediaLib" name="aos-MediaLib" revision="v6.4" />
+  <project path="Video" name="nova-audio-Video" remote="joyfork" revision="feature/audio-support" />
+  <project path="MediaLib" name="nova-audio-MediaLib" remote="joyfork" revision="feature/audio-support" />
   <project path="FileCoreLibrary" name="aos-FileCoreLibrary" revision="v6.4" />
 
   <project path="native/avos" name="aos-avos" revision="no_android_sync" />
