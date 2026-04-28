@@ -371,6 +371,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     // Used to skip the forced-landscape behavior and to keep the controller
     // visible since there are no video frames to show.
     private boolean mIsAudioOnly;
+    /** Drives external subtitle playback for audio files (Android MediaPlayer path). */
+    private ExternalSubtitleDriver mExternalSubtitleDriver;
     private static int mLockedRotation;
     private boolean mForceSWDecoding;
     private boolean mStopped;
@@ -604,10 +606,11 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         );
         mContext = this;
 
-        // Always pin the controller and skip the forced-landscape behavior, regardless
-        // of whether the file is audio or video — the user wants a free-rotation player
-        // with a permanently visible playback bar.
-        mIsAudioOnly = true;
+        // mIsAudioOnly tracks "actually an audio file" — used for decoder selection
+        // and to drive external subtitle parsing. The UX changes (free rotation,
+        // pinned controller) are unconditional and live in setLockRotation /
+        // PlayerController so they apply to video too.
+        mIsAudioOnly = isAudioOnlyIntent(getIntent());
 
         // Detect if we're being used as an external player
         detectExternalPlayerMode();
@@ -723,7 +726,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
         mPlayerController = new PlayerController(mContext, getWindow(), (ViewGroup)mRootView, mSurfaceController, this, actionBar);
         mPlayerController.setVideoTitleEnabled(true);
-        mPlayerController.setAudioOnly(mIsAudioOnly);
+        // Always pin the controller (no auto-hide) — applies to video and audio alike.
+        mPlayerController.setAudioOnly(true);
 
         mAudioInfoController = new TrackInfoController(mContext, getLayoutInflater(), menuAnchor, actionBar);
         mAudioInfoController.setListener(this);
@@ -1242,6 +1246,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     protected void onDestroy() {
         if (log.isDebugEnabled()) log.debug("onDestroy");
 
+        stopExternalSubtitleDriver();
+
         // Send external player result if we haven't already
         sendExternalPlayerResult();
 
@@ -1394,6 +1400,30 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         };
     }
 
+    private void startExternalSubtitleDriverIfNeeded() {
+        if (!mIsAudioOnly) return;
+        if (mExternalSubtitleDriver != null) return;
+        Uri data = getIntent() != null ? getIntent().getData() : null;
+        if (data == null || !"file".equalsIgnoreCase(data.getScheme())) return;
+        File mediaFile = new File(data.getPath());
+        File subtitleFile = ExternalSubtitleDriver.findSubtitleFor(mediaFile);
+        if (subtitleFile == null) return;
+        mExternalSubtitleDriver = ExternalSubtitleDriver.fromFile(
+                subtitleFile,
+                subtitle -> {
+                    if (mSubtitleManager != null) mSubtitleManager.addSubtitle(subtitle);
+                },
+                () -> mPlayer != null ? mPlayer.getCurrentPosition() : 0);
+        if (mExternalSubtitleDriver != null) mExternalSubtitleDriver.start();
+    }
+
+    private void stopExternalSubtitleDriver() {
+        if (mExternalSubtitleDriver != null) {
+            mExternalSubtitleDriver.stop();
+            mExternalSubtitleDriver = null;
+        }
+    }
+
     private static boolean isAudioOnlyIntent(Intent intent) {
         if (intent == null) return false;
         String type = intent.getType();
@@ -1419,13 +1449,11 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     }
 
     private void setLockRotation(boolean avpLock) {
-        if (mIsAudioOnly) {
-            // Audio-only playback has no video surface to orient — let the user keep
-            // their natural orientation instead of snapping to landscape.
-            mIsRotationLocked = false;
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-            return;
-        }
+        // Skip the forced-landscape behavior unconditionally — the user wants free
+        // rotation for both audio and video playback.
+        mIsRotationLocked = false;
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        if (true) return;
         Display display = getWindowManager().getDefaultDisplay();
         int rotation = display.getRotation();
         if (log.isDebugEnabled()) log.debug("CONFIG setLockRotation, rotation status: {}, i.e. {}", rotation, getHumanReadableRotation(rotation));
@@ -1475,10 +1503,13 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     protected void onNewIntent(Intent intent) {
         if (log.isDebugEnabled()) log.debug("onNewIntent: {}", intent);
         setIntent(intent);
-        // Re-apply pinned-controller / no-rotation-lock behavior on intent swap.
-        mIsAudioOnly = true;
-        if (mPlayerController != null) mPlayerController.setAudioOnly(true);
+        mIsAudioOnly = isAudioOnlyIntent(intent);
+        if (mPlayer != null) mPlayer.setPreferAndroidPlayer(mIsAudioOnly);
+        if (mPlayerController != null) mPlayerController.setAudioOnly(true); // always pin
         setLockRotation(mLockRotation);
+        // Restart external subtitle driver in case the new intent points at a
+        // different audio file with its own subtitle.
+        stopExternalSubtitleDriver();
         if(mWasInPictureInPicture) {
             if (PlayerService.sPlayerService != null) {
                 PlayerService.sPlayerService.stopAndSaveVideoState();
@@ -3117,10 +3148,10 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             mProgressView.setVisibility(View.GONE);
             PlayerService.sPlayerService.setAudioFilt();
             mPlayerController.start();
-            // After the player is fully prepared, force-show the controller so the
-            // seek bar / play-pause are reachable even if earlier show() calls were
-            // no-ops (e.g. during onCreate before the layout was attached).
-            mPlayerController.setAudioOnly(mIsAudioOnly);
+            // Re-pin the controller in case the earlier show() during construction
+            // ran before the layout was attached.
+            mPlayerController.setAudioOnly(true);
+            startExternalSubtitleDriverIfNeeded();
             // Now that the video is loaded, Video info should be avalaible
             if (mInfoMenuItem != null) {
                 mInfoMenuItem.setVisible(mStreamingUri != null);
