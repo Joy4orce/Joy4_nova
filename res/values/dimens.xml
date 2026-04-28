@@ -103,7 +103,8 @@
     <dimen name="track_menu_layout_width">48dip</dimen>
 
     <!-- Subtitles -->
-    <dimen name="subtitles_paddingBottom">12dip</dimen>
+    <!-- Minimum bottom padding so subtitles stay above the player control bar (which is ~96dp tall) -->
+    <dimen name="subtitles_paddingBottom">110dip</dimen>
     <dimen name="subtitles_shadow_radius">1dip</dimen>
     <dimen name="subtitles_shadow_dx">1dip</dimen>
     <dimen name="subtitles_shadow_dy">1dip</dimen>
