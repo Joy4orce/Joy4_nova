@@ -212,7 +212,11 @@ android {
         abi {
             enable = true
             reset()
-            include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            if (project.hasProperty("ciAbi")) {
+                include(*ciAbi.toString().split(",").collect { it.trim() } as String[])
+            } else {
+                include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            }
             if (project.hasProperty("universal")) {
                 // universal if for fdroid now with specific version(Name|Code) and oneapk for amazon
                 enable = false
