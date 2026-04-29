@@ -1,4 +1,4 @@
-[submodule "nova/aos-FileCoreLibrary"]
-	path = nova/aos-FileCoreLibrary
+[submodule "nova/FileCoreLibrary"]
+	path = nova/FileCoreLibrary
 	url = https://github.com/nova-video-player/aos-FileCoreLibrary.git
 	branch = v6.4

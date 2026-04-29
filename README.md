@@ -2,18 +2,24 @@
 
 Nova Video Player monorepo with audio file playback support — consolidates the
 three audio-enabled forks plus the FileCoreLibrary upstream into one repo.
+Subdirectory names match the legacy `repo` manifest paths so
+`Video/settings.gradle`'s `settingsDir.parentFile`-relative project lookups
+still resolve.
 
 ## Layout
 
 ```
 nova/
-├── aos-AVP/              (subtree of Joy4orce/nova-audio-AVP, history preserved)
-├── aos-MediaLib/         (subtree of Joy4orce/nova-audio-MediaLib, history preserved)
-├── aos-Video/            (subtree of Joy4orce/nova-audio-Video, history preserved)
-├── aos-FileCoreLibrary/  (submodule of nova-video-player/aos-FileCoreLibrary @ v6.4)
-├── apk/                  (gitignored — build artifacts)
-└── prebuilt-ffmpeg/      (gitignored — fetch separately)
+├── AVP/              (subtree of Joy4orce/nova-audio-AVP, history preserved)
+├── MediaLib/         (subtree of Joy4orce/nova-audio-MediaLib, history preserved)
+├── Video/            (subtree of Joy4orce/nova-audio-Video, history preserved)
+├── FileCoreLibrary/  (submodule of nova-video-player/aos-FileCoreLibrary @ v6.4)
+├── apk/              (gitignored — build artifacts)
+└── prebuilt-ffmpeg/  (gitignored — fetch separately for local builds)
 ```
+
+CI assembles the rest of the build tree (`nova/native/*`, `nova/Makefile`)
+on demand; those paths are gitignored.
 
 ## Cloning
 

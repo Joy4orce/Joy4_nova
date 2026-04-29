@@ -4,6 +4,11 @@ nova/apk/
 # Prebuilt binaries (download via scripts/fetch-prebuilt-ffmpeg.sh)
 nova/prebuilt-ffmpeg/
 
+# CI-only build helpers (cp'd / cloned in by .github/workflows/nova.yml).
+# Tracked source lives in nova/AVP/ and the upstream nova-video-player repos.
+nova/Makefile
+nova/native/
+
 # Claude Code local config
 .claude/
 nova/.claude/

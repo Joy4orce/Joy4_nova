@@ -5,18 +5,20 @@
 # from the legacy multi-repo CI (last build was build-15 in archived
 # Joy4orce/nova-audio-AVP), so we offset GITHUB_RUN_NUMBER by 15.
 #
-# How this differs from the pre-monorepo workflow:
+# Compared to the pre-monorepo workflow:
 #   * Trigger branch:      feature/audio-support  ->  main
 #   * Source layout:       `repo sync` of 20+ repos  ->  monorepo checkout
 #                          plus targeted clones of upstream native deps
-#   * gradle work dir:     nova/Video             ->  $BUILD_DIR/Video
-#                          (where $BUILD_DIR contains symlinks into
-#                           the monorepo's nova/aos-* projects so paths
-#                           like settingsDir.parentFile/MediaLib still work)
+#   * Working dir:         nova/Video             (unchanged)
+#                          The four "main" projects keep their legacy names
+#                          (AVP / Video / MediaLib / FileCoreLibrary) inside
+#                          nova/, so Video/settings.gradle's
+#                          settingsDir.parentFile/<name> lookups still resolve.
 #
-# The four "main" projects (AVP / Video / MediaLib / FileCoreLibrary) live
-# inside the monorepo. The 18 native build deps still come from upstream
-# nova-video-player/* at the revisions previously pinned by v6_4.xml.
+# The 18 native build deps (avos, ffmpeg, openssl, dav1d, opus, libmysofa,
+# libtorrent, prebuilt blobs, ...) come from upstream nova-video-player at the
+# revisions previously pinned by v6_4.xml — we never forked those, so there's
+# no point putting them in the monorepo.
 
 name: NOVA CI (monorepo)
 
@@ -57,22 +59,13 @@ jobs:
 
     - name: assemble build workspace
       shell: bash
+      working-directory: nova
       run: |
         set -euxo pipefail
 
-        BUILD_DIR="$RUNNER_TEMP/nova_build"
-        mkdir -p "$BUILD_DIR"
-        cd "$BUILD_DIR"
-
-        # Symlink monorepo subprojects into the names the legacy v6_4.xml manifest used.
-        # Video/settings.gradle resolves :MediaLib and :FileCoreLibrary via
-        # settingsDir.parentFile/<name>, so the four projects must be siblings.
-        ln -s "$GITHUB_WORKSPACE/nova/aos-AVP"             AVP
-        ln -s "$GITHUB_WORKSPACE/nova/aos-Video"           Video
-        ln -s "$GITHUB_WORKSPACE/nova/aos-MediaLib"        MediaLib
-        ln -s "$GITHUB_WORKSPACE/nova/aos-FileCoreLibrary" FileCoreLibrary
-
         # The manifest's <copyfile src="Makefile" dest="Makefile"/> from AVP.
+        # AVP/Makefile just dispatches to AVP/core.mk via the AVP -> . self-symlink,
+        # so cp keeps the legacy `make` entrypoint working.
         cp AVP/Makefile ./Makefile
 
         # Native build deps from upstream nova-video-player at v6_4.xml revisions.
@@ -101,18 +94,17 @@ jobs:
         clone_branch  prebuilt-libmysofa              v1_3              native/prebuilt/libmysofa
         clone_branch  prebuilt-torrentd               main              native/prebuilt/torrentd
 
-        echo "BUILD_DIR=$BUILD_DIR" >> "$GITHUB_ENV"
         echo "BUILD_NUMBER=$((${{ github.run_number }} + ${{ env.BUILD_NUMBER_OFFSET }}))" >> "$GITHUB_ENV"
 
     - name: build debug apk (arm64-v8a only)
-      working-directory: ${{ env.BUILD_DIR }}/Video
+      working-directory: nova/Video
       run: ./gradlew assembleNoamazonDebug --no-daemon --stacktrace -PciAbi=arm64-v8a
 
     - name: upload apk
       uses: actions/upload-artifact@v4
       with:
         name: nova-audio-debug-apk
-        path: ${{ env.BUILD_DIR }}/Video/build/outputs/apk/**/*-arm64-v8a-*.apk
+        path: nova/Video/build/outputs/apk/**/*-arm64-v8a-*.apk
         if-no-files-found: error
 
     - name: publish release
@@ -125,5 +117,5 @@ jobs:
           Debug APK (arm64-v8a) built from `main` @ ${{ github.sha }}
 
           Tap the `.apk` file below to install on your Android phone.
-        files: ${{ env.BUILD_DIR }}/Video/build/outputs/apk/**/*-arm64-v8a-*.apk
+        files: nova/Video/build/outputs/apk/**/*-arm64-v8a-*.apk
         prerelease: true
