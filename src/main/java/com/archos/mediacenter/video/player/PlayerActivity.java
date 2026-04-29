@@ -1400,39 +1400,70 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         };
     }
 
+    // Per-call diagnostic buffer flushed as a single on-screen Toast at the end of
+    // startExternalSubtitleDriverIfNeeded(). Only used when launched as an external
+    // VIEW handler, so internal library playback stays quiet.
+    private final StringBuilder mSubDiagBuffer = new StringBuilder();
+
+    private void subDiag(String line) {
+        mSubDiagBuffer.append("\n").append(line);
+        if (log.isDebugEnabled()) log.debug("SUB-DIAG: {}", line);
+    }
+
+    private void subDiagShow(String headline) {
+        final String text = headline + mSubDiagBuffer.toString();
+        mSubDiagBuffer.setLength(0);
+        if (!mIsExternalPlayer) return;
+        runOnUiThread(() -> {
+            try {
+                android.widget.Toast.makeText(this, text, android.widget.Toast.LENGTH_LONG).show();
+            } catch (Exception ignored) {}
+        });
+    }
+
     private void startExternalSubtitleDriverIfNeeded() {
         if (!mIsAudioOnly) return;
         if (mExternalSubtitleDriver != null) return;
         Uri data = getIntent() != null ? getIntent().getData() : null;
-        if (data == null) return;
+        subDiag("uri = " + data);
+        if (data != null) subDiag("scheme = " + data.getScheme() + ", authority = " + data.getAuthority());
+        if (data == null) {
+            subDiagShow("[자막 검색 실패] 인텐트에 URI 없음");
+            return;
+        }
         String localPath = resolveLocalPath(data);
+        subDiag("resolved path = " + localPath);
         if (localPath == null) {
-            if (log.isDebugEnabled()) log.debug("startExternalSubtitleDriverIfNeeded: cannot resolve local path for {}", data);
+            subDiagShow("[자막 검색 실패] URI를 로컬 경로로 변환 불가");
             return;
         }
         File mediaFile = new File(localPath);
-        if (log.isDebugEnabled()) {
-            File parent = mediaFile.getParentFile();
-            log.debug("startExternalSubtitleDriverIfNeeded: searching siblings for {} (parent={}, exists={}, canRead={})",
-                    mediaFile, parent, mediaFile.exists(), mediaFile.canRead());
-            if (parent != null) {
-                File[] kids = parent.listFiles();
-                log.debug("startExternalSubtitleDriverIfNeeded: parent.listFiles() -> {} entries (null means permission denied)",
-                        kids == null ? "null" : String.valueOf(kids.length));
-            }
+        File parent = mediaFile.getParentFile();
+        subDiag("media exists=" + mediaFile.exists() + ", canRead=" + mediaFile.canRead());
+        File[] kids = (parent != null) ? parent.listFiles() : null;
+        if (kids == null) {
+            subDiag("parent.listFiles = null  ← 권한 없음 (모든 파일 액세스 미허용)");
+        } else {
+            subDiag("parent.listFiles = " + kids.length + "개 항목");
         }
         File subtitleFile = ExternalSubtitleDriver.findSubtitleFor(mediaFile);
         if (subtitleFile == null) {
-            if (log.isDebugEnabled()) log.debug("startExternalSubtitleDriverIfNeeded: no sibling subtitle found next to {}", mediaFile);
+            subDiagShow("[자막 검색 실패] 일치하는 자막 파일 없음");
             return;
         }
+        subDiag("found = " + subtitleFile.getName());
         mExternalSubtitleDriver = ExternalSubtitleDriver.fromFile(
                 subtitleFile,
                 subtitle -> {
                     if (mSubtitleManager != null) mSubtitleManager.addSubtitle(subtitle);
                 },
                 () -> mPlayer != null ? mPlayer.getCurrentPosition() : 0);
-        if (mExternalSubtitleDriver != null) mExternalSubtitleDriver.start();
+        if (mExternalSubtitleDriver != null) {
+            mExternalSubtitleDriver.start();
+            subDiagShow("[자막 로드 성공]");
+        } else {
+            subDiagShow("[자막 검색 실패] 파싱 결과 0 cue (파일은 찾았지만 내용 못 읽음)");
+        }
     }
 
     /**
