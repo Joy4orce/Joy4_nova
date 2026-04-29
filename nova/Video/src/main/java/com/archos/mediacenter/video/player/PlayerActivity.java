@@ -1427,9 +1427,24 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         final String text = headline + mSubDiagBuffer.toString();
         mSubDiagBuffer.setLength(0);
         if (!mIsExternalPlayer) return;
+        // Toast.LENGTH_LONG truncates after a couple of lines, which loses the
+        // URI / authority / display-name details we need to debug NAS and other
+        // FileProvider failures. On failure also push the full diagnostic into
+        // the system clipboard so the user can paste it back to us.
+        final boolean isFailure = headline != null && headline.contains("실패");
+        if (isFailure) {
+            try {
+                android.content.ClipboardManager cm = (android.content.ClipboardManager)
+                        getSystemService(Context.CLIPBOARD_SERVICE);
+                if (cm != null) {
+                    cm.setPrimaryClip(android.content.ClipData.newPlainText("Nova subtitle diag", text));
+                }
+            } catch (Exception ignored) {}
+        }
+        final String displayed = isFailure ? text + "\n(클립보드에 전체 진단 복사됨)" : text;
         runOnUiThread(() -> {
             try {
-                android.widget.Toast.makeText(this, text, android.widget.Toast.LENGTH_LONG).show();
+                android.widget.Toast.makeText(this, displayed, android.widget.Toast.LENGTH_LONG).show();
             } catch (Exception ignored) {}
         });
     }
@@ -1480,34 +1495,68 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         // managers' FileProviders key URIs on the underlying file path so the
         // mutated URI resolves to the real sibling subtitle file even though we
         // never see /storage/... ourselves.
+        // Filename detection has three tiers — some providers ignore
+        // OpenableColumns entirely, but their URI's last path segment usually
+        // still carries the original filename, and DocumentFile's getName()
+        // covers another slice of providers (mostly SAF):
+        //   1. ContentResolver.query(OpenableColumns.DISPLAY_NAME)
+        //   2. DocumentFile.fromSingleUri(...).getName()
+        //   3. uri.getLastPathSegment() (URL-decoded by Uri)
         String displayName = queryDisplayName(data);
-        subDiag("display_name = " + displayName);
+        if (displayName != null) {
+            subDiag("display_name = " + displayName);
+        } else {
+            try {
+                androidx.documentfile.provider.DocumentFile df =
+                        androidx.documentfile.provider.DocumentFile.fromSingleUri(this, data);
+                if (df != null) displayName = df.getName();
+            } catch (Exception ignored) {}
+            if (displayName != null) {
+                subDiag("display_name (DocumentFile) = " + displayName);
+            } else {
+                String last = data.getLastPathSegment();
+                if (last != null && last.contains(".")) {
+                    displayName = last;
+                    subDiag("display_name (lastPathSegment) = " + displayName);
+                } else {
+                    subDiag("display_name = null  ← 파일명 추출 실패");
+                }
+            }
+        }
+
+        int candidatesTried = 0, candidatesOpened = 0;
         if (displayName != null) {
             for (String ext : ExternalSubtitleDriver.SUPPORTED_EXTENSIONS) {
                 String subFilename = swapExtension(displayName, ext);
                 if (subFilename == null) continue;
                 Uri candidate = mutateUriToSibling(data, subFilename);
                 if (candidate == null) continue;
-                subDiag("try: ." + ext);
+                candidatesTried++;
                 InputStream is = null;
+                String openErr = null;
                 try {
                     is = getContentResolver().openInputStream(candidate);
-                    if (is == null) continue;
-                    ExternalSubtitleDriver d = ExternalSubtitleDriver.fromInputStream(
-                            is, subFilename, subListener, posProvider);
-                    is = null; // ownership transferred to fromInputStream
-                    if (attachExternalSubtitleDriver(d, "[자막 로드 성공] (URI) " + subFilename)) return;
+                    if (is != null) {
+                        candidatesOpened++;
+                        ExternalSubtitleDriver d = ExternalSubtitleDriver.fromInputStream(
+                                is, subFilename, subListener, posProvider);
+                        is = null; // ownership transferred to fromInputStream
+                        if (attachExternalSubtitleDriver(d, "[자막 로드 성공] (URI) " + subFilename)) return;
+                    }
                 } catch (Exception e) {
-                    // Most candidates won't exist; suppress the noise.
+                    openErr = e.getClass().getSimpleName();
                 } finally {
                     if (is != null) try { is.close(); } catch (IOException ignored) {}
                 }
+                if (openErr != null) subDiag("." + ext + " → " + openErr);
             }
+            subDiag("URI 후보 " + candidatesTried + "개 시도, " + candidatesOpened + "개 열림");
         }
 
-        subDiagShow("[자막 검색 실패] 일치하는 자막 파일 없음 (auth=" +
-                (data.getAuthority() == null ? "?" : data.getAuthority()) +
-                ", name=" + displayName + ")");
+        // Failure headline: keep critical fields short and FIRST so they survive
+        // Toast truncation. Full diagnostic is also copied to the clipboard.
+        String authority = (data.getAuthority() == null) ? "?" : data.getAuthority();
+        subDiagShow("[자막 검색 실패]\nauth=" + authority + "\nname=" + displayName);
     }
 
     /**
