@@ -1,0 +1,129 @@
+# Joy4_nova monorepo CI
+#
+# Builds a debug APK with audio-file playback support and uploads it both as a
+# workflow artifact and as a GitHub Release. Continuation of the build-N tags
+# from the legacy multi-repo CI (last build was build-15 in archived
+# Joy4orce/nova-audio-AVP), so we offset GITHUB_RUN_NUMBER by 15.
+#
+# How this differs from the pre-monorepo workflow:
+#   * Trigger branch:      feature/audio-support  ->  main
+#   * Source layout:       `repo sync` of 20+ repos  ->  monorepo checkout
+#                          plus targeted clones of upstream native deps
+#   * gradle work dir:     nova/Video             ->  $BUILD_DIR/Video
+#                          (where $BUILD_DIR contains symlinks into
+#                           the monorepo's nova/aos-* projects so paths
+#                           like settingsDir.parentFile/MediaLib still work)
+#
+# The four "main" projects (AVP / Video / MediaLib / FileCoreLibrary) live
+# inside the monorepo. The 18 native build deps still come from upstream
+# nova-video-player/* at the revisions previously pinned by v6_4.xml.
+
+name: NOVA CI (monorepo)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  # build-N continuation: legacy CI ended at build-15. Bump if we ever lose runs.
+  BUILD_NUMBER_OFFSET: 15
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      ANDROID_NDK_HOME: ${ANDROID_NDK_LATEST_HOME}
+      ANDROID_NDK_ROOT: ${ANDROID_NDK_LATEST_HOME}
+
+    steps:
+    - name: checkout monorepo (with FileCoreLibrary submodule)
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: setup java17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: install build packages
+      run: |
+        sudo apt-get update || sudo apt-get update
+        sudo apt-get install -y nasm meson ninja-build maven build-essential wget curl unzip git pkg-config
+
+    - name: assemble build workspace
+      shell: bash
+      run: |
+        set -euxo pipefail
+
+        BUILD_DIR="$RUNNER_TEMP/nova_build"
+        mkdir -p "$BUILD_DIR"
+        cd "$BUILD_DIR"
+
+        # Symlink monorepo subprojects into the names the legacy v6_4.xml manifest used.
+        # Video/settings.gradle resolves :MediaLib and :FileCoreLibrary via
+        # settingsDir.parentFile/<name>, so the four projects must be siblings.
+        ln -s "$GITHUB_WORKSPACE/nova/aos-AVP"             AVP
+        ln -s "$GITHUB_WORKSPACE/nova/aos-Video"           Video
+        ln -s "$GITHUB_WORKSPACE/nova/aos-MediaLib"        MediaLib
+        ln -s "$GITHUB_WORKSPACE/nova/aos-FileCoreLibrary" FileCoreLibrary
+
+        # The manifest's <copyfile src="Makefile" dest="Makefile"/> from AVP.
+        cp AVP/Makefile ./Makefile
+
+        # Native build deps from upstream nova-video-player at v6_4.xml revisions.
+        UPSTREAM=https://github.com/nova-video-player
+        mkdir -p native/prebuilt
+
+        clone_branch() { git clone --depth 1 --branch "$2" "$UPSTREAM/$1.git" "$3"; }
+        clone_default() { git clone --depth 1 "$UPSTREAM/$1.git" "$2"; }
+
+        clone_branch  aos-avos                        no_android_sync   native/avos
+        clone_default aos-audiocompress                                  native/audiocompress
+        clone_branch  ffmpeg-android-builder-nobin    v8_0              native/ffmpeg-android-builder
+        clone_branch  dav1d-android-builder-nobin     v1_4              native/dav1d-android-builder
+        clone_branch  opus-android-builder-nobin      20241012          native/opus-android-builder
+        clone_branch  libmysofa-android-builder       main              native/libmysofa-android-builder
+        clone_branch  openssl-android-builder-nobin   v3_5_2            native/openssl-android-builder
+        clone_default aos-libyuv                                         native/libyuv
+        clone_default aos-libnativehelper                                native/libnativehelper
+        clone_default aos-boost-android-builder                          native/boost
+        clone_branch  aos-libtorrent-android-builder  main              native/libtorrent-android-builder
+        clone_default torrentd-nobin                                     native/torrentd
+        clone_branch  prebuilt-ffmpeg                 v8_0              native/prebuilt/ffmpeg
+        clone_branch  prebuilt-opus                   main              native/prebuilt/opus
+        clone_branch  prebuilt-dav1d                  v1_5              native/prebuilt/dav1d
+        clone_branch  prebuilt-openssl                v3_5              native/prebuilt/openssl
+        clone_branch  prebuilt-libmysofa              v1_3              native/prebuilt/libmysofa
+        clone_branch  prebuilt-torrentd               main              native/prebuilt/torrentd
+
+        echo "BUILD_DIR=$BUILD_DIR" >> "$GITHUB_ENV"
+        echo "BUILD_NUMBER=$((${{ github.run_number }} + ${{ env.BUILD_NUMBER_OFFSET }}))" >> "$GITHUB_ENV"
+
+    - name: build debug apk (arm64-v8a only)
+      working-directory: ${{ env.BUILD_DIR }}/Video
+      run: ./gradlew assembleNoamazonDebug --no-daemon --stacktrace -PciAbi=arm64-v8a
+
+    - name: upload apk
+      uses: actions/upload-artifact@v4
+      with:
+        name: nova-audio-debug-apk
+        path: ${{ env.BUILD_DIR }}/Video/build/outputs/apk/**/*-arm64-v8a-*.apk
+        if-no-files-found: error
+
+    - name: publish release
+      if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: build-${{ env.BUILD_NUMBER }}
+        name: Audio Support Build ${{ env.BUILD_NUMBER }}
+        body: |
+          Debug APK (arm64-v8a) built from `main` @ ${{ github.sha }}
+
+          Tap the `.apk` file below to install on your Android phone.
+        files: ${{ env.BUILD_DIR }}/Video/build/outputs/apk/**/*-arm64-v8a-*.apk
+        prerelease: true
