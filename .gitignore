@@ -1,0 +1,25 @@
+# Build artifacts (large, regenerable from CI)
+nova/apk/
+
+# Prebuilt binaries (download via scripts/fetch-prebuilt-ffmpeg.sh)
+nova/prebuilt-ffmpeg/
+
+# Claude Code local config
+.claude/
+nova/.claude/
+settings.local.json
+
+# Android / Gradle
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
