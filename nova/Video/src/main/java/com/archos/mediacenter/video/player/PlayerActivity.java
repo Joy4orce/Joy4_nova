@@ -123,6 +123,8 @@ import org.slf4j.LoggerFactory;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -1442,39 +1444,145 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             subDiagShow("[자막 검색 실패] 인텐트에 URI 없음");
             return;
         }
+
+        ExternalSubtitleDriver.Listener subListener = subtitle -> {
+            if (mSubtitleManager != null) mSubtitleManager.addSubtitle(subtitle);
+        };
+        ExternalSubtitleDriver.PositionProvider posProvider =
+                () -> mPlayer != null ? mPlayer.getCurrentPosition() : 0;
+
+        // ── Path 1: file:// or resolvable content:// → scan parent directory.
+        // Works for local storage (file:// from third-party explorers, MediaStore
+        // and SAF document URIs that expose a real path) — the cheap, exact route.
         String localPath = resolveLocalPath(data);
         subDiag("resolved path = " + localPath);
-        if (localPath == null) {
-            subDiagShow("[자막 검색 실패] URI를 로컬 경로로 변환 불가");
-            return;
+        if (localPath != null) {
+            File mediaFile = new File(localPath);
+            File parent = mediaFile.getParentFile();
+            subDiag("media exists=" + mediaFile.exists() + ", canRead=" + mediaFile.canRead());
+            File[] kids = (parent != null) ? parent.listFiles() : null;
+            subDiag(kids == null
+                    ? "parent.listFiles = null  ← 권한 없음 (모든 파일 액세스 미허용)"
+                    : "parent.listFiles = " + kids.length + "개 항목");
+            File subtitleFile = ExternalSubtitleDriver.findSubtitleFor(mediaFile);
+            if (subtitleFile != null) {
+                subDiag("found (file) = " + subtitleFile.getName());
+                ExternalSubtitleDriver d = ExternalSubtitleDriver.fromFile(subtitleFile, subListener, posProvider);
+                if (attachExternalSubtitleDriver(d, "[자막 로드 성공] " + subtitleFile.getName())) return;
+                subDiag("file 파싱 결과 0 cue, URI 변환 시도");
+            }
         }
-        File mediaFile = new File(localPath);
-        File parent = mediaFile.getParentFile();
-        subDiag("media exists=" + mediaFile.exists() + ", canRead=" + mediaFile.canRead());
-        File[] kids = (parent != null) ? parent.listFiles() : null;
-        if (kids == null) {
-            subDiag("parent.listFiles = null  ← 권한 없음 (모든 파일 액세스 미허용)");
-        } else {
-            subDiag("parent.listFiles = " + kids.length + "개 항목");
+
+        // ── Path 2: URI mutation. The active path-based scan failed (NAS share
+        // exposed via FileProvider, opaque content:// from Solid/CX/X-plore, etc).
+        // Get the real DISPLAY_NAME via OpenableColumns, swap in each subtitle
+        // extension, and ask the same ContentResolver to open it. Most file
+        // managers' FileProviders key URIs on the underlying file path so the
+        // mutated URI resolves to the real sibling subtitle file even though we
+        // never see /storage/... ourselves.
+        String displayName = queryDisplayName(data);
+        subDiag("display_name = " + displayName);
+        if (displayName != null) {
+            for (String ext : ExternalSubtitleDriver.SUPPORTED_EXTENSIONS) {
+                String subFilename = swapExtension(displayName, ext);
+                if (subFilename == null) continue;
+                Uri candidate = mutateUriToSibling(data, subFilename);
+                if (candidate == null) continue;
+                subDiag("try: ." + ext);
+                InputStream is = null;
+                try {
+                    is = getContentResolver().openInputStream(candidate);
+                    if (is == null) continue;
+                    ExternalSubtitleDriver d = ExternalSubtitleDriver.fromInputStream(
+                            is, subFilename, subListener, posProvider);
+                    is = null; // ownership transferred to fromInputStream
+                    if (attachExternalSubtitleDriver(d, "[자막 로드 성공] (URI) " + subFilename)) return;
+                } catch (Exception e) {
+                    // Most candidates won't exist; suppress the noise.
+                } finally {
+                    if (is != null) try { is.close(); } catch (IOException ignored) {}
+                }
+            }
         }
-        File subtitleFile = ExternalSubtitleDriver.findSubtitleFor(mediaFile);
-        if (subtitleFile == null) {
-            subDiagShow("[자막 검색 실패] 일치하는 자막 파일 없음");
-            return;
+
+        subDiagShow("[자막 검색 실패] 일치하는 자막 파일 없음 (auth=" +
+                (data.getAuthority() == null ? "?" : data.getAuthority()) +
+                ", name=" + displayName + ")");
+    }
+
+    /**
+     * Wire up a freshly-built driver: bootstrap the SubtitleManager rendering
+     * pipeline (which is normally only kicked off by the AVOS native player's
+     * onSubtitleMetadataUpdated callback — never fired for audio-only playback,
+     * so without this our addSubtitle() calls would silently no-op against a
+     * null DispSubtitleThread) and start ticking. Returns false if the driver
+     * itself is null (parse failed).
+     */
+    private boolean attachExternalSubtitleDriver(ExternalSubtitleDriver driver, String successHeadline) {
+        if (driver == null) return false;
+        if (mSubtitleManager != null) mSubtitleManager.start();
+        mExternalSubtitleDriver = driver;
+        driver.start();
+        subDiagShow(successHeadline);
+        return true;
+    }
+
+    /** Query OpenableColumns.DISPLAY_NAME via ContentResolver. */
+    private String queryDisplayName(Uri uri) {
+        try (android.database.Cursor c = getContentResolver().query(uri,
+                new String[]{android.provider.OpenableColumns.DISPLAY_NAME}, null, null, null)) {
+            if (c != null && c.moveToFirst()) {
+                int idx = c.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME);
+                if (idx >= 0) return c.getString(idx);
+            }
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) log.debug("queryDisplayName failed: {}", e.getMessage());
         }
-        subDiag("found = " + subtitleFile.getName());
-        mExternalSubtitleDriver = ExternalSubtitleDriver.fromFile(
-                subtitleFile,
-                subtitle -> {
-                    if (mSubtitleManager != null) mSubtitleManager.addSubtitle(subtitle);
-                },
-                () -> mPlayer != null ? mPlayer.getCurrentPosition() : 0);
-        if (mExternalSubtitleDriver != null) {
-            mExternalSubtitleDriver.start();
-            subDiagShow("[자막 로드 성공]");
-        } else {
-            subDiagShow("[자막 검색 실패] 파싱 결과 0 cue (파일은 찾았지만 내용 못 읽음)");
-        }
+        return null;
+    }
+
+    /** "RJ01199941.mp3" + "srt" → "RJ01199941.srt" (or null if no usable extension). */
+    private static String swapExtension(String filename, String newExt) {
+        if (filename == null) return null;
+        int dot = filename.lastIndexOf('.');
+        if (dot <= 0) return null;
+        return filename.substring(0, dot) + "." + newExt;
+    }
+
+    /**
+     * Build a sibling URI by replacing the basename of {@code uri} with
+     * {@code newFilename}. Handles two URI shapes:
+     *   * SAF DocumentsContract URIs — swap the trailing path inside the doc id
+     *   * Plain content:// / file:// URIs — swap the last URL path segment
+     * Either way the rest of the URI (authority, prefix path, query) is preserved.
+     */
+    private Uri mutateUriToSibling(Uri uri, String newFilename) {
+        if (uri == null || newFilename == null) return null;
+
+        // Try DocumentsContract first — covers SAF document URIs.
+        try {
+            if (android.provider.DocumentsContract.isDocumentUri(this, uri)) {
+                String docId = android.provider.DocumentsContract.getDocumentId(uri);
+                if (docId != null) {
+                    int slash = docId.lastIndexOf('/');
+                    int colon = docId.lastIndexOf(':');
+                    int sep = Math.max(slash, colon);
+                    String newDocId = (sep >= 0)
+                            ? docId.substring(0, sep + 1) + newFilename
+                            : newFilename;
+                    return android.provider.DocumentsContract.buildDocumentUri(uri.getAuthority(), newDocId);
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // Generic last-path-segment swap — works for typical FileProvider URIs
+        // where the URL path mirrors the on-disk file path.
+        java.util.List<String> segments = uri.getPathSegments();
+        if (segments == null || segments.isEmpty()) return null;
+        Uri.Builder b = uri.buildUpon().path(null);
+        for (int i = 0; i < segments.size() - 1; i++) b.appendPath(segments.get(i));
+        b.appendPath(newFilename);
+        return b.build();
     }
 
     /**

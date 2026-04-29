@@ -17,9 +17,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -80,6 +82,37 @@ public class ExternalSubtitleDriver {
         }
         log.info("ExternalSubtitleDriver.fromFile: parsed {} cues from {}", cues.size(), subtitleFile.getAbsolutePath());
         return new ExternalSubtitleDriver(cues, listener, positionProvider);
+    }
+
+    /**
+     * Build a driver from an already-open {@link InputStream}. Used when the
+     * subtitle is reachable via {@link android.content.ContentResolver} but not
+     * as a real on-disk path — e.g. third-party FileProvider / SAF / NAS clients
+     * that expose <code>content://</code> URIs without a {@code _data} column.
+     *
+     * <p>The stream is fully consumed and closed by this method. The caller
+     * supplies {@code filenameForFormat} so we can pick the right parser
+     * (the URI itself sometimes carries a synthetic name without a useful
+     * extension).
+     */
+    public static ExternalSubtitleDriver fromInputStream(InputStream is, String filenameForFormat,
+                                                         Listener listener, PositionProvider positionProvider) {
+        if (is == null) return null;
+        try {
+            String content = readText(is);
+            List<Cue> cues = parseByName(content, filenameForFormat);
+            if (cues == null || cues.isEmpty()) {
+                log.info("ExternalSubtitleDriver.fromInputStream: parsed 0 cues from {}", filenameForFormat);
+                return null;
+            }
+            log.info("ExternalSubtitleDriver.fromInputStream: parsed {} cues from {}", cues.size(), filenameForFormat);
+            return new ExternalSubtitleDriver(cues, listener, positionProvider);
+        } catch (IOException e) {
+            log.warn("ExternalSubtitleDriver.fromInputStream: read failed for {}", filenameForFormat, e);
+            return null;
+        } finally {
+            try { is.close(); } catch (IOException ignored) {}
+        }
     }
 
     /** Find the first sibling subtitle file matching the given media file name. */
@@ -163,33 +196,36 @@ public class ExternalSubtitleDriver {
     }
 
     private static List<Cue> parse(File file) {
-        String name = file.getName().toLowerCase(Locale.US);
         try {
-            String content = readText(file);
-            if (name.endsWith(".srt") || name.endsWith(".vtt") || name.endsWith(".txt")) {
-                return parseSrtVtt(content);
-            } else if (name.endsWith(".ass") || name.endsWith(".ssa")) {
-                return parseAss(content);
-            } else if (name.endsWith(".smi")) {
-                return parseSmi(content);
-            }
+            return parseByName(readText(file), file.getName());
         } catch (IOException e) {
             log.warn("ExternalSubtitleDriver.parse: failed to read {}", file, e);
+            return null;
         }
-        return null;
+    }
+
+    /** Pick the right parser by filename extension and run it on the raw text. */
+    private static List<Cue> parseByName(String content, String filenameForFormat) {
+        String name = (filenameForFormat == null) ? "" : filenameForFormat.toLowerCase(Locale.US);
+        if (name.endsWith(".srt") || name.endsWith(".vtt") || name.endsWith(".txt")) return parseSrtVtt(content);
+        if (name.endsWith(".ass") || name.endsWith(".ssa")) return parseAss(content);
+        if (name.endsWith(".smi")) return parseSmi(content);
+        // Fall back to SRT/VTT parser — works for most well-formed subtitle files.
+        return parseSrtVtt(content);
     }
 
     private static String readText(File file) throws IOException {
-        // Try UTF-8 first; if it produces lots of replacement chars, fall back to default.
-        byte[] data = new byte[(int) file.length()];
         try (FileInputStream fis = new FileInputStream(file)) {
-            int read = 0;
-            while (read < data.length) {
-                int n = fis.read(data, read, data.length - read);
-                if (n < 0) break;
-                read += n;
-            }
+            return readText(fis);
         }
+    }
+
+    private static String readText(InputStream is) throws IOException {
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        byte[] tmp = new byte[8192];
+        int n;
+        while ((n = is.read(tmp)) > 0) buf.write(tmp, 0, n);
+        byte[] data = buf.toByteArray();
         // Strip UTF-8 BOM
         int offset = 0;
         if (data.length >= 3 && (data[0] & 0xff) == 0xEF && (data[1] & 0xff) == 0xBB && (data[2] & 0xff) == 0xBF) {
