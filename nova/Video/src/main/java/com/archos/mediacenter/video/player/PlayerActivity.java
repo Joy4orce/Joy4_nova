@@ -1489,12 +1489,37 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         }
 
         // ── Path 2: URI mutation. The active path-based scan failed (NAS share
-        // exposed via FileProvider, opaque content:// from Solid/CX/X-plore, etc).
-        // Get the real DISPLAY_NAME via OpenableColumns, swap in each subtitle
-        // extension, and ask the same ContentResolver to open it. Most file
-        // managers' FileProviders key URIs on the underlying file path so the
-        // mutated URI resolves to the real sibling subtitle file even though we
-        // never see /storage/... ourselves.
+        // exposed via FileProvider, opaque content:// from Solid/CX/X-plore, an
+        // SMB-to-HTTP localhost proxy from FE/X-plore/etc., ...). Get a usable
+        // filename, swap each subtitle extension into the URI, and try to open
+        // the result. Most file managers' FileProviders key URIs on the
+        // underlying file path so the mutated URI lands on the real sibling
+        // subtitle file even though we never see /storage/... ourselves.
+        //
+        // Two important details that bit earlier builds:
+        //   * ContentResolver.openInputStream() does not handle http(s):// —
+        //     it only routes content://, file://, android.resource://. SMB-to-
+        //     HTTP file managers (e.g. http://127.0.0.1:21082/SMB/...) need
+        //     direct HttpURLConnection access, otherwise every candidate dies
+        //     with FileNotFoundException regardless of whether the file exists.
+        //   * Probing several URIs over HTTP can stall, so the whole loop runs
+        //     on a worker thread; only the SubtitleManager bootstrap and the
+        //     final diagnostic Toast hop back to the UI thread.
+        final Uri uri = data;
+        new Thread(() -> tryUriMutationFallback(uri, subListener, posProvider),
+                "Nova-ExtSub-UriProbe").start();
+    }
+
+    /**
+     * Background-thread half of {@link #startExternalSubtitleDriverIfNeeded()}.
+     * Tries to open a sibling subtitle by mutating the media URI's basename to
+     * each known subtitle extension. Calls back to the UI thread for the final
+     * driver attach (which touches mSubtitleManager) and for the diagnostic
+     * Toast.
+     */
+    private void tryUriMutationFallback(Uri data,
+                                        ExternalSubtitleDriver.Listener subListener,
+                                        ExternalSubtitleDriver.PositionProvider posProvider) {
         // Filename detection has three tiers — some providers ignore
         // OpenableColumns entirely, but their URI's last path segment usually
         // still carries the original filename, and DocumentFile's getName()
@@ -1535,16 +1560,23 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 InputStream is = null;
                 String openErr = null;
                 try {
-                    is = getContentResolver().openInputStream(candidate);
+                    is = openCandidateStream(candidate);
                     if (is != null) {
                         candidatesOpened++;
-                        ExternalSubtitleDriver d = ExternalSubtitleDriver.fromInputStream(
+                        final String headline = "[자막 로드 성공] (URI) " + subFilename;
+                        final ExternalSubtitleDriver d = ExternalSubtitleDriver.fromInputStream(
                                 is, subFilename, subListener, posProvider);
                         is = null; // ownership transferred to fromInputStream
-                        if (attachExternalSubtitleDriver(d, "[자막 로드 성공] (URI) " + subFilename)) return;
+                        if (d != null) {
+                            runOnUiThread(() -> attachExternalSubtitleDriver(d, headline));
+                            return;
+                        } else {
+                            subDiag("." + ext + " → 0 cues parsed");
+                        }
                     }
                 } catch (Exception e) {
-                    openErr = e.getClass().getSimpleName();
+                    openErr = e.getClass().getSimpleName() +
+                            (e.getMessage() != null ? ": " + e.getMessage() : "");
                 } finally {
                     if (is != null) try { is.close(); } catch (IOException ignored) {}
                 }
@@ -1555,8 +1587,44 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
         // Failure headline: keep critical fields short and FIRST so they survive
         // Toast truncation. Full diagnostic is also copied to the clipboard.
-        String authority = (data.getAuthority() == null) ? "?" : data.getAuthority();
-        subDiagShow("[자막 검색 실패]\nauth=" + authority + "\nname=" + displayName);
+        final String authority = (data.getAuthority() == null) ? "?" : data.getAuthority();
+        final String finalDisplayName = displayName;
+        runOnUiThread(() -> subDiagShow(
+                "[자막 검색 실패]\nauth=" + authority + "\nname=" + finalDisplayName));
+    }
+
+    /**
+     * Open an InputStream for a candidate sibling URI, dispatching by scheme.
+     * <p>
+     * ContentResolver.openInputStream() only handles {@code content://},
+     * {@code file://}, and {@code android.resource://}. For
+     * {@code http(s)://} URIs (the localhost-proxy pattern used by SMB-aware
+     * file managers like FE / X-plore) it throws FileNotFoundException
+     * immediately even when the resource exists, so we route those through
+     * a plain HttpURLConnection with short timeouts.
+     */
+    private InputStream openCandidateStream(Uri uri) throws IOException {
+        String scheme = (uri.getScheme() == null) ? "" : uri.getScheme().toLowerCase(java.util.Locale.US);
+        if ("http".equals(scheme) || "https".equals(scheme)) {
+            java.net.URL url = new java.net.URL(uri.toString());
+            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+            conn.setConnectTimeout(2500);
+            conn.setReadTimeout(4000);
+            conn.setInstanceFollowRedirects(true);
+            int code;
+            try {
+                code = conn.getResponseCode();
+            } catch (IOException e) {
+                conn.disconnect();
+                throw e;
+            }
+            if (code != java.net.HttpURLConnection.HTTP_OK) {
+                conn.disconnect();
+                throw new java.io.FileNotFoundException("HTTP " + code);
+            }
+            return conn.getInputStream();
+        }
+        return getContentResolver().openInputStream(uri);
     }
 
     /**
