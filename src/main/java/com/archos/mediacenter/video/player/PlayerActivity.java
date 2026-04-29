@@ -1411,6 +1411,16 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             return;
         }
         File mediaFile = new File(localPath);
+        if (log.isDebugEnabled()) {
+            File parent = mediaFile.getParentFile();
+            log.debug("startExternalSubtitleDriverIfNeeded: searching siblings for {} (parent={}, exists={}, canRead={})",
+                    mediaFile, parent, mediaFile.exists(), mediaFile.canRead());
+            if (parent != null) {
+                File[] kids = parent.listFiles();
+                log.debug("startExternalSubtitleDriverIfNeeded: parent.listFiles() -> {} entries (null means permission denied)",
+                        kids == null ? "null" : String.valueOf(kids.length));
+            }
+        }
         File subtitleFile = ExternalSubtitleDriver.findSubtitleFor(mediaFile);
         if (subtitleFile == null) {
             if (log.isDebugEnabled()) log.debug("startExternalSubtitleDriverIfNeeded: no sibling subtitle found next to {}", mediaFile);
@@ -1427,14 +1437,84 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
     /**
      * Resolve a media URI to a real on-disk path so we can scan siblings for a subtitle file.
-     * Handles file:// directly and content:// via MediaStore._data; returns null if the URI is
-     * remote (http/smb/...) or backed by a DocumentProvider that doesn't expose a local path.
+     * Handles:
+     *   - file://                                   -> uri.getPath()
+     *   - content:// MediaStore (audio/video/image) -> _data column lookup
+     *   - content:// DocumentsContract (SAF):
+     *       * com.android.externalstorage.documents -> /storage/emulated/0/<rel> (or /storage/<vol>/<rel>)
+     *       * com.android.providers.media.documents -> rewrite to MediaStore URI, then _data
+     *       * com.android.providers.downloads.documents -> public_downloads URI, then _data
+     *   - everything else (remote http/smb, opaque providers) -> null
      */
     private String resolveLocalPath(Uri uri) {
         if (uri == null) return null;
         String scheme = uri.getScheme();
-        if ("file".equalsIgnoreCase(scheme)) return uri.getPath();
+        if ("file".equalsIgnoreCase(scheme)) {
+            if (log.isDebugEnabled()) log.debug("resolveLocalPath: file scheme -> {}", uri.getPath());
+            return uri.getPath();
+        }
         if (!"content".equalsIgnoreCase(scheme)) return null;
+        String authority = uri.getAuthority();
+        // DocumentsContract paths (Storage Access Framework) — most common for modern file managers.
+        try {
+            if (android.provider.DocumentsContract.isDocumentUri(this, uri)) {
+                String docId = android.provider.DocumentsContract.getDocumentId(uri);
+                if (log.isDebugEnabled()) log.debug("resolveLocalPath: DocumentsContract uri authority={} docId={}", authority, docId);
+                if ("com.android.externalstorage.documents".equals(authority) && docId != null) {
+                    String[] split = docId.split(":", 2);
+                    String volume = split[0];
+                    String relPath = split.length > 1 ? split[1] : "";
+                    if ("primary".equalsIgnoreCase(volume)) {
+                        String p = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + relPath;
+                        if (log.isDebugEnabled()) log.debug("resolveLocalPath: externalstorage primary -> {}", p);
+                        return p;
+                    }
+                    String p = "/storage/" + volume + "/" + relPath;
+                    if (log.isDebugEnabled()) log.debug("resolveLocalPath: externalstorage volume {} -> {}", volume, p);
+                    return p;
+                }
+                if ("com.android.providers.media.documents".equals(authority) && docId != null) {
+                    String[] split = docId.split(":", 2);
+                    if (split.length == 2) {
+                        String type = split[0];
+                        Uri mediaTable = null;
+                        if ("audio".equals(type)) mediaTable = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                        else if ("video".equals(type)) mediaTable = android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                        else if ("image".equals(type)) mediaTable = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                        if (mediaTable != null) {
+                            try {
+                                Uri mediaQuery = android.content.ContentUris.withAppendedId(mediaTable, Long.parseLong(split[1]));
+                                String p = queryDataColumn(mediaQuery);
+                                if (p != null) {
+                                    if (log.isDebugEnabled()) log.debug("resolveLocalPath: media documents {} -> {}", type, p);
+                                    return p;
+                                }
+                            } catch (NumberFormatException ignored) {}
+                        }
+                    }
+                }
+                if ("com.android.providers.downloads.documents".equals(authority) && docId != null) {
+                    try {
+                        Uri downloadUri = android.content.ContentUris.withAppendedId(
+                                Uri.parse("content://downloads/public_downloads"), Long.parseLong(docId));
+                        String p = queryDataColumn(downloadUri);
+                        if (p != null) {
+                            if (log.isDebugEnabled()) log.debug("resolveLocalPath: downloads documents -> {}", p);
+                            return p;
+                        }
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) log.debug("resolveLocalPath: DocumentsContract path failed: {}", e.getMessage());
+        }
+        // Fallback: try _data directly (works for MediaStore content URIs and well-behaved FileProviders).
+        String p = queryDataColumn(uri);
+        if (log.isDebugEnabled()) log.debug("resolveLocalPath: _data fallback for authority={} -> {}", authority, p);
+        return p;
+    }
+
+    private String queryDataColumn(Uri uri) {
         String[] projection = { android.provider.MediaStore.MediaColumns.DATA };
         try (android.database.Cursor c = getContentResolver().query(uri, projection, null, null, null)) {
             if (c != null && c.moveToFirst()) {
@@ -1445,7 +1525,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 }
             }
         } catch (Exception e) {
-            if (log.isDebugEnabled()) log.debug("resolveLocalPath: query failed for {}: {}", uri, e.getMessage());
+            if (log.isDebugEnabled()) log.debug("queryDataColumn: failed for {}: {}", uri, e.getMessage());
         }
         return null;
     }
