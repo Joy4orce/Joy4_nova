@@ -1,0 +1,403 @@
+<h2>What is Nova Video Player?</h2>
+
+<p>NOVA is an opeN sOurce Video plAyer designed for Android devices (tablets, phones and TVs). <br />
+This application is based on a fork of Archos Video Player open-source release, intended to support new features with an enhanced stability.</p>
+
+<p>NOVA is published on <a href="https://play.google.com/store/apps/details?id=org.courville.nova">GooglePlay</a> or on <a href="https://www.amazon.fr/dp/B07P1Q1DG9">Amazon Appstore</a> or on <a href="https://f-droid.org/en/packages/org.courville.nova/">F-Droid</a> or on <a href="https://apt.izzysoft.de/fdroid/index/apk/org.courville.nova">IzzyOnDroid</a> or directly on <a href="https://github.com/nova-video-player/aos-AVP/releases">github</a>. 
+Latest changes are tracked <a href="https://github.com/nova-video-player/aos-AVP/blob/nova/CHANGELOG.md">here</a>.</p>
+
+<p>Please note that NOVA is free and consists in a small community effort done on personal time.</p>
+
+<h2>I have just downloaded Nova Video Player and it shows no video.</h2>
+
+<p>On a fresh start, the discovery process for videos stored on local storage can take some time. <br />
+Nova Video Player is just a video player and does not point to any streaming service. If you do not have already video content on your device no videos will be displayed.</p>
+
+<p>Network shares can also be added as video sources.</p>
+
+<h2>What are the differences between the audio passthrough modes?</h2>
+
+<p>Audio passthrough amounts to transmit through HDMI interface compressed sound channels directly to your AV receiver that will perform the decoding and rendering. It is thus a feature targeted for Android TV or TV boxes. <br />
+On Nova Video Player, three audio passthrough modes are supported:  </p>
+
+<ul>
+<li>Nova encapsulation (experimental): spdif/IEC61937 encapsulation is done by nova opening directly an IEC61937 audio track;</li>
+<li>System encapsulation: Android performs the encapsulation;</li>
+<li>Universal (AC3 recode): targets AndroidTV TVs linked to AV receiver through ARC that cannot sustain multichannel PCM payload (i.e. ARC non eARC), to recode original sound track to AC3 5.1 and use system encapsulation passthrough.</li>
+</ul>
+
+<p>You might have to try the various modes and figure out what suits you best depending on the multi-channel audio codec used in your video files.</p>
+
+<p>Note that:</p>
+
+<ul>
+<li>when using an Android TV box (not an Android TV TV) directly connected via HDMI to your AV multichannel receiver and thus not through ARC, multichannel support can be achieved through multichannel PCM which is natively supported by Nova without the need to activate passthrough;</li>
+<li>multichannel PCM or AAC is not supported via ARC (eARC is required) resulting in stereo output</li>
+</ul>
+
+<p>Force Audio passthrough nova option disables AV receiver capability check to always use passthrough. This could result in streams not being properly decoded. This mode is enabled by default because some AV receivers were found capable of decoding more than what they were advertizing. For safer playback, consider disabling this option.</p>
+
+<p>Note that playback speed is not supported when using audio passthrough.</p>
+
+<h2>Some videos play really slowly on my device.</h2>
+
+<p>Nova Video Player relies on the hardware acceleration capabilities of the product it runs on. For instance some products do not support HEVC(H.265) hardware decoding and revert to software decoding yielding to a choppy video playback.  </p>
+
+<p>In any case please make sure that you have not forced software decoding in the settings of Nova Video Player (Settings/Software decoding).</p>
+
+<p>On some devices (e.g. Chromecast with Google TV) trying to play dolby vision videos on a non dolby vision capable display/TV results in choppy video playback. If this happens try to "Disable dolby vision" in Nova settings (that forces to use non dolby vision codecs).</p>
+
+<h2>Which network shares are supported?</h2>
+
+<p>Several network share protocols are supported by Nova:</p>
+
+<ul>
+<li>SMB: server message block version 1 to 3 usually on port 445. This is the recommended protocol to play videos;</li>
+<li>UPnP: universal plug and play (some servers not supported, verified to work with synology and minidlna);</li>
+<li>FTP: file transfer protocol on port 21 by default (some server types not supported);</li>
+<li>FTPS: FTP secure on port 21 by default (some server types not supported);</li>
+<li>SFTP: secure FTP on port 22 by default. This is the recommdended protocol to play videos when using remote access;</li>
+<li>WEBDAV: web-based distributed authoring and versioning over http (port 80 or 5005 on a synology)</li>
+<li>WEBDAVS: webdav over https (port 443 or 5006 on a synology)</li>
+</ul>
+
+<p>Note that:</p>
+
+<ul>
+<li>Nova is only compatible with ftp(s) servers supporting "recent" 2007 MLST command (<a href="https://tools.ietf.org/html/rfc3659">RFC3659</a>), e.g. with proftpd but NOT with vsftpd;</li>
+<li>Nova has UPnP support but issues can be experienced with remote subtitles support (UPnP has no native support for srt files). Nova is reported not to be compatible with Serviio media server;</li>
+<li>Two types of SMB protocols are supported: smbj and jcifs-ng (smb). smbj is known to provide higher throughput but only supports SMB2+ protocols (not SMB1), use this one to play high bitrate videos;</li>
+<li>sshj seems to be a faster implementation for sftp.</li>
+</ul>
+
+<h2>What is the best network protocol to play high bitrate video files?</h2>
+
+<p>According to benchmarks, sftp and webdav are the best network protocols to play high bitrate video files (e.g. large 4k).</p>
+
+<p>Current default SMB implementation based on jcifs-ng is known to have difficulties to play high bitrate videos. smbj is an alternate SMB implementation pwhich erforms better but only supports SMB servers with protocol version higher than 2, i.e.: SMB1 will not work with smbj.</p>
+
+<h2>I cannot connect to a webdav server.</h2>
+
+<p>When adding/browsing a webdav network shortcut, you need to fill the following dialog inputs:</p>
+
+<ul>
+<li>dropdown menu: to select webdav or webdavs network protocol (i.e.: http or https);</li>
+<li>server address: hostname/IP address (i.e. not an url) without specifying the path (e.g. <a href="https://my.webdav.com">my.webdav.com</a>);</li>
+<li>port: usually 443 for webdavs and 80 for webdav (on Synology NAS it is 5006 or 5005);</li>
+<li>path: url path for the server starting with a slash (e.g. <code>/dav</code>).</li>
+</ul>
+
+<h2>How multimedia information is retrieved?</h2>
+
+<p>Nova relies on <a href="https://www.themoviedb.org/">The Movie Database TMDB</a> external services to retrieve multimedia information (descriptions and posters/backdrops) based on your video collection both for movies and TV shows.</p>
+
+<p>Note that on Sony Android TVs, a rescan of USB disk is triggered at each power up/return from suspend and it is a Sony bug (cf. <a href="https://github.com/nova-video-player/aos-AVP/issues/354">here</a>).</p>
+
+<h2>Nova Video Player can’t find information on some of my videos, I’d like to add them manually.</h2>
+
+<p>Nova Video Player supports NFO file description format that follows the <a href="https://kodi.wiki/view/NFO_files/Movies">Kodi specification</a>.Advanced users can manually create them or use a dedicated tool for this task. More details are available <a href="https://github.com/nova-video-player/aos-AVP/wiki/NFO-files">here</a>.
+Note that Nova only supports The Movie Database identifiers (tmdbid).</p>
+
+<h2>What type of subtitles are supported?</h2>
+
+<p>SRT, SUB, VOBSUB, PGS subtitles are supported. SSA support is rudimentary.</p>
+
+<h2>Blue screen starting nova.</h2>
+
+<p>If you get an empty blue screen at application start, just reboot your device to get in a sane state.</p>
+
+<h2>Resume points are not working.</h2>
+
+<p>Please check if you have enabled private mode which prevents resume points to be recorded.</p>
+
+<h2>Is this possible to synchronize video resume points between devices?</h2>
+
+<p>On network shares with writeable access, after playing a video e.g. <code>video.mkv</code>, nova saves a <code>.video.mkv.archos.resume.xml</code> file containing the resume point.
+This file is recognized between devices accessing the same network share.</p>
+
+<p>Another method is to use <a href="https://trakt.tv/">Trakt</a> live scrobling feature. Do register to trakt via your PC using email address and then sign in in nova settings. 
+Note that only the last 100 played entries are synced from trakt to reduce network overhead.</p>
+
+<h2>Trakt complains about no Internet connection.</h2>
+
+<p>Trakt can report that there is no Internet connection when you use specific adblocking (Pi-hole or AdGuard). In order to overcome this issue you need to whitelist these domains:</p>
+
+<p><code>
+static.criteo.net
+www.google-analytics.com
+stats.g.doubleclick.net
+</code></p>
+
+<p>With AdGuard you need to add the following corresponding personalized filtering rules:</p>
+
+<p><code>
+@@||static.criteo.net^
+@@||www.google-analytics.com^
+@@||stats.g.doubleclick.net^
+</code></p>
+
+<h2>What are the different play modes.</h2>
+
+<p>Nova is able to play video files sequentially by choosing a play mode. This option is selectable when playing the video in one of the accessible menus. The various available play modes are:</p>
+
+<ul>
+<li>Single (default one): play a single video and then stop;</li>
+<li>Folder: play all the files sequentially in the folder of the file that initiated the playback and stop at after the last one has been played;</li>
+<li>Repeat single: repeat in loop the video played;</li>
+<li>Repeat folder: play all the files sequentially in the folder of the file that initiated the playback, and repeat this process in loop;</li>
+<li>Binge watching: play TV show episodes sequentially even if they are not located in the same folder and stop at the last one of the last season available.</li>
+</ul>
+
+<h2>Dolby Vision and HDR.</h2>
+
+<p>Dolby Vision and HDR support on AndroidTV depends on your TV capabilities, AV receiver passthrough compatibility and TV box hardware specification. This multifactor dependency is prone for confusion. </p>
+
+<p>Note that specific patches have been integrated in Nova v6.0.33 to improve DOVI support.</p>
+
+<p>Dolby Vision requires specific HW support and TV box constructor in certain cases have to pay a specific license to benefit from this feature. This is the case for Amlogic S905Xx based hardware. Cheap chinese non certified hardware might not fullfil this requirement.</p>
+
+<h2>Washy colors on the TV.</h2>
+
+<p>It can happen that the bottom and top bars instead of being black are with a greyish color and that video seems to have a kind a veil that makes the image washy.</p>
+
+<p>This is due to a wrong HDMI display mode selected that has a color space not compatible with the video color format.</p>
+
+<p>In order to overcome the issue, on some hardware (e.g. nvidia shield), you can disable the adaptive refresh rate on nova and force the display mode to be used going through Android setting in display/audio->advanced to match color space to content color format one.</p>
+
+<p>Most often the washy colors happen using RGB8 and not with YUV420 (RGB/8/Rec.709 NOK, YUV420/8/Rec.709 OK, YUV422/12/Rec.2020/hdr OK, YUV422/10/Rec.2020/hdr OK).</p>
+
+<p>One can check the compatible display modes of your device through <code>adb shell dumpsys SurfaceFlinger</code>. The video color format used can be checked with FFMpeg <code>ffprobe</code> command.</p>
+
+<p>Best is to use HDMI 2.1 compativle devices and be aware that you can deteriorate the experience if you have a sound bar that would be only HDMI 1.4 capable between your Android TV box and your TV.</p>
+
+<h2>Adaptive refresh rate on fire tv stick.</h2>
+
+<p>In order to get adaptive refresh rate on Amazon fire tv stick you need to enable it in fireOS settings -> display &amp; sounds -> Display, put video resolution to auto (up to 4k ultra hd); -> match original frame rate ON; -> dynamic range settings disable HDR or set it to adaptive. If you do not do this you will only have a restrictive set of refresh rates available.
+Note that choosing adaptive for dynamic range setting, your UI will be 1080p, and disabled will enable a 4k UI.</p>
+
+<h2>How to use playback speed.</h2>
+
+<p>First you need to enable it in nova settings ("Enable playback speed").
+This option is not available when using audio passthrough.</p>
+
+<p>This feature enables various playback speed from 0.05x to 2.00x. Though accessible through menu/tile while playing, various shortcuts (cf dedicated section) are available. Control is also mapped to next/prev track available on some remotes (e.g. Ugoos UR02 BT remote).</p>
+
+<p>It might not work when you are using a AV receiver (e.g. nvidia shield with samsung soundbar).
+It might cause choppy video playback on some hardware due to funky audiotrack implementation (e.g. Mediatek based Google streamer).</p>
+
+<h2>Visibility of external USB drive on Nvidia Shield.</h2>
+
+<p>In order to identify multimedia files, Nova relies on Android media scanning for local storage and USB storage. On latest version of the OS, Nvidia shield disables external storage Android indexing for performance enhancements. In order to get back external storage video files visibility, you need to enter Android settings/Device Preferences/Storage and enable Scan for media automatically option.</p>
+
+<p>Alternatively you can expose in the same setting the local USB drive via SMB  (Mount network storage option) and then use Nova SMB network shares indexing.</p>
+
+<h2>Nova shuts down my Wi-Fi.</h2>
+
+<p>On some devices due to some manufacturer Wi-Fi driver instability (e.g. Fire 10 HD), Nova's UDP SMB discovery process may cause Wi-Fi to switch off. 
+In order to avoid this issue, select "Disable SMB UDP discovery" in Nova settings.</p>
+
+<h2>Opensubtitles login issues after v6.2.40.</h2>
+
+<p>Note that you need to use your opensubtitles.com credentials (not your opensubtitle.org one) and input your username (not your email) to login to opensubtitles.com.</p>
+
+<p>Opensubtitles has announced to all app developers that starting January 2024, XML-RPC will not be supported anymore and that REST-API needs to be used (cf. https://github.com/nova-video-player/aos-AVP/issues/852).</p>
+
+<p>As a consequence, old opensubtitles.org logins will not be supported anymore and users need to register an account at opensubtitles.com to continue to use the service with nova.</p>
+
+<p>Note that there is a download quota of 5 subs per IP and per 24 hours without inputing credentials and 10-20 with a registered account.</p>
+
+<p>The remaining quota will be reported when downloading subs by nova.</p>
+
+<p>I managed to get 20 subs quota per day (instead of the 10 I had initially) by clicking on the "IF YOUR DOWNLOAD LIMIT IS WRONG, CLICK HERE TO FIX IT" found at https://www.opensubtitles.com/fr/users/profile. It might work for you too if you are in this situation (could be a sign-in before 2024 boost).</p>
+
+<h2>Some files located on local/USB storage are not seen by nova a.k.a. API31 debacle.</h2>
+
+<p>For good reasons Google restricts <code>MANAGE_EXTERNAL_STORAGE</code> permission since API31.
+Nova thus switched to MediaStore API.
+As a consequence nova is only able to see files registered as Media files by Google (missing video/subtitles formats such as ASS, NFO, torrent files).
+These files are not modifiable nor visible from nova when using local storage (incl. USB HDDs).
+This creates loss of functionality &amp; incomprehension from nova users.
+Numerous appeals were issued &amp; proper request filed for being granted the permission with explanation video.
+Only got default "no answers"/"not compliant" without having a Google support taking time to understand/review the case properly.
+Note that many other video players have the wanted <code>MANAGE_EXTERNAL_STORAGE</code> permission: e.g. VLC, mx player, video player all format, Video Player KMP, kodi...
+I consider this as unfair treatment and discrimination.
+Sad that an app that has more than 500k active users and 2M downloads on Google Play cannot get proper attention from Google.</p>
+
+<h2>Where NFO files, posters/banners are located.</h2>
+
+<p>Due to Android storage restrictions for API31, local NFO/JPG media information files for videos stored on local/HDD storage have been moved to nova public application folder located <code>/sdcard/Android/data/org.courville.nova/files/nfoPoster</code>.</p>
+
+<p>Note that due to API31 restrictions, NFO files co-located with videos on local storage are invisible to nova since Google refuses to grant <code>MANAGE_EXTERNAL_STORAGE</code> permission to nova (cf. section above).</p>
+
+<h2>How to exclude some folders from media indexing?</h2>
+
+<p>For local storage or remote network shares, creating a <code>.nomedia</code> empty file in a folder will instruct nova to not index the video files included in this folder.
+Note that this is a global Android practice and since nova is relying on Android multimedia indexing for local storage, it is inherently supported.</p>
+
+<h2>Audio boost effect acts temporarily</h2>
+
+<p>This can be avoided by selecting PCM instead of Automatic in Android All settings -> Display &amp; Sound -> Advanced sound settings -> Select formats.
+This option removes the adaptive normalization of the sound that seems to be Android TV default behavior canceling nova's boost mode after a while.</p>
+
+<h2>What are the touch zones and gestures in the video player?</h2>
+
+<p>Nova Video Player supports multiple touch gestures and zones for different controls:</p>
+
+<div style="text-align: center; margin: 20px 0;">
+  <div style="display: inline-block; border: 2px solid #333; background: #f8f8f8; font-family: monospace; position: relative;">
+    <div style="background: #333; color: white; padding: 8px; text-align: center; font-weight: bold;">
+      NOVA VIDEO PLAYER TOUCH ZONES
+    </div>
+    <table style="border-collapse: collapse; width: 500px; height: 350px;">
+      <tr>
+        <td style="width: 25%; padding: 0;">
+          <table style="border-collapse: collapse; width: 100%; height: 350px;">
+            <tr style="height: 75%; border-bottom: 2px solid #ff6b6b;">
+              <td style="border: 1px solid #666; text-align: center; background: #e8f4fd; vertical-align: middle;">
+                <strong>LEFT TOP</strong><br>
+                <small>🔊 SCROLL: Volume</small><br><br>
+                <strong>⏪ DOUBLE TAP:</strong><br>
+                <strong>Rewind 10s</strong>
+              </td>
+            </tr>
+            <tr style="height: 25%;">
+              <td style="border: 1px solid #666; text-align: center; background: #f0e8ff; vertical-align: middle;">
+                <strong>LEFT BOTTOM</strong><br>
+                <strong>🔽 DOUBLE TAP:</strong><br>
+                <strong>Speed Down (-0.05×)</strong><br>
+                <small>(requires speed setting enabled)</small>
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td style="border: 1px solid #666; text-align: center; background: #fff2e8; width: 50%; vertical-align: middle;">
+          <strong>CENTRAL ZONE</strong><br>
+          <small>(middle 1/3 of screen - FULL HEIGHT)</small><br><br>
+          <strong>📱 SINGLE TAP:</strong><br>
+          • If playing ▶️: Pause ⏸️ + Show OSD<br>
+          • If paused ⏸️: Resume ▶️ + Hide OSD<br><br>
+          <small style="color: #666;">Outside zones: Single tap = OSD toggle only</small><br><br>
+          <small style="color: #999;">No 75%/25% split here</small>
+        </td>
+        <td style="width: 25%; padding: 0;">
+          <table style="border-collapse: collapse; width: 100%; height: 350px;">
+            <tr style="height: 75%; border-bottom: 2px solid #ff6b6b;">
+              <td style="border: 1px solid #666; text-align: center; background: #e8f4fd; vertical-align: middle;">
+                <strong>RIGHT TOP</strong><br>
+                <small>☀️ SCROLL: Brightness</small><br><br>
+                <strong>⏩ DOUBLE TAP:</strong><br>
+                <strong>Forward 10s</strong>
+              </td>
+            </tr>
+            <tr style="height: 25%;">
+              <td style="border: 1px solid #666; text-align: center; background: #f0e8ff; vertical-align: middle;">
+                <strong>RIGHT BOTTOM</strong><br>
+                <strong>🔼 DOUBLE TAP:</strong><br>
+                <strong>Speed Up (+0.05×)</strong><br>
+                <small>(requires speed setting enabled)</small>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <div style="position: absolute; right: -120px; top: 120px; font-size: 12px; color: #666;">
+      ← TOP 75%
+    </div>
+    <div style="position: absolute; right: -140px; top: 290px; font-size: 12px; color: #666;">
+      ← BOTTOM 25%
+    </div>
+  </div>
+</div>
+
+<p><strong>Gesture Summary:</strong></p>
+
+<ul>
+<li><strong>Single Tap Central Zone</strong>: Toggle pause/play (pause shows OSD, resume hides OSD)</li>
+<li><strong>Single Tap Outside</strong>: Toggle OSD controls only (no pause/play change)</li>
+<li><strong>Double Tap Top 75% Left</strong>: Rewind 10 seconds</li>
+<li><strong>Double Tap Top 75% Right</strong>: Fast forward 10 seconds</li>
+<li><strong>Double Tap Bottom 25% Left</strong>: Decrease audio playback speed (-0.05×)</li>
+<li><strong>Double Tap Bottom 25% Right</strong>: Increase audio playback speed (+0.05×)</li>
+<li><strong>Scroll Left Side</strong>: Adjust volume</li>
+<li><strong>Scroll Right Side</strong>: Adjust screen brightness</li>
+</ul>
+
+<p><strong>Notes:</strong></p>
+
+<ul>
+<li>Audio speed control requires the playback speed feature to be enabled in settings</li>
+<li>When the player is locked, all gestures show unlock instructions instead</li>
+<li>The central zone spans the middle third of the screen horizontally (full height)</li>
+<li>Central zone behavior is based on playback state, not OSD visibility</li>
+</ul>
+
+<h2>What keyboard shortcuts are available?</h2>
+
+<p>Nova Video Player supports various keyboard shortcuts for different input devices:</p>
+
+<p><strong>Playback Controls:</strong></p>
+
+<ul>
+<li><strong>Space/P/Enter</strong>: Toggle play/pause</li>
+<li><strong>D-Pad Right/Left</strong>: Seek forward/backward </li>
+<li><strong>0-9</strong>: Jump to 0-90% of video timeline</li>
+</ul>
+
+<p><strong>Volume Controls:</strong></p>
+
+<ul>
+<li><strong>Volume Up/U, Volume Down/D</strong>: Adjust volume</li>
+<li><strong>* (Star)</strong>: Increase volume</li>
+<li><strong>/ (Slash)</strong>: Decrease volume</li>
+</ul>
+
+<p><strong>Video/Audio/Subtitle Controls:</strong></p>
+
+<ul>
+<li><strong>F</strong>: Switch video format</li>
+<li><strong>O</strong>: Toggle overlays</li>
+<li><strong>A/#</strong>: Switch audio track</li>
+<li><strong>S/J</strong>: Switch subtitle track</li>
+<li><strong>Z/X</strong>: Adjust subtitle delay</li>
+</ul>
+
+<p><strong>Navigation:</strong></p>
+
+<ul>
+<li><strong>Menu/D-Pad Up</strong>: Show/hide TV menu</li>
+<li><strong>Escape/Back</strong>: Close TV menu</li>
+</ul>
+
+<p><strong>Playback Speed</strong> (requires speed setting enabled):</p>
+
+<ul>
+<li><strong>Channel Up/H</strong>: Increase speed (+0.05×)</li>
+<li><strong>Channel Down/G</strong>: Decrease speed (-0.05×)</li>
+</ul>
+
+<p>For the complete list of shortcuts including TV remote controls, see the <a href="https://github.com/nova-video-player/aos-AVP/wiki/Keyboard-shortcuts">keyboard shortcuts wiki</a>.</p>
+
+<h2>I'd like to request a new feature.</h2>
+
+<p>Feel free to join our <a href="https://www.reddit.com/r/NovaVideoPlayer">Reddit community</a> or open a feature request on <a href="https://github.com/nova-video-player/aos-AVP/issues">github project issue</a>.</p>
+
+<h2>I'd like to report a bug.</h2>
+
+<p>When discussing an issue on reddit, it is best also to report it on <a href="https://github.com/nova-video-player/aos-AVP/issues">github project issue</a> with details about your specific configuration/setup/hardware/Android version and if possible a way or link or sample to reproduce the problem. It is also best to include logs to help figuring out the problem (<a href="https://github.com/nova-video-player/aos-AVP/wiki/Debugging">debugging procedure</a>).</p>
+
+<h2>How can I contribute in the development?</h2>
+
+<p>Source code is available on <a href="https://github.com/nova-video-player/aos-AVP">github</a> and associated repositories and pull requests are welcome.</p>
+
+<h2>The application does not support my language, how can I help?</h2>
+
+<p>You are welcome to contribute to the translation of the application via <a href="https://crowdin.com/project/nova-video-player">crowdin platform</a>.</p>
+
+<h2>Where to find Nova Video Player application privacy policy?</h2>
+
+<p>Nova application privacy policy can be found <a href="https://home.courville.org/nova_video_player-faq/privacy.html">here</a>.</p>
+
+<h2>I want to sponsor Nova.</h2>
+
+<p>You are always welcome to show your gratitude and appreciation to the developers of this application through a donation via <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=software%40courville.org&amp;lc=US&amp;item_name=Nova+Video+Player+Donation&amp;no_note=0&amp;no_shipping=1&amp;currency_code=EUR">paypal</a>, or <a href="https://liberapay.com/NovaVideoPlayer/donate">liberapay</a> or <a href="https://github.com/sponsors/courville">github sponsor</a> or <a href="https://opencollective.com/novavideoplayer">opencollective</a>.</p>

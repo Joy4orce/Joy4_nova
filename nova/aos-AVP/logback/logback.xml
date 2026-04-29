@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<included>
+    <appender name="LOG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/debug.log</file>  <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/debug-%d.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>50MB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Debug first activity -->
+    <logger name="com.archos.mediacenter.video.browser.MainActivity" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.browser.MainFragment" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.leanback.MainFragment" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.CustomApplication" level="DEBUG" additivity="false">
+        <appender-ref ref="logcat"/>
+	<appender-ref ref="LOG_FILE"/>
+    </logger>
+
+    <logger name="com.archos.mediacenter.video.browser.FileManagerService" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.browser.NewVideosActionProvider" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.browser.TorrentObserverService" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+
+    <!-- Debug player -->
+    <logger name="com.archos.mediacenter.video.player.Player" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.player.PlayerActivity" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.player.PlayerController" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.player.PlayerService" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.player.MediaButtonService" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+
+    <!-- Debug permissions -->
+    <logger name="com.archos.mediacenter.video.browser.PermissionChecker" level="DEBUG" additivity="false">
+        <appender-ref ref="logcat"/>
+	<appender-ref ref="LOG_FILE"/>
+    </logger>
+
+    <logger name="com.archos.filecorelibrary.FileUtils" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.filecorelibrary.FileUtilsQ" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+
+    <!-- Debug network shares -->
+    <logger name="com.archos.filecorelibrary.sshj" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.filecorelibrary.smbj" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.filecorelibrary.webdav" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+
+    <logger name="com.archos.mediacenter.video.browser.filebrowsing.BrowserByFolder" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.leanback.filebrowsing.ListingFragment" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+
+    <logger name="com.archos.mediacenter.filecoreextension.upnp2" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.upnp" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.filecorelibrary.samba.NetworkCredentialsDatabase" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.leanback.network.NetworkServerCredentialsDialog" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+
+    <logger name="com.archos.mediacenter.utils.videodb.XmlDb" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+
+    <logger name="com.archos.mediaprovider.video.VideoStoreImportReceiver" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediaprovider.video.VideoStoreImportService" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediaprovider.video.VideoStoreImportImpl" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediaprovider.video.NetworkScannerServiceVideo" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediascraper.AutoScrapeService" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+
+    <!-- Debug: Did not manage to access the file -->
+    <logger name="com.archos.mediacenter.video.info.VideoInfoActivityFragment" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.leanback.details.FileDetailsRowPresenter" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.info.VideoInfoCommonClass" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.utils.VideoMetadata" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.utils.CodecDiscovery" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.medialib.AvosMediaMetadataRetriever" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.medialib.AndroidMediaMetadataRetriever" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+
+    <logger name="com.archos.medialib.SmbProxy" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.filecorelibrary.StreamOverHttp" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+
+    <!-- Debug jcifs -->
+    <logger name="jcifs.netbios.UdpDiscovery" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.filecorelibrary.jcifs" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.browser.filebrowsing.network.SmbBrowser" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="jcifs.netbios.UdpDiscovery" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="jcifs.netbios.NameServiceClientImpl" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="jcifs.smb.SmbSessionImpl" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="jcifs.util.transport.Transport" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="jcifs.smb.SmbTransportImpl" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.filecorelibrary.samba" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+
+    <!-- Debug trakt -->
+    <logger name="com.archos.mediacenter.utils.trakt.Trakt" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.utils.trakt.TraktService" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.utils.trakt.TraktAPI" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+
+    <!-- Debug scraper -->
+    <logger name="com.archos.mediascraper.themoviedb3" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediascraper.themoviedb3.MyTmdb" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediascraper.preprocess" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediascraper.xml" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediascraper.NfoWriter" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediascraper.NfoParser" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediascraper.themoviedb3.SearchMovieParser2" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediascraper.themoviedb3.SearchParserResult" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediascraper.themoviedb3.SearchShowParser" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+
+
+     <!-- Subtitles -->
+    <logger name="com.archos.mediacenter.video.utils.SubtitlesDownloaderActivity2" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.utils.OpenSubtitlesApiHelper" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.utils.ISO639codes" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.utils.VideoPreferencesCommon" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.player.SubtitleManager" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.player.Subtitle3DTextView" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+
+    <!-- Debug auto-scan refresh -->
+    <logger name="com.archos.mediaprovider.video.NetworkAutoRefresh" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediaprovider.video.NetworkScannerUtil" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediaprovider.video.NetworkScannerServiceVideo" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediaprovider.video.NetworkRefreshJob" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediaprovider.video.RemoteStateService" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediaprovider.video.VideoProvider" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediaprovider.video.ScraperProvider" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediaprovider.MediaThumbnailService" level="INFO" additivity="false">
+        <appender-ref ref="logcat"/>
+    </logger>
+
+</included>

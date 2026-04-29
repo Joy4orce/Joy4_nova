@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<included>
+    <appender name="SMB_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/smb.log</file>  <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/smb-%d.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>50MB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <logger name="com.archos.filecorelibrary.jcifs" level="DEBUG" additivity="false">
+        <appender-ref ref="SMB_FILE"/>
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.mediacenter.video.browser.filebrowsing.network.SmbBrowser" level="DEBUG" additivity="false">
+        <appender-ref ref="SMB_FILE"/>
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="com.archos.filecorelibrary.samba" level="DEBUG" additivity="false">
+        <appender-ref ref="SMB_FILE"/>
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="jcifs.netbios.UdpDiscovery" level="DEBUG" additivity="false">
+        <appender-ref ref="SMB_FILE"/>
+        <appender-ref ref="logcat"/>
+    </logger>
+    <logger name="jcifs.netbios.NameServiceClientImpl" level="TRACE" additivity="false">
+        <appender-ref ref="SMB_FILE"/>
+    </logger>
+    <logger name="jcifs.smb.SmbSessionImpl" level="TRACE" additivity="false">
+        <appender-ref ref="SMB_FILE"/>
+    </logger>
+    <logger name="jcifs.util.transport.Transport" level="TRACE" additivity="false">
+        <appender-ref ref="SMB_FILE"/>
+    </logger>
+    <logger name="jcifs.smb.SmbTransportImpl" level="TRACE" additivity="false">
+        <appender-ref ref="SMB_FILE"/>
+    </logger>
+</included>
