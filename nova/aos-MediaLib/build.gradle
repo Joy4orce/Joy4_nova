@@ -1,0 +1,195 @@
+apply plugin: 'com.android.library'
+
+repositories {
+    google()
+    mavenCentral()
+    mavenLocal()
+}
+
+ext {
+    groupOpen = false
+    // jetty required by jupnp and going above 9.4.14 requires minSdkVersion 26
+}
+
+allprojects {
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile).configureEach {
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+        }
+        // to generate the required jar dependencies e.g. cling seamless
+        preBuild.dependsOn(ndkBuild)
+    }
+}
+
+configurations {
+    configureEach {
+        exclude group: 'org.json', module: 'json'
+    }
+}
+
+android {
+    namespace = 'com.archos.medialib'
+    compileSdk = 36
+    gradle.startParameter.getTaskNames().each { task ->
+        if (task.contains("Open")) {
+            groupOpen = true
+        }
+    }
+
+    compileOptions {
+        coreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+            //tmp prebuilt jni
+            jniLibs.srcDirs = ['libs']
+        }
+        test {
+            java.srcDirs = ['test/java']
+            resources.srcDirs = ['test/resources']
+        }
+    }
+
+    defaultConfig {
+        minSdkVersion 23
+        targetSdkVersion 35
+        multiDexEnabled = true
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        compileTask -> compileTask.dependsOn ndkBuild
+    }
+    clean.dependsOn 'ndkClean'
+
+    buildTypes {
+        release {
+            minifyEnabled = false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/beans.xml'
+        exclude 'META-INF/maven'
+        exclude 'META-INF/versions/**/OSGI-INF/MANIFEST.MF'
+        exclude 'README'
+        exclude "**/libc++_shared.so"
+    }
+
+    buildFeatures {
+        aidl = true
+        renderScript = false
+    }
+    lint {
+        abortOnError false // Set to false to only fail on fatal issues
+        disable 'all'
+        enable 'NewApi'
+        fatal 'NewApi'
+    }
+    testOptions {
+        unitTests.all {
+            testLogging {
+                events "passed", "skipped", "failed", "standardOut", "standardError"
+                outputs.upToDateWhen {false}
+                showStandardStreams = true
+            }
+        }
+    }
+
+    libraryVariants.all { variant ->
+        variant.assembleProvider.configure { assemble ->
+            assemble.dependsOn("lint" + variant.name.capitalize())
+        }
+    }
+}
+
+tasks.register('ndkBuild', Exec) {
+    workingDir = "../"
+    List<String> myCmd = new ArrayList<String>()
+    myCmd.add("make")
+    myCmd.add("native_libyuv")
+    myCmd.add("native_libnativehelper")
+    myCmd.add("native_avos_full")
+    myCmd.add("native_torrentd")
+    commandLine = myCmd
+}
+
+tasks.register('ndkClean', Exec) {
+    workingDir = "../"
+    List<String> myCmd = new ArrayList<String>()
+    myCmd.add("make")
+    myCmd.add("native_clean")
+    commandLine = myCmd
+}
+
+def useSan = false
+if (useSan)
+    apply from: 'profiling.gradle'
+
+dependencies {
+    implementation project(':FileCoreLibrary')
+    implementation 'androidx.lifecycle:lifecycle-process:2.10.0'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
+    implementation 'androidx.core:core:1.18.0'
+    implementation 'androidx.legacy:legacy-support-core-utils:1.0.0'
+    implementation 'androidx.media:media:1.7.1'
+    implementation 'androidx.fragment:fragment:1.8.9'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.preference:preference:1.2.1'
+    // WARNING: Do NOT upgrade httpclient5 beyond 5.5.1 - Android incompatible!
+    // Version 5.5.2+ crashes at app startup with NoSuchMethodError on jdk.net.Sockets.supportedOptions()
+    // This JDK-specific API (used for TCP keepalive socket options) does not exist in Android runtime
+    // See: DefaultHttpClientConnectionOperator line 87 in httpclient5 source
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.5.1'
+    implementation 'org.json:json:20251224'
+    // see https://github.com/UweTrottmann/trakt-java?tab=readme-ov-file for threetenabp instead of threetenbp
+    //implementation ('com.github.nova-video-player:trakt-java:0.0.1') {
+    implementation ('com.uwetrottmann.trakt5:trakt-java:6.18.0') {
+        exclude group: 'org.threeten', module: 'threetenbp'
+    }
+    implementation 'com.jakewharton.threetenabp:threetenabp:1.4.9'
+    api ('org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:1.0.2') {
+        exclude group:'org.apache.oltu.oauth2' , module: 'org.apache.oltu.oauth2.common'
+    }
+    implementation 'commons-codec:commons-codec:1.21.0'
+    implementation 'org.apache.commons:commons-text:1.15.0'
+    // version aligned with external dependencies trakt-java tmdb-java (check pom.xml)
+    implementation 'com.squareup.okhttp3:logging-interceptor:5.3.2'
+    // stick with 2.10.0 since errors are showing up in sentry when using 2.11.0
+    implementation 'com.uwetrottmann.tmdb2:tmdb-java:2.13.0'
+    api 'org.jupnp:org.jupnp:3.0.4'
+    api 'org.jupnp:org.jupnp.support:3.0.4'
+    api 'org.jupnp:org.jupnp.android:3.0.4'
+    implementation 'javax.servlet:javax.servlet-api:4.0.1'
+    // jetty 9.2.x for Android API 23 compatibility (LongAdder not available until API 24)
+    implementation ('org.eclipse.jetty:jetty-server:9.2.30.v20200428') {
+        exclude group: 'org.eclipse.jetty.orbit', module: 'javax.servlet'
+    }
+    implementation ('org.eclipse.jetty:jetty-servlet:9.2.30.v20200428') {
+        exclude group: 'org.eclipse.jetty.orbit', module: 'javax.servlet'
+    }
+    implementation ('org.eclipse.jetty:jetty-client:9.2.30.v20200428') {
+        exclude group: 'org.eclipse.jetty.orbit', module: 'javax.servlet'
+    }
+    implementation 'io.sentry:sentry:8.37.1'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:5.23.0'
+    testImplementation 'ch.qos.logback:logback-classic:1.5.32'
+    testImplementation 'org.slf4j:slf4j-api:2.0.17'
+    testImplementation 'org.robolectric:robolectric:4.16.1'
+    testImplementation 'androidx.test:core:1.7.0'
+}
