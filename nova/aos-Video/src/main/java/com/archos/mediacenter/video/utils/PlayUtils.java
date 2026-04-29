@@ -292,6 +292,7 @@ public class PlayUtils implements IndexHelper.Listener {
             if (log.isDebugEnabled()) log.debug("onResumeReady: nova player");
             intent.putExtra(PlayerService.VIDEO, video);
             intent.setClass(context, PlayerActivity.class);
+            intent.putExtra(PlayerActivity.EXTRA_NOVA_INTERNAL_LAUNCH, true);
             intent.setDataAndType(dataUri, mimeType);
         } else {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);

@@ -294,6 +294,7 @@ public class  UpdateRecommendationsService extends IntentService implements Defa
 		detailsIntent.setData(video);
 		detailsIntent.putExtra(PlayerActivity.RESUME, PlayerActivity.RESUME_FROM_LAST_POS);
 		detailsIntent.setClass(this, PlayerActivity.class);
+		detailsIntent.putExtra(PlayerActivity.EXTRA_NOVA_INTERNAL_LAUNCH, true);
 		TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
 		stackBuilder.addParentStack(PlayerActivity.class);
 		stackBuilder.addNextIntent(detailsIntent);

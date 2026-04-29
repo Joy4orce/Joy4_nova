@@ -156,6 +156,7 @@ public class TorrentLoaderActivity extends AppCompatActivity implements TorrentT
         intent.putExtra(PlayerActivity.RESUME, getIntent().getIntExtra(PlayerActivity.RESUME, PlayerActivity.RESUME_NO));
         intent.putExtra(PlayerService.KEY_ORIGINAL_TORRENT_URL, mOriginalTorrentUri);
         intent.setClass(TorrentLoaderActivity.this, PlayerActivity.class);
+        intent.putExtra(PlayerActivity.EXTRA_NOVA_INTERNAL_LAUNCH, true);
         startActivity(intent);
         hasLaunchedPlayer = true;
         this.finish();

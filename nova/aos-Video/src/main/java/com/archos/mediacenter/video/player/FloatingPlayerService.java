@@ -494,6 +494,11 @@ public class FloatingPlayerService extends Service implements PlayerService.Play
         }
 
         intent.putExtra(PlayerActivity.LAUNCH_FROM_FLOATING_PLAYER, true);
+        // Floating-player relaunch is a Nova-internal flow: even if the original
+        // session originated from an external ACTION_VIEW, by the time the user
+        // expands the floating bubble we want finish() to drop back to whatever
+        // is behind us rather than try to bounce back to a long-gone caller.
+        intent.putExtra(PlayerActivity.EXTRA_NOVA_INTERNAL_LAUNCH, true);
 
         // Pass current playback position from floating player
         if (Player.sPlayer != null) {

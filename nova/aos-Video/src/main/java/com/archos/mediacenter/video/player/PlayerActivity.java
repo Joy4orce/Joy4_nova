@@ -194,6 +194,17 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     public static final String KEY_STREAMING_URI = "streaming_uri";
     public static final String KEY_TORRENT_URL = "torrent_url";
     public static final String KEY_TORRENT_SELECTED_FILE="torrent_seletected_file";
+
+    /**
+     * Sentinel extra set by every internal call site that launches PlayerActivity
+     * via {@code setClass(..., PlayerActivity.class)}. Used by
+     * {@link #detectExternalPlayerMode()} to distinguish "Nova launched its own
+     * player" from "another app fired ACTION_VIEW at us". When absent on an
+     * ACTION_VIEW intent we treat the launch as external so finish() can use
+     * {@code finishAndRemoveTask()} to return to the calling app instead of
+     * leaving Nova's main browser visible.
+     */
+    public static final String EXTRA_NOVA_INTERNAL_LAUNCH = "com.archos.mediacenter.NOVA_INTERNAL_LAUNCH";
     public static final String LAUNCH_FROM_FLOATING_PLAYER = "launch_from_floating_player";
     public static final String KEY_FORCE_SW = "force_software_decoding";
 
@@ -4049,39 +4060,42 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     // External player result reporting methods
     private void detectExternalPlayerMode() {
         Intent intent = getIntent();
-        if (intent != null) {
-            String action = intent.getAction();
-            boolean returnResult = intent.getBooleanExtra("return_result", false);
-            if (log.isDebugEnabled()) log.debug("detectExternalPlayerMode: action={}, return_result={}", action, returnResult);
+        if (intent == null) return;
 
-            // Check if launched via ACTION_VIEW (typical for external player usage)
-            if (Intent.ACTION_VIEW.equals(action)) {
-                // Try to get calling package from multiple sources
-                mCallingPackage = getCallingPackage();
+        String action = intent.getAction();
+        boolean returnResult = intent.getBooleanExtra("return_result", false);
+        boolean isInternalLaunch = intent.getBooleanExtra(EXTRA_NOVA_INTERNAL_LAUNCH, false);
+        if (log.isDebugEnabled()) log.debug("detectExternalPlayerMode: action={}, return_result={}, internal_launch={}",
+                action, returnResult, isInternalLaunch);
 
-                // API 22+: Try getReferrer() as fallback (more reliable than getCallingPackage)
-                if (mCallingPackage == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                    Uri referrer = getReferrer();
-                    if (referrer != null && "android-app".equals(referrer.getScheme())) {
-                        mCallingPackage = referrer.getHost();
-                        if (log.isDebugEnabled()) log.debug("detectExternalPlayerMode: Got calling package from referrer: {}", mCallingPackage);
-                    }
-                }
+        // ACTION_VIEW without our internal sentinel = somebody outside Nova fired a
+        // VIEW intent at us (typical "Open with..." from a file manager). We treat
+        // this as external mode unconditionally so finish() can call
+        // finishAndRemoveTask() and return to the caller instead of revealing
+        // Nova's main browser underneath.
+        //
+        // Previously this branch only triggered when getCallingPackage()/getReferrer()
+        // resolved to a non-Nova package OR explicit position/resume extras were
+        // present. Many file managers (Galaxy My Files, some Files-by-Google flows,
+        // 3rd-party managers using FileProvider) use plain startActivity() with no
+        // referrer info and no extras, which left mIsExternalPlayer=false and
+        // caused the wrong back-stack behaviour.
+        if (Intent.ACTION_VIEW.equals(action) && !isInternalLaunch) {
+            mIsExternalPlayer = true;
 
-                // Check if we have external player indicators
-                boolean hasExternalIndicators = returnResult ||
-                        intent.hasExtra("position") ||
-                        intent.hasExtra("resume_position") ||
-                        intent.hasExtra("startfrom");
-
-                // Detect external player mode if:
-                // 1. We have a calling package that's different from Nova, OR
-                // 2. We have external player indicators (position extras, return_result, etc.)
-                if ((mCallingPackage != null && !mCallingPackage.equals(getPackageName())) || hasExternalIndicators) {
-                    mIsExternalPlayer = true;
-                    if (log.isDebugEnabled()) log.debug("detectExternalPlayerMode: Nova launched as external player by {} (hasExternalIndicators={})", mCallingPackage, hasExternalIndicators);
+            // Capture the calling package opportunistically for result reporting.
+            // It's fine if both probes return null — finishAndRemoveTask() works
+            // either way; the package is only needed for the broadcast fallback in
+            // sendExternalPlayerResult().
+            mCallingPackage = getCallingPackage();
+            if (mCallingPackage == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                Uri referrer = getReferrer();
+                if (referrer != null && "android-app".equals(referrer.getScheme())) {
+                    mCallingPackage = referrer.getHost();
                 }
             }
+            if (log.isDebugEnabled()) log.debug("detectExternalPlayerMode: external launch by {} (returnResult={})",
+                    mCallingPackage, returnResult);
         }
     }
 

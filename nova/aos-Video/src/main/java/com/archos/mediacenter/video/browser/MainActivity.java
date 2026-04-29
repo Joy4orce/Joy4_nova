@@ -434,6 +434,7 @@ public class MainActivity extends BrowserActivity implements ExternalPlayerWithR
                     Intent intent2 = new Intent(Intent.ACTION_VIEW, uri);
                     if (!mPreferences.getBoolean(VideoPreferencesActivity.ALLOW_3RD_PARTY_PLAYER, VideoPreferencesActivity.ALLOW_3RD_PARTY_PLAYER_DEFAULT)) {
                         intent2.setClass(this, PlayerActivity.class);
+                        intent2.putExtra(PlayerActivity.EXTRA_NOVA_INTERNAL_LAUNCH, true);
                     }
                     try {
                         startActivity(intent2);
