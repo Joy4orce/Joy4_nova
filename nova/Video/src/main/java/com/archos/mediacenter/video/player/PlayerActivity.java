@@ -1413,38 +1413,27 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         };
     }
 
-    // Per-call diagnostic buffer flushed as a single on-screen Toast at the end of
-    // startExternalSubtitleDriverIfNeeded(). Only used when launched as an external
-    // VIEW handler, so internal library playback stays quiet.
-    private final StringBuilder mSubDiagBuffer = new StringBuilder();
-
+    // Lightweight diagnostic helpers for the external-subtitle scan. During
+    // development these wrote a verbose buffer to an on-screen Toast (and even
+    // copied the full text to the clipboard) so we could iterate on the
+    // various FileProvider / SAF / NAS-over-HTTP-proxy edge cases. With the
+    // logic stable, debug detail goes to logcat only and the user sees at most
+    // a single short Toast when the scan can't find a subtitle. Successful
+    // loads are silent — the subtitles themselves are the success indicator.
     private void subDiag(String line) {
-        mSubDiagBuffer.append("\n").append(line);
         if (log.isDebugEnabled()) log.debug("SUB-DIAG: {}", line);
     }
 
     private void subDiagShow(String headline) {
-        final String text = headline + mSubDiagBuffer.toString();
-        mSubDiagBuffer.setLength(0);
+        if (log.isDebugEnabled()) log.debug("SUB-DIAG: {}", headline);
         if (!mIsExternalPlayer) return;
-        // Toast.LENGTH_LONG truncates after a couple of lines, which loses the
-        // URI / authority / display-name details we need to debug NAS and other
-        // FileProvider failures. On failure also push the full diagnostic into
-        // the system clipboard so the user can paste it back to us.
-        final boolean isFailure = headline != null && headline.contains("실패");
-        if (isFailure) {
-            try {
-                android.content.ClipboardManager cm = (android.content.ClipboardManager)
-                        getSystemService(Context.CLIPBOARD_SERVICE);
-                if (cm != null) {
-                    cm.setPrimaryClip(android.content.ClipData.newPlainText("Nova subtitle diag", text));
-                }
-            } catch (Exception ignored) {}
-        }
-        final String displayed = isFailure ? text + "\n(클립보드에 전체 진단 복사됨)" : text;
+        boolean isFailure = headline != null && headline.contains("실패");
+        if (!isFailure) return;
         runOnUiThread(() -> {
             try {
-                android.widget.Toast.makeText(this, displayed, android.widget.Toast.LENGTH_LONG).show();
+                android.widget.Toast.makeText(this,
+                        "자막 파일을 찾을 수 없습니다.",
+                        android.widget.Toast.LENGTH_SHORT).show();
             } catch (Exception ignored) {}
         });
     }
