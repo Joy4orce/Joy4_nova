@@ -36,15 +36,15 @@ jobs:
          repo init -u https://github.com/Joy4orce/nova-audio-AVP -b feature/audio-support -m v6_4.xml
          repo sync -j 4
          repo forall -c 'git checkout -t $REPO_REMOTE/$REPO_RREV || true'
-    - name: build debug apk
+    - name: build debug apk (arm64-v8a only)
       run: |
         cd nova/Video
-        ./gradlew assembleNoamazonDebug --no-daemon --stacktrace
+        ./gradlew assembleNoamazonDebug --no-daemon --stacktrace -PciAbi=arm64-v8a
     - name: upload apk
       uses: actions/upload-artifact@v4
       with:
         name: nova-audio-debug-apk
-        path: nova/Video/build/outputs/apk/**/*.apk
+        path: nova/Video/build/outputs/apk/**/*-arm64-v8a-*.apk
         if-no-files-found: error
     - name: publish release
       if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
@@ -53,11 +53,8 @@ jobs:
         tag_name: build-${{ github.run_number }}
         name: Audio Support Build ${{ github.run_number }}
         body: |
-          Debug APK built from `feature/audio-support` @ ${{ github.sha }}
+          Debug APK (arm64-v8a) built from `feature/audio-support` @ ${{ github.sha }}
 
-          Pick the APK that matches your phone's CPU architecture:
-          - `arm64-v8a` : recent Android phones (default choice)
-          - `armeabi-v7a` : older 32-bit ARM devices
-          - `x86_64` / `x86` : emulators or Intel-based devices
-        files: nova/Video/build/outputs/apk/**/*.apk
+          Tap the `.apk` file below to install on your Android phone.
+        files: nova/Video/build/outputs/apk/**/*-arm64-v8a-*.apk
         prerelease: true
