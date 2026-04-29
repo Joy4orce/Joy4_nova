@@ -1404,10 +1404,18 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         if (!mIsAudioOnly) return;
         if (mExternalSubtitleDriver != null) return;
         Uri data = getIntent() != null ? getIntent().getData() : null;
-        if (data == null || !"file".equalsIgnoreCase(data.getScheme())) return;
-        File mediaFile = new File(data.getPath());
+        if (data == null) return;
+        String localPath = resolveLocalPath(data);
+        if (localPath == null) {
+            if (log.isDebugEnabled()) log.debug("startExternalSubtitleDriverIfNeeded: cannot resolve local path for {}", data);
+            return;
+        }
+        File mediaFile = new File(localPath);
         File subtitleFile = ExternalSubtitleDriver.findSubtitleFor(mediaFile);
-        if (subtitleFile == null) return;
+        if (subtitleFile == null) {
+            if (log.isDebugEnabled()) log.debug("startExternalSubtitleDriverIfNeeded: no sibling subtitle found next to {}", mediaFile);
+            return;
+        }
         mExternalSubtitleDriver = ExternalSubtitleDriver.fromFile(
                 subtitleFile,
                 subtitle -> {
@@ -1415,6 +1423,31 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                 },
                 () -> mPlayer != null ? mPlayer.getCurrentPosition() : 0);
         if (mExternalSubtitleDriver != null) mExternalSubtitleDriver.start();
+    }
+
+    /**
+     * Resolve a media URI to a real on-disk path so we can scan siblings for a subtitle file.
+     * Handles file:// directly and content:// via MediaStore._data; returns null if the URI is
+     * remote (http/smb/...) or backed by a DocumentProvider that doesn't expose a local path.
+     */
+    private String resolveLocalPath(Uri uri) {
+        if (uri == null) return null;
+        String scheme = uri.getScheme();
+        if ("file".equalsIgnoreCase(scheme)) return uri.getPath();
+        if (!"content".equalsIgnoreCase(scheme)) return null;
+        String[] projection = { android.provider.MediaStore.MediaColumns.DATA };
+        try (android.database.Cursor c = getContentResolver().query(uri, projection, null, null, null)) {
+            if (c != null && c.moveToFirst()) {
+                int idx = c.getColumnIndex(android.provider.MediaStore.MediaColumns.DATA);
+                if (idx >= 0) {
+                    String path = c.getString(idx);
+                    if (path != null && !path.isEmpty()) return path;
+                }
+            }
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) log.debug("resolveLocalPath: query failed for {}: {}", uri, e.getMessage());
+        }
+        return null;
     }
 
     private void stopExternalSubtitleDriver() {
@@ -4019,6 +4052,16 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
             if (log.isDebugEnabled()) log.debug("finish() called - sending result before finish");
             sendExternalPlayerResult();
         }
+        if (mIsExternalPlayer) {
+            // Launched via VIEW from another app (e.g. a file manager). The manifest pins this
+            // activity to taskAffinity="archos.task.video" with launchMode="singleTask", which
+            // means a plain super.finish() leaves Nova's main browser visible underneath.
+            // finishAndRemoveTask() tears down the whole archos.task.video task so the user
+            // returns directly to the launching app instead of taking a detour through Nova.
+            if (log.isDebugEnabled()) log.debug("finish() called - external player, removing task to return to caller");
+            finishAndRemoveTask();
+            return;
+        }
         super.finish();
     }
 
@@ -4031,6 +4074,11 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         public void onPrepared() {
             if (log.isDebugEnabled()) log.debug("onPrepared");
             mNetworkFailed = false;
+            // Kick the external subtitle scan here too: postVideoInfoAndPrepared() is gated on
+            // mVideoInfo != null, which is false for unindexed files opened via an external
+            // VIEW intent (e.g. tapping an mp3 in Galaxy My Files). Calling it directly lets
+            // sibling .srt/.vtt/.ass/.ssa/.smi load without depending on the media library DB.
+            startExternalSubtitleDriverIfNeeded();
             if (log.isDebugEnabled()) log.debug("onPrepared: call postVideoInfoAndPrepared");
             postVideoInfoAndPrepared();
         }
