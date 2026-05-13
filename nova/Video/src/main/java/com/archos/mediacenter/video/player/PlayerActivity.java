@@ -384,7 +384,19 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     // Used to skip the forced-landscape behavior and to keep the controller
     // visible since there are no video frames to show.
     private boolean mIsAudioOnly;
-    /** Drives external subtitle playback for audio files (Android MediaPlayer path). */
+    /**
+     * True when we deliberately route this playback through Android's
+     * MediaPlayer instead of the AVOS native player. Happens for
+     * audio-only files (AVOS refuses to start without a video stream)
+     * and for external launches whose URI is http(s):// — AVOS's
+     * native HTTP demuxer can't open SMB-to-HTTP localhost proxies
+     * served by file managers like FE / X-plore, while Android's
+     * MediaPlayer handles them fine. Also gates the external sibling
+     * subtitle scan, which is the only way subtitles get loaded when
+     * the AVOS native subtitle pipeline is bypassed.
+     */
+    private boolean mUsesAndroidMediaPlayer;
+    /** Drives external subtitle playback when the AVOS sub pipeline is bypassed. */
     private ExternalSubtitleDriver mExternalSubtitleDriver;
     private static int mLockedRotation;
     private boolean mForceSWDecoding;
@@ -624,6 +636,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         // pinned controller) are unconditional and live in setLockRotation /
         // PlayerController so they apply to video too.
         mIsAudioOnly = isAudioOnlyIntent(getIntent());
+        mUsesAndroidMediaPlayer = mIsAudioOnly || isHttpStreamingIntent(getIntent());
 
         // Detect if we're being used as an external player
         detectExternalPlayerMode();
@@ -751,9 +764,12 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         mResumeFromLast = false;
 
         mPlayer = new Player(mContext, getWindow(), mSurfaceController, false);
-        // Audio-only files: use Android's MediaPlayer because the AVOS native player
-        // refuses to start playback when there is no video stream.
-        mPlayer.setPreferAndroidPlayer(isAudioOnlyIntent(getIntent()));
+        // Force Android MediaPlayer when:
+        //   * The file is audio-only (AVOS refuses to start without a video stream), or
+        //   * The URI is http(s):// from an external launch (AVOS's ffmpeg HTTP demuxer
+        //     can't open SMB-to-HTTP localhost proxies and the activity hangs in
+        //     "preparing" forever, leaving a black screen with no controls).
+        mPlayer.setPreferAndroidPlayer(mUsesAndroidMediaPlayer);
 
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.N_MR1){ //detect any kind of rotation, even from 270 to 90°
             mDisplayListener = new DisplayManager.DisplayListener() {
@@ -1439,7 +1455,12 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     }
 
     private void startExternalSubtitleDriverIfNeeded() {
-        if (!mIsAudioOnly) return;
+        // Run the external sibling-subtitle scan whenever the AVOS native subtitle
+        // pipeline is bypassed — i.e. for audio-only files AND for http(s)
+        // external launches that we routed through Android MediaPlayer. For
+        // everything else AVOS handles subtitles internally via
+        // onSubtitleMetadataUpdated and we'd just create duplicates.
+        if (!mUsesAndroidMediaPlayer) return;
         if (mExternalSubtitleDriver != null) return;
         Uri data = getIntent() != null ? getIntent().getData() : null;
         subDiag("uri = " + data);
@@ -1817,6 +1838,24 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         return false;
     }
 
+    /**
+     * True when the intent is an EXTERNAL {@code http(s)://} launch — the kind
+     * of URI handed to us by SMB-to-HTTP localhost proxies (FE File Explorer,
+     * X-plore Pro, ...). The AVOS native player's ffmpeg HTTP demuxer can't
+     * open these reliably, so we route playback through Android's MediaPlayer.
+     * Nova-internal launches (UPnP, in-app HTTP browse, ...) are excluded —
+     * those callers stamp {@link #EXTRA_NOVA_INTERNAL_LAUNCH} on the intent
+     * and are expected to know which engine they want.
+     */
+    private static boolean isHttpStreamingIntent(Intent intent) {
+        if (intent == null) return false;
+        if (intent.getBooleanExtra(EXTRA_NOVA_INTERNAL_LAUNCH, false)) return false;
+        Uri data = intent.getData();
+        if (data == null) return false;
+        String scheme = data.getScheme();
+        return "http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme);
+    }
+
     private void setLockRotation(boolean avpLock) {
         // Skip the forced-landscape behavior unconditionally — the user wants free
         // rotation for both audio and video playback.
@@ -1873,7 +1912,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         if (log.isDebugEnabled()) log.debug("onNewIntent: {}", intent);
         setIntent(intent);
         mIsAudioOnly = isAudioOnlyIntent(intent);
-        if (mPlayer != null) mPlayer.setPreferAndroidPlayer(mIsAudioOnly);
+        mUsesAndroidMediaPlayer = mIsAudioOnly || isHttpStreamingIntent(intent);
+        if (mPlayer != null) mPlayer.setPreferAndroidPlayer(mUsesAndroidMediaPlayer);
         if (mPlayerController != null) mPlayerController.setAudioOnly(true); // always pin
         setLockRotation(mLockRotation);
         // Restart external subtitle driver in case the new intent points at a
