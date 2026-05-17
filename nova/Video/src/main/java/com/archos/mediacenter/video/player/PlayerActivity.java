@@ -1911,6 +1911,21 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     protected void onNewIntent(Intent intent) {
         if (log.isDebugEnabled()) log.debug("onNewIntent: {}", intent);
         setIntent(intent);
+
+        // singleTask + taskAffinity="archos.task.video" means the same PlayerActivity
+        // instance can serve multiple distinct launches. The external-player state
+        // is intent-specific (a Nova-internal launch from the library should not
+        // affect back-stack behaviour for a later "Open with..." from a file
+        // manager, and vice versa), so reset and re-detect every time.
+        // Without this reset the flag stays sticky on whatever the FIRST launch
+        // set it to and, e.g., a fresh ACTION_VIEW for a .mov falls back to
+        // super.finish() — leaving Nova's main browser visible underneath
+        // instead of returning to the caller.
+        mIsExternalPlayer = false;
+        mResultSent = false;
+        mCallingPackage = null;
+        detectExternalPlayerMode();
+
         mIsAudioOnly = isAudioOnlyIntent(intent);
         mUsesAndroidMediaPlayer = mIsAudioOnly || isHttpStreamingIntent(intent);
         if (mPlayer != null) mPlayer.setPreferAndroidPlayer(mUsesAndroidMediaPlayer);
