@@ -460,6 +460,11 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
+        // Capture our own logcat to a file so devices we can't adb into (Samsung S25
+        // Ultra hitting a silent SIGTERM during AVOS init, etc.) still leave a
+        // forensic trail. Must run before SentryAndroid.init so even Sentry-related
+        // init failures are captured.
+        startEarlyLogcatCapture(base);
         if (BuildConfig.ENABLE_BUG_REPORT) {
             SentryAndroid.init(this, options -> {
                 options.setDsn(BuildConfig.SENTRY_DSN);
@@ -467,6 +472,50 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                 options.setDebug(false);
                 options.setEnableSystemEventBreadcrumbs(false);
                 });
+        }
+    }
+
+    /**
+     * Fork a {@code logcat -f <file>} subprocess in the very first moments of
+     * Application startup so we have a written record of what happens during init
+     * even when the process dies before any normal log-flush. Writes to
+     * {@code /storage/emulated/0/Android/data/org.courville.nova/files/crash-logs/nova-launch.log}
+     * which the user can reach through Samsung "My Files" without ADB.
+     *
+     * <p>On Android Q+ without {@code READ_LOGS} the subprocess only sees our own
+     * process's tagged messages, which is exactly the scope we need — Application
+     * onCreate, native library load, AVOS init, and any FATAL EXCEPTION from our
+     * own threads. The file is overwritten on each launch so it always holds the
+     * latest attempt; {@code -r/-n} bound disk usage at ~6 MB across rotations.
+     */
+    private static java.lang.Process sEarlyLogcatProcess;
+    private void startEarlyLogcatCapture(Context base) {
+        try {
+            File dir = base.getExternalFilesDir("crash-logs");
+            if (dir == null) return;
+            if (!dir.exists() && !dir.mkdirs()) return;
+            File logFile = new File(dir, "nova-launch.log");
+            // Always start fresh — the user wants the *latest* crash, not history.
+            if (logFile.exists()) {
+                // delete() can return false on some FUSE volumes; logcat will just
+                // overwrite the file on open so we don't bail out on failure here.
+                //noinspection ResultOfMethodCallIgnored
+                logFile.delete();
+            }
+            sEarlyLogcatProcess = Runtime.getRuntime().exec(new String[]{
+                    "logcat",
+                    "-f", logFile.getAbsolutePath(),
+                    "-r", "2048",      // rotate at 2 MB
+                    "-n", "2",         // keep 2 rotated copies
+                    "-v", "threadtime",
+                    "*:V"
+            });
+            android.util.Log.i("NovaLaunchCapture",
+                    "early logcat capture writing to " + logFile.getAbsolutePath());
+        } catch (Throwable t) {
+            // Never let crash-log capture itself crash the launch.
+            android.util.Log.w("NovaLaunchCapture",
+                    "early logcat capture failed: " + t.getMessage());
         }
     }
 
