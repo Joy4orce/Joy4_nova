@@ -518,13 +518,17 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
     @SuppressWarnings("JavaReflectionMemberAccess")
     private void capFileDescriptorLimitForAvos() {
         final int FD_SAFE_CAP = 1024;
+        // RLIMIT_NOFILE = 7 on Linux/Android (sys/resource.h, stable across all
+        // architectures). android.system.OsConstants does expose the constant
+        // but only as @SystemApi, so it isn't visible from a public-SDK build —
+        // we hardcode the same well-known numeric value the kernel uses.
+        final int RLIMIT_NOFILE = 7;
         try {
             Class<?> osClass = Class.forName("android.system.Os");
             Class<?> rlimitClass = Class.forName("android.system.StructRlimit");
-            int rlimitNofile = android.system.OsConstants.RLIMIT_NOFILE;
 
             Object current = osClass.getMethod("getrlimit", int.class)
-                    .invoke(null, rlimitNofile);
+                    .invoke(null, RLIMIT_NOFILE);
             if (current == null) return;
             long curSoft = rlimitClass.getField("rlim_cur").getLong(current);
             long curHard = rlimitClass.getField("rlim_max").getLong(current);
@@ -538,7 +542,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
                     .getConstructor(long.class, long.class)
                     .newInstance((long) FD_SAFE_CAP, curHard);
             osClass.getMethod("setrlimit", int.class, rlimitClass)
-                    .invoke(null, rlimitNofile, newLimit);
+                    .invoke(null, RLIMIT_NOFILE, newLimit);
             android.util.Log.i("NovaLaunchCapture",
                     "RLIMIT_NOFILE soft cap " + curSoft + " -> " + FD_SAFE_CAP +
                             " (hard=" + curHard + ") to keep AVOS select(2) happy");
