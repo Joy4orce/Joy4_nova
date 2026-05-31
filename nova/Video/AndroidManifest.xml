@@ -115,7 +115,28 @@
         android:localeConfig="@xml/locales_config"
         android:usesCleartextTraffic="true"
         android:enableOnBackInvokedCallback="false"
-        android:networkSecurityConfig="@xml/network_security_config">
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:memtagMode="off"><!--
+            Disable ARMv8.5 Memory Tagging Extension (MTE) at the application level.
+
+            On devices with MTE hardware (Snapdragon 8 Elite / S25 Ultra, etc.) and
+            Android 15+ with targetSdkVersion=35, the system enables MTE async by
+            default. Our prebuilt AVOS / ffmpeg / dav1d / openssl native blobs come
+            from upstream nova-video-player and were built long before MTE
+            awareness. They contain the usual benign-on-non-MTE memory bugs
+            (small use-after-frees, off-by-one accesses) that MTE async catches
+            and turns into immediate SIGKILL — no tombstone, no Java exception,
+            no chance to log.
+
+            Symptoms on S25 Ultra build-25: process loads all .so files cleanly,
+            runs through libavos_init / audio_interface_init in <1ms, then dies
+            silently with signal 15 right after the first AVOS C/C++ allocation
+            chain. Same APK runs fine on S23 Ultra (ARMv8.2, no MTE hardware).
+
+            Until the upstream prebuilt libraries are rebuilt clean, opt the
+            whole app out of MTE. We lose the MTE security benefit but the app
+            actually launches — the right trade-off for a media player.
+        -->
         <meta-data
             android:name="to.dualscreen"
             android:value="true" />
