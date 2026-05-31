@@ -465,6 +465,10 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
         // forensic trail. Must run before SentryAndroid.init so even Sentry-related
         // init failures are captured.
         startEarlyLogcatCapture(base);
+        // Workaround for AVOS aborting on `select(2): EINVAL` during its debug
+        // mainloop. Must happen before any FDs the AVOS subsystem will scan get
+        // allocated — see capFileDescriptorLimitForAvos() for details.
+        capFileDescriptorLimitForAvos();
         if (BuildConfig.ENABLE_BUG_REPORT) {
             SentryAndroid.init(this, options -> {
                 options.setDsn(BuildConfig.SENTRY_DSN);
@@ -488,6 +492,63 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
      * own threads. The file is overwritten on each launch so it always holds the
      * latest attempt; {@code -r/-n} bound disk usage at ~6 MB across rotations.
      */
+    /**
+     * Workaround for AVOS aborting at launch on devices where file descriptors
+     * get allocated above bionic's {@code FD_SETSIZE} (1024). The build-26
+     * launch-capture log from a Samsung S25 Ultra (Android 16) showed the
+     * exact crash signature:
+     * <pre>
+     *   D avos_player: creating mainloop (for debug only)
+     *   D avos_player: service_data_events: select error(22): Invalid argument
+     *   D avos_player: aborting...
+     * </pre>
+     * AVOS's debug mainloop calls {@code select(2)} with the bitmap-based
+     * {@code fd_set}, which has a hard ceiling of 1024 fds in bionic. Since
+     * Android 13 the per-process soft RLIMIT_NOFILE has been raised to
+     * 32768 — so any high-numbered fd that AVOS opens lands above 1024 and
+     * {@code select(2)} returns {@code EINVAL}, after which AVOS calls
+     * {@code abort()} and the process dies with no Java trace.
+     * <p>
+     * Lower the soft limit to 1024 here so every fd AVOS allocates after this
+     * point stays within the {@code select(2)} window. The hard limit is left
+     * untouched — we never raise, only lower. Goes through reflection because
+     * {@link android.system.Os#setrlimit} is {@link android.annotation.SystemApi}
+     * on most Android versions.
+     */
+    @SuppressWarnings("JavaReflectionMemberAccess")
+    private void capFileDescriptorLimitForAvos() {
+        final int FD_SAFE_CAP = 1024;
+        try {
+            Class<?> osClass = Class.forName("android.system.Os");
+            Class<?> rlimitClass = Class.forName("android.system.StructRlimit");
+            int rlimitNofile = android.system.OsConstants.RLIMIT_NOFILE;
+
+            Object current = osClass.getMethod("getrlimit", int.class)
+                    .invoke(null, rlimitNofile);
+            if (current == null) return;
+            long curSoft = rlimitClass.getField("rlim_cur").getLong(current);
+            long curHard = rlimitClass.getField("rlim_max").getLong(current);
+            if (curSoft <= FD_SAFE_CAP) {
+                android.util.Log.i("NovaLaunchCapture",
+                        "RLIMIT_NOFILE soft=" + curSoft + " already <= " + FD_SAFE_CAP + ", no change");
+                return;
+            }
+
+            Object newLimit = rlimitClass
+                    .getConstructor(long.class, long.class)
+                    .newInstance((long) FD_SAFE_CAP, curHard);
+            osClass.getMethod("setrlimit", int.class, rlimitClass)
+                    .invoke(null, rlimitNofile, newLimit);
+            android.util.Log.i("NovaLaunchCapture",
+                    "RLIMIT_NOFILE soft cap " + curSoft + " -> " + FD_SAFE_CAP +
+                            " (hard=" + curHard + ") to keep AVOS select(2) happy");
+        } catch (Throwable t) {
+            // Never let the FD workaround itself crash the launch.
+            android.util.Log.w("NovaLaunchCapture",
+                    "capFileDescriptorLimitForAvos failed: " + t);
+        }
+    }
+
     private static java.lang.Process sEarlyLogcatProcess;
     private void startEarlyLogcatCapture(Context base) {
         try {
