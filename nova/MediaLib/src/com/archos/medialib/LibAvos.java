@@ -228,7 +228,39 @@ public class LibAvos {
         loadLibrary(ctx, "avos", armHasNeon, false);
         if (loadLibrary(ctx, "avosjni", armHasNeon, false)) {
             nativeInit(ctx.getPackageName(), sIsPluginAvailable);
-            nativeLoadLibraryRTLDGlobal("libsfdec.core.21.so");
+            // Original line:
+            //   nativeLoadLibraryRTLDGlobal("libsfdec.core.21.so");
+            //
+            // The native side of nativeLoadLibraryRTLDGlobal() calls
+            // libavos_debug_acquire() before doing the actual dlopen, which
+            // spawns a debug mainloop thread that runs service_data_events
+            // through select(2). Since Android 13 the per-process RLIMIT_NOFILE
+            // soft limit jumped to 32768, so AVOS's mainloop ends up looking
+            // at file descriptors above bionic's FD_SETSIZE (1024) ceiling.
+            // select(2) returns EINVAL and AVOS abort()s — no Java exception,
+            // no tombstone, just SIGABRT during Application init.
+            //
+            // We reproduced this exactly on a Samsung S25 Ultra (Snapdragon 8
+            // Elite, Android 16, build-25..28). S23 Ultra (Snapdragon 8 Gen 2,
+            // Android 14) happens to allocate the same fds below 1024 and
+            // survives, so the bug looked device-specific until in-app logcat
+            // capture surfaced the abort().
+            //
+            // Bypass that JNI entry point entirely: load sfdec.core.21 the
+            // normal way via System.loadLibrary. We lose RTLD_GLOBAL — meaning
+            // sfdec's symbols aren't visible to subsequently-loaded libs
+            // through the global namespace — but on Android-M+ AVOS no longer
+            // does runtime dlsym lookups on sfdec, so in practice nothing
+            // calls those symbols by name. If video playback regressions show
+            // up on older Androids we'll have to fix the native side properly
+            // (drop the libavos_debug_acquire side effect, or replace AVOS's
+            // select() with poll()/epoll()).
+            try {
+                System.loadLibrary("sfdec.core.21");
+                if (DBG) Log.d(TAG, "init: sfdec.core.21 loaded via System.loadLibrary (RTLD_GLOBAL bypass)");
+            } catch (UnsatisfiedLinkError ule) {
+                Log.w(TAG, "init: failed to load sfdec.core.21", ule);
+            }
             sIsAvailable = true;
         } else {
             sIsAvailable = false;
