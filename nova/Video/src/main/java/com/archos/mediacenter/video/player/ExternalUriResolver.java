@@ -21,24 +21,34 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.util.Log;
+
+import com.archos.filecorelibrary.MimeUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Helpers for media URIs handed to us by other apps ("Open with" from a file
- * manager): mapping content:// URIs back to on-disk paths, and guessing the
- * next file of an http(s):// localhost-proxy URI whose folder can't be listed.
+ * manager): mapping content:// URIs back to on-disk paths, and finding the
+ * other files in the folder of an http(s):// localhost-proxy URI (from the
+ * proxy's folder listing, or by guessing the next episode number).
  * Shared by the sibling-subtitle scan (PlayerActivity) and folder auto-play
  * (UpdateNextTask).
  */
@@ -50,6 +60,9 @@ public final class ExternalUriResolver {
     private static final int HTTP_READ_TIMEOUT_MS = 4000;
     private static final int MAX_NUMBER_GROUPS = 3;
     private static final Pattern DIGITS = Pattern.compile("\\d+");
+    private static final int MAX_LISTING_BYTES = 1 << 20;
+    private static final Pattern HREF = Pattern.compile("href\\s*=\\s*[\"']([^\"'#?]+)", Pattern.CASE_INSENSITIVE);
+    private static final String DIAG_TAG = "Nova-AutoPlay";
 
     private ExternalUriResolver() {}
 
@@ -233,8 +246,93 @@ public final class ExternalUriResolver {
     }
 
     /**
+     * Ask a localhost http(s) proxy for the folder holding {@code uri} and return
+     * every audio/video file in it, sorted by name like the folder play mode does
+     * for local and SMB folders. Many proxies answer a GET on the folder URL with
+     * an HTML index; its href links are collected. Returns null when the proxy
+     * won't list the folder (error, or no media links in the answer), so the
+     * caller can fall back to {@link #findNextHttpByNumber}.
+     * Blocking network I/O: call off the UI thread.
+     */
+    public static List<Uri> listHttpFolderMedia(Uri uri) {
+        if (!isLocalhostHttp(uri)) return null;
+        List<String> segments = uri.getPathSegments();
+        if (segments.isEmpty()) return null;
+        Uri.Builder b = uri.buildUpon().path(null).query(null).fragment(null);
+        for (int i = 0; i < segments.size() - 1; i++) b.appendPath(segments.get(i));
+        String folderUrl = b.build().toString() + "/";
+        List<String> folderSegments = segments.subList(0, segments.size() - 1);
+
+        String body;
+        HttpURLConnection conn = null;
+        try {
+            conn = openHttp(Uri.parse(folderUrl), false);
+            String contentType = conn.getContentType();
+            body = readLimited(conn.getInputStream(), MAX_LISTING_BYTES);
+            // INFO via android.util.Log so it lands in nova-launch.log: what the proxy
+            // returns for a folder is what decides whether this works
+            Log.i(DIAG_TAG, "folder listing " + folderUrl + " -> " + contentType + ", " + body.length() + " chars: "
+                    + body.substring(0, Math.min(300, body.length())).replace('\n', ' '));
+        } catch (Exception e) {
+            Log.i(DIAG_TAG, "folder listing " + folderUrl + " failed: " + e);
+            return null;
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+
+        Map<String, Uri> byName = new HashMap<>();
+        Matcher m = HREF.matcher(body);
+        while (m.find()) {
+            String href = m.group(1).replace("&amp;", "&");
+            Uri child;
+            try {
+                child = Uri.parse(new URL(new URL(folderUrl), href).toString());
+            } catch (Exception e) {
+                continue;
+            }
+            // direct children of the folder only (no parent/sub-folder links)
+            List<String> childSegments = child.getPathSegments();
+            if (childSegments.size() != folderSegments.size() + 1
+                    || !childSegments.subList(0, folderSegments.size()).equals(folderSegments)) continue;
+            String name = child.getLastPathSegment();
+            String mimeType = MimeUtils.guessMimeTypeFromExtension(MimeUtils.getExtension(name));
+            if (mimeType == null || !(mimeType.startsWith("video/") || mimeType.startsWith("audio/"))) continue;
+            byName.put(name, child);
+        }
+        if (byName.isEmpty()) {
+            Log.i(DIAG_TAG, "folder listing has no media links, falling back to episode-number guess");
+            return null;
+        }
+        List<String> names = new ArrayList<>(byName.keySet());
+        Collections.sort(names, String.CASE_INSENSITIVE_ORDER); // same order as FileComparator.SortByNameAsc
+        List<Uri> media = new ArrayList<>(names.size());
+        for (String name : names) media.add(byName.get(name));
+        Log.i(DIAG_TAG, "folder listing: " + media.size() + " media files");
+        return media;
+    }
+
+    private static boolean isLocalhostHttp(Uri uri) {
+        if (uri == null) return false;
+        String scheme = uri.getScheme();
+        if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme)) return false;
+        String host = uri.getHost();
+        return "127.0.0.1".equals(host) || "localhost".equalsIgnoreCase(host);
+    }
+
+    private static String readLimited(InputStream in, int maxBytes) throws IOException {
+        try (InputStream is = in) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buf = new byte[8192];
+            int n;
+            while (out.size() < maxBytes && (n = is.read(buf)) != -1) out.write(buf, 0, n);
+            return new String(out.toByteArray(), StandardCharsets.UTF_8);
+        }
+    }
+
+    /**
      * Guess the next file after an http(s):// URI whose folder we can't list
-     * (SMB-to-HTTP localhost proxies such as FE File Explorer). Increments the
+     * (SMB-to-HTTP localhost proxies such as File Manager +, whose NAS URIs look
+     * like http://127.0.0.1:21082/SMB/5/HDD1/...). Increments the
      * episode number in the basename ("Show S01E09 1080p.mp4" -> "Show S01E10
      * 1080p.mp4", keeping zero padding) and returns the sibling URI only if the
      * server says it exists. When {@code wrap} is set and there is no next one,
@@ -244,11 +342,7 @@ public final class ExternalUriResolver {
      * Blocking network I/O: call off the UI thread.
      */
     public static Uri findNextHttpByNumber(Uri uri, boolean wrap) {
-        if (uri == null) return null;
-        String scheme = uri.getScheme();
-        if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme)) return null;
-        String host = uri.getHost();
-        if (!"127.0.0.1".equals(host) && !"localhost".equalsIgnoreCase(host)) return null;
+        if (!isLocalhostHttp(uri)) return null;
         String name = uri.getLastPathSegment();
         if (name == null) return null;
         int dot = name.lastIndexOf('.');

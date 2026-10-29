@@ -28,6 +28,7 @@ import com.archos.filecorelibrary.FileComparator;
 import com.archos.filecorelibrary.FileUtils;
 import com.archos.filecorelibrary.ListingEngine;
 import com.archos.filecorelibrary.MetaFile2;
+import com.archos.filecorelibrary.MimeUtils;
 import com.archos.filecorelibrary.RawLister;
 import com.archos.mediacenter.filecoreextension.UriUtils;
 import com.archos.mediacenter.filecoreextension.upnp2.RawListerFactoryWithUpnp;
@@ -234,14 +235,33 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
         }
         // "Open with" from another app hands us content:// (local file managers) or
         // http(s):// (SMB-to-HTTP localhost proxies). Map content:// back to the
-        // on-disk file so the folder listing below works, and guess the next
-        // http(s):// file by its episode number since that folder can't be listed.
+        // on-disk file so the folder listing below works. For http(s):// ask the
+        // proxy for the folder's listing and play every media file in it; if it
+        // won't list, fall back to guessing the next file by its episode number.
         if (mUri != null && "content".equalsIgnoreCase(mUri.getScheme())) {
             String localPath = ExternalUriResolver.resolveLocalPath(ArchosUtils.getGlobalContext(), mUri);
             if (log.isDebugEnabled()) log.debug("UpdateNextTask.Result: content uri {} resolved to {}", mUri, localPath);
             if (localPath != null) mUri = ExternalUriResolver.fileUri(localPath);
         } else if (mUri != null && !binge
                 && ("http".equalsIgnoreCase(mUri.getScheme()) || "https".equalsIgnoreCase(mUri.getScheme()))) {
+            List<Uri> siblings = ExternalUriResolver.listHttpFolderMedia(mUri);
+            if (siblings != null) {
+                String currentName = mUri.getLastPathSegment();
+                int current = -1;
+                for (int i = 0; i < siblings.size(); i++) {
+                    if (siblings.get(i).getLastPathSegment().equals(currentName)) {
+                        current = i;
+                        break;
+                    }
+                }
+                if (current != -1) {
+                    int next = nextOfSameType(siblings, current, repeatFolder);
+                    nextUri = next != -1 ? siblings.get(next) : null;
+                    if (log.isDebugEnabled()) log.debug("UpdateNextTask.Result: next via http folder listing: {}", nextUri);
+                    return nextUri != null ? new Result(nextUri, nextId) : null;
+                }
+                if (log.isDebugEnabled()) log.debug("UpdateNextTask.Result: {} not in http folder listing, guessing", currentName);
+            }
             nextUri = ExternalUriResolver.findNextHttpByNumber(mUri, repeatFolder);
             if (log.isDebugEnabled()) log.debug("UpdateNextTask.Result: next via http number guess: {}", nextUri);
             return nextUri != null ? new Result(nextUri, nextId) : null;
@@ -366,22 +386,7 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
                             }
                             // if it is found
                             if (current != -1) {
-                                // stay on the current file's media type so a folder mixing songs and
-                                // videos doesn't hand a video to the audio-only player (or vice versa)
-                                boolean currentIsAudio = isAudio(filteredList.get(current));
-                                int next = -1;
-                                // k == total wraps back onto the current file: repeat folder with a single match loops it
-                                for (int k = 1; k <= total; k++) {
-                                    int idx = current + k;
-                                    if (idx >= total) {
-                                        if (!repeatFolder) break;
-                                        idx %= total;
-                                    }
-                                    if (isAudio(filteredList.get(idx)) == currentIsAudio) {
-                                        next = idx;
-                                        break;
-                                    }
-                                }
+                                int next = nextOfSameType(filteredList, current, repeatFolder);
                                 if (next != -1) {
                                     MetaFile2 nextFile = filteredList.get(next);
                                     nextUri = isLocal
@@ -409,8 +414,31 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
         return null;
     }
 
-    private static boolean isAudio(MetaFile2 file) {
-        String mimeType = file.getMimeType();
+    /**
+     * Index of the file after {@code current} with the same media type (audio vs video),
+     * or -1 at the end of the folder. Staying on one type keeps a folder mixing songs
+     * and videos from handing a video to the audio-only player (or vice versa).
+     * With {@code repeatFolder} it wraps around; k == total lands back on the current
+     * file, so repeat folder with a single match loops it.
+     * {@code items} holds MetaFile2 (folder listing) or Uri (http listing) entries.
+     */
+    private static int nextOfSameType(List<?> items, int current, boolean repeatFolder) {
+        int total = items.size();
+        boolean currentIsAudio = isAudio(items.get(current));
+        for (int k = 1; k <= total; k++) {
+            int idx = current + k;
+            if (idx >= total) {
+                if (!repeatFolder) break;
+                idx %= total;
+            }
+            if (isAudio(items.get(idx)) == currentIsAudio) return idx;
+        }
+        return -1;
+    }
+
+    private static boolean isAudio(Object item) {
+        String name = item instanceof MetaFile2 ? ((MetaFile2) item).getName() : ((Uri) item).getLastPathSegment();
+        String mimeType = MimeUtils.guessMimeTypeFromExtension(MimeUtils.getExtension(name));
         return mimeType != null && mimeType.startsWith("audio/");
     }
 
