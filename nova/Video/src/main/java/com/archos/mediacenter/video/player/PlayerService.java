@@ -35,6 +35,7 @@ import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.media.session.PlaybackState;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -326,9 +327,9 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
                     mUpdateNextTask = null;
                 }
             });
-            mUpdateNextTask.execute(repeatFolder, binge);
+            mUpdateNextTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, repeatFolder, binge); // may block on network probes: keep it off the shared serial queue
         } else {
-            mUpdateNextTask.execute(repeatFolder, binge);
+            mUpdateNextTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, repeatFolder, binge); // may block on network probes: keep it off the shared serial queue
             UpdateNextTask.Result result = null;
             try {
                 result = mUpdateNextTask.get();
@@ -456,7 +457,7 @@ public class PlayerService extends Service implements Player.Listener, IndexHelp
         mNightModeOn = mPreferences.getBoolean(KEY_AUDIO_FILT_NIGHT, false);
         mForceSingleRepeatMode = isDemoMode;
         mHideSubtitles = mPreferences.getBoolean(KEY_HIDE_SUBTITLES, false);
-        mPlayMode = mPreferences.getInt(KEY_PLAY_MODE, PLAYMODE_SINGLE);
+        mPlayMode = mPreferences.getInt(KEY_PLAY_MODE, PLAYMODE_FOLDER); // auto-play the next file in the folder unless the user picks otherwise
         mResume = intent.getIntExtra(RESUME, RESUME_NO);
         if (log.isDebugEnabled()) log.debug("PlayerService.onStart: read mResume={} from intent", mResume);
 

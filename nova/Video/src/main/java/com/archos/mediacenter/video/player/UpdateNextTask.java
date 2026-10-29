@@ -45,6 +45,7 @@ import com.jcraft.jsch.SftpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -231,6 +232,20 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
                 return null;
             }
         }
+        // "Open with" from another app hands us content:// (local file managers) or
+        // http(s):// (SMB-to-HTTP localhost proxies). Map content:// back to the
+        // on-disk file so the folder listing below works, and guess the next
+        // http(s):// file by its episode number since that folder can't be listed.
+        if (mUri != null && "content".equalsIgnoreCase(mUri.getScheme())) {
+            String localPath = ExternalUriResolver.resolveLocalPath(ArchosUtils.getGlobalContext(), mUri);
+            if (log.isDebugEnabled()) log.debug("UpdateNextTask.Result: content uri {} resolved to {}", mUri, localPath);
+            if (localPath != null) mUri = ExternalUriResolver.fileUri(localPath);
+        } else if (mUri != null && !binge
+                && ("http".equalsIgnoreCase(mUri.getScheme()) || "https".equalsIgnoreCase(mUri.getScheme()))) {
+            nextUri = ExternalUriResolver.findNextHttpByNumber(mUri, repeatFolder);
+            if (log.isDebugEnabled()) log.debug("UpdateNextTask.Result: next via http number guess: {}", nextUri);
+            return nextUri != null ? new Result(nextUri, nextId) : null;
+        }
         if (!UriUtils.isImplementedByFileCore(mUri)) {// when we can't list folder
             if (log.isDebugEnabled()) log.debug("UpdateNextTask.Result: scheme for {} not supported -> cannot list folder thus no next...", mUri);
             return null;
@@ -338,23 +353,40 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
                             int total = filteredList.size();
                             int current = -1;
                             // try to find the current video in the list
+                            // local files also match by name: JavaFile2.getUri() doesn't escape '#'/'?',
+                            // so its URI differs from the escaped one ExternalUriResolver.fileUri() builds
+                            boolean isLocal = "file".equalsIgnoreCase(mUri.getScheme());
+                            String currentName = isLocal ? new File(mUri.getPath()).getName() : null;
                             for (int i = 0; i < filteredList.size(); i++) {
-                                if (mUri.equals(filteredList.get(i).getUri())) {
+                                if (mUri.equals(filteredList.get(i).getUri())
+                                        || (isLocal && currentName.equals(filteredList.get(i).getName()))) {
                                     current = i;
                                     break;
                                 }
                             }
                             // if it is found
                             if (current != -1) {
-                                int next = current + 1;
-                                // when repeat folder, just modulo
-                                if (repeatFolder) {
-                                    nextUri = filteredList.get(next % total).getUri();
-                                    if (log.isDebugEnabled()) log.debug("updateNextVideo({}) - next via filesystem:{}", repeatFolder, nextUri);
-                                    return new Result(nextUri, nextId);
-                                } else if (next < total) {
-                                    // in no repeat more, check that next still in list
-                                    nextUri = filteredList.get(next).getUri();
+                                // stay on the current file's media type so a folder mixing songs and
+                                // videos doesn't hand a video to the audio-only player (or vice versa)
+                                boolean currentIsAudio = isAudio(filteredList.get(current));
+                                int next = -1;
+                                // k == total wraps back onto the current file: repeat folder with a single match loops it
+                                for (int k = 1; k <= total; k++) {
+                                    int idx = current + k;
+                                    if (idx >= total) {
+                                        if (!repeatFolder) break;
+                                        idx %= total;
+                                    }
+                                    if (isAudio(filteredList.get(idx)) == currentIsAudio) {
+                                        next = idx;
+                                        break;
+                                    }
+                                }
+                                if (next != -1) {
+                                    MetaFile2 nextFile = filteredList.get(next);
+                                    nextUri = isLocal
+                                            ? ExternalUriResolver.fileUri(new File(new File(mUri.getPath()).getParentFile(), nextFile.getName()).getPath())
+                                            : nextFile.getUri();
                                     if (log.isDebugEnabled()) log.debug("updateNextVideo({}) - next via filesystem:{}", repeatFolder, nextUri);
                                     return new Result(nextUri, nextId);
                                 } else if (log.isDebugEnabled()) log.debug("updateNextVideo({}) - no next in filesystem, it's the last:{}", repeatFolder, mUri);
@@ -375,6 +407,11 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
 
         if (log.isDebugEnabled()) log.debug("updateNextVideo({}) - No next found", repeatFolder);
         return null;
+    }
+
+    private static boolean isAudio(MetaFile2 file) {
+        String mimeType = file.getMimeType();
+        return mimeType != null && mimeType.startsWith("audio/");
     }
 
     @Override

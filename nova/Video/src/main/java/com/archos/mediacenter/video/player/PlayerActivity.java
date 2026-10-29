@@ -1462,7 +1462,9 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         // onSubtitleMetadataUpdated and we'd just create duplicates.
         if (!mUsesAndroidMediaPlayer) return;
         if (mExternalSubtitleDriver != null) return;
-        Uri data = getIntent() != null ? getIntent().getData() : null;
+        // mUri follows the service (folder auto-play moves it to the next file);
+        // the launch intent only knows the first one.
+        Uri data = mUri != null ? mUri : (getIntent() != null ? getIntent().getData() : null);
         subDiag("uri = " + data);
         if (data != null) subDiag("scheme = " + data.getScheme() + ", authority = " + data.getAuthority());
         if (data == null) {
@@ -1578,7 +1580,13 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
                                 is, subFilename, subListener, posProvider);
                         is = null; // ownership transferred to fromInputStream
                         if (d != null) {
-                            runOnUiThread(() -> attachExternalSubtitleDriver(d, headline));
+                            runOnUiThread(() -> {
+                                // folder auto-play may have moved on while we were probing
+                                // (the unstarted driver d holds no resources, so it's simply dropped)
+                                if (data.equals(mUri) && mExternalSubtitleDriver == null) {
+                                    attachExternalSubtitleDriver(d, headline);
+                                }
+                            });
                             return;
                         } else {
                             subDiag("." + ext + " → 0 cues parsed");
@@ -1616,23 +1624,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
     private InputStream openCandidateStream(Uri uri) throws IOException {
         String scheme = (uri.getScheme() == null) ? "" : uri.getScheme().toLowerCase(java.util.Locale.US);
         if ("http".equals(scheme) || "https".equals(scheme)) {
-            java.net.URL url = new java.net.URL(uri.toString());
-            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(2500);
-            conn.setReadTimeout(4000);
-            conn.setInstanceFollowRedirects(true);
-            int code;
-            try {
-                code = conn.getResponseCode();
-            } catch (IOException e) {
-                conn.disconnect();
-                throw e;
-            }
-            if (code != java.net.HttpURLConnection.HTTP_OK) {
-                conn.disconnect();
-                throw new java.io.FileNotFoundException("HTTP " + code);
-            }
-            return conn.getInputStream();
+            return ExternalUriResolver.openHttp(uri, false).getInputStream();
         }
         return getContentResolver().openInputStream(uri);
     }
@@ -1676,135 +1668,14 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
         return filename.substring(0, dot) + "." + newExt;
     }
 
-    /**
-     * Build a sibling URI by replacing the basename of {@code uri} with
-     * {@code newFilename}. Handles two URI shapes:
-     *   * SAF DocumentsContract URIs — swap the trailing path inside the doc id
-     *   * Plain content:// / file:// URIs — swap the last URL path segment
-     * Either way the rest of the URI (authority, prefix path, query) is preserved.
-     */
+    /** Sibling URI with the basename swapped; see {@link ExternalUriResolver#siblingUri}. */
     private Uri mutateUriToSibling(Uri uri, String newFilename) {
-        if (uri == null || newFilename == null) return null;
-
-        // Try DocumentsContract first — covers SAF document URIs.
-        try {
-            if (android.provider.DocumentsContract.isDocumentUri(this, uri)) {
-                String docId = android.provider.DocumentsContract.getDocumentId(uri);
-                if (docId != null) {
-                    int slash = docId.lastIndexOf('/');
-                    int colon = docId.lastIndexOf(':');
-                    int sep = Math.max(slash, colon);
-                    String newDocId = (sep >= 0)
-                            ? docId.substring(0, sep + 1) + newFilename
-                            : newFilename;
-                    return android.provider.DocumentsContract.buildDocumentUri(uri.getAuthority(), newDocId);
-                }
-            }
-        } catch (Exception ignored) {}
-
-        // Generic last-path-segment swap — works for typical FileProvider URIs
-        // where the URL path mirrors the on-disk file path.
-        java.util.List<String> segments = uri.getPathSegments();
-        if (segments == null || segments.isEmpty()) return null;
-        Uri.Builder b = uri.buildUpon().path(null);
-        for (int i = 0; i < segments.size() - 1; i++) b.appendPath(segments.get(i));
-        b.appendPath(newFilename);
-        return b.build();
+        return ExternalUriResolver.siblingUri(this, uri, newFilename);
     }
 
-    /**
-     * Resolve a media URI to a real on-disk path so we can scan siblings for a subtitle file.
-     * Handles:
-     *   - file://                                   -> uri.getPath()
-     *   - content:// MediaStore (audio/video/image) -> _data column lookup
-     *   - content:// DocumentsContract (SAF):
-     *       * com.android.externalstorage.documents -> /storage/emulated/0/<rel> (or /storage/<vol>/<rel>)
-     *       * com.android.providers.media.documents -> rewrite to MediaStore URI, then _data
-     *       * com.android.providers.downloads.documents -> public_downloads URI, then _data
-     *   - everything else (remote http/smb, opaque providers) -> null
-     */
+    /** Resolve a media URI to a real on-disk path; see {@link ExternalUriResolver#resolveLocalPath}. */
     private String resolveLocalPath(Uri uri) {
-        if (uri == null) return null;
-        String scheme = uri.getScheme();
-        if ("file".equalsIgnoreCase(scheme)) {
-            if (log.isDebugEnabled()) log.debug("resolveLocalPath: file scheme -> {}", uri.getPath());
-            return uri.getPath();
-        }
-        if (!"content".equalsIgnoreCase(scheme)) return null;
-        String authority = uri.getAuthority();
-        // DocumentsContract paths (Storage Access Framework) — most common for modern file managers.
-        try {
-            if (android.provider.DocumentsContract.isDocumentUri(this, uri)) {
-                String docId = android.provider.DocumentsContract.getDocumentId(uri);
-                if (log.isDebugEnabled()) log.debug("resolveLocalPath: DocumentsContract uri authority={} docId={}", authority, docId);
-                if ("com.android.externalstorage.documents".equals(authority) && docId != null) {
-                    String[] split = docId.split(":", 2);
-                    String volume = split[0];
-                    String relPath = split.length > 1 ? split[1] : "";
-                    if ("primary".equalsIgnoreCase(volume)) {
-                        String p = android.os.Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + relPath;
-                        if (log.isDebugEnabled()) log.debug("resolveLocalPath: externalstorage primary -> {}", p);
-                        return p;
-                    }
-                    String p = "/storage/" + volume + "/" + relPath;
-                    if (log.isDebugEnabled()) log.debug("resolveLocalPath: externalstorage volume {} -> {}", volume, p);
-                    return p;
-                }
-                if ("com.android.providers.media.documents".equals(authority) && docId != null) {
-                    String[] split = docId.split(":", 2);
-                    if (split.length == 2) {
-                        String type = split[0];
-                        Uri mediaTable = null;
-                        if ("audio".equals(type)) mediaTable = android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-                        else if ("video".equals(type)) mediaTable = android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-                        else if ("image".equals(type)) mediaTable = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                        if (mediaTable != null) {
-                            try {
-                                Uri mediaQuery = android.content.ContentUris.withAppendedId(mediaTable, Long.parseLong(split[1]));
-                                String p = queryDataColumn(mediaQuery);
-                                if (p != null) {
-                                    if (log.isDebugEnabled()) log.debug("resolveLocalPath: media documents {} -> {}", type, p);
-                                    return p;
-                                }
-                            } catch (NumberFormatException ignored) {}
-                        }
-                    }
-                }
-                if ("com.android.providers.downloads.documents".equals(authority) && docId != null) {
-                    try {
-                        Uri downloadUri = android.content.ContentUris.withAppendedId(
-                                Uri.parse("content://downloads/public_downloads"), Long.parseLong(docId));
-                        String p = queryDataColumn(downloadUri);
-                        if (p != null) {
-                            if (log.isDebugEnabled()) log.debug("resolveLocalPath: downloads documents -> {}", p);
-                            return p;
-                        }
-                    } catch (NumberFormatException ignored) {}
-                }
-            }
-        } catch (Exception e) {
-            if (log.isDebugEnabled()) log.debug("resolveLocalPath: DocumentsContract path failed: {}", e.getMessage());
-        }
-        // Fallback: try _data directly (works for MediaStore content URIs and well-behaved FileProviders).
-        String p = queryDataColumn(uri);
-        if (log.isDebugEnabled()) log.debug("resolveLocalPath: _data fallback for authority={} -> {}", authority, p);
-        return p;
-    }
-
-    private String queryDataColumn(Uri uri) {
-        String[] projection = { android.provider.MediaStore.MediaColumns.DATA };
-        try (android.database.Cursor c = getContentResolver().query(uri, projection, null, null, null)) {
-            if (c != null && c.moveToFirst()) {
-                int idx = c.getColumnIndex(android.provider.MediaStore.MediaColumns.DATA);
-                if (idx >= 0) {
-                    String path = c.getString(idx);
-                    if (path != null && !path.isEmpty()) return path;
-                }
-            }
-        } catch (Exception e) {
-            if (log.isDebugEnabled()) log.debug("queryDataColumn: failed for {}: {}", uri, e.getMessage());
-        }
-        return null;
+        return ExternalUriResolver.resolveLocalPath(this, uri);
     }
 
     private void stopExternalSubtitleDriver() {
@@ -4826,6 +4697,12 @@ public class PlayerActivity extends AppCompatActivity implements PlayerControlle
 
         @Override
         public void setUri(Uri uri, Uri streamingUri){
+            if (mUri != null && !mUri.equals(uri)) {
+                // folder auto-play moved on: drop the previous file's sibling subtitles
+                // so onPrepared rescans next to the new one
+                stopExternalSubtitleDriver();
+                if (mSubtitleManager != null) mSubtitleManager.clear();
+            }
             mUri = uri;
             mStreamingUri = streamingUri;
             final String scheme = mUri.getScheme();
