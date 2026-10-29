@@ -235,9 +235,10 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
         }
         // "Open with" from another app hands us content:// (local file managers) or
         // http(s):// (SMB-to-HTTP localhost proxies). Map content:// back to the
-        // on-disk file so the folder listing below works. For http(s):// ask the
-        // proxy for the folder's listing and play every media file in it; if it
-        // won't list, fall back to guessing the next file by its episode number.
+        // on-disk file so the folder listing below works. For http(s):// get the
+        // folder's media files from the proxy's listing, or else over SMB from a
+        // matching server registered in Nova, and play every one of them; failing
+        // both, guess the next file by its episode number.
         if (mUri != null && "content".equalsIgnoreCase(mUri.getScheme())) {
             String localPath = ExternalUriResolver.resolveLocalPath(ArchosUtils.getGlobalContext(), mUri);
             if (log.isDebugEnabled()) log.debug("UpdateNextTask.Result: content uri {} resolved to {}", mUri, localPath);
@@ -245,6 +246,7 @@ public class UpdateNextTask extends AsyncTask<Boolean, Integer, UpdateNextTask.R
         } else if (mUri != null && !binge
                 && ("http".equalsIgnoreCase(mUri.getScheme()) || "https".equalsIgnoreCase(mUri.getScheme()))) {
             List<Uri> siblings = ExternalUriResolver.listHttpFolderMedia(mUri);
+            if (siblings == null) siblings = ExternalUriResolver.listViaRegisteredSmb(ArchosUtils.getGlobalContext(), mUri);
             if (siblings != null) {
                 String currentName = mUri.getLastPathSegment();
                 int current = -1;

@@ -21,9 +21,14 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 
+import com.archos.filecorelibrary.MetaFile2;
 import com.archos.filecorelibrary.MimeUtils;
+import com.archos.filecorelibrary.samba.NetworkCredentialsDatabase;
+import com.archos.mediacenter.filecoreextension.upnp2.RawListerFactoryWithUpnp;
+import com.archos.mediacenter.utils.ShortcutDbAdapter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +43,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,7 +55,8 @@ import java.util.regex.Pattern;
  * Helpers for media URIs handed to us by other apps ("Open with" from a file
  * manager): mapping content:// URIs back to on-disk paths, and finding the
  * other files in the folder of an http(s):// localhost-proxy URI (from the
- * proxy's folder listing, or by guessing the next episode number).
+ * proxy's folder listing, an SMB server registered in Nova, or by guessing
+ * the next episode number).
  * Shared by the sibling-subtitle scan (PlayerActivity) and folder auto-play
  * (UpdateNextTask).
  */
@@ -63,6 +71,8 @@ public final class ExternalUriResolver {
     private static final int MAX_LISTING_BYTES = 1 << 20;
     private static final Pattern HREF = Pattern.compile("href\\s*=\\s*[\"']([^\"'#?]+)", Pattern.CASE_INSENSITIVE);
     private static final String DIAG_TAG = "Nova-AutoPlay";
+    // proxy location ("127.0.0.1:21082/SMB/13") -> smb host[:port] that held its files last time
+    private static final Map<String, String> sProxyLocationToSmbHost = new HashMap<>();
 
     private ExternalUriResolver() {}
 
@@ -295,8 +305,7 @@ public final class ExternalUriResolver {
             if (childSegments.size() != folderSegments.size() + 1
                     || !childSegments.subList(0, folderSegments.size()).equals(folderSegments)) continue;
             String name = child.getLastPathSegment();
-            String mimeType = MimeUtils.guessMimeTypeFromExtension(MimeUtils.getExtension(name));
-            if (mimeType == null || !(mimeType.startsWith("video/") || mimeType.startsWith("audio/"))) continue;
+            if (!isMediaName(name)) continue;
             byName.put(name, child);
         }
         if (byName.isEmpty()) {
@@ -327,6 +336,98 @@ public final class ExternalUriResolver {
             while (out.size() < maxBytes && (n = is.read(buf)) != -1) out.write(buf, 0, n);
             return new String(out.toByteArray(), StandardCharsets.UTF_8);
         }
+    }
+
+    /**
+     * Fallback for proxies that refuse folder listings (File Manager + answers
+     * 403). Its URIs (/SMB/&lt;locationId&gt;/&lt;share&gt;/&lt;dirs&gt;/&lt;file&gt;) carry the share
+     * and path but not the NAS address, so look through the SMB servers the user
+     * registered in Nova (network shortcuts and saved credentials) for one whose
+     * &lt;share&gt;/&lt;dirs&gt; folder holds the same file, list it over SMB, and map
+     * every audio/video file back to a proxy URI so playback keeps going through
+     * the proxy. Returns null when no registered server matches.
+     * Blocking network I/O: call off the UI thread.
+     */
+    public static List<Uri> listViaRegisteredSmb(Context context, Uri uri) {
+        if (!isLocalhostHttp(uri)) return null;
+        List<String> segments = uri.getPathSegments();
+        if (segments.size() < 4 || !"SMB".equalsIgnoreCase(segments.get(0))) return null;
+        String locationKey = uri.getAuthority() + "/" + segments.get(0) + "/" + segments.get(1);
+        String fileName = segments.get(segments.size() - 1);
+        // unencoded like the smb:// URIs Nova builds itself (JcifsFile2)
+        String folderPath = TextUtils.join("/", segments.subList(2, segments.size() - 1)) + "/";
+
+        List<String> hosts = new ArrayList<>();
+        synchronized (sProxyLocationToSmbHost) {
+            String known = sProxyLocationToSmbHost.get(locationKey);
+            if (known != null) hosts.add(known);
+        }
+        for (String host : registeredSmbHosts(context)) if (!hosts.contains(host)) hosts.add(host);
+        if (hosts.isEmpty()) {
+            Log.i(DIAG_TAG, "no SMB server registered in Nova, can't list " + folderPath);
+            return null;
+        }
+        for (String host : hosts) {
+            Uri smbFolder = Uri.parse("smb://" + host + "/" + folderPath);
+            try {
+                List<MetaFile2> files = RawListerFactoryWithUpnp.getRawListerForUrl(smbFolder).getFileList();
+                if (files == null) continue;
+                boolean holdsCurrent = false;
+                List<String> names = new ArrayList<>();
+                for (MetaFile2 file : files) {
+                    if (!file.isFile()) continue;
+                    if (file.getName().equals(fileName)) holdsCurrent = true;
+                    if (isMediaName(file.getName())) names.add(file.getName());
+                }
+                if (!holdsCurrent) {
+                    Log.i(DIAG_TAG, "smb listing " + smbFolder + ": " + fileName + " not there");
+                    continue;
+                }
+                synchronized (sProxyLocationToSmbHost) {
+                    sProxyLocationToSmbHost.put(locationKey, host);
+                }
+                Collections.sort(names, String.CASE_INSENSITIVE_ORDER); // same order as FileComparator.SortByNameAsc
+                List<Uri> media = new ArrayList<>(names.size());
+                for (String name : names) media.add(siblingUri(null, uri, name));
+                Log.i(DIAG_TAG, "smb listing " + smbFolder + ": " + media.size() + " media files");
+                return media;
+            } catch (Exception e) {
+                Log.i(DIAG_TAG, "smb listing " + smbFolder + " failed: " + e);
+            }
+        }
+        return null;
+    }
+
+    /** host[:port] of every smb:// server registered in Nova, shortcuts first. */
+    private static List<String> registeredSmbHosts(Context context) {
+        Set<String> hosts = new LinkedHashSet<>();
+        try (Cursor c = ShortcutDbAdapter.VIDEO.getAllShortcuts(context, null, null)) {
+            if (c != null) {
+                for (ShortcutDbAdapter.Shortcut shortcut : ShortcutDbAdapter.VIDEO.cursorToShortcutList(c)) {
+                    addSmbHost(hosts, shortcut.getUri());
+                }
+            }
+        } catch (Exception e) {
+            Log.i(DIAG_TAG, "reading network shortcuts failed: " + e);
+        }
+        NetworkCredentialsDatabase credentials = NetworkCredentialsDatabase.getInstance();
+        credentials.loadCredentials(context);
+        for (NetworkCredentialsDatabase.Credential credential : credentials.getAllPersistentCredentials()) {
+            addSmbHost(hosts, credential.getUriString());
+        }
+        return new ArrayList<>(hosts);
+    }
+
+    private static void addSmbHost(Set<String> hosts, String uriString) {
+        if (uriString == null) return;
+        Uri u = Uri.parse(uriString);
+        if (!"smb".equalsIgnoreCase(u.getScheme()) || u.getHost() == null) return;
+        hosts.add(u.getPort() > 0 ? u.getHost() + ":" + u.getPort() : u.getHost());
+    }
+
+    private static boolean isMediaName(String name) {
+        String mimeType = MimeUtils.guessMimeTypeFromExtension(MimeUtils.getExtension(name));
+        return mimeType != null && (mimeType.startsWith("video/") || mimeType.startsWith("audio/"));
     }
 
     /**
