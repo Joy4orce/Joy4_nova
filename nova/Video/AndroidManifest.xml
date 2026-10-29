@@ -18,7 +18,7 @@
     xmlns:dist="http://schemas.android.com/apk/distribution"
     xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="auto"
-    android:sharedUserId="archos.openmediacenter"
+    android:sharedUserId="com.joy4orce.openmediacenter"
     android:sharedUserMaxSdkVersion="32">
 
     <supports-screens android:largeScreens="true" />
@@ -219,7 +219,7 @@
         <!-- Provides search suggestions for video search. -->
         <provider
             android:name="com.archos.mediacenter.video.browser.SearchProviderVideo"
-            android:authorities="browser.SearchProviderVideocommunity" />
+            android:authorities="${applicationId}.SearchProviderVideo" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -1272,7 +1272,7 @@
         <!-- ContentProvider for media -->
         <provider
             android:name="com.archos.mediaprovider.video.VideoProvider"
-            android:authorities="com.archos.media.videocommunity;com.archos.media.scrapercommunity"
+            android:authorities="com.joy4orce.nova.media.video;com.joy4orce.nova.media.scraper"
             android:exported="true" />
         <!-- BroadcastReceiver to trigger database import -->
         <receiver

@@ -146,7 +146,7 @@ android {
         }
     }
     defaultConfig {
-        applicationId = "org.courville.nova"
+        applicationId = "com.joy4orce.nova"
         generatedDensities = []
         minSdkVersion 23
         targetSdkVersion 35
@@ -196,6 +196,9 @@ android {
         resValue "string", "APPLICATION_ID", applicationId
         resValue "string", "APP_INFO", "Nova v" + versionName + " (" + applicationId + ")"
         resValue "string", "APP_VERSION", novaVersionName
+        // searchable XMLs can't use ${applicationId}; keep their authorities in step with the manifest
+        resValue "string", "search_suggest_authority", applicationId + ".SearchProviderVideo"
+        resValue "string", "leanback_search_authority", applicationId + ".leanback.search.VideoSearchProvider"
     }
     bundle {
         language {

@@ -483,7 +483,7 @@ public class CustomApplication extends Application implements DefaultLifecycleOb
      * Fork a {@code logcat -f <file>} subprocess in the very first moments of
      * Application startup so we have a written record of what happens during init
      * even when the process dies before any normal log-flush. Writes to
-     * {@code /storage/emulated/0/Android/data/org.courville.nova/files/crash-logs/nova-launch.log}
+     * {@code /storage/emulated/0/Android/data/com.joy4orce.nova/files/crash-logs/nova-launch.log}
      * which the user can reach through Samsung "My Files" without ADB.
      *
      * <p>On Android Q+ without {@code READ_LOGS} the subprocess only sees our own
